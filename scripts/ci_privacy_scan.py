@@ -41,8 +41,11 @@ SKIP_DIRS = {
 ALLOWLIST = {
     Path("CHANGELOG.md"),
     Path("README.md"),
+    Path("README.en.md"),
     Path("docs") / "PUBLISHING.md",
     Path("scripts") / "ci_privacy_scan.py",
+    # 打包排除规则（EXCLUDE 清单）里写智能体本地目录名是正当的，非真实本地状态
+    Path("scripts") / "package_skill.py",
     Path(".gitignore"),
 }
 

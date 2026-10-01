@@ -15,6 +15,10 @@
 - **Human maintainers**: this README (install / commands / layout); do not treat it as the generation spec
 - The repo is the skill: the repo root is the skill body (SKILL.md + assets + references + scripts)
 
+<p align="center">
+  <img src="docs/assets/presentation-cover-white.png" alt="topmind-presentation · formal business presentations" width="960" />
+</p>
+
 ### Theme overview (Gate 0)
 
 <p align="center">

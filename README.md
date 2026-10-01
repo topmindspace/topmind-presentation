@@ -15,6 +15,10 @@
 - **人类维护者**：本 README（安装 / 命令 / 目录）；勿把本文件当生成规范
 - 仓库即技能：本仓库根目录就是技能本体（SKILL.md + assets + references + scripts），没有 monorepo 安装器
 
+<p align="center">
+  <img src="docs/assets/presentation-cover-white.png" alt="topmind-presentation · 正式商务演示" width="960" />
+</p>
+
 ### 主题总览（Gate 0）
 
 <p align="center">
@@ -72,7 +76,7 @@ cp -r topmind-presentation ~/.claude/skills/topmind-presentation
 # 或钉版本：下载对应 Release 的 topmind-presentation.zip 解压
 ```
 
-npm 包 [`@topmindspace/topmind-presentation`](https://www.npmjs.com/package/@topmindspace/topmind-presentation) 与 GitHub tag 同版本发布，需要时可 `npm pack` 取文件。
+npm 包 [`@topmindspace/topmind-presentation`](https://www.npmjs.com/package/@topmindspace/topmind-presentation) 随 GitHub tag 自动发布（版本号与 tag 一致）。
 
 > 不要 `npm install topmind-presentation`（技能 id 不是独立 npm 包）。
 

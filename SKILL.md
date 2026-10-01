@@ -20,7 +20,7 @@ triggers:
 description: "为正式商务演示把材料做成可视化报告：零外链可翻页 HTML（日常上台）+ 高保真可编辑 16:9 PPTX（按需）双交付；MD3 式密度克制；三模式（A 演示 / B 研究 / C 架构）× 9 风格；内置 48 原创线性图标 + bento/timeline/2col 弹性版式。Use when 用户要做报告、演示、汇报、PPT、slides、deck、路演，或写研究报告、分析报告、咨询报告、白皮书、调研、评测、对标、经营分析、复盘、项目汇报、商务/HTML/网页报告，或做架构图、拓扑图、流程图、泳道图、方案图，或把材料做成可视化报告并导出 HTML/PPT/PPTX，或优化报告的排版/版式/配色/图文布局，或做报告时说快速模式/fast/直接生成/一键出稿/少问一句。Do NOT use for 纯代码工程、非报告类网页或应用开发、视频/图片生成、直接改写已有 Word/PPT 源文件本身、封面配图（→topmind-cover）。"
 license: MIT
 compatibility: "Python 3 stdlib for HTML generation; Node >=18 + pptxgenjs for PPTX; optional playwright for browser regression / theme captures."
-version: 0.2.1
+version: 0.2.2
 author: TopMindspace
 ---
 # TopPPT HTML

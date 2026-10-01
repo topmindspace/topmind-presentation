@@ -10,7 +10,7 @@
 **Let ideas fly — make good thinking visible.** A high-craft skill for **demo reports / formal business presentations**: **HTML + PPT dual delivery** — day-to-day, present with paginated HTML like slides; export **layout-faithful editable PPTX** when needed. **MD3-inspired**: fitting information density, restrained type / shapes / color. Core craft is layout, typography, color, and content structure — not gadget soup.
 
 - Skill id: `topmind-presentation`; brand: **TopPPT HTML**
-- Version: **v0.2.1** (standalone repo, independently versioned)
+- Version: **v0.2.2** (standalone repo, independently versioned)
 - **Agent entry**: `SKILL.md` → `references/playbook.md` (L1) → L2 on demand
 - **Human maintainers**: this README (install / commands / layout); do not treat it as the generation spec
 - The repo is the skill: the repo root is the skill body (SKILL.md + assets + references + scripts)

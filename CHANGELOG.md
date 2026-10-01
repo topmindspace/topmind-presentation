@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## [Unreleased] 独立建仓（2026-10-01，未发版）
+## [0.2.2] - 2026-10-01
+
+> 0.2.1 → **0.2.2**（patch）。独立建仓首个发布版。
 
 - 本技能原为 `topmind-writing-skills`（原 `tms-skills`）monorepo 中的 `top-ppt-html`，
   现独立为 `topmind-presentation` 仓库并改名 **`topmind-presentation`**。
@@ -9,6 +11,6 @@
 - 基础设施：根 `package.json`（`@topmindspace/topmind-presentation`，去 `private`）、
   CI（含 `--with-pptx` 门禁）/ Release workflow（tag v* → GitHub Release + npm）、
   `docs/PUBLISHING.md`、隐私扫描。
-- 技能版本沿用 **0.2.1**；npm 包首次发布将从本仓库 tag 打起。
+- 无引用 banner 图已删除；showcase.html 加历史样张声明。
 
 ## 0.2.1（monorepo 时代，见原仓库 CHANGELOG）

@@ -1,7 +1,7 @@
 # Industry Research: High-Fidelity HTML/Web Slide → Editable PPTX Export
 
 > 备注（2026-10-01）：本研究写于技能独立建仓前，文中 `top-ppt-html` /
-> `tms-skills` 均指现 `topmind-presentation` / `tms-presentation-skills`，
+> `tms-skills` 均指现 `topmind-presentation` / `topmind-presentation`，
 > 内容原样保留。
 
 **Context:** Skill generates HTML presentation reports; exports editable 16:9 PPTX via PptxGenJS.  

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Release privacy scan for tms-presentation-skills.
+"""Release privacy scan for topmind-presentation.
 
 Fails when public trees contain personal/host-local markers or secrets-shaped text.
 Ignore-rules and migration notes may mention deprecated ids / local-state dir names.

@@ -81,7 +81,7 @@ jobs:
             exit 1
           fi
           VERSION="$(node -p "require('./package.json').version")"
-          PKG="@topmindspace/tms-presentation-skills"
+          PKG="@topmindspace/topmind-presentation"
           echo "Checking whether ${PKG}@${VERSION} is already on the registry..."
           if npm view "${PKG}@${VERSION}" version >/dev/null 2>&1; then
             echo "${PKG}@${VERSION} already on npm — skip publish (exit 0)."

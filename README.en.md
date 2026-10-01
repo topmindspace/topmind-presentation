@@ -2,9 +2,9 @@
 
 **[中文](./README.md)** | English
 
-[![Release](https://img.shields.io/github/v/release/topmindspace/tms-presentation-skills?style=flat-square&color=blue)](https://github.com/topmindspace/tms-presentation-skills/releases)
-[![npm](https://img.shields.io/npm/v/@topmindspace/tms-presentation-skills?style=flat-square)](https://www.npmjs.com/package/@topmindspace/tms-presentation-skills)
-[![CI](https://img.shields.io/github/actions/workflow/status/topmindspace/tms-presentation-skills/ci.yml?style=flat-square&label=CI)](https://github.com/topmindspace/tms-presentation-skills/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/topmindspace/topmind-presentation?style=flat-square&color=blue)](https://github.com/topmindspace/topmind-presentation/releases)
+[![npm](https://img.shields.io/npm/v/@topmindspace/topmind-presentation?style=flat-square)](https://www.npmjs.com/package/@topmindspace/topmind-presentation)
+[![CI](https://img.shields.io/github/actions/workflow/status/topmindspace/topmind-presentation/ci.yml?style=flat-square&label=CI)](https://github.com/topmindspace/topmind-presentation/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 
 **Let ideas fly — make good thinking visible.** A high-craft skill for **demo reports / formal business presentations**: **HTML + PPT dual delivery** — day-to-day, present with paginated HTML like slides; export **layout-faithful editable PPTX** when needed. **MD3-inspired**: fitting information density, restrained type / shapes / color. Core craft is layout, typography, color, and content structure — not gadget soup.
@@ -22,7 +22,7 @@
   <sub>Presentation · business-blue (default) · also <a href="./assets/style-gallery.html">style-gallery</a> · <a href="./assets/theme-overview-research.png">research</a> · <a href="./assets/theme-overview-architecture.png">architecture</a></sub>
 </p>
 
-**Live** · [Landing](https://topmindspace.github.io/tms-presentation-skills/) · [Showcase deck](https://topmindspace.github.io/tms-presentation-skills/showcase.html) · [Style gallery](https://topmindspace.github.io/tms-presentation-skills/style-gallery.html)
+**Live** · [Landing](https://topmindspace.github.io/topmind-presentation/) · [Showcase deck](https://topmindspace.github.io/topmind-presentation/showcase.html) · [Style gallery](https://topmindspace.github.io/topmind-presentation/style-gallery.html)
 
 - In-repo gallery: [`assets/style-gallery.html`](./assets/style-gallery.html)
 - Product showcase: [`assets/examples/2026-09-26-topmind-tms-skills-showcase.html`](./assets/examples/2026-09-26-topmind-tms-skills-showcase.html) (Mode A · dual-delivery narrative · **5 chart types** · toolbar page)
@@ -58,13 +58,13 @@ The repo is the skill: copy the repo root (or the `topmind-presentation.zip` fro
 
 ```bash
 # track HEAD
-git clone https://github.com/topmindspace/tms-presentation-skills.git
-cp -r tms-presentation-skills ~/.claude/skills/topmind-presentation
+git clone https://github.com/topmindspace/topmind-presentation.git
+cp -r topmind-presentation ~/.claude/skills/topmind-presentation
 
 # or pin a version: download topmind-presentation.zip from the Release page
 ```
 
-The npm package [`@topmindspace/tms-presentation-skills`](https://www.npmjs.com/package/@topmindspace/tms-presentation-skills) is published in sync with GitHub tags when needed.
+The npm package [`@topmindspace/topmind-presentation`](https://www.npmjs.com/package/@topmindspace/topmind-presentation) is published in sync with GitHub tags when needed.
 
 > Do not `npm install topmind-presentation` (the skill id is not a standalone npm package).
 

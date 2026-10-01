@@ -7,10 +7,10 @@
 | 通道 | 方式 | 特点 |
 |------|------|------|
 | **GitHub** | clone / 下载 Release zip | 跟 HEAD 或钉版本 |
-| **npm** | 包 `@topmindspace/tms-presentation-skills` | 与 GitHub tag 同版本发布 |
+| **npm** | 包 `@topmindspace/topmind-presentation` | 与 GitHub tag 同版本发布 |
 
-- 包：<https://www.npmjs.com/package/@topmindspace/tms-presentation-skills>
-- 仓库：<https://github.com/topmindspace/tms-presentation-skills>
+- 包：<https://www.npmjs.com/package/@topmindspace/topmind-presentation>
+- 仓库：<https://github.com/topmindspace/topmind-presentation>
 
 ## 版本策略（务必遵守）
 
@@ -40,7 +40,7 @@
    - `npm publish`：先查 registry，版本已存在则跳过；**`NPM_TOKEN` 缺失 → 显式失败**；
      E409 / 版本冲突 → 显式失败（说明打 tag 前没 bump；禁止复用 tag 号）。
    - prune Releases（留最近 2 个；git tags 保留不删）。
-5. 验证：`npm view @topmindspace/tms-presentation-skills version`
+5. 验证：`npm view @topmindspace/topmind-presentation version`
 
 Secret **`NPM_TOKEN`**（granular，scope `@topmindspace` 写权限）配置在 GitHub Actions。
 
@@ -53,7 +53,7 @@ Secret **`NPM_TOKEN`**（granular，scope `@topmindspace` 写权限）配置在 
 | 环境变量 | `TOP_PPT_*` | `TOP_PPT_NODE_EXE` |
 | 注入标记 | `__TOPPPT_*__` | `__TOPPPT_CONSTANTS__` |
 | JS API | PascalCase | `TopPptHtml` |
-| npm | `@topmindspace/*` | `@topmindspace/tms-presentation-skills` |
+| npm | `@topmindspace/*` | `@topmindspace/topmind-presentation` |
 
 ## 隐私检查清单
 

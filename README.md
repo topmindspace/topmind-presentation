@@ -2,9 +2,9 @@
 
 [English](./README.en.md) | 中文
 
-[![Release](https://img.shields.io/github/v/release/topmindspace/tms-presentation-skills?style=flat-square&color=blue)](https://github.com/topmindspace/tms-presentation-skills/releases)
-[![npm](https://img.shields.io/npm/v/@topmindspace/tms-presentation-skills?style=flat-square)](https://www.npmjs.com/package/@topmindspace/tms-presentation-skills)
-[![CI](https://img.shields.io/github/actions/workflow/status/topmindspace/tms-presentation-skills/ci.yml?style=flat-square&label=CI)](https://github.com/topmindspace/tms-presentation-skills/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/topmindspace/topmind-presentation?style=flat-square&color=blue)](https://github.com/topmindspace/topmind-presentation/releases)
+[![npm](https://img.shields.io/npm/v/@topmindspace/topmind-presentation?style=flat-square)](https://www.npmjs.com/package/@topmindspace/topmind-presentation)
+[![CI](https://img.shields.io/github/actions/workflow/status/topmindspace/topmind-presentation/ci.yml?style=flat-square&label=CI)](https://github.com/topmindspace/topmind-presentation/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 
 **让 idea 飞，好想法被看见。** 为**演示报告 / 正式商务演示**而生的高品质演示文稿技能：**HTML + PPT 双交付**——日常用可翻页 HTML 等同幻灯片；需要时再导出**版式保真可编辑 PPTX**。参考 **MD3**：合适信息密度、克制文字/图形/颜色。核心工艺是版式、排版、色彩与内容组织——不是 gadget 堆砌。
@@ -22,7 +22,7 @@
   <sub>演示 · business-blue（默认）· 另见 <a href="./assets/style-gallery.html">style-gallery</a> · <a href="./assets/theme-overview-research.png">研究</a> · <a href="./assets/theme-overview-architecture.png">架构</a></sub>
 </p>
 
-**在线体验** · [落地页](https://topmindspace.github.io/tms-presentation-skills/) · [Showcase 演示文稿](https://topmindspace.github.io/tms-presentation-skills/showcase.html) · [风格画廊](https://topmindspace.github.io/tms-presentation-skills/style-gallery.html)
+**在线体验** · [落地页](https://topmindspace.github.io/topmind-presentation/) · [Showcase 演示文稿](https://topmindspace.github.io/topmind-presentation/showcase.html) · [风格画廊](https://topmindspace.github.io/topmind-presentation/style-gallery.html)
 
 - 交互画廊（仓库内）：[`assets/style-gallery.html`](./assets/style-gallery.html)
 - 产品 Showcase（仓库内）：[`assets/examples/2026-09-26-topmind-tms-skills-showcase.html`](./assets/examples/2026-09-26-topmind-tms-skills-showcase.html)（Mode A · 双交付叙事 · **5 种图表** · Header 工具栏）
@@ -66,13 +66,13 @@
 
 ```bash
 # 跟仓库 HEAD
-git clone https://github.com/topmindspace/tms-presentation-skills.git
-cp -r tms-presentation-skills ~/.claude/skills/topmind-presentation
+git clone https://github.com/topmindspace/topmind-presentation.git
+cp -r topmind-presentation ~/.claude/skills/topmind-presentation
 
 # 或钉版本：下载对应 Release 的 topmind-presentation.zip 解压
 ```
 
-npm 包 [`@topmindspace/tms-presentation-skills`](https://www.npmjs.com/package/@topmindspace/tms-presentation-skills) 与 GitHub tag 同版本发布，需要时可 `npm pack` 取文件。
+npm 包 [`@topmindspace/topmind-presentation`](https://www.npmjs.com/package/@topmindspace/topmind-presentation) 与 GitHub tag 同版本发布，需要时可 `npm pack` 取文件。
 
 > 不要 `npm install topmind-presentation`（技能 id 不是独立 npm 包）。
 
@@ -122,7 +122,7 @@ python3 scripts/validate_pptx.py report.pptx --strict --model=report.model.json
 ## 三、目录结构
 
 ```
-tms-presentation-skills/          # 仓库即技能：根目录就是技能本体
+topmind-presentation/          # 仓库即技能：根目录就是技能本体
 ├─ SKILL.md                     # 智能体入口：触发描述 + 工作流 + 铁律
 ├─ README.md                    # 本文件：人类视角的简介/开发/打包
 ├─ package.json                 # Node 依赖（pptxgenjs）与常用命令

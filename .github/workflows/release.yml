@@ -1,0 +1,147 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Privacy scan
+        run: python3 scripts/ci_privacy_scan.py
+
+      # Same skill gates as CI (incl. lightweight regression fixture + smoke_pptx).
+      - name: Skill gates
+        run: bash scripts/ci_skill_gates.sh --with-pptx
+
+      # Fail fast when the tag does not match package.json version: npm publishes
+      # the package.json version, so a skewed tag would permanently desync
+      # tag ↔ npm (and the idempotent pre-publish check would mask it).
+      - name: Verify tag matches package.json version
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          EXPECTED="v$(node -p "require('./package.json').version")"
+          if [[ "$TAG" != "$EXPECTED" ]]; then
+            echo "tag ↔ package.json version mismatch: tag=${TAG} but package.json version=${EXPECTED#v}" >&2
+            echo "Bump package.json version or re-tag before publishing." >&2
+            exit 1
+          fi
+          echo "tag matches package.json version: ${TAG}"
+
+      - name: Package skill
+        run: |
+          set -euo pipefail
+          python3 scripts/package_skill.py
+          ls -la dist/
+
+      - name: Collect artifacts
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          cp dist/topmind-presentation.zip release-assets/
+          cp dist/topmind-presentation.manifest.json release-assets/
+          ls -la release-assets/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true
+
+      # Publish to npm (keeps npm in sync with the tag).
+      # Requires repository secret NPM_TOKEN (granular token, write on @topmindspace).
+      # Fail loudly when the secret is not configured: publishing the GitHub
+      # Release while silently skipping npm would leave a green-but-incomplete release.
+      - name: Publish to npm (idempotent)
+        run: |
+          set -euo pipefail
+          if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
+            echo "NPM_TOKEN not configured — refusing to publish an npm-less release." >&2
+            exit 1
+          fi
+          VERSION="$(node -p "require('./package.json').version")"
+          PKG="@topmindspace/tms-presentation-skills"
+          echo "Checking whether ${PKG}@${VERSION} is already on the registry..."
+          if npm view "${PKG}@${VERSION}" version >/dev/null 2>&1; then
+            echo "${PKG}@${VERSION} already on npm — skip publish (exit 0)."
+            exit 0
+          fi
+          echo "Publishing ${PKG}@${VERSION} ..."
+          set +e
+          PUBLISH_LOG="$(mktemp)"
+          npm publish --access public >"$PUBLISH_LOG" 2>&1
+          rc=$?
+          set -e
+          cat "$PUBLISH_LOG"
+          if [ "$rc" -eq 0 ]; then
+            echo "npm publish OK: ${PKG}@${VERSION}"
+            exit 0
+          fi
+          # E409 / already-published conflicts: the earlier "Verify tag matches
+          # package.json version" step already guarantees this tag ==
+          # package.json version, so an E409 here means the version was published
+          # by an earlier attempt of this same release — re-check the registry and
+          # treat it as idempotent success instead of failing.
+          if grep -Eqi 'E409|Cannot publish over previously published|previously staged|EPUBLISHCONFLICT|cannot publish over existing' "$PUBLISH_LOG"; then
+            echo "npm publish reported a conflict for ${PKG}@${VERSION}; re-checking registry..."
+            if npm view "${PKG}@${VERSION}" version >/dev/null 2>&1; then
+              echo "${PKG}@${VERSION} is on npm (published by an earlier attempt) — success."
+              exit 0
+            fi
+            echo "npm publish conflict for ${PKG}@${VERSION} but the version is NOT visible on npm — FAIL." >&2
+            echo "Bump package.json version and re-tag; do not reuse a tag across versions." >&2
+            exit 1
+          fi
+          # Double-check registry in case the failure was client-side only
+          if npm view "${PKG}@${VERSION}" version >/dev/null 2>&1; then
+            echo "${PKG}@${VERSION} now visible on npm after publish attempt — success."
+            exit 0
+          fi
+          echo "npm publish failed with exit ${rc} (not an already-published conflict)." >&2
+          exit "$rc"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # Keep only the 2 most recent GitHub Releases (API delete only).
+      # Do NOT run `git push origin :refs/tags/...` — tags stay for history / npm pin.
+      - name: Prune old releases (keep 2; tags retained)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          KEEP=2
+          mapfile -t ids < <(gh api "repos/${GITHUB_REPOSITORY}/releases" --jq 'sort_by(.published_at // .created_at) | reverse | .[] | "\(.id)\t\(.tag_name)"')
+          echo "found ${#ids[@]} release(s); keeping newest ${KEEP}; tags retained"
+          i=0
+          for row in "${ids[@]}"; do
+            i=$((i + 1))
+            if [ "$i" -le "$KEEP" ]; then
+              echo "keep  $row"
+              continue
+            fi
+            id="${row%%$'\t'*}"
+            tag="${row#*$'\t'}"
+            echo "prune release id=${id} tag=${tag} (tag retained)"
+            gh api -X DELETE "repos/${GITHUB_REPOSITORY}/releases/${id}"
+          done

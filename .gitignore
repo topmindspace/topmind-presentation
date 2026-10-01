@@ -1,0 +1,59 @@
+# ═══════════════════════════════════════════════════════════════════════
+# TopPPT HTML · 版本控制忽略规则
+#
+# 原则：能再生成的、本机专属的、IDE/智能体本地状态的，都不入库。
+#   入库 = 技能源（SKILL.md / README.md / package.json / assets / references / scripts）
+#   出库 = 构建与回归产物、依赖、缓存、本地工具状态、临时脚本
+# 与 scripts/package_skill.py 的「进包 / 不进包」矩阵同口径。
+#
+# 注意：gitignore 不支持行尾注释——注释必须独占一行，否则会被当成模式的一部分。
+# ═══════════════════════════════════════════════════════════════════════
+
+# ── 构建与回归产物（可再生成）──────────────────────────────────────────
+
+# 分发包 zip、回归 PPTX、探针产物、发布清单
+/dist/
+
+# prepare_images.py 产出的片段与模型对象
+/report-assets/
+
+# 图标 PNG 资产缓存（build_icon_assets.js 生成 · sharp 栅格化）
+scripts/icon-assets.json
+
+# render_compare.py 的渲染对照产物
+/render-compare/
+**/render-compare/
+
+# ── Node 依赖 ─────────────────────────────────────────────────────────
+
+node_modules/
+**/node_modules/
+
+# ── Python 缓存与虚拟环境 ─────────────────────────────────────────────
+
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ── IDE / 智能体本地状态（项目相关，但不随技能分发、不入库）────────────
+
+# IDE / 智能体本地状态（会话计划、运行时记忆等）
+.codebuddy/
+.h3caiwork/
+.playwright-mcp/
+
+# ── 临时脚本与调试输出（下划线开头，用后即删）─────────────────────────
+
+scripts/_*
+*.tmp
+*.log
+
+# ── 编辑器 / 操作系统 ─────────────────────────────────────────────────
+
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

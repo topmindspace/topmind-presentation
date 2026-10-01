@@ -1,0 +1,5 @@
+# Codex / ChatGPT Skills UI metadata (optional)
+display_name: "TopPPT HTML"
+short_description: "Elegant, atmospheric formal presentations for speeches — HTML + editable 16:9 PPTX."
+default_prompt: "Generate an elegant formal presentation or report as HTML (PPTX on request via B-channel)."
+allow_implicit_invocation: true

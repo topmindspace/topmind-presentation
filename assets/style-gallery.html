@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风格 × 模式矩阵 · TopPPT HTML</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Google Sans","Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI",
+                "PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
+    background:#eef0f3;color:#202124;padding:52px 32px 72px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .head{max-width:1360px;margin:0 auto 22px}
+  .head h1{font-size:34px;font-weight:700;letter-spacing:-.02em;margin-bottom:10px}
+  .head p{font-size:15px;color:#5f6368;line-height:1.65;max-width:960px}
+  .head code{background:#e0e3e8;padding:2px 7px;border-radius:6px;font-size:13px}
+
+  .caps{max-width:1360px;margin:0 auto 26px;display:flex;flex-wrap:wrap;gap:9px}
+  .caps span{font-size:12.5px;font-weight:600;color:#3c4043;background:#fff;
+    border:1px solid #e0e3e8;padding:7px 14px;border-radius:999px}
+  .caps span.b{background:#1a73e8;color:#fff;border-color:#1a73e8}
+
+  /* ── 模式 Tab（一级维度） ── */
+  .modes{max-width:1360px;margin:0 auto 24px;display:flex;gap:12px;flex-wrap:wrap;align-items:stretch}
+  .mtab{flex:1;min-width:280px;text-align:left;background:#fff;border:1px solid #e0e3e8;
+    border-radius:16px;padding:16px 20px;cursor:pointer;font-family:inherit;
+    transition:transform .2s cubic-bezier(.2,0,0,1),box-shadow .2s,border-color .2s}
+  .mtab:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+  .mtab.on{border-color:#1a73e8;box-shadow:0 0 0 2px #d2e3fc}
+  .mtab__k{font-size:11px;font-weight:700;letter-spacing:.1em;color:#1a73e8;margin-bottom:5px}
+  .mtab__t{font-size:16px;font-weight:700;color:#202124;margin-bottom:4px}
+  .mtab__d{font-size:12.5px;color:#5f6368;line-height:1.55}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:26px;
+    max-width:1360px;margin:0 auto}
+
+  .preset{border-radius:22px;overflow:hidden;border:1px solid #e0e0e0;background:#fff;
+    box-shadow:0 3px 10px rgba(0,0,0,.06);cursor:pointer;
+    transition:transform .22s cubic-bezier(.2,0,0,1),box-shadow .22s,outline-color .15s;
+    outline:3px solid transparent;outline-offset:-3px}
+  .preset:hover{transform:translateY(-5px);box-shadow:0 16px 38px rgba(0,0,0,.13)}
+  .preset.sel{outline-color:#1a73e8}
+  .preset.sel .meta__pick{background:#1a73e8;color:#fff;border-color:#1a73e8}
+
+  /* ── 预览区（每张卡用自己的变量渲染当前模式的迷你版式） ── */
+  .pv{padding:20px 22px 18px;background:var(--pbg);color:var(--ptxt);font-family:var(--pfont-body);
+    border-bottom:1px solid var(--pbd);letter-spacing:var(--pletter,0)}
+  .pv__bar{display:flex;align-items:center;gap:9px;margin-bottom:calc(14px * var(--pgap,1))}
+  .pv__mark{width:24px;height:24px;border-radius:var(--prad,8px);background:var(--pa);color:var(--paon);
+    display:grid;place-items:center;font-size:10px;font-weight:700}
+  .pv__bart{font-size:12.5px;font-weight:600;font-family:var(--pfont-display)}
+  .pv__barsub{margin-left:auto;display:flex;gap:6px;align-items:center}
+  .pv__dot{width:12px;height:12px;border-radius:50%;border:1px solid var(--pbd)}
+  .pv__pager{font-size:9.5px;color:var(--ptxt2);border:1px solid var(--pbd);border-radius:999px;
+    padding:2px 7px;font-weight:600}
+
+  .pv__eyebrow{font-size:10px;font-weight:700;letter-spacing:var(--peye,.11em);text-transform:uppercase;
+    color:var(--pa);margin-bottom:6px}
+  .pv__h{font-size:calc(22px * var(--pscale,1));line-height:1.18;letter-spacing:var(--pletter,-.02em);
+    font-weight:var(--pw,700);margin-bottom:calc(14px * var(--pgap,1));font-family:var(--pfont-display)}
+
+  /* presentation 迷你件 */
+  .pv__metric{display:flex;gap:calc(16px * var(--pgap,1));margin-bottom:12px}
+  .pv__metric div b{font-size:calc(26px * var(--pscale,1));font-weight:700;letter-spacing:var(--pletter,-.03em);
+    color:var(--pa);display:block;line-height:1;font-family:var(--pfont-display)}
+  .pv__metric div span{font-size:10px;color:var(--ptxt2)}
+  .pv__bars{display:flex;align-items:flex-end;gap:8px;height:56px}
+  .pv__bars i{flex:1;border-radius:5px 5px 0 0;background:var(--ps3)}
+  .pv__bars i.a{background:var(--pa)}
+  .pv__chips{display:flex;gap:7px;margin-top:13px;flex-wrap:wrap}
+  .pv__chip{font-size:10.5px;font-weight:600;padding:4px 11px;border-radius:999px;
+    background:var(--pas);color:var(--pa)}
+  .pv__chip.l{background:transparent;border:1px solid var(--pbd);color:var(--ptxt2)}
+
+  /* research 迷你件：Exhibit 框 + sowhat + 双栏 */
+  .pv__exh{border:1px solid var(--pbd);border-radius:8px;background:#fff;padding:10px 12px;margin-bottom:10px}
+  .pv__exhHd{display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:1px solid var(--pbd);padding-bottom:6px;margin-bottom:8px}
+  .pv__exhNo{font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--pa)}
+  .pv__exhT{font-size:10.5px;font-weight:600;color:var(--ptxt)}
+  .pv__hrow{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .pv__hrow span{font-size:10px;color:var(--ptxt2);width:30px;flex:none}
+  .pv__htrack{flex:1;height:8px;border-radius:999px;background:var(--ps3);overflow:hidden}
+  .pv__hfill{height:100%;border-radius:999px;background:var(--pa)}
+  .pv__hval{font-size:10px;font-weight:700;color:var(--ptxt);width:28px;text-align:right;flex:none}
+  .pv__src{font-size:9px;color:var(--ptxt2);border-top:1px solid var(--pbd);padding-top:5px;margin-top:2px}
+  .pv__sowhat{display:flex;align-items:center;gap:8px;margin-top:16px;padding:16px 24px;border:1px solid color-mix(in srgb,var(--pa) 28%,transparent);border-radius:8px;
+    background:var(--pas);border-radius:0 6px 6px 0;padding:6px 10px;margin-bottom:10px}
+  .pv__swK{font-size:8.5px;font-weight:700;letter-spacing:.1em;color:var(--pa);flex:none}
+  .pv__swV{font-size:10px;font-weight:500;color:var(--ptxt);line-height:1.5}
+  .pv__cols{column-count:2;column-gap:calc(14px * var(--pgap,1));font-size:9.5px;color:var(--ptxt2);
+    line-height:var(--plh,1.6)}
+  .pv__cols p{margin-bottom:5px;break-inside:avoid-column}
+  .pv__cols b{color:var(--ptxt)}
+
+  /* architecture 迷你件：分层带 */
+  .pv__arch{display:flex;flex-direction:column;gap:6px}
+  .pv__layer{display:grid;grid-template-columns:56px 1fr;gap:8px;align-items:stretch}
+  .pv__lname{font-size:9px;font-weight:700;letter-spacing:.05em;color:var(--ptxt2);
+    border-left:3px solid var(--pbd);padding-left:7px;display:flex;align-items:center}
+  .pv__layer--f .pv__lname{color:var(--pa);border-left-color:var(--pa)}
+  .pv__nodes{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .pv__node{border:1px solid var(--pbd);border-radius:7px;padding:6px 9px;background:#fff}
+  .pv__node--a{background:var(--pas);border-color:transparent}
+  .pv__nt{font-size:10px;font-weight:600;color:var(--ptxt)}
+  .pv__node--a .pv__nt{color:var(--pa)}
+  .pv__nd{font-size:8.5px;color:var(--ptxt2);margin-top:1px}
+  .pv__legend{display:flex;gap:7px;justify-content:flex-end;margin-top:9px}
+
+  /* 编码色板展示条（9 套风格各有 c1–c5；彩色只属于数据系列） */
+  .pv__pal{display:flex;align-items:center;gap:6px;margin-top:13px;flex-wrap:wrap}
+  .pv__pd{width:14px;height:14px;border-radius:5px;flex:none;border:1px solid rgba(0,0,0,.08)}
+  .pv__palt{font-size:9.5px;font-weight:600;color:var(--ptxt2);margin-left:3px}
+
+  /* 深色优先卡（graphite）：主预览用 dark token，白底小件换深色面 */
+  .preset.dm .pv__exh{background:var(--psoft)}
+  .preset.dm .pv__node{background:var(--psoft)}
+
+  /* 暗色预览条 */
+  .dk{display:flex;align-items:center;gap:14px;padding:13px 22px;background:var(--dbg);
+    border-bottom:1px solid var(--pbd)}
+  .dk__tag{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--dtxt2);
+    border:1px solid var(--dbd);border-radius:999px;padding:3px 9px}
+  .dk__h{font-size:14px;font-weight:700;color:var(--dtxt);font-family:var(--pfont-display)}
+  .dk__bars{display:flex;align-items:flex-end;gap:4px;height:26px;margin-left:auto}
+  .dk__bars i{width:10px;border-radius:3px 3px 0 0;background:var(--ds3)}
+  .dk__bars i.a{background:var(--da)}
+  .dk__num{font-size:17px;font-weight:700;color:var(--da);font-family:var(--pfont-display)}
+
+  /* 卡底说明 */
+  .meta{padding:16px 22px 18px;background:#fff}
+  .meta__name{display:flex;align-items:center;gap:9px;font-size:16.5px;font-weight:700;color:#202124}
+  .meta__name .sw{width:16px;height:16px;border-radius:5px;background:var(--pa);border:1px solid rgba(0,0,0,.08)}
+  .meta__en{font-size:12px;color:#9aa0a6;font-weight:400}
+  .meta__pick{margin-left:auto;font-size:12px;font-weight:600;color:#1a73e8;border:1px solid #d2e3fc;
+    border-radius:999px;padding:5px 13px;background:#fff;cursor:pointer}
+  .meta__d{font-size:13.5px;color:#5f6368;line-height:1.6;margin-top:8px}
+  .meta__s{font-size:12.5px;color:#80868b;margin-top:7px}
+  .meta__s b{color:#3c4043;font-weight:600}
+
+  .foot{max-width:1360px;margin:34px auto 0;font-size:13.5px;color:#80868b;line-height:1.7}
+  .foot code{background:#e0e3e8;padding:2px 7px;border-radius:6px;font-size:12.5px}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>风格 × 模式矩阵 · TopPPT HTML</h1>
+  <p>三种报告模式 × 9 套风格 × 亮/暗双主题，正交组合任意选用。<strong>模式</strong>（演示汇报 / 研究报告 / 信息架构图）是内容呈现形态与信息密度——生成时确定，切模式即换一套独立模板；<strong>风格</strong>是纯视觉皮肤——header 下拉可实时切换；<strong>主题</strong>（浅色 / 深色）在问询时一并确认——<strong>HTML 与 PPTX 导出同主题</strong>。切换上方模式 Tab，查看每种风格在该模式下的迷你版式特征；点击卡片标记，把 <code>data-mode + data-style + data-theme</code> 交给生成流程。</p>
+  <p style="margin-top:10px">三模式完整样例见 <code>assets/examples/</code>（presentation×2、research×3、architecture×2，AI 智能体发展研究主题）；三份模式模板见 <code>assets/templates/</code>。本页每张卡片已同时展示浅色（主预览）与深色（底部辅助条）两个变体，可一并挑选主题。</p>
+</div>
+
+<div class="caps">
+  <span class="b">三模式 × 9 风格 × 亮暗主题</span><span class="b">模式独立模板</span><span class="b">PPTX 三模式高保真</span><span class="b">PPTX 同主题导出</span>
+  <span>9 套风格</span><span>亮暗双主题</span><span>header 工具栏</span><span>宽屏 16:9</span><span>MD3 对齐</span>
+  <span>引用闭环</span><span>去AI味</span><span>质量校验闭环</span><span>常量单源</span>
+</div>
+
+<div class="modes" id="modes"></div>
+<div class="grid" id="grid"></div>
+
+<div class="foot">
+  结构与风格分离：三份模式模板见 <code>assets/templates/</code>，9 套 token 见 <code>references/styles.md</code>（PPTX 侧与 <code>scripts/layout-constants.json</code> 同源）。
+  模式规则见 <code>references/modes.md</code>：演示汇报（3 秒一主张，台上宣讲）/ 研究报告（咨询密排：行动标题 + Exhibit 编号 + so-what + 双/三栏论证 + 密表 + 矩阵）/ 信息架构图（图为王，1–3 张全幅主图）。
+  每张卡底部辅助条：石墨深灰为「深色优先」——主预览即 dark 变体、辅助条展示浅色辅助变体；其余 8 套主预览为 light、辅助条为 dark。每套风格的 5 色数据色板（c1–c5，单源 <code>STYLE_DATA_COLORS</code>）在主预览中随模式展示（彩色只属于数据系列）。
+  新增风格：styles.md 加两个覆盖块 → 本页 <code>STYLE_META</code> 加一项（卡片列表与配色由单源派生，不必手改）→ 完。
+</div>
+
+<script>
+/* __TOPPPT_CONSTANTS_START__ */
+/* ── 由 scripts/sync_runtime.py 从 scripts/layout-constants.json 注入 · 禁止手改 ── */
+/* MTS = 三模式独立排版比例尺（按模式取 pt；基准 TS_BASE = presentation 档） */
+/* PRESETS_DARK = 风格 dark token（REPORT_MODEL.theme="dark" 时导出深色版）*/
+/* GRID = 12 列网格；TYPO = 语义字阶 C0–T14；CONT = 容器内边距；REG = 图表登记四元组；DEEP = 深度模式配置 */
+/* IMG = 素材图片规格与配图占位约定（版式/裁切/建议尺寸/占位标签，双引擎同源） */
+/* STYLE_DATA_COLORS(_DARK) = 9 套风格各自的编码色板 c1–c5（数据系列；结构色纪律不变） */
+/* LAYOUT_SLOTS + regionOf = 页型布局区域 IR（与 scripts/lib_layout_regions.js 同源） */
+var PW = 13.333, PH = 7.5, MX = 0.6, CW = PW - 2 * MX, EMU = 914400;
+var TS_BASE = {"coverTitle":44,"coverSub":18,"h1":30,"h2":17,"lead":14,"body":13,"caption":11,"micro":10};
+var MTS = {"presentation":{"coverTitle":44,"coverSub":18,"h1":30,"h2":17,"lead":14,"body":13,"caption":11,"micro":10},"research":{"coverTitle":36,"coverSub":14,"h1":22,"h2":13.5,"lead":11.5,"body":10.5,"caption":9,"micro":8.5},"architecture":{"coverTitle":44,"coverSub":19,"h1":30,"h2":17,"lead":14,"body":13,"caption":11,"micro":10}};
+var PT = {"layout":{"contentTop":2.35,"contentBottom":6.9,"contentBottomWithNote":6.4,"pageNumY":7.0},"common":{"headEyebrowY":0.48,"headTitleY":0.82,"headRuleY":1.72,"leadY":1.88,"bodyY":2.35,"bodyYWithLead":2.55,"pagerY":7.0},"cover":{"metaY":0.7,"titleY":2.4,"titleH":2.0,"subtitleY":4.5,"subtitleH":0.8},"closing":{"eyebrowY":0.7,"titleY":1.2,"titleH":1.2,"pointsY":3.0,"pointTitleH":0.6,"pointBodyH":1.2},"points":{"listY":2.5,"rowH":0.72,"rowHMin":0.5,"markSize":0.14,"metricY":4.7,"metricW":2.6,"metricValH":0.9,"metricCapY":5.6},"metrics":{"bandY":3.1,"cardH":2.3,"valY":3.45,"valH":1.1,"capY":4.55,"capH":0.7,"gap":0.3,"maxW":2.9},"table":{"y":2.5,"rowH":0.55,"rowHMin":0.32,"headRowH":0.5},"bar":{"hbarY0":2.6,"hbarY1":6.25,"chartX":0.6,"chartY":2.95,"chartW":1.2,"chartH":3.35,"noteY":6.55},"note":{"y":6.55,"h":0.4},"exhibit":{"badgeY":2.35,"chartY":2.75,"chartH":3.25,"soWhatY":6.05,"footnoteY":6.72},"twocol":{"colGap":0.5,"bodyH":3.6,"rowHMin":0.5},"hbar":{"labelW":1.9,"valW":1.0,"rowH":0.55,"barRatio":0.5},"diagram":{"layerBarW":1.35,"layerGap":0.15,"nodeGap":0.15,"bodyStartY":2.9,"maxLayerH":1.15,"nodeMaxW":2.2},"split":{"leftW":0.55,"rightW":0.415,"rightX":0.585,"pointsY":2.7,"rowH":0.78,"capY":2.55,"chartY":3.0,"chartH":3.7,"tableY":2.7,"tableRowH":0.5},"cards":{"startY":3.0,"gap":0.25,"maxH":2.0,"titleH":0.4},"timeline":{"labelY":2.95,"axisY":3.58,"dotY":3.51,"dotR":0.18,"nameY":3.9,"descY":4.45,"descH":1.2},"research":{"col3Gap":0.38,"matrixLabelW":1.5,"matrixCellH":0.85,"matrixY":2.2,"denseTableY":2.2,"denseRowH":0.42,"halfTableW":0.52,"halfChartX":0.57,"halfChartW":0.43},"arch":{"fullStartY":2.1,"fullEndY":6.9,"laneH":0.72,"laneHMin":0.5,"laneGap":0.14,"laneHeadW":1.3,"stepGap":0.12,"stepMaxW":1.9},"kpi":{"heroY":2.9,"heroW":0.52,"heroH":1.6,"dividerX":0.56,"metricY0":2.95,"metricRowH":0.85},"comparison":{"panelGap":0.4,"panelY":2.55,"panelH":3.4,"titleH":0.45,"rowH":0.62},"quote":{"markY":1.75,"textY":2.7,"textH":2.3,"authorY":5.25,"contextY":5.8},"donut":{"centerX":3.05,"centerY":4.6,"r":1.6,"holeR":0.95,"legendX":5.6,"legendRowH":0.55,"legendLabelW":3.4,"legendValW":1.3,"legendPctX":10.8,"legendPctW":1.3},"steps":{"y":3.05,"barH":1.35,"gap":0.12,"arrowW":0.3,"numH":0.3,"titleH":0.34,"pad":0.08,"maxPerRow":6},"heatmap":{"y":2.6,"labelW":1.7,"headH":0.42,"cellH":0.6,"cellGap":0.06,"legendW":1.6},"pyramid":{"y":2.35,"rowH":0.72,"gap":0.08,"minW":0.34,"labelW":3.2},"bullet":{"y":2.6,"rowH":0.8,"labelW":2.4,"valW":1.7,"barH":0.26},"image":{"y":2.3,"h":4.2,"halfW":0.56,"halfGap":0.06,"capY":6.6,"capH":0.3,"radius":0.09,"noteRowH":0.62,"gridGap":0.16,"gridCols":{"2":2,"3":3,"4":4,"6":3},"gridCapH":0.28,"compareGap":0.3,"compareTagH":0.26,"wallCellH":0.92,"wallGap":0.18,"wallMaxRows":2},"flagbar":{"hdH":0.26,"rowH":0.24,"maxRows":3,"gap":0.12},"sankey":{"y":2.45,"h":4.1,"nodeW":0.32,"nodeGap":0.14,"labelW":1.55,"minBandH":0.22,"maxNodes":12,"maxFlows":24},"treemap":{"y":2.45,"h":4.1,"gap":0.05,"labelMinH":0.34,"maxLeaves":16,"maxDepth":3},"boxplot":{"y":2.7,"h":3.7,"labelW":1.5,"groupGap":0.3,"boxMaxW":0.9,"whiskerCapW":0.34,"maxGroups":8},"network":{"y":2.4,"h":4.2,"nodeR":0.28,"nodeRMin":0.18,"labelMaxW":1.4,"maxNodes":18,"maxEdges":30},"marimekko":{"y":2.6,"h":3.75,"labelW":1.55,"colGap":0.06,"legendH":0.42,"maxCols":6,"maxSegs":4},"streamgraph":{"y":2.6,"h":3.75,"labelW":1.4,"bandMinH":0.12,"maxSeries":6}};
+var PRESETS = {
+  'business-blue': { accent:'1A73E8', ink:'202124', body:'5F6368', faint:'80868B', bg:'FFFFFF', surface:'F8F9FA', line:'DADCE0', soft:'E8F0FE', onAccent:'FFFFFF', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'apple-mono': { accent:'1D1D1F', ink:'1D1D1F', body:'6E6E73', faint:'86868B', bg:'FFFFFF', surface:'F5F5F7', line:'D2D2D7', soft:'F5F5F7', onAccent:'FFFFFF', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'mckinsey': { accent:'003A70', ink:'101828', body:'475467', faint:'667085', bg:'FFFFFF', surface:'F2F4F7', line:'D0D5DD', soft:'EEF4FB', onAccent:'FFFFFF', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'brand-red': { accent:'D0021B', ink:'1F1A1B', body:'5D5456', faint:'8A8083', bg:'FFFFFF', surface:'FAF7F7', line:'E2D9DA', soft:'FBECEC', onAccent:'FFFFFF', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'warm-sand': { accent:'96681F', ink:'2A2521', body:'6B5F52', faint:'93836F', bg:'FBF9F6', surface:'F6F2EC', line:'E0D7C9', soft:'F3ECDD', onAccent:'FFFFFF', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'deep-teal': { accent:'0F6B5C', ink:'14201E', body:'4A5A57', faint:'73837F', bg:'FFFFFF', surface:'F2F6F5', line:'CFDEDC', soft:'E4F1EE', onAccent:'FFFFFF', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'graphite-dark': { accent:'0369A1', ink:'1A1D21', body:'4B5158', faint:'767C84', bg:'F4F5F7', surface:'ECEEF1', line:'CED1D6', soft:'E2EFF7', onAccent:'FFFFFF', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'indigo-violet': { accent:'5B5BD6', ink:'1B1A2E', body:'52506B', faint:'7A779A', bg:'FFFFFF', surface:'F4F4FB', line:'D7D7E8', soft:'ECECF9', onAccent:'FFFFFF', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'spectrum': { accent:'4563EF', ink:'171A21', body:'4D5566', faint:'7B8494', bg:'FBFCFE', surface:'F4F6FA', line:'D6DCE6', soft:'ECEEFF', onAccent:'FFFFFF', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' }
+};
+var PRESETS_DARK = {
+  'business-blue': { accent:'8AB4F8', ink:'E8EAED', body:'ADB4BD', faint:'868D96', bg:'0D0F13', surface:'191D23', line:'2F353D', soft:'16243A', onAccent:'0D1B2E', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'apple-mono': { accent:'F5F5F7', ink:'F5F5F7', body:'A1A1A6', faint:'86868B', bg:'000000', surface:'161617', line:'38383D', soft:'1D1D1F', onAccent:'000000', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'mckinsey': { accent:'7FB2E5', ink:'E4E7EC', body:'AAB3C2', faint:'8A94A6', bg:'0C1116', surface:'12181F', line:'2A3342', soft:'12233A', onAccent:'0C1A2E', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'brand-red': { accent:'FF5A66', ink:'F3ECEC', body:'C4B6B7', faint:'9A8D8E', bg:'130D0E', surface:'1A1213', line:'37272A', soft:'331518', onAccent:'2A0D10', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'warm-sand': { accent:'D9B36A', ink:'ECE5DB', body:'C4B8A8', faint:'9B8D7A', bg:'15120E', surface:'1D1913', line:'3A3128', soft:'2E2417', onAccent:'2A1F10', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'deep-teal': { accent:'4FC3B0', ink:'E2ECEA', body:'B3C2BF', faint:'86948F', bg:'0D1312', surface:'131B1A', line:'293834', soft:'12312C', onAccent:'0C2420', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'graphite-dark': { accent:'4DA3FF', ink:'EEF2F6', body:'B9C2CD', faint:'85909D', bg:'0B0E12', surface:'171D24', line:'2B3540', soft:'132841', onAccent:'07182B', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'indigo-violet': { accent:'A5A4F0', ink:'E6E5F5', body:'B6B4D4', faint:'8B89B0', bg:'100F1C', surface:'171629', line:'322F52', soft:'232146', onAccent:'171631', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
+  'spectrum': { accent:'8BA0F8', ink:'E8EBF2', body:'A7AFBF', faint:'7E8798', bg:'0E1116', surface:'171C26', line:'2B3342', soft:'1B2242', onAccent:'141A38', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' }
+};
+var STYLE_DATA_COLORS = {"business-blue":["1a73e8","3526bb","21a199","b77148","99983d"],"apple-mono":["1d1d1f","0071e3","0f7b6c","c2410c","7c3aed"],"mckinsey":["003a70","2826bb","21a18e","b76848","99903d"],"brand-red":["d0021b","bb6326","d634ae","40a182","438aa8"],"warm-sand":["96681f","839324","cf3b3e","4d88b2","4a47a4"],"deep-teal":["0f6b5c","2683bb","22aa3e","b74870","a85c43"],"graphite-dark":["0369a1","2637bb","1f9977","b75948","a18a40"],"indigo-violet":["5b5bd6","7432ae","4197c8","a08f4b","7ca04b"],"spectrum":["4563ef","5b26bb","269ebb","af8746","83993d"]};
+var STYLE_DATA_COLORS_DARK = {"business-blue":["8ab4f8","7966e0","88e7e5","d4ad91","cbce83"],"apple-mono":["f5f5f7","2997ff","2dd4bf","ff9f0a","bf5af2"],"mckinsey":["7fb2e5","6f6bdb","8ce3d8","d1a694","cbc586"],"brand-red":["ff5a66","e09e66","e788cb","91d4c2","83b4ce"],"warm-sand":["d9b36a","c2d571","df9391","97b5ce","8e89c7"],"deep-teal":["4fc3b0","7aaecd","97d8a4","c99cac","c29c8f"],"graphite-dark":["4da3ff","6c66e0","88e7dc","d4a691","cec983"],"indigo-violet":["a5a4f0","a967e0","89c3e7","d3c792","aece83"],"spectrum":["8ba0f8","9066e0","88d6e7","d4ba91","bdce83"]};
+var GRID = {"columns":12,"gutter":0.16,"colW":0.8644,"x":[0.6,1.6244,2.6488,3.6732,4.6976,5.722,6.7464,7.7708,8.7952,9.8196,10.844,11.8684,12.733],"y":[2.35,3.27,4.19,5.11,6.03,6.9],"safe":{"top":0.4,"bottom":0.4,"left":0.6,"right":0.6}};
+var TYPO = {"levels":[{"id":"C0","name":"封面/章节幕标题","role":"coverTitle","usage":"封面主标题、章节幕标题"},{"id":"T1","name":"页码/章节徽章","role":"caption","usage":"页码徽章、章节编号"},{"id":"T2","name":"页面主标题/结论标题","role":"h1","usage":"每页顶部结论句（research 行动标题）"},{"id":"T3","name":"副标题/语境说明","role":"lead","usage":"主标题下方导语"},{"id":"T4","name":"模块标题/图表标题","role":"h2","usage":"卡片标题、图表标题、面板标题"},{"id":"T5","name":"证据编号/轻量标签","role":"micro","usage":"Exhibit 编号、状态标签"},{"id":"T6","name":"证据块标题/小节标题","role":"h2","usage":"分栏小标题、证据块标题"},{"id":"T7","name":"正文解释段落","role":"body","usage":"证据解释、管理解读正文、表格正文"},{"id":"T8","name":"结论条文字","role":"body","usage":"结论条、核心结论框"},{"id":"T9","name":"结论条标签（可选·默认隐藏）","role":"caption","usage":"结论条可选标签（默认不显示）"},{"id":"T10","name":"结论条正文/业务含义","role":"body","usage":"结论条正文、行动含义、表格行动项"},{"id":"T11","name":"图表轴/图例/刻度/微标签","role":"micro","usage":"坐标轴、图例、刻度、单位（禁用于表格正文与完整短句）"},{"id":"T12","name":"图表数据标签","role":"caption","usage":"折线点值、柱形标签、百分比标注"},{"id":"T13","name":"关键 KPI 大数字","role":"h1","usage":"KPI 大数字、hero 数值"},{"id":"T14","name":"注释/口径/来源/页脚","role":"micro","usage":"footnote、来源行、页脚、小页码"}],"tableSemanticRule":{"body":["T7","T10"],"microAllowed":["T11"],"microForbiddenFor":["表格正文","行动项","风险项","解释句","建议句","长项目符号","完整短句"]}};
+var CONT = {"pad":{"card":0.18,"panel":0.2,"cell":0.08,"band":0.16,"soWhat":0.16,"kpi":0.18,"chart":0.1,"head":0.05,"footer":0.05,"node":0.06},"minPad":0.06,"textMetrics":{"lineFactor":1.45,"emAsciiRatio":0.52},"overflowRule":"溢出处置优先级（禁静默截断）：① 重构承载（列表/卡片/表/图/组合版式）→ ② 拆页/分章（议程→主张→证据卡→明细；01a/01b；信息须完整）→ ③ 换布局形态（V1–V4/多列/卡栅格）→ ④ 有限 fontShrink（阶梯内、模式 floor 以上、最多 4 档）→ ⑤ 禁止：静默截断、砍 so-what/证据/口径、为审美稀疏删决策必需信息。单页字数预算是预警不是删字许可证。","fontShrink":{"ladder":[15,14,13.5,13,12.5,12,11.5,11,10.5,10,9.5,9,8.5],"maxShrinkSteps":4,"floorPt":{"presentation":10,"research":9,"architecture":10},"preferContentFirst":true,"warnBelow":9.5},"continuousTextRule":"语义连续的一句话 / so-what 主句 / 结论句 / 表格单元格正文不得拆成多个独立文本框（避免异常空格、断句、基线漂移）；局部加粗高亮必须用同一文本框内富文本。","adaptiveText":{"title":{"base":30,"step1":24,"longChars":28,"longMax":24,"xlongChars":44,"xlongMax":20},"list":{"denseItems":6,"gapFactor":0.5,"denseGapFactor":0.25,"lineFactor":1.45,"denseLineFactor":1.3,"max":14,"denseMax":12},"table":{"cellMax":12.5,"cellFloor":9,"headMax":13,"longCellChars":24,"rowFloorIn":0.22,"cellPadIn":0.07}}};
+var REG = {"bar":{"html":"svg-bars","pptx":"native","nativeType":"bar","dataTable":"notes","min":{"vbHeightMin":160}},"hbar":{"html":"svg-hbars","pptx":"native","nativeType":"bar","dataTable":"notes","min":{"vbHeightMin":100}},"stack":{"html":"svg-stack","pptx":"native","nativeType":"bar","dataTable":"notes","min":{"vbHeightMin":160},"nativeOpt":{"barGrouping":"stacked"}},"stackline":{"html":"svg-stackline","pptx":"native","nativeType":"bar","dataTable":"notes","min":{"vbHeightMin":40},"nativeOpt":{"barGrouping":"percentStacked"}},"line":{"html":"svg-line","pptx":"native","nativeType":"line","dataTable":"notes","min":{"vbHeightMin":160}},"dualline":{"html":"svg-dualline","pptx":"native","nativeType":"line","dataTable":"notes","min":{"vbHeightMin":160}},"area":{"html":"svg-area","pptx":"native","nativeType":"area","dataTable":"notes","min":{"vbHeightMin":160}},"donut":{"html":"svg-donut","pptx":"native","nativeType":"doughnut","dataTable":"notes","min":{"pxWidthMin":140}},"multidonut":{"html":"svg-mdonut","pptx":"native","nativeType":"doughnut","dataTable":"notes","min":{"pxWidthMin":140}},"pie":{"html":"svg-pie","pptx":"native","nativeType":"pie","dataTable":"notes","min":{"pxWidthMin":140}},"radar":{"html":"svg-radar","pptx":"native","nativeType":"radar","dataTable":"notes","min":{"pxWidthMin":220}},"scatter":{"html":"svg-scatter","pptx":"native","nativeType":"scatter","dataTable":"notes","min":{"vbHeightMin":180}},"bubble":{"html":"svg-bubble","pptx":"native","nativeType":"bubble","dataTable":"notes","min":{"vbHeightMin":180}},"waterfall":{"html":"svg-wf","pptx":"native","nativeType":"bar","dataTable":"notes","min":{"vbHeightMin":170},"nativeTrick":"stacked+hiddenBase+connector"},"gauge":{"html":"svg-gauge","pptx":"native","nativeType":"doughnut","dataTable":"notes","min":{"pxWidthMin":180},"nativeTrick":"doughnut+firstSliceAng+hiddenRemainder"},"pareto":{"html":"svg-pareto","pptx":"native","nativeType":"bar","dataTable":"notes","min":{"vbHeightMin":180},"nativeTrick":"multiType+bar+line"},"gantt":{"html":"svg-gantt","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":130},"path":{"forbidPresetShapes":true}},"vsbar":{"html":"svg-vsbar","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":100},"path":{"forbidPresetShapes":true}},"progress":{"html":"svg-progress","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":100},"path":{"forbidPresetShapes":true}},"sparkline":{"html":"svg-spark","pptx":"shape","dataTable":"off","min":{"vbHeightMin":20},"path":{"forbidPresetShapes":true}},"funnel":{"html":"svg-funnel","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":160},"path":{"minSamplePoints":8,"forbidPresetShapes":true}},"treemap":{"html":"svg-treemap","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":170},"path":{"forbidPresetShapes":true}},"marimekko":{"html":"svg-marimekko","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":160},"path":{"forbidPresetShapes":true}},"boxplot":{"html":"svg-boxplot","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":180},"path":{"forbidPresetShapes":true}},"network":{"html":"svg-network","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":200},"path":{"forbidPresetShapes":true}},"sankey":{"html":"svg-sankey","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":200},"path":{"minSamplePoints":16,"trackBothEdges":true,"forbidPresetShapes":true}},"streamgraph":{"html":"svg-stream","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":160},"path":{"minSamplePoints":24,"trackBothEdges":true,"forbidPresetShapes":true}},"slope":{"html":"svg-slope","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":180},"path":{"forbidPresetShapes":true}},"dumbbell":{"html":"svg-dumbbell","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":160},"path":{"forbidPresetShapes":true}},"lollipop":{"html":"svg-lollipop","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":140},"path":{"forbidPresetShapes":true}},"dotplot":{"html":"svg-dotplot","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":120},"path":{"forbidPresetShapes":true}},"bulletchart":{"html":"svg-bullet","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":140},"path":{"forbidPresetShapes":true}},"waffle":{"html":"svg-waffle","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":160},"path":{"forbidPresetShapes":true}},"radialbar":{"html":"svg-radialbar","pptx":"shape","dataTable":"notes","min":{"pxWidthMin":200},"path":{"minSamplePoints":16,"forbidPresetShapes":true}},"rose":{"html":"svg-rose","pptx":"shape","dataTable":"notes","min":{"pxWidthMin":180},"path":{"minSamplePoints":16,"forbidPresetShapes":true}},"candlestick":{"html":"svg-candle","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":180},"path":{"forbidPresetShapes":true}}};
+var DEEP = {"triggers":["高保真","1:1","一比一","精确还原","按图还原","正式交付","不能偏移","像素级","严格对照","逐页验收"],"complexCharts":["sankey","streamgraph","treemap","marimekko","boxplot","network","rose","radialbar","candlestick","funnel"],"checks":{"anchors":true,"containerOverflow":true,"renderCompare":true,"manifest":true},"renderCompare":{"engine":"soffice","fallback":"powerpoint-com","skipIfMissing":true,"dpi":96}};
+var IMG = {"layouts":["full","half","bleed","grid","compare","wall"],"multiLayouts":["grid","compare","wall"],"fitEnum":["cover","contain"],"fitDefault":"cover","formats":["png","jpeg","jpg","webp","svg"],"ratioDefault":{"full":"3:1","half":"4:3","bleed":"21:9","grid":"4:3","compare":"4:3","wall":"1:1"},"ratioCssClass":{"full":"media--r3-1","half":"media--r4-3","bleed":"media--r21-9","grid":"media--r4-3","compare":"media--r4-3","wall":"media--r1-1"},"recommendedSizePx":{"full":"2400×800","half":"1400×1050","bleed":"2560×1100","grid":"900×675","compare":"1400×1050","wall":"480×480"},"maxInlineBytes":1572864,"maxTotalInlineBytes":8388608,"maxPerPage":6,"placeholderLabel":"配图占位","placeholderHintPrefix":"建议 ","placeholderHintSuffix":"px","zeroExternal":true,"qualityRule":"位图优先提供 ≥2× 显示尺寸；截图用 16:9 或 4:3 锁定比例；数据图不要用截图（应用内联 SVG 图表，可随主题变色）。"};
+var LAYOUT_SLOTS = {"version":"0.1","pageTypes":{"points":{"mode":["presentation","research","architecture"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".grid.g-2 / .card / .ul","pptx":"points columns","minUnits":1},{"id":"annotation","role":"annotation","required":false,"html":".sowhat / .note","pptx":"soWhatBar / footnoteLine"}]},"metrics":{"mode":["presentation","research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".metric","pptx":"metric row","minUnits":4},{"id":"annotation","role":"annotation","required":false,"html":"口径行 / .sowhat","pptx":"footnoteLine / soWhatBar"}]},"kpi":{"mode":["presentation","research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"hero","role":"primary","required":true,"html":".t-metric hero","pptx":"hero number"},{"id":"metrics","role":"secondary","required":false,"html":".metric","pptx":"support metrics"},{"id":"annotation","role":"annotation","required":false,"html":".sowhat / .note","pptx":"soWhatBar"}]},"exhibit":{"mode":["research","presentation"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead / .exhibit__hd","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":"svg[data-chart] / .exhibit","pptx":"nativeChart | shapeChart","channel":"registry"},{"id":"secondary","role":"secondary","required":false,"html":"要点列表","pptx":"side bullets"},{"id":"annotation","role":"annotation","required":true,"html":".exhibit__src / .sowhat","pptx":"footnoteLine / soWhatBar / notes"}]},"split":{"mode":["presentation","research","architecture"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"left","role":"primary","required":true,"html":"左区（points/table/image/chart）","pptx":"left zone"},{"id":"right","role":"secondary","required":true,"html":"右区（points/table/image/chart）","pptx":"right zone"},{"id":"annotation","role":"annotation","required":false,"html":".sowhat / .note","pptx":"soWhatBar"}]},"table":{"mode":["presentation","research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".tbl-wrap table","pptx":"addTable","maxRows":{"presentation":8,"research":16}},{"id":"annotation","role":"annotation","required":false,"html":".sowhat / .note","pptx":"soWhatBar / footnoteLine"}]},"bar":{"mode":["presentation","research","architecture"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":"svg[data-chart]","pptx":"nativeChart | shapeChart","channel":"registry"},{"id":"annotation","role":"annotation","required":true,"html":"note / dataTable","pptx":"footnoteLine / notes / inline table"}]},"donut":{"mode":["presentation","research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":"svg[data-chart=donut]","pptx":"addChart doughnut"},{"id":"annotation","role":"annotation","required":false,"html":"中心合计 / 图例 / .note","pptx":"center label / legend / notes"}]},"twocol":{"mode":["research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".cols-2","pptx":"two text columns"},{"id":"annotation","role":"annotation","required":false,"html":".sowhat","pptx":"soWhatBar"}]},"threecol":{"mode":["research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".cols-3","pptx":"three text columns"},{"id":"annotation","role":"annotation","required":false,"html":".sowhat","pptx":"soWhatBar"}]},"halftable":{"mode":["research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":"左表","pptx":"addTable left"},{"id":"secondary","role":"secondary","required":true,"html":"右图","pptx":"chart right"},{"id":"annotation","role":"annotation","required":false,"html":".sowhat","pptx":"soWhatBar"}]},"matrix":{"mode":["research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".matrix","pptx":"matrix cells"},{"id":"annotation","role":"annotation","required":false,"html":".sowhat","pptx":"soWhatBar"}]},"comparison":{"mode":["presentation","research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"left","role":"primary","required":true,"html":"左面板","pptx":"left panel"},{"id":"right","role":"secondary","required":true,"html":"右面板","pptx":"right panel"},{"id":"annotation","role":"annotation","required":false,"html":"verdict / .sowhat","pptx":"verdict bar"}]},"quote":{"mode":["presentation","research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":"金句正文","pptx":"quote text"}]},"timeline":{"mode":["presentation","research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".tl","pptx":"timeline axis"}]},"steps":{"mode":["presentation","architecture"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".steps","pptx":"step row"}]},"cards":{"mode":["presentation","research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".card grid","pptx":"card grid"}]},"heatmap":{"mode":["presentation","research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".heat","pptx":"heat cells"}]},"bullet":{"mode":["presentation","research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".bul","pptx":"bullet rows"}]},"pyramid":{"mode":["presentation","research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".pyr","pptx":"pyramid layers"}]},"image":{"mode":["presentation","research","architecture"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".media*","pptx":"imageLayoutShapes"}]},"diagram":{"mode":["architecture","research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".arch / layers","pptx":"layered nodes + edges","maxNodes":24,"maxLayers":4},{"id":"annotation","role":"annotation","required":false,"html":".arch__legend / .note","pptx":"legend chips / notes"}]},"lane":{"mode":["architecture","research"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":".lane","pptx":"lanes + steps"}]},"sankey":{"mode":["research","architecture"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":"svg[data-chart=sankey]","pptx":"infoSankey","maxNodes":12},{"id":"annotation","role":"annotation","required":true,"html":"dataTable / .note","pptx":"notes"}]},"treemap":{"mode":["research","architecture"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":"svg[data-chart=treemap]","pptx":"infoTreemap"},{"id":"annotation","role":"annotation","required":true,"html":"dataTable / .note","pptx":"notes"}]},"boxplot":{"mode":["research","architecture"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":"svg[data-chart=boxplot]","pptx":"infoBoxplot"},{"id":"annotation","role":"annotation","required":true,"html":"dataTable / .note","pptx":"notes"}]},"network":{"mode":["research","architecture"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":"svg[data-chart=network]","pptx":"infoNetwork"},{"id":"annotation","role":"annotation","required":true,"html":"dataTable / .note","pptx":"notes"}]},"marimekko":{"mode":["research","architecture"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":"svg[data-chart=marimekko]","pptx":"infoMarimekko"},{"id":"annotation","role":"annotation","required":true,"html":"dataTable / .note","pptx":"notes"}]},"streamgraph":{"mode":["research","architecture"],"slots":[{"id":"head","role":"chrome","required":true,"html":".shead","pptx":"head()"},{"id":"primary","role":"primary","required":true,"html":"svg[data-chart=streamgraph]","pptx":"infoStreamgraph"},{"id":"annotation","role":"annotation","required":true,"html":"dataTable / .note","pptx":"notes"}]}}};
+
+/* regionOf(pageType, slotId, opts) — 页型布局区域 IR（与 scripts/lib_layout_regions.js 同源） */
+function regionOf(pageType, slotId, opts) {
+  var type = String(pageType || 'points'), slot = String(slotId || '');
+  opts = opts || {};
+  var L = PT.layout || {}, C = PT.common || {};
+  var topDefault = C.bodyY || 2.5;
+  var bottomDefault = opts.withNote ? (L.contentBottomWithNote || 6.4) : (L.contentBottom || 6.9);
+  if (slot === 'head' || slot === 'chrome') {
+    return { x: MX, y: C.headEyebrowY || 0.55, w: CW,
+      h: Math.max(0.4, (C.headRuleY || 1.95) - (C.headEyebrowY || 0.55)),
+      titleY: C.headTitleY, ruleY: C.headRuleY, leadY: C.leadY, bodyY: C.bodyY };
+  }
+  if (slot === 'annotation' || slot === 'soWhat') {
+    var sy = (PT.exhibit && PT.exhibit.soWhatY != null) ? PT.exhibit.soWhatY : 6.05;
+    return { x: MX, y: sy, w: CW, h: 0.62 };
+  }
+  if (slot === 'footnote') {
+    var fy = (PT.exhibit && PT.exhibit.footnoteY != null) ? PT.exhibit.footnoteY : ((PT.note && PT.note.y) || 6.55);
+    return { x: MX, y: fy, w: CW - 1.2, h: (PT.note && PT.note.h) || 0.32 };
+  }
+  var P = PT[type] || {};
+  if (type === 'exhibit' && slot === 'primary') {
+    var ey = P.chartY || 2.95;
+    return { x: MX, y: ey, w: CW, h: Math.max(1.2, (L.contentBottomWithNote || 6.4) - ey), badgeY: P.badgeY };
+  }
+  if (type === 'metrics' && slot === 'primary') {
+    return { x: MX, y: P.bandY || 3.1, w: CW, h: P.cardH || 2.3, gap: P.gap, maxW: P.maxW,
+      valY: P.valY, valH: P.valH, capY: P.capY, capH: P.capH };
+  }
+  if (type === 'table' && slot === 'primary') {
+    var ty = P.y || topDefault;
+    return { x: MX, y: ty, w: CW, h: Math.max(1, (opts.bottom != null ? opts.bottom : bottomDefault) - ty) };
+  }
+  if (type === 'bar' && slot === 'primary') {
+    var by = P.chartY || 2.95;
+    var bb = opts.bottom != null ? opts.bottom : bottomDefault;
+    /* chartX/chartW 历史误用已纠正：与 donut/table/hbar/exhibit 同口径，图表盒对齐版心 (MX, CW) */
+    return { x: MX, y: by, w: CW, h: Math.max(1.2, bb - by) };
+  }
+  if (type === 'bar' && slot === 'hbar') {
+    var y0 = P.hbarY0 || 2.6;
+    var y1 = opts.bottom != null ? opts.bottom : (P.hbarY1 || 6.25);
+    return { x: MX, y: y0, w: CW, h: Math.max(1.2, y1 - y0) };
+  }
+  if (type === 'points' && (slot === 'primary' || slot === 'list')) {
+    var ly = P.listY || topDefault;
+    return { x: MX, y: ly, w: CW, h: Math.max(0.8, (opts.bottom != null ? opts.bottom : bottomDefault) - ly) };
+  }
+  if (type === 'split' && (slot === 'left' || slot === 'right')) {
+    var st = P.chartY || topDefault;
+    var sb = opts.bottom != null ? opts.bottom : bottomDefault;
+    if (slot === 'left') return { x: MX, y: st, w: CW * (P.leftW || 0.55), h: Math.max(1.2, sb - st) };
+    return { x: MX + CW * (P.rightX != null ? P.rightX : 0.585), y: st, w: CW * (P.rightW || 0.415), h: Math.max(1.2, sb - st) };
+  }
+  if (type === 'twocol' && (slot === 'primary' || slot === 'left' || slot === 'right')) {
+    var gap = P.colGap || 0.5, colW = (CW - gap) / 2;
+    var tt = opts.top != null ? opts.top : topDefault;
+    var tb = opts.bottom != null ? opts.bottom : bottomDefault;
+    if (slot === 'right') return { x: MX + colW + gap, y: tt, w: colW, h: Math.max(1, tb - tt) };
+    return { x: MX, y: tt, w: colW, h: Math.max(1, tb - tt) };
+  }
+  if ((type === 'diagram' || type === 'lane') && slot === 'primary') {
+    var arch = PT.arch || {};
+    var dy = (opts.mode === 'architecture' && arch.fullStartY != null) ? arch.fullStartY : (P.bodyStartY || 2.9);
+    var db = (opts.mode === 'architecture' && arch.fullEndY != null) ? arch.fullEndY
+      : (opts.bottom != null ? opts.bottom : bottomDefault);
+    return { x: MX, y: dy, w: CW, h: Math.max(1.2, db - dy) };
+  }
+  if (type === 'kpi' && (slot === 'hero' || slot === 'primary')) {
+    return { x: MX, y: P.heroY || 2.9, w: CW * (P.heroW || 0.52), h: P.heroH || 1.6,
+      dividerX: P.dividerX, metricY0: P.metricY0, metricRowH: P.metricRowH };
+  }
+  /* R3：kpi 支撑指标列——落在 dividerX 右侧（默认全宽返回会压住 hero） */
+  if (type === 'kpi' && slot === 'metrics') {
+    var dxK = P.dividerX != null ? P.dividerX : 0.56;
+    return {
+      x: MX + CW * dxK + 0.35, y: P.metricY0 || 2.95,
+      w: CW * (1 - dxK) - 0.5,
+      h: Math.max(0.6, bottomDefault - (P.metricY0 || 2.95)),
+    };
+  }
+  if (type === 'comparison' && (slot === 'left' || slot === 'primary' || slot === 'right')) {
+    var cg = P.panelGap || 0.4, pw = (CW - cg) / 2;
+    if (slot === 'right') return { x: MX + pw + cg, y: P.panelY || 2.55, w: pw, h: P.panelH || 3.4 };
+    return { x: MX, y: P.panelY || 2.55, w: pw, h: P.panelH || 3.4 };
+  }
+  if (type === 'quote' && slot === 'primary') {
+    return { x: MX + 1.05, y: P.textY || 2.7, w: CW - 2.1, h: P.textH || 2.3 };
+  }
+  if (type === 'heatmap' && slot === 'primary') {
+    var hy = P.y || 2.6;
+    return { x: MX, y: hy, w: CW, h: Math.max(1, (opts.bottom != null ? opts.bottom : bottomDefault) - hy) };
+  }
+  if (type === 'bullet' && slot === 'primary') {
+    var uy = P.y || 2.6;
+    return { x: MX, y: uy, w: CW, h: Math.max(1, (opts.bottom != null ? opts.bottom : bottomDefault) - uy) };
+  }
+  if (type === 'pyramid' && slot === 'primary') {
+    var py2 = P.y || 2.35;
+    return { x: MX, y: py2, w: CW, h: Math.max(1, (opts.bottom != null ? opts.bottom : bottomDefault) - py2) };
+  }
+  if (type === 'steps' && slot === 'primary') {
+    return { x: MX, y: P.y || 3.05, w: CW, h: P.barH || 1.35 };
+  }
+  if (type === 'cards' && slot === 'primary') {
+    var cy2 = P.startY || 3.0;
+    return { x: MX, y: cy2, w: CW, h: Math.max(1, (opts.bottom != null ? opts.bottom : bottomDefault) - cy2) };
+  }
+  if (type === 'timeline' && slot === 'primary') {
+    return { x: MX, y: P.labelY || 2.95, w: CW, h: Math.max(1, bottomDefault - (P.labelY || 2.95)) };
+  }
+  if (type === 'image' && slot === 'primary') {
+    var iy2 = Math.max(P.y || 2.3, opts.top || 0);
+    /* R2：有图注时图片不得越过 contentBottomWithNote（图注落注释带，属 annotation self） */
+    var iBottom = (opts.bottom != null) ? opts.bottom
+      : (opts.caption ? (L.contentBottomWithNote || 6.4) : bottomDefault);
+    return { x: MX, y: iy2, w: CW, h: Math.max(1.2, Math.min(P.h || 4.2, iBottom - iy2)) };
+  }
+  if ((type === 'halftable') && (slot === 'left' || slot === 'primary')) {
+    var rs = PT.research || {};
+    var ht = opts.top != null ? opts.top : topDefault;
+    var hb = opts.bottom != null ? opts.bottom : bottomDefault;
+    return { x: MX, y: ht, w: CW * (rs.halfTableW || 0.52), h: Math.max(1, hb - ht) };
+  }
+  if ((type === 'halftable') && (slot === 'right' || slot === 'secondary')) {
+    var rs2 = PT.research || {};
+    var ht2 = opts.top != null ? opts.top : topDefault;
+    var hb2 = opts.bottom != null ? opts.bottom : bottomDefault;
+    return { x: MX + CW * (rs2.halfChartX || 0.57), y: ht2, w: CW * (rs2.halfChartW || 0.43), h: Math.max(1, hb2 - ht2) };
+  }
+  if (type === 'matrix' && slot === 'primary') {
+    var rm = PT.research || {};
+    var my = rm.matrixY || 2.3;
+    return { x: MX, y: my, w: CW, h: Math.max(1, (opts.bottom != null ? opts.bottom : bottomDefault) - my) };
+  }
+  var INFO = { sankey:1, treemap:1, boxplot:1, network:1, marimekko:1, streamgraph:1 };
+  if (INFO[type] && slot === 'primary') {
+    var iy3 = P.y || topDefault;
+    var ih3 = Math.max(1.2, Math.min(P.h || 4.1, (opts.bottom != null ? opts.bottom : bottomDefault) - iy3));
+    return { x: MX, y: iy3, w: CW, h: ih3 };
+  }
+  return { x: MX, y: topDefault, w: CW, h: Math.max(0.8, bottomDefault - topDefault) };
+}
+
+/* __TOPPPT_CONSTANTS_END__ */
+
+/* ── 三种模式（一级维度；独立模板，生成时确定） ── */
+var MODES=[
+ {id:'presentation',k:'模式 A · data-mode="presentation"',t:'演示汇报',
+  d:'台上讲给人听：版心 1400、正文 17–18px、每屏一主张、大图表。8–15 页。',rec:'默认'},
+ {id:'research',k:'模式 B · data-mode="research"',t:'研究报告',
+  d:'咨询机构坐读材料：版心 1240、正文 14–15px、行动标题、Exhibit 编号、双/三栏论证、密表、so-what。12–25 页。',rec:'推荐风格：麦肯锡 / 墨绿 / 暖沙金'},
+ {id:'architecture',k:'模式 C · data-mode="architecture"',t:'信息架构图',
+  d:'图为王：版心 1600、每页一张全幅主图（分层带/泳道/管线），文字退到图注级。1–3 张图，可省 Agenda。',rec:'推荐风格：石墨 / 商务蓝 / 彩色'}
+];
+
+/* ── 风格的「描述性字段」手写（名称/定位/适用/语汇）；**卡片列表与配色一律取自单源**
+     （PRESETS / PRESETS_DARK / STYLE_DATA_COLORS，由 sync_runtime.py 注入）
+     语汇字段与 engine.css + layout-constants.styleIdentity 同口径，预览能看出性格差。 ── */
+var STYLE_META=[
+{id:'business-blue',name:'商务蓝',en:'business-blue',d:'专业克制、信息密度高。中性灰阶 + 单一蓝，最通用的商务选择。',s:'技术 / 数据 / 通用商务汇报',
+ pfontBody:"'Google Sans','Roboto','PingFang SC','Microsoft YaHei',sans-serif",
+ pfontDisplay:"'Google Sans','Roboto','PingFang SC','Microsoft YaHei',sans-serif",
+ prad:'16px',pscale:1,peye:'.11em',plh:1.6,pgap:1,pw:700,pletter:'-.03em'},
+{id:'apple-mono',name:'优雅黑白',en:'apple-mono',d:'苹果式极简。大留白、超大字、几乎无彩色，靠排版与留白取胜。',s:'产品发布 / 品牌 / 高管演示',
+ pfontBody:"-apple-system,'SF Pro Text','Helvetica Neue','PingFang SC',sans-serif",
+ pfontDisplay:"-apple-system,'SF Pro Display','Helvetica Neue','PingFang SC',sans-serif",
+ prad:'20px',pscale:1.22,peye:'.12em',plh:1.75,pgap:1.35,pw:500,pletter:'-.04em'},
+{id:'mckinsey',name:'麦肯锡咨询',en:'mckinsey',d:'结构化、正式、咨询范。衬线标题 + 细线框架 + 高密表格。',s:'战略 / 咨询 / 立项 / 对标',
+ pfontBody:"'Inter','IBM Plex Sans','PingFang SC','Microsoft YaHei',sans-serif",
+ pfontDisplay:"Georgia,'Times New Roman','Songti SC','SimSun',serif",
+ prad:'6px',pscale:.92,peye:'.14em',plh:1.45,pgap:.78,pw:600,pletter:'-.015em'},
+{id:'brand-red',name:'品牌红',en:'brand-red',d:'以品牌主色红为强调，正式有辨识度。可替换为任意企业品牌色。',s:'企业品牌材料 / 正式汇报 / 对外宣讲',
+ pfontBody:"'HarmonyOS Sans','PingFang SC','Microsoft YaHei',sans-serif",
+ pfontDisplay:"'HarmonyOS Sans','PingFang SC','Microsoft YaHei',sans-serif",
+ prad:'14px',pscale:1.02,peye:'.12em',plh:1.58,pgap:1,pw:700,pletter:'-.025em'},
+{id:'warm-sand',name:'暖沙金',en:'warm-sand',d:'温暖高级、编辑感/年报感。米白暖底 + 古铜金强调，衬线标题。',s:'年度报告 / 品牌叙事 / 文化建设',
+ pfontBody:"'Inter','Source Han Sans','PingFang SC','Microsoft YaHei',sans-serif",
+ pfontDisplay:"Georgia,'Playfair Display','Songti SC','STSong','SimSun',serif",
+ prad:'12px',pscale:1.05,peye:'.13em',plh:1.72,pgap:1.2,pw:600,pletter:'-.01em'},
+{id:'deep-teal',name:'墨绿',en:'deep-teal',d:'沉稳、可信赖。冷灰底 + 深青强调。',s:'金融 / 风控 / ESG / 审计',
+ pfontBody:"'Inter','Source Han Sans','PingFang SC','Microsoft YaHei',sans-serif",
+ pfontDisplay:"'Inter','Source Han Sans','PingFang SC','Microsoft YaHei',sans-serif",
+ prad:'12px',pscale:1,peye:'.11em',plh:1.58,pgap:1,pw:700,pletter:'-.028em'},
+{id:'graphite-dark',name:'石墨深灰',en:'graphite-dark',
+ d:'深色优先的沉浸石墨风：近黑石墨面板 + 亮蓝青强调，默认即深色；浅色变体（中性石墨纸灰 + 同系蓝青）为打印/外发辅助。',s:'产品发布会 / 指挥中心大屏 / 深色优先',
+ darkMain:true,das:'#132841',ds2:'#171d24',daon:'#07182b',
+ pfontBody:"'Inter','SF Pro Text','PingFang SC','Microsoft YaHei',sans-serif",
+ pfontDisplay:"'Inter','SF Pro Display','PingFang SC',sans-serif",
+ prad:'14px',pscale:.98,peye:'.1em',plh:1.5,pgap:.85,pw:700,pletter:'-.03em'},
+{id:'indigo-violet',name:'靛紫',en:'indigo-violet',d:'创新、前沿。冷白底 + 靛紫强调。',s:'AI / 科技 / 研发 / 前沿技术',
+ pfontBody:"'Inter','SF Pro Text','PingFang SC','Microsoft YaHei',sans-serif",
+ pfontDisplay:"'Inter','SF Pro Text','PingFang SC','Microsoft YaHei',sans-serif",
+ prad:'16px',pscale:1.02,peye:'.12em',plh:1.6,pgap:1,pw:700,pletter:'-.032em'},
+{id:'spectrum',name:'光谱彩色',en:'spectrum',
+ d:'中性结构 + 5 色数据色板（c1–c5）：图表、图例、小段标签出彩，页面骨架安静。强调色 = 主系列色 c1 的深化版（保按钮对比度），彩色只属于数据系列。',s:'数据密集汇报 / 运营复盘 / 大屏看板',
+ pfontBody:"'Inter','SF Pro Text','PingFang SC','Microsoft YaHei',sans-serif",
+ pfontDisplay:"'Inter','SF Pro Text','PingFang SC','Microsoft YaHei',sans-serif",
+ prad:'14px',pscale:.95,peye:'.1em',plh:1.48,pgap:.8,pw:700,pletter:'-.03em'},
+/* ── 新增风格族 ── */
+
+];
+
+/* 颜色派生：p* = light 预览卡，d* = dark 预览条；全部来自上方注入的 PRESETS / PRESETS_DARK（单源）。
+   ps3 / ds3（分块底色）在单源里无同名 token，取当前主题的 line（边框色）近似——画廊只用于挑风格，不参与交付。 */
+var STYLE_META_MAP={}; STYLE_META.forEach(function(m){STYLE_META_MAP[m.id]=m;});
+/* 卡片列表由单源派生（PRESETS 来自 layout-constants.json 注入）：风格集变更时画廊自动跟随，
+   不再需要两处维护；缺描述时 warn 并降级为最小字段。 */
+var STYLE_IDS=(typeof PRESETS!=='undefined'&&PRESETS)?Object.keys(PRESETS):STYLE_META.map(function(m){return m.id;});
+var STYLES=(function(){
+  function hx(x){return '#'+String(x||'').toLowerCase();}
+  return STYLE_IDS.map(function(id){
+    var m=STYLE_META_MAP[id];
+    if(!m){ if(window.console)console.warn('画廊缺少风格描述 STYLE_META: '+id); m={id:id,name:id,en:id,d:'',s:''}; }
+    var L=(typeof PRESETS!=='undefined' && PRESETS[id])||{};
+    var D=(typeof PRESETS_DARK!=='undefined' && PRESETS_DARK[id])||L;
+    var o={}; for(var k in m){if(m.hasOwnProperty(k))o[k]=m[k];}
+    o.pa=hx(L.accent); o.paon=hx(L.onAccent); o.pas=hx(L.soft); o.psoft=hx(L.surface);
+    o.pbg=hx(L.bg); o.ps3=hx(L.line); o.ptxt=hx(L.ink); o.ptxt2=hx(L.body); o.pbd=hx(L.line);
+    o.dbg=hx(D.bg); o.dtxt=hx(D.ink); o.dtxt2=hx(D.faint); o.da=hx(D.accent);
+    o.das=hx(D.soft); o.ds2=hx(D.surface); o.ds3=hx(D.line); o.dbd=hx(D.line); o.daon=hx(D.onAccent);
+    /* 编码色板：9 套风格各有 c1–c5（单源 STYLE_DATA_COLORS / _DARK；单源存裸 hex，CSS 侧补 #） */
+    var C=(typeof STYLE_DATA_COLORS!=='undefined'&&STYLE_DATA_COLORS[id])||null;
+    if(C)o.colors=C.map(hx);
+    return o;
+  });
+})();
+
+var MODE_TITLES={
+ presentation:'六成企业试点，规模化不足两成',
+ research:'试点率与增幅互证：研发域一年内有望反超',
+ architecture:'三层解耦：模型、编排、应用'
+};
+
+/* 三模式标题字号差异：演示大字疏朗 / 研究密排 / 架构中等——直观传达密度差 */
+var MODE_HSIZE={presentation:24,research:17,architecture:20};
+
+var curMode='presentation';
+var picked={};   /* mode -> styleId */
+
+function hbarRow(label,v,max,fill){
+  var w=Math.round(v/max*100);
+  return '<div class="pv__hrow"><span>'+label+'</span>'+
+    '<div class="pv__htrack"><div class="pv__hfill" style="width:'+w+'%'+';background:'+(fill||'var(--pa)')+'"></div></div>'+
+    '<div class="pv__hval">'+v+'%</div></div>';
+}
+
+/* 编码色板展示行：9 套风格各有 c1–c5（彩色只属于数据系列） */
+function palRow(s){
+  if(!s.colors)return '';
+  return '<div class="pv__pal">'+s.colors.map(function(c){
+    return '<span class="pv__pd" style="background:'+c+'"></span>';}).join('')+
+    '<span class="pv__palt">数据色板 c1–c5</span></div>';
+}
+
+function pvBody(s,mode){
+  var t=MODE_TITLES[mode];
+  var bar='<div class="pv__bar"><div class="pv__mark">AI</div><div class="pv__bart">AI 智能体研究</div>'+
+    '<div class="pv__barsub"><div class="pv__dot" style="background:var(--pa)"></div>'+
+    '<div class="pv__dot" style="background:var(--ps3)"></div>'+
+    '<div class="pv__pager">3 / 12</div></div></div>';
+  var eyebrow='<div class="pv__eyebrow">'+(mode==='research'?'03 · 域间差异':(mode==='architecture'?'01 · 总体架构':'01 · 范式跃迁'))+'</div>';
+  var hs=Math.round(MODE_HSIZE[mode]*(s.pscale!=null?s.pscale:1));
+  var h='<div class="pv__h" style="font-size:'+hs+'px">'+t+'</div>';
+  var pal=s.colors;
+
+  if(mode==='presentation'){
+    var bars=pal
+      ?'<div class="pv__bars">'+pal.map(function(c,i){return '<i style="background:'+c+';height:'+(42+i*14)+'%"></i>';}).join('')+'</div>'
+      :'<div class="pv__bars"><i style="height:38%"></i><i style="height:55%"></i>'+
+        '<i class="a" style="height:78%"></i><i class="a" style="height:100%"></i></div>';
+    return bar+eyebrow+h+
+      '<div class="pv__metric"><div><b>61%</b><span>企业试点率</span></div>'+
+      '<div><b style="color:var(--ptxt)">18%</b><span>规模化占比</span></div></div>'+
+      bars+
+      '<div class="pv__chips"><span class="pv__chip">试点及以上 61%</span><span class="pv__chip l">观望 39%</span></div>'+
+      palRow(s);
+  }
+  if(mode==='research'){
+    return bar+eyebrow+h+
+      '<div class="pv__exh"><div class="pv__exhHd"><span class="pv__exhNo">EXHIBIT 1</span>'+
+      '<span class="pv__exhT">各业务域试点率对比</span></div>'+
+      hbarRow('客服',72,100,pal?pal[0]:null)+hbarRow('财务',57,100,pal?pal[1]:null)+
+      hbarRow('营销',48,100,pal?pal[2]:null)+hbarRow('研发',38,100,pal?pal[3]:null)+
+      '<div class="pv__src">来源：企业智能体发展调研，2026-08；口径说明一行</div></div>'+
+      '<div class="pv__sowhat">'+
+      '<span class="pv__swV">研发域势能最大，工具链补齐后有望反超客服域。</span></div>'+
+      '<div class="pv__cols"><p><b>发现。</b>试点率 61%，规模化仅 18%。</p>'+
+      '<p><b>证据。</b>37/42 家卡在权限与集成。</p>'+
+      '<p><b>含义。</b>瓶颈在治理，不在模型。</p>'+
+      '<p><b>推论。</b>平台先行，场景分层放量。</p></div>'+
+      palRow(s);
+  }
+  /* architecture */
+  return bar+eyebrow+h+
+    '<div class="pv__arch">'+
+    '<div class="pv__layer pv__layer--f"><div class="pv__lname">应用层</div>'+
+    '<div class="pv__nodes"><div class="pv__node pv__node--a"><div class="pv__nt">智能客服</div><div class="pv__nd">7×24 应答</div></div>'+
+    '<div class="pv__node"><div class="pv__nt">研发副驾</div><div class="pv__nd">代码操作</div></div></div></div>'+
+    '<div class="pv__layer"><div class="pv__lname">编排层</div>'+
+    '<div class="pv__nodes"><div class="pv__node"><div class="pv__nt">任务规划</div><div class="pv__nd">目标拆解</div></div>'+
+    '<div class="pv__node"><div class="pv__nt">工具调度</div><div class="pv__nd">千级注册</div></div></div></div>'+
+    '<div class="pv__layer"><div class="pv__lname">模型层</div>'+
+    '<div class="pv__nodes"><div class="pv__node"><div class="pv__nt">多模型接入</div><div class="pv__nd">按场景路由</div></div>'+
+    '<div class="pv__node"><div class="pv__nt">统一网关</div><div class="pv__nd">配额降级</div></div></div></div>'+
+    '</div>'+
+    '<div class="pv__legend"><span class="pv__chip">建设焦点</span><span class="pv__chip l">已有能力</span></div>'+
+    palRow(s);
+}
+
+function dkStrip(s,mode){
+  var tag=s.darkMain?'浅色辅助变体 · 打印/外发'
+    :{presentation:'演示汇报 · 深色',research:'研究报告 · 深色',architecture:'信息架构图 · 深色'}[mode];
+  var bars='<div class="dk__bars">'+
+    (s.colors
+      ? s.colors.map(function(c,i){return '<i style="background:'+c+';height:'+(40+i*15)+'%"></i>';}).join('')
+      : '<i style="height:45%"></i><i style="height:70%"></i><i class="a" style="height:100%"></i><i class="a" style="height:60%"></i>')+
+    '</div>';
+  var num=s.darkMain?'深色优先'
+    :(mode==='research'?'10.5pt':(mode==='architecture'?'图为王':'17px'));
+  return '<div class="dk"><span class="dk__tag">'+tag+'</span>'+
+    '<span class="dk__h">'+MODE_TITLES[mode].substring(0,10)+'…</span>'+bars+
+    '<span class="dk__num">'+num+'</span></div>';
+}
+
+function cardHtml(s,mode){
+  /* 主预览 token：darkMain 风格（石墨）用 dark 值渲染，其余用 light */
+  var lightVars='--pa:'+s.pa+';--paon:'+s.paon+';--pas:'+s.pas+';--psoft:'+s.psoft+';--pbg:'+s.pbg+
+    ';--ps3:'+s.ps3+';--ptxt:'+s.ptxt+';--ptxt2:'+s.ptxt2+';--pbd:'+s.pbd+';';
+  var darkVars='--pa:'+s.da+';--paon:'+(s.daon||s.paon)+';--pas:'+(s.das||'rgba(128,128,128,.16)')+
+    ';--psoft:'+(s.ds2||s.ds3)+';--pbg:'+s.dbg+
+    ';--ps3:'+s.ds3+';--ptxt:'+s.dtxt+';--ptxt2:'+s.dtxt2+';--pbd:'+s.dbd+';';
+  var pvVars=(s.darkMain?darkVars:lightVars);
+  /* 辅助条 token：darkMain 卡的辅助条展示 light 变体，其余展示 dark */
+  var dkLight='--dbg:'+s.pbg+';--dtxt:'+s.ptxt+';--dtxt2:'+s.ptxt2+';--da:'+s.pa+';--ds3:'+s.ps3+';--dbd:'+s.pbd+';';
+  var dkDark='--dbg:'+s.dbg+';--dtxt:'+s.dtxt+';--dtxt2:'+s.dtxt2+';--da:'+s.da+';--ds3:'+s.ds3+';--dbd:'+s.dbd+';';
+  var dkVars=(s.darkMain?dkLight:dkDark);
+  var font=';--pfont-body:'+(s.pfontBody||'sans-serif').replace(/'/g,'&apos;')+
+    ';--pfont-display:'+(s.pfontDisplay||s.pfontBody||'sans-serif').replace(/'/g,'&apos;')+
+    ';'+(s.prad?'--prad:'+s.prad+';':'')+
+    (s.pscale!=null?'--pscale:'+s.pscale+';':'')+
+    (s.peye?'--peye:'+s.peye+';':'')+
+    (s.plh?'--plh:'+s.plh+';':'')+
+    (s.pgap!=null?'--pgap:'+s.pgap+';':'')+
+    (s.pw?'--pw:'+s.pw+';':'')+
+    (s.pletter?'--pletter:'+s.pletter+';':'');
+  return '<article class="preset'+(s.darkMain?' dm':'')+'" data-style="'+s.id+'" style="'+pvVars+dkVars+font+'">'+
+    '<div class="pv">'+pvBody(s,mode)+'</div>'+dkStrip(s,mode)+
+    '<div class="meta"><div class="meta__name"><span class="sw"></span>'+s.name+
+    '<span class="meta__en">'+s.en+'</span>'+
+    '<span class="meta__pick">选用 '+s.name+'</span></div>'+
+    '<div class="meta__d">'+s.d+'</div>'+
+    '<div class="meta__s">适用：<b>'+s.s+'</b>　·　模式：'+mode+'</div></div></article>';
+}
+
+function renderModes(){
+  var box=document.getElementById('modes');
+  box.innerHTML='';
+  MODES.forEach(function(m){
+    var b=document.createElement('button');
+    b.type='button';b.className='mtab'+(m.id===curMode?' on':'');
+    b.innerHTML='<div class="mtab__k">'+m.k+'</div><div class="mtab__t">'+m.t+'</div>'+
+      '<div class="mtab__d">'+m.d+'</div><div class="mtab__d" style="margin-top:5px;color:#1a73e8">'+m.rec+'</div>';
+    b.addEventListener('click',function(){curMode=m.id;renderModes();renderGrid();});
+    box.appendChild(b);
+  });
+}
+
+function renderGrid(){
+  var g=document.getElementById('grid');
+  g.innerHTML='';
+  STYLES.forEach(function(s){
+    var d=document.createElement('div');
+    d.innerHTML=cardHtml(s,curMode);
+    var el=d.firstChild;
+    if(picked[curMode]===s.id)el.classList.add('sel');
+    el.addEventListener('click',function(){
+      picked[curMode]=s.id;
+      g.querySelectorAll('.preset').forEach(function(x){x.classList.remove('sel')});
+      el.classList.add('sel');
+      console.log('已标记：data-mode="'+curMode+'" + data-style="'+s.id+'"');
+    });
+    g.appendChild(el);
+  });
+}
+
+renderModes();
+renderGrid();
+</script>
+</body>
+</html>

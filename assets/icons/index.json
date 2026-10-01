@@ -1,0 +1,557 @@
+{
+  "version": "0.2.0",
+  "count": 48,
+  "defaults": [
+    "信息",
+    "检查",
+    "数据",
+    "图表",
+    "目标",
+    "团队",
+    "工具"
+  ],
+  "icons": {
+    "增长": {
+      "file": "增长.svg",
+      "png": "增长.png",
+      "label": "增长/上升",
+      "keywords": [
+        "增长",
+        "上升",
+        "提升",
+        "增加",
+        "up"
+      ],
+      "default": false
+    },
+    "下降": {
+      "file": "下降.svg",
+      "png": "下降.png",
+      "label": "下降/回落",
+      "keywords": [
+        "下降",
+        "回落",
+        "减少",
+        "降低",
+        "down"
+      ],
+      "default": false
+    },
+    "数据": {
+      "file": "数据.svg",
+      "png": "数据.png",
+      "label": "数据库/底座",
+      "keywords": [
+        "数据",
+        "底座",
+        "database"
+      ],
+      "default": true
+    },
+    "图表": {
+      "file": "图表.svg",
+      "png": "图表.png",
+      "label": "柱状图",
+      "keywords": [
+        "图表",
+        "柱状",
+        "bar"
+      ],
+      "default": true
+    },
+    "趋势": {
+      "file": "趋势.svg",
+      "png": "趋势.png",
+      "label": "趋势/折线",
+      "keywords": [
+        "趋势",
+        "折线",
+        "line"
+      ],
+      "default": false
+    },
+    "占比": {
+      "file": "占比.svg",
+      "png": "占比.png",
+      "label": "环形/占比",
+      "keywords": [
+        "占比",
+        "环形",
+        "份额",
+        "donut"
+      ],
+      "default": false
+    },
+    "表格": {
+      "file": "表格.svg",
+      "png": "表格.png",
+      "label": "表格/网格",
+      "keywords": [
+        "表格",
+        "矩阵",
+        "table"
+      ],
+      "default": false
+    },
+    "效率": {
+      "file": "效率.svg",
+      "png": "效率.png",
+      "label": "仪表盘/效率",
+      "keywords": [
+        "效率",
+        "仪表盘",
+        "性能",
+        "gauge"
+      ],
+      "default": false
+    },
+    "成果": {
+      "file": "成果.svg",
+      "png": "成果.png",
+      "label": "奖章/成果",
+      "keywords": [
+        "成果",
+        "奖章",
+        "奖项",
+        "medal"
+      ],
+      "default": false
+    },
+    "安全": {
+      "file": "安全.svg",
+      "png": "安全.png",
+      "label": "盾牌/安全",
+      "keywords": [
+        "安全",
+        "盾牌",
+        "shield"
+      ],
+      "default": false
+    },
+    "权限": {
+      "file": "权限.svg",
+      "png": "权限.png",
+      "label": "锁/权限",
+      "keywords": [
+        "权限",
+        "锁",
+        "lock"
+      ],
+      "default": false
+    },
+    "检查": {
+      "file": "检查.svg",
+      "png": "检查.png",
+      "label": "检查/对勾",
+      "keywords": [
+        "检查",
+        "对勾",
+        "校验",
+        "check"
+      ],
+      "default": true
+    },
+    "风险": {
+      "file": "风险.svg",
+      "png": "风险.png",
+      "label": "警告/风险",
+      "keywords": [
+        "风险",
+        "警告",
+        "warning"
+      ],
+      "default": false
+    },
+    "团队": {
+      "file": "团队.svg",
+      "png": "团队.png",
+      "label": "用户/团队",
+      "keywords": [
+        "团队",
+        "人力",
+        "team"
+      ],
+      "default": true
+    },
+    "计划": {
+      "file": "计划.svg",
+      "png": "计划.png",
+      "label": "日历/计划",
+      "keywords": [
+        "计划",
+        "日历",
+        "日程",
+        "calendar"
+      ],
+      "default": false
+    },
+    "智能": {
+      "file": "智能.svg",
+      "png": "智能.png",
+      "label": "芯片/AI",
+      "keywords": [
+        "智能",
+        "芯片",
+        "AI",
+        "chip"
+      ],
+      "default": false
+    },
+    "洞察": {
+      "file": "洞察.svg",
+      "png": "洞察.png",
+      "label": "搜索/洞察",
+      "keywords": [
+        "洞察",
+        "搜索",
+        "分析",
+        "search"
+      ],
+      "default": false
+    },
+    "工具": {
+      "file": "工具.svg",
+      "png": "工具.png",
+      "label": "扳手/工具",
+      "keywords": [
+        "工具",
+        "扳手",
+        "tool"
+      ],
+      "default": true
+    },
+    "清单": {
+      "file": "清单.svg",
+      "png": "清单.png",
+      "label": "清单/条目",
+      "keywords": [
+        "清单",
+        "条目",
+        "checklist"
+      ],
+      "default": false
+    },
+    "流程": {
+      "file": "流程.svg",
+      "png": "流程.png",
+      "label": "分支/流程",
+      "keywords": [
+        "流程",
+        "分支",
+        "pipeline"
+      ],
+      "default": false
+    },
+    "箭头": {
+      "file": "箭头.svg",
+      "png": "箭头.png",
+      "label": "右箭头",
+      "keywords": [
+        "箭头",
+        "指向",
+        "arrow"
+      ],
+      "default": false
+    },
+    "下载": {
+      "file": "下载.svg",
+      "png": "下载.png",
+      "label": "下载",
+      "keywords": [
+        "下载",
+        "download"
+      ],
+      "default": false
+    },
+    "上传": {
+      "file": "上传.svg",
+      "png": "上传.png",
+      "label": "上传",
+      "keywords": [
+        "上传",
+        "upload"
+      ],
+      "default": false
+    },
+    "分享": {
+      "file": "分享.svg",
+      "png": "分享.png",
+      "label": "分享",
+      "keywords": [
+        "分享",
+        "share"
+      ],
+      "default": false
+    },
+    "循环": {
+      "file": "循环.svg",
+      "png": "循环.png",
+      "label": "循环/刷新",
+      "keywords": [
+        "循环",
+        "刷新",
+        "迭代",
+        "飞轮",
+        "refresh"
+      ],
+      "default": false
+    },
+    "目标": {
+      "file": "目标.svg",
+      "png": "目标.png",
+      "label": "同心圆靶心",
+      "keywords": [
+        "目标",
+        "target"
+      ],
+      "default": true
+    },
+    "闪电": {
+      "file": "闪电.svg",
+      "png": "闪电.png",
+      "label": "闪电/高效",
+      "keywords": [
+        "闪电",
+        "高效",
+        "快速",
+        "快捷"
+      ],
+      "default": false
+    },
+    "勾选": {
+      "file": "勾选.svg",
+      "png": "勾选.png",
+      "label": "对勾",
+      "keywords": [
+        "勾选",
+        "完成",
+        "done"
+      ],
+      "default": false
+    },
+    "用户": {
+      "file": "用户.svg",
+      "png": "用户.png",
+      "label": "单人/用户",
+      "keywords": [
+        "用户",
+        "客户",
+        "user"
+      ],
+      "default": false
+    },
+    "组织": {
+      "file": "组织.svg",
+      "png": "组织.png",
+      "label": "组织架构/层级",
+      "keywords": [
+        "组织",
+        "层级",
+        "组织架构",
+        "org"
+      ],
+      "default": false
+    },
+    "灯泡": {
+      "file": "灯泡.svg",
+      "png": "灯泡.png",
+      "label": "灯泡/创意",
+      "keywords": [
+        "灯泡",
+        "创意",
+        "想法",
+        "idea"
+      ],
+      "default": false
+    },
+    "文档": {
+      "file": "文档.svg",
+      "png": "文档.png",
+      "label": "文档/报告",
+      "keywords": [
+        "文档",
+        "报告",
+        "文件",
+        "doc"
+      ],
+      "default": false
+    },
+    "云": {
+      "file": "云.svg",
+      "png": "云.png",
+      "label": "云/平台",
+      "keywords": [
+        "云",
+        "平台",
+        "cloud"
+      ],
+      "default": false
+    },
+    "邮件": {
+      "file": "邮件.svg",
+      "png": "邮件.png",
+      "label": "信封/邮件",
+      "keywords": [
+        "邮件",
+        "邮箱",
+        "mail"
+      ],
+      "default": false
+    },
+    "手机": {
+      "file": "手机.svg",
+      "png": "手机.png",
+      "label": "手机",
+      "keywords": [
+        "手机",
+        "移动",
+        "phone"
+      ],
+      "default": false
+    },
+    "对话": {
+      "file": "对话.svg",
+      "png": "对话.png",
+      "label": "对话框",
+      "keywords": [
+        "对话",
+        "沟通",
+        "chat"
+      ],
+      "default": false
+    },
+    "位置": {
+      "file": "位置.svg",
+      "png": "位置.png",
+      "label": "定位/地点",
+      "keywords": [
+        "位置",
+        "地点",
+        "pin"
+      ],
+      "default": false
+    },
+    "时间": {
+      "file": "时间.svg",
+      "png": "时间.png",
+      "label": "时钟/时间",
+      "keywords": [
+        "时间",
+        "时钟",
+        "clock"
+      ],
+      "default": false
+    },
+    "金钱": {
+      "file": "金钱.svg",
+      "png": "金钱.png",
+      "label": "纸币/财务",
+      "keywords": [
+        "金钱",
+        "成本",
+        "财务",
+        "money"
+      ],
+      "default": false
+    },
+    "链接": {
+      "file": "链接.svg",
+      "png": "链接.png",
+      "label": "链条/链接",
+      "keywords": [
+        "链接",
+        "link"
+      ],
+      "default": false
+    },
+    "设置": {
+      "file": "设置.svg",
+      "png": "设置.png",
+      "label": "齿轮/设置",
+      "keywords": [
+        "设置",
+        "齿轮",
+        "配置",
+        "setting"
+      ],
+      "default": false
+    },
+    "信息": {
+      "file": "信息.svg",
+      "png": "信息.png",
+      "label": "信息/提示",
+      "keywords": [
+        "信息",
+        "提示",
+        "info"
+      ],
+      "default": true
+    },
+    "星标": {
+      "file": "星标.svg",
+      "png": "星标.png",
+      "label": "五角星",
+      "keywords": [
+        "星标",
+        "收藏",
+        "star"
+      ],
+      "default": false
+    },
+    "书签": {
+      "file": "书签.svg",
+      "png": "书签.png",
+      "label": "书签",
+      "keywords": [
+        "书签",
+        "bookmark"
+      ],
+      "default": false
+    },
+    "文件夹": {
+      "file": "文件夹.svg",
+      "png": "文件夹.png",
+      "label": "文件夹/资产",
+      "keywords": [
+        "文件夹",
+        "资产",
+        "folder"
+      ],
+      "default": false
+    },
+    "火箭": {
+      "file": "火箭.svg",
+      "png": "火箭.png",
+      "label": "火箭/发射",
+      "keywords": [
+        "火箭",
+        "发射",
+        "rocket"
+      ],
+      "default": false
+    },
+    "旗帜": {
+      "file": "旗帜.svg",
+      "png": "旗帜.png",
+      "label": "旗帜/里程碑",
+      "keywords": [
+        "旗帜",
+        "里程碑",
+        "flag"
+      ],
+      "default": false
+    },
+    "罗盘": {
+      "file": "罗盘.svg",
+      "png": "罗盘.png",
+      "label": "罗盘/方向",
+      "keywords": [
+        "罗盘",
+        "方向",
+        "导航",
+        "compass"
+      ],
+      "default": false
+    }
+  }
+}

@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "skill": "topmind-presentation",
+  "description": "Keyword/heuristic trigger coverage against SKILL.md frontmatter description. Not an LLM eval — CI gates regressions when trigger keywords drift.",
+  "how_to_extend": [
+    "Add a positive query that should select this skill (报告/路演/PPT/HTML/调研…).",
+    "Add a negative query that must NOT select it (coding/video/edit-existing-pptx…).",
+    "Each entry: {id, query, expect: 'hit'|'miss', notes?}",
+    "Runner: python3 scripts/check_triggers.py — matches query tokens against description keywords extracted from SKILL.md.",
+    "Wire: package_skill.py --check invokes check_triggers; also npm run check."
+  ],
+  "positive": [
+    {
+      "id": "P01",
+      "query": "帮我做一份季度经营分析报告",
+      "expect": "hit"
+    },
+    {
+      "id": "P02",
+      "query": "明天路演用的融资 PPT，10页左右",
+      "expect": "hit"
+    },
+    {
+      "id": "P03",
+      "query": "生成一份可翻页的 HTML 演示文稿",
+      "expect": "hit"
+    },
+    {
+      "id": "P04",
+      "query": "把调研材料做成 slides deck",
+      "expect": "hit"
+    },
+    {
+      "id": "P05",
+      "query": "写一份麦肯锡风格的对标分析研究报告",
+      "expect": "hit"
+    },
+    {
+      "id": "P06",
+      "query": "项目复盘汇报 PPTX，要能编辑",
+      "expect": "hit"
+    },
+    {
+      "id": "P07",
+      "query": "画一张系统架构拓扑图，图为王",
+      "expect": "hit"
+    },
+    {
+      "id": "P08",
+      "query": "泳道流程图 + 方案说明页",
+      "expect": "hit"
+    },
+    {
+      "id": "P09",
+      "query": "白皮书大纲做成网页报告",
+      "expect": "hit"
+    },
+    {
+      "id": "P10",
+      "query": "评测报告可视化，导出 HTML 和 PPT",
+      "expect": "hit"
+    },
+    {
+      "id": "P11",
+      "query": "商务汇报用的一页一主张演示",
+      "expect": "hit"
+    },
+    {
+      "id": "P12",
+      "query": "快速模式一键出稿，少问一句",
+      "expect": "hit"
+    },
+    {
+      "id": "P13",
+      "query": "fast mode generate a pitch deck",
+      "expect": "hit"
+    },
+    {
+      "id": "P14",
+      "query": "咨询报告：发现、证据、so-what",
+      "expect": "hit"
+    },
+    {
+      "id": "P15",
+      "query": "优化这份报告的排版版式和配色密度",
+      "expect": "hit"
+    },
+    {
+      "id": "P16",
+      "query": "把数据做成可视化经营分析 deck",
+      "expect": "hit"
+    },
+    {
+      "id": "P17",
+      "query": "发布会演讲 PPT，亮暗双主题",
+      "expect": "hit"
+    },
+    {
+      "id": "P18",
+      "query": "行业调研 + 对标分析 HTML 报告",
+      "expect": "hit"
+    },
+    {
+      "id": "P19",
+      "query": "直接生成项目汇报 slides",
+      "expect": "hit"
+    },
+    {
+      "id": "P20",
+      "query": "高保真 1:1 导出可编辑 PPTX",
+      "expect": "hit"
+    },
+    {
+      "id": "P21",
+      "query": "做个信息架构图和分层带",
+      "expect": "hit"
+    },
+    {
+      "id": "P22",
+      "query": "董事会汇报材料，正式演示风格",
+      "expect": "hit"
+    }
+  ],
+  "negative": [
+    {
+      "id": "N01",
+      "query": "帮我写一个 React 组件库并跑单测",
+      "expect": "miss"
+    },
+    {
+      "id": "N02",
+      "query": "debug 这段 Python 报错",
+      "expect": "miss"
+    },
+    {
+      "id": "N03",
+      "query": "生成一段产品宣传视频脚本并渲染成 mp4",
+      "expect": "miss"
+    },
+    {
+      "id": "N04",
+      "query": "用 Midjourney 生成一张产品海报图",
+      "expect": "miss"
+    },
+    {
+      "id": "N05",
+      "query": "直接改这个已有的 pptx 里第三页的字号",
+      "expect": "miss"
+    },
+    {
+      "id": "N06",
+      "query": "打开 Word 文档把第二段改成被动语态",
+      "expect": "miss"
+    },
+    {
+      "id": "N07",
+      "query": "搭建一个电商官网前端，不要报告",
+      "expect": "miss"
+    },
+    {
+      "id": "N08",
+      "query": "给我写 SQL 迁移脚本",
+      "expect": "miss"
+    },
+    {
+      "id": "N09",
+      "query": "配置 nginx 反向代理",
+      "expect": "miss"
+    },
+    {
+      "id": "N10",
+      "query": "把这段代码 refactor 成 TypeScript",
+      "expect": "miss"
+    },
+    {
+      "id": "N11",
+      "query": "剪辑这段会议录像加字幕",
+      "expect": "miss"
+    }
+  ]
+}

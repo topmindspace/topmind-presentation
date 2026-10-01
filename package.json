@@ -1,0 +1,37 @@
+{
+  "name": "@topmindspace/tms-presentation-skills",
+  "version": "0.2.1",
+  "description": "TopPPT HTML：正式商务演示双交付。单文件 HTML + 版式保真可编辑 PPTX；MD3 密度克制；布局骨架 P1–P12 + 弹性版式（bento/timeline/2col）；内置 48 原创线性图标；模型单写；strict 0/0 交付。",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/topmindspace/tms-presentation-skills.git"
+  },
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "scaffold": "python3 scripts/scaffold_report.py",
+    "sync": "python3 scripts/sync_runtime.py",
+    "audit": "python3 scripts/audit_styles.py && python3 scripts/audit_docs.py && python3 scripts/audit_skill.py && python3 scripts/audit_css.py",
+    "capture-themes": "node scripts/capture_theme_overview.js",
+    "measure": "python3 scripts/measure_height.py",
+    "eval": "python3 evals/run_evals.py",
+    "build-examples": "python3 scripts/build_examples.py",
+    "regression": "python3 scripts/regression.py",
+    "negative": "python3 scripts/negative_tests.py",
+    "package": "python3 scripts/package_skill.py",
+    "check": "python3 scripts/package_skill.py --check",
+    "triggers": "python3 scripts/check_triggers.py"
+  },
+  "dependencies": {
+    "pptxgenjs": "^4.0.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
+}

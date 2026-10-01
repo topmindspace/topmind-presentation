@@ -1,6 +1,6 @@
 {
   "name": "@topmindspace/topmind-presentation",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "TopPPT HTML：正式商务演示双交付。单文件 HTML + 版式保真可编辑 PPTX；MD3 密度克制；布局骨架 P1–P12 + 弹性版式（bento/timeline/2col）；内置 48 原创线性图标；模型单写；strict 0/0 交付。",
   "license": "MIT",
   "publishConfig": {

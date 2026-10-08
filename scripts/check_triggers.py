@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · description trigger coverage (keyword/heuristic, no LLM).
+"""topmind-presentation · description trigger coverage (keyword/heuristic, no LLM).
 
 Gates regressions when SKILL.md description drifts away from eval queries.
 See evals/trigger-queries.json → how_to_extend.
@@ -52,6 +52,41 @@ NEG_QUERY_CUES = [
 ]
 
 
+# Sibling-skill routing cues (0.2.5). A negative query that carries one of these
+# cues is correctly excluded only when the description's Do-NOT zone names the
+# target skill — so the gate fails if someone deletes the hand-off from SKILL.md.
+ROUTE_AWAY = {
+    '研究一下': 'topmind-research',
+    '找资料': 'topmind-research',
+    '核实': 'topmind-research',
+    '核事实': 'topmind-research',
+    '已存的笔记': 'topmind-organize',
+    '存的笔记': 'topmind-organize',
+    '周复盘': 'topmind-organize',
+    '巡检': 'topmind-loop',
+    '工作区复盘': 'topmind-loop',
+    '长图': 'topmind-poster',
+    '一图看懂': 'topmind-poster',
+    '榜单图': 'topmind-poster',
+    '封面': 'topmind-cover',
+}
+
+
+def split_zones(desc: str) -> tuple[str, str]:
+    """Positive zone = text before 'Do NOT'; Do-NOT zone = the rest."""
+    i = desc.find('Do NOT')
+    if i < 0:
+        return desc, ''
+    return desc[:i], desc[i:]
+
+
+def routed_away(query: str, desc: str) -> list[str]:
+    _pos, neg = split_zones(desc)
+    q = query.lower()
+    return [f'{cue}→{target}' for cue, target in ROUTE_AWAY.items()
+            if cue.lower() in q and target in neg]
+
+
 def load_description() -> str:
     txt = SKILL.read_text(encoding='utf-8')
     m = re.search(r'^description:\s*"(.*)"\s*$', txt, re.M)
@@ -61,8 +96,10 @@ def load_description() -> str:
 
 
 def tokenize_hits(query: str, desc: str) -> list[str]:
+    """Only the positive zone counts: words that appear solely under Do NOT
+    (e.g. 周复盘 → topmind-organize) must not make this skill look like a match."""
     q_low = query.lower()
-    d_low = desc.lower()
+    d_low = split_zones(desc)[0].lower()
     hits = []
     for kw in POS_KEYWORDS:
         if kw.lower() in q_low and kw.lower() in d_low:
@@ -88,8 +125,11 @@ def evaluate(desc: str, data: dict) -> tuple[list[dict], int, int]:
             expect = item.get('expect', default_expect)
             hits = tokenize_hits(q, desc)
             if expect == 'hit':
-                ok = len(hits) >= 1
-                detail = f'keywords={hits}' if ok else 'no shared trigger keyword with description'
+                routes = routed_away(q, desc)
+                ok = len(hits) >= 1 and not routes
+                detail = (f'keywords={hits}' if ok
+                          else f'routed away to sibling skill {routes}' if routes
+                          else 'no shared trigger keyword with description')
             else:
                 # miss: either no positive keyword overlap, OR query is clearly
                 # out-of-scope and description has Do-NOT boundaries.
@@ -100,8 +140,12 @@ def evaluate(desc: str, data: dict) -> tuple[list[dict], int, int]:
                 # when a weak overlapping token exists (e.g. "pptx" in "改已有 pptx").
                 if looks_negative_query(q) and boundary_covered(desc):
                     ok = True
+                routes = routed_away(q, desc)
+                if routes:
+                    ok = True
                 detail = (
-                    f'miss-ok boundary; weak_hits={hits}' if ok
+                    (f'miss-ok routed={routes}; weak_hits={hits}' if routes
+                     else f'miss-ok boundary; weak_hits={hits}') if ok
                     else f'unexpected trigger overlap={hits}'
                 )
             rows.append({

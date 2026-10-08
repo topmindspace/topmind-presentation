@@ -2,12 +2,12 @@
 
 > **生成报告时读本文件**：设计哲学、CRAP/MD3、页面高度模型、PPTX 比例尺、12 列网格、语义字阶、
 > 结构 token、排版类、布局工具、**SVG 主题语义类**（图表配色必读）。
-> **组件 CSS 实现目录**（顶栏/卡片/列表/表格/页脚/动效等）在 `../docs/archive/refs/design-system-engine.md`——
+> **组件 CSS 实现目录**（顶栏/卡片/列表/表格/页脚/动效等）在 [writing-skills 归档 `refs/design-system-engine.md`](https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/refs/design-system-engine.md)——
 > 生成时用 `components-atoms.md` 的组件写法即可，**勿整读 engine 文件**。
 
 本文件提供**设计哲学、Token、栅格、语义字阶、SVG 语义类**——全部风格复用。
 **颜色 / 字体 / 圆角 / 阴影的实际值不在此文件**，由 `references/styles.md` 中你所选的那套风格通过 `data-style` 覆盖块注入。
-**组件 CSS 类实现目录**（顶栏/卡片/列表/表格/页脚/动效）在 `../docs/archive/refs/design-system-engine.md`——生成时用 `components-atoms.md` 写法即可。
+**组件 CSS 类实现目录**（顶栏/卡片/列表/表格/页脚/动效）在 [writing-skills 归档 `refs/design-system-engine.md`](https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/refs/design-system-engine.md)——生成时用 `components-atoms.md` 写法即可。
 
 配合方式（三模式独立模板）：
 1. 从 `assets/templates/{presentation|research|architecture}.html` 复制对应模式模板起步（模板自带模式密度层与专属组件）。

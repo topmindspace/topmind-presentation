@@ -6,6 +6,7 @@
 # Env:
 #   SKILL_GATES_WITH_PPTX=1  same as --with-pptx
 #   PYTHON / NODE optional overrides
+#   AGENTSKILLS   path to the skills-ref validator (default: agentskills on PATH)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -58,6 +59,18 @@ run_one() {
   fi
 
   "$PY" scripts/package_skill.py --check
+  "$PY" scripts/check_repo.py
+
+  # Agent Skills 官方校验器（skills-ref）。CI 里 pip 安装；本机没装时跳过并提示。
+  local AS="${AGENTSKILLS:-$(command -v agentskills || true)}"
+  if [[ -n "$AS" ]]; then
+    "$AS" validate "$PWD"
+  elif [[ "${CI:-}" == "true" ]]; then
+    echo "ci_skill_gates: agentskills not found in CI (pip install skills-ref)" >&2
+    exit 1
+  else
+    echo "ci_skill_gates: skip agentskills validate (pip install skills-ref)"
+  fi
   "$PY" scripts/audit_styles.py
   "$PY" scripts/audit_docs.py
   "$PY" scripts/audit_skill.py

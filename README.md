@@ -10,7 +10,7 @@
 **让 idea 飞，好想法被看见。** 为**演示报告 / 正式商务演示**而生的高品质演示文稿技能：**HTML + PPT 双交付**——日常用可翻页 HTML 等同幻灯片；需要时再导出**版式保真可编辑 PPTX**。参考 **MD3**：合适信息密度、克制文字/图形/颜色。核心工艺是版式、排版、色彩与内容组织——不是 gadget 堆砌。
 
 - 技能标识：`topmind-presentation`；品牌名：**TopPPT HTML**
-- 版本：**v0.2.4**（独立仓库，版本独立演进）
+- 版本：**v0.2.5**（独立仓库，版本独立演进）
 - **智能体入口**：`SKILL.md` → `references/playbook.md`（L1）→ L2 按需
 - **人类维护者**：本 README（安装 / 命令 / 目录）；勿把本文件当生成规范
 - 仓库即技能：本仓库根目录就是技能本体（SKILL.md + assets + references + scripts），没有 monorepo 安装器
@@ -66,19 +66,25 @@
 
 ### 安装
 
-仓库即技能：把本仓库根目录（或 GitHub Release 附件 `topmind-presentation.zip` 解压结果）复制到智能体的技能目录，目录名保持 `topmind-presentation`。技能识别面为 `SKILL.md`（frontmatter 的 `name` / `description` 即触发描述）。
+仓库即技能：宿主要能在技能目录里看到 `topmind-presentation/SKILL.md`。四种装法任选：
 
 ```bash
-# 跟仓库 HEAD
-git clone https://github.com/topmindspace/topmind-presentation.git
-cp -r topmind-presentation ~/.claude/skills/topmind-presentation
+# 1. 钉版本（推荐）：下载对应 Release 的 topmind-presentation.zip，解压到技能目录
+unzip topmind-presentation.zip -d ~/.claude/skills/
 
-# 或钉版本：下载对应 Release 的 topmind-presentation.zip 解压
+# 2. 跟仓库 HEAD
+git clone --depth 1 https://github.com/topmindspace/topmind-presentation.git ~/.claude/skills/topmind-presentation
+
+# 3. skills CLI（vercel-labs/skills，需要 Node.js 22+；会把整个仓库含 docs/ 复制进去）
+npx skills add topmindspace/topmind-presentation --agent claude-code -g
+
+# 4. npm：包只进 node_modules，宿主发现不了，装完要再同步或复制一次
+npm i @topmindspace/topmind-presentation
+npx skills experimental_sync -a claude-code -y     # 实验性命令；或手动：
+cp -r node_modules/@topmindspace/topmind-presentation ~/.claude/skills/topmind-presentation
 ```
 
-npm 包 [`@topmindspace/topmind-presentation`](https://www.npmjs.com/package/@topmindspace/topmind-presentation) 随 GitHub tag 自动发布（版本号与 tag 一致）。
-
-> 不要 `npm install topmind-presentation`（技能 id 不是独立 npm 包）。
+npm 包 [`@topmindspace/topmind-presentation`](https://www.npmjs.com/package/@topmindspace/topmind-presentation) 随 GitHub tag 自动发布（版本号与 tag 一致），内容与 Release zip 同为运行所需文件（`package.json` 的 `files` 白名单），不含 `docs/` 落地页、截图和评测集。npm 上没有不带 scope 的 `topmind-presentation` 包，不要装错。
 
 **依赖**：HTML 生成与全部校验脚本零第三方依赖（Python 标准库）。只有「生成 PPTX」需要 Node + pptxgenjs：
 

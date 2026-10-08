@@ -1,31 +1,20 @@
 ---
 name: topmind-presentation
-action_category: write
-triggers:
-  - 报告
-  - 演示
-  - 汇报
-  - PPT
-  - slides
-  - deck
-  - 路演
-  - 可视化报告
-  - 研究报告
-  - 白皮书
-  - 架构图
-  - 流程图
-  - 培训课件
-  - 答辩
-  - fast
-description: "为正式商务演示把材料做成可视化报告：零外链可翻页 HTML（日常上台）+ 高保真可编辑 16:9 PPTX（按需）双交付；MD3 式密度克制；三模式（A 演示 / B 研究 / C 架构）× 9 风格；内置 48 原创线性图标 + bento/timeline/2col 弹性版式。Use when 用户要做报告、演示、汇报、PPT、slides、deck、路演，或写研究报告、分析报告、咨询报告、白皮书、调研、评测、对标、经营分析、复盘、项目汇报、商务/HTML/网页报告，或做架构图、拓扑图、流程图、泳道图、方案图，或把材料做成可视化报告并导出 HTML/PPT/PPTX，或优化报告的排版/版式/配色/图文布局，或做报告时说快速模式/fast/直接生成/一键出稿/少问一句。Do NOT use for 纯代码工程、非报告类网页或应用开发、视频/图片生成、直接改写已有 Word/PPT 源文件本身、封面配图（→topmind-cover）。"
+description: "把已有材料做成正式商务演示与多页可视化报告：零外链可翻页 HTML + 可编辑 16:9 PPTX 双交付；三模式（A 演示 / B 研究型版式 / C 架构）× 9 风格。Use when 用户要做演示、汇报、PPT、PPTX、slides、deck、路演、答辩、培训课件、项目汇报，或把调研、评测、对标、经营分析、咨询报告、白皮书等已有材料排成可翻页 HTML、网页报告或可编辑 PPTX，或做多页或要 PPTX 交付的架构图、拓扑图、流程图、泳道图、方案图，或优化报告的排版/版式/配色/图文布局；说快速模式/直接生成/一键出稿/少问一句走 Fast Mode。Do NOT use for 找资料、核事实、写研究结论（→ topmind-research）、整理工作区已存笔记或周复盘（→ topmind-organize）、工作区巡检与例行复盘（→ topmind-loop）、单张长图/信息图/榜单图（→ topmind-poster）、文章封面配图（→ topmind-cover）、改写已有 PPT/Word 源文件（→ 官方 pptx/docx 技能）、纯代码工程、非报告类网页或应用开发、视频/图片生成。"
 license: MIT
 compatibility: "Python 3 stdlib for HTML generation; Node >=18 + pptxgenjs for PPTX; optional playwright for browser regression / theme captures."
-version: 0.2.4
-author: TopMindspace
+metadata:
+  version: "0.2.5"
+  author: TopMindSpace
+  updated: "2026-10-08"
+  action_category: write
+  triggers: 演示, 汇报, PPT, PPTX, slides, deck, 路演, 答辩, 培训课件, 可视化报告, 网页报告, 商务演示, 架构图, 流程图
 ---
-# TopPPT HTML
+# topmind-presentation · 商务演示与可视化报告
 
 为**演示报告 / 正式商务演示**而生：**HTML + PPT 双交付**（日常可翻页 HTML；需要时导出可编辑 PPTX）。MD3 密度克制，一屏一重心。内容唯一源 `REPORT_MODEL`；**B 通道** `build_pptx.js` 交付，**A 通道**仅预览/`cross_verify`。
+
+**分工**：只管版式与交付，不找资料、不核事实；材料来自 topmind-research 时沿用其数字与来源（铁律 10）。
 
 ## Gate 0 · 先给参考图（**标准模式**硬门禁）
 
@@ -134,10 +123,6 @@ author: TopMindspace
 - **PPTX（B 通道）**：`extract_model` → `build_pptx.js` → `validate_pptx --strict`；16:9 可编辑。**A 不交付**（仅预览/`cross_verify`；playbook §九）。
 - **验收**：HTML strict 0/0；含 PPTX 再加 PPTX 0/0；失败给定向修复指引。
 - **交付说明**：`quality_gate.py --deliver`（PPTX 带 `--pptx/--model`）出七要素，缺一 FAIL。
-
-## 版本口径
-
-包 semver ≠ schema 线（layout-constants / model-schema，现 `0.1`）；patch 不抬 schema，当前版本见 package.json。
 
 ## 环境依赖
 

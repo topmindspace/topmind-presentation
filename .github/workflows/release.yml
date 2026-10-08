@@ -30,7 +30,10 @@ jobs:
       - name: Privacy scan
         run: python3 scripts/ci_privacy_scan.py
 
-      # Same skill gates as CI (incl. lightweight regression fixture + smoke_pptx).
+      - name: Install skills-ref (Agent Skills validator)
+        run: python3 -m pip install --quiet skills-ref
+
+      # Same skill gates as CI (incl. validator, npm pack whitelist, regression fixture + smoke_pptx).
       - name: Skill gates
         run: bash scripts/ci_skill_gates.sh --with-pptx
 
@@ -70,6 +73,10 @@ jobs:
           generate_release_notes: true
 
       # Publish to npm (keeps npm in sync with the tag).
+      # Package contents = package.json "files" whitelist (runtime files only, same scope
+      # as the Release zip minus evals/showcase); scripts/check_repo.py in the gates above
+      # fails the release if docs/ or other non-runtime files would be published.
+      # npm installs land in node_modules; README「安装」documents how hosts pick it up.
       # Requires repository secret NPM_TOKEN (granular token, write on @topmindspace).
       # Fail loudly when the secret is not configured: publishing the GitHub
       # Release while silently skipping npm would leave a green-but-incomplete release.

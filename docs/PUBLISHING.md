@@ -7,7 +7,7 @@
 | 通道 | 方式 | 特点 |
 |------|------|------|
 | **GitHub** | clone / 下载 Release zip | 跟 HEAD 或钉版本 |
-| **npm** | 包 `@topmindspace/topmind-presentation` | 与 GitHub tag 同版本发布 |
+| **npm** | 包 `@topmindspace/topmind-presentation` | 与 GitHub tag 同版本发布；内容按 `package.json` 的 `files` 白名单（只含运行所需文件）；装进 `node_modules` 后需 `npx skills experimental_sync` 或手动复制进技能目录，宿主才能发现 |
 
 - 包：<https://www.npmjs.com/package/@topmindspace/topmind-presentation>
 - 仓库：<https://github.com/topmindspace/topmind-presentation>
@@ -16,13 +16,14 @@
 
 - **默认只升 patch**（修 bug、改文案、小优化）；新能力升 minor；**major 仅用于破坏性变更**。
 - `git tag vX.Y.Z` 的 `X.Y.Z` 必须等于根 `package.json` 的 `version`，
-  同时与 `SKILL.md` frontmatter 的 `version` 同值（三处一致）。
+  同时与 `SKILL.md` 的 `metadata.version`、`package-lock.json` 根版本、README 中英文的版本号同值，
+  由 `scripts/check_repo.py` 校验。
 - npm 版本发布后不可覆盖；有变更就要新号；禁止复用 tag 号。
 
 ## 发布流程
 
 1. 更新 `CHANGELOG.md`。
-2. bump 版本（三处同值：`package.json` / `SKILL.md` frontmatter / `README.md`）。
+2. bump 版本（`package.json` / `package-lock.json` / `SKILL.md` metadata.version / `README.md` / `README.en.md` 同值）。
 3. 门禁：
    ```bash
    bash scripts/ci_skill_gates.sh --with-pptx

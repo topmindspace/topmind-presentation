@@ -250,9 +250,9 @@
 
 | 模式 | 模板 | 样例（AI 智能体发展研究主题） |
 |------|------|------|
-| A 演示汇报 | `assets/templates/presentation.html` | `examples/2026-09-09-presentation-business-blue.html`（apple-mono 等旧风格变体见 `../docs/archive/examples/`） |
-| B 研究报告 | `assets/templates/research.html` | `examples/2026-09-09-research-mckinsey.html`（deep-teal/warm-sand/indigo-violet 旧风格变体见 `../docs/archive/examples/`） |
-| C 信息架构图 | `assets/templates/architecture.html`（出厂 dark） | `examples/2026-09-09-architecture-graphite-dark.html`（出厂 dark · 深色优先；spectrum 旧变体见 `../docs/archive/examples/`） |
+| A 演示汇报 | `assets/templates/presentation.html` | `examples/2026-09-09-presentation-business-blue.html`（apple-mono 等旧风格变体见 [writing-skills 归档 `examples`](https://github.com/topmindspace/topmind-writing-skills/tree/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/examples)） |
+| B 研究报告 | `assets/templates/research.html` | `examples/2026-09-09-research-mckinsey.html`（deep-teal/warm-sand/indigo-violet 旧风格变体见 [writing-skills 归档 `examples`](https://github.com/topmindspace/topmind-writing-skills/tree/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/examples)） |
+| C 信息架构图 | `assets/templates/architecture.html`（出厂 dark） | `examples/2026-09-09-architecture-graphite-dark.html`（出厂 dark · 深色优先；spectrum 旧变体见 [writing-skills 归档 `examples`](https://github.com/topmindspace/topmind-writing-skills/tree/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/examples)） |
 
 > **主题一致性**：三模式收尾页与金句页统一走**强调带**（`band--accent` / `band--accent--solid`），浅色/深色同向，不再出现"浅色模式末尾深色页"；`band--deep` 仅限显式反相页（≤1 处、不作末页）。
 

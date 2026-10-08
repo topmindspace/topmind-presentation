@@ -2,7 +2,7 @@
 
 > **何时读**：需要卡片头 / 列表行首 / 指标角标 / 提示条图标时。  
 > **取码**：本节「高频取码」或 `python scripts/extract_snippet.py --task icons`。  
-> **完整 SVG 枚举**（60+）：`../docs/archive/refs/icons-catalog.md`（生成默认**不**预读；仅当高频未覆盖语义时按名查阅）。
+> **完整 SVG 枚举**（60+）：[writing-skills 归档 `refs/icons-catalog.md`](https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/refs/icons-catalog.md)（生成默认**不**预读；仅当高频未覆盖语义时按名查阅）。
 
 全部 24×24、描边（stroke 1.8，圆角线帽），`currentColor` 随主题变色。共 **48** 个，单源 `assets/icons/`（`*.svg` HTML 内联 + `*.png` 512px 预渲染供 PPTX），`index.json` 为关键词→图标映射 + 默认表。校验：`python scripts/check_icons.py`。
 
@@ -95,7 +95,7 @@
 
 ## 高频取码（压缩 SVG · 20，与 assets/icons/ 同源）
 
-> 完整 48 见 `assets/icons/index.json`（关键词→图标映射 + 默认表）；归档旧目录 `../docs/archive/refs/icons-catalog.md` 仅备查。
+> 完整 48 见 `assets/icons/index.json`（关键词→图标映射 + 默认表）；归档旧目录 [writing-skills 归档 `refs/icons-catalog.md`](https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/refs/icons-catalog.md) 仅备查。
 
 **数据库**
 ```html

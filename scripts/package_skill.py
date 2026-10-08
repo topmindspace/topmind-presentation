@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 技能分发包打包器（发布前完整性校验 + 发布清单）
+"""topmind-presentation · 技能分发包打包器（发布前完整性校验 + 发布清单）
 
 用法:
     python scripts/package_skill.py            # 校验 → 打包 → 写发布清单
@@ -17,6 +17,7 @@
     README.md                      人类视角的简介 / 安装 / 开发 / 打包
     package.json                   Node 依赖声明（pptxgenjs）与常用命令
     assets/templates/              三份模式模板 + engine.css / ui.js（公共片段注入源）
+    assets/icons/                  48 原创图标（SVG + PNG）+ index.json（render_from_model / icon_lib / validate_report 运行时读取）
     assets/examples/               ≥3 黄金样张（每模式 1）+ 可选产品 showcase HTML/model
     assets/pptx-export.js          PPTX 预览运行时（注入源）
     assets/style-gallery.html      风格 × 模式 × 亮暗主题交互画廊
@@ -64,7 +65,7 @@ NAME = 'topmind-presentation'                       # 技能全名 = 分发包�
 OUT = ROOT / 'dist' / f'{NAME}.zip'
 MANIFEST = ROOT / 'dist' / f'{NAME}.manifest.json'
 DESC_LIMIT = 1024
-# 版本唯一事实源 = SKILL.md frontmatter `version`（须与 package.json version 一致，见 --check 比对）；
+# 版本唯一事实源 = SKILL.md frontmatter `metadata.version`（须与 package.json version 一致，见 --check 比对）；
 # 回退读 package.json。注意：layout-constants.json 的 `version` 是版式常量版本（0.1），不是技能版本，禁止用作技能版本。
 try:
     VERSION = str(json.loads(
@@ -83,6 +84,7 @@ INCLUDE = [
     'assets/theme-overview-research.png',
     'assets/theme-overview-architecture.png',
     'assets/templates/*',
+    'assets/icons/*',
     'assets/examples/*',
     'assets/showcase/*',
     'references/*',
@@ -118,6 +120,7 @@ REQUIRED = [
     'assets/templates/presentation.html', 'assets/templates/research.html',
     'assets/templates/architecture.html', 'assets/templates/engine.css',
     'assets/templates/ui.js',
+    'assets/icons/index.json',
     'references/playbook.md',
     'references/layout-grammar.md',
     'references/default-surface.md',
@@ -205,7 +208,8 @@ def check_skill_md():
             errs.append(f'description {len(desc)} 字符 > {DESC_LIMIT}')
         if '<' in desc or '>' in desc:
             errs.append('description 含尖括号（部分平台会拒载）')
-    ver_m = re.search(r'^version:\s*"?([\w.\-]+)"?\s*$', fm, re.M)
+    # 0.2.5 起版本在 metadata.version（Agent Skills 规范），兼容旧的顶层 version
+    ver_m = re.search(r'^\s*version:\s*"?([\w.\-]+)"?\s*$', fm, re.M)
     return {'name': NAME, 'description_len': len(desc),
             'version': ver_m.group(1) if ver_m else VERSION}, errs
 

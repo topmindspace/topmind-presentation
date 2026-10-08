@@ -6,8 +6,8 @@ assets/examples/ 至少保留 3 份黄金样张（每模式 1）：
   presentation-business-blue · research-mckinsey · architecture-graphite-dark
 另可含产品 showcase（如 2026-09-26-topmind-tms-skills-showcase），不替代黄金样张。
 
-完整 9 风格染色矩阵旧实现：../docs/archive/build_examples.py.full
-其余历史示例：../docs/archive/examples/
+完整 9 风格染色矩阵旧实现：https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/build_examples.py.full
+其余历史示例：https://github.com/topmindspace/topmind-writing-skills/tree/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/examples
 """
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ def main() -> int:
         print('缺黄金样张:')
         for m in missing:
             print(' ', m)
-        print('归档全量重建脚本: ../docs/archive/build_examples.py.full')
+        print('归档全量重建脚本: https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/build_examples.py.full')
         return 1
     print(f'黄金样张齐全：{len(GOLDEN)} 组（html+model）')
     for stem in GOLDEN:
@@ -48,7 +48,7 @@ def main() -> int:
             print(f'  FAIL {model.name}: {e}')
             return 1
         print(f'  OK {stem}  html={html.stat().st_size // 1024}KB  model={model.stat().st_size}B')
-    print('提示：全矩阵重建请用 ../docs/archive/build_examples.py.full（维护向）。')
+    print('提示：全矩阵重建请用 https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/build_examples.py.full（维护向）。')
     return 0
 
 

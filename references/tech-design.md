@@ -112,7 +112,7 @@
 
 - **发布版**：**v0.1**（布局语法 + 模型单写 + 硬门禁 + 风格语汇层）。**双版本口径**：npm / `metadata.version` = **semver（0.1.x）**；`layout-constants.json` `version` = **布局语法 schema 线（`0.1`）**——`model-schema.json` / `layoutSlots` 同步 schema 线，`sync_runtime.py` 校验 `package.json` 对齐 `0.1.x`。变更流水见仓库根 `CHANGELOG.md`。
 - **兼容回落**：排版比例尺只有 `modeTypeScale` 一套；未知模式回落 `presentation` 档。环境变量 `TOP_PPT_NODE_EXE` / `TOP_PPT_NODE_PATH`（旧名已移除）。
-- **文档分工**：本文件管架构与机制；日常规范见 `references/*`，业界对标依据见 `../docs/archive/refs/industry-benchmark.md`。
+- **文档分工**：本文件管架构与机制；日常规范见 `references/*`，业界对标依据见 [writing-skills 归档 `refs/industry-benchmark.md`](https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/refs/industry-benchmark.md)。
 
 ## 八、目录职责
 
@@ -123,7 +123,7 @@
 | `references/modes.md` | 三模式密度契约与锁定版式（L2：定模式细节时读） |
 | `references/outline-design.md` | 内容架构七步法 + 跨页叙事节奏 + 细节保全 |
 | `references/design-system.md` | MD3 对齐、设计原理（CRAP/7:2:1/字体矩阵）、页高模型、12 列网格、语义字阶、SVG 语义类（生成时主读） |
-| `../docs/archive/refs/design-system-engine.md` | 顶栏/卡片/列表/表格/页脚/动效等 CSS 类实现目录（维护者；生成时勿读） |
+| [writing-skills 归档 `refs/design-system-engine.md`](https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/refs/design-system-engine.md) | 顶栏/卡片/列表/表格/页脚/动效等 CSS 类实现目录（维护者；生成时勿读） |
 | `references/styles.md` | 9 套风格定义与选型 |
 | `references/content-rules.md` | 页内写作规则、密度三档、表格语义字号、容器内边距、连续文本流 |
 | `references/components.md` | 结构组件与锁定版式（`components.md` §1–§15c、§32–§50）+ 版式选型表 + **组合版式矩阵（§46c）** |
@@ -133,7 +133,7 @@
 | `references/pptx-export.md` | PPTX 导出通道、模型字段、双单源、29 页型、图表双通道 |
 | `references/high-fidelity.md` | 按需深度模式规范（触发、容差、manifest、渲染对照） |
 | `references/failure-modes.md` | 十四类失败模式 + 修复顺序铁律 + 错误解释纠正表 |
-| `../docs/archive/refs/industry-benchmark.md` | 业界对标与采纳/不采纳决策依据 |
+| [writing-skills 归档 `refs/industry-benchmark.md`](https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/refs/industry-benchmark.md) | 业界对标与采纳/不采纳决策依据 |
 | `scripts/*` | 校验器、**骨架生成器 `scaffold_report.py`**、注入器、回归、**三项审计（styles / docs / skill）**、打包（全部标准库；PPTX 精导需 Node + pptxgenjs） |
 | `evals/*` | Eval 框架：`prompts.csv`（14 条，含负对照）+ `rubric.schema.json`（风格目标评分契约）+ `run_evals.py`（结果/过程/风格/效率四类目标） |
 | `assets/templates/*` | 三模式模板 + 公共引擎/UI（标记块由 `sync_runtime.py` 注入） |

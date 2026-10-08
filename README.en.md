@@ -10,7 +10,7 @@
 **Let ideas fly — make good thinking visible.** A high-craft skill for **demo reports / formal business presentations**: **HTML + PPT dual delivery** — day-to-day, present with paginated HTML like slides; export **layout-faithful editable PPTX** when needed. **MD3-inspired**: fitting information density, restrained type / shapes / color. Core craft is layout, typography, color, and content structure — not gadget soup.
 
 - Skill id: `topmind-presentation`; brand: **TopPPT HTML**
-- Version: **v0.2.4** (standalone repo, independently versioned)
+- Version: **v0.2.5** (standalone repo, independently versioned)
 - **Agent entry**: `SKILL.md` → `references/playbook.md` (L1) → L2 on demand
 - **Human maintainers**: this README (install / commands / layout); do not treat it as the generation spec
 - The repo is the skill: the repo root is the skill body (SKILL.md + assets + references + scripts)
@@ -58,19 +58,25 @@ Also: arrow-key paging; **Esc** closes modals. After style/theme change, re-run 
 
 ## Install
 
-The repo is the skill: copy the repo root (or the `topmind-presentation.zip` from a GitHub Release) into your agent's skills directory, keeping the folder name `topmind-presentation`. The skill surface is `SKILL.md` (`name` / `description` in frontmatter drive triggering).
+The repo is the skill: your host must see `topmind-presentation/SKILL.md` inside its skills directory. Pick one:
 
 ```bash
-# track HEAD
-git clone https://github.com/topmindspace/topmind-presentation.git
-cp -r topmind-presentation ~/.claude/skills/topmind-presentation
+# 1. pinned (recommended): unzip topmind-presentation.zip from a GitHub Release
+unzip topmind-presentation.zip -d ~/.claude/skills/
 
-# or pin a version: download topmind-presentation.zip from the Release page
+# 2. track HEAD
+git clone --depth 1 https://github.com/topmindspace/topmind-presentation.git ~/.claude/skills/topmind-presentation
+
+# 3. skills CLI (vercel-labs/skills, Node.js 22+; copies the whole repo including docs/)
+npx skills add topmindspace/topmind-presentation --agent claude-code -g
+
+# 4. npm: the package lands in node_modules only, so sync or copy it afterwards
+npm i @topmindspace/topmind-presentation
+npx skills experimental_sync -a claude-code -y     # experimental; or copy by hand:
+cp -r node_modules/@topmindspace/topmind-presentation ~/.claude/skills/topmind-presentation
 ```
 
-The npm package [`@topmindspace/topmind-presentation`](https://www.npmjs.com/package/@topmindspace/topmind-presentation) is published in sync with GitHub tags when needed.
-
-> Do not `npm install topmind-presentation` (the skill id is not a standalone npm package).
+The npm package [`@topmindspace/topmind-presentation`](https://www.npmjs.com/package/@topmindspace/topmind-presentation) is published automatically for each GitHub tag. Like the Release zip it ships only runtime files (the `files` whitelist in `package.json`); the `docs/` site, screenshots and evals stay out. There is no unscoped `topmind-presentation` package on npm.
 
 PPTX needs `npm install` in this folder (pptxgenjs). HTML generation: Python stdlib only.
 

@@ -7,7 +7,8 @@
     "Add a negative query that must NOT select it (coding/video/edit-existing-pptx…).",
     "Each entry: {id, query, expect: 'hit'|'miss', notes?}",
     "Runner: python3 scripts/check_triggers.py — matches query tokens against description keywords extracted from SKILL.md.",
-    "Wire: package_skill.py --check invokes check_triggers; also npm run check."
+    "Wire: package_skill.py --check invokes check_triggers; also npm run check.",
+    "Sibling routing: negative queries carrying a ROUTE_AWAY cue (check_triggers.py) pass only when the description's Do NOT zone names the target skill (topmind-research / organize / loop / poster / cover)."
   ],
   "positive": [
     {
@@ -32,7 +33,7 @@
     },
     {
       "id": "P05",
-      "query": "写一份麦肯锡风格的对标分析研究报告",
+      "query": "把对标分析材料排成麦肯锡风格的研究型报告",
       "expect": "hit"
     },
     {
@@ -67,7 +68,7 @@
     },
     {
       "id": "P12",
-      "query": "快速模式一键出稿，少问一句",
+      "query": "做汇报 PPT，快速模式一键出稿，少问一句",
       "expect": "hit"
     },
     {
@@ -176,6 +177,42 @@
       "id": "N11",
       "query": "剪辑这段会议录像加字幕",
       "expect": "miss"
+    },
+    {
+      "id": "N12",
+      "query": "帮我研究一下国产大模型最近半年的进展，出一份研究报告",
+      "expect": "miss",
+      "notes": "找证据、写研究结论 → topmind-research；要做成汇报材料时由 research 回执建议本技能"
+    },
+    {
+      "id": "N13",
+      "query": "核实一下这家公司的融资额，各家报道数字不一样",
+      "expect": "miss",
+      "notes": "→ topmind-research"
+    },
+    {
+      "id": "N14",
+      "query": "把我这周存的笔记整理一下，做个周复盘",
+      "expect": "miss",
+      "notes": "→ topmind-organize"
+    },
+    {
+      "id": "N15",
+      "query": "跑一次工作区巡检，顺便复盘一下有哪些没处理的",
+      "expect": "miss",
+      "notes": "→ topmind-loop"
+    },
+    {
+      "id": "N16",
+      "query": "做一张一图看懂的长图，发朋友圈用",
+      "expect": "miss",
+      "notes": "单张长图/信息图 → topmind-poster"
+    },
+    {
+      "id": "N17",
+      "query": "给这篇公众号文章配一张封面",
+      "expect": "miss",
+      "notes": "→ topmind-cover"
     }
   ]
 }

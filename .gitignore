@@ -57,3 +57,7 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# Release / pack outputs
+release-assets/
+*.tgz

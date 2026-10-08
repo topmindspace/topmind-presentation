@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [Unreleased]
+
+### 优化
+
+- GitHub Actions 改用 Node 24 运行时的版本：`actions/checkout` v4 → v7、`actions/setup-node` v4 → v7、`actions/setup-python` v5 → v7、`softprops/action-gh-release` v2 → v3；CI 与 Release 的 `node-version` 20 → 24（本地 Node 24 跑 `ci_skill_gates.sh --with-pptx` 全绿）。
+- `runs-on` 由 `ubuntu-latest` 固定为 `ubuntu-24.04`：GitHub 在 2026-10-19 至 11-19 期间把 `ubuntu-latest` 逐步切到 Ubuntu 26.04，先停在当前已验证的镜像，切 26.04 另行验证后再改。
+- 只改工作流，技能内容与版本号不变。
+
 ## [0.2.5] - 2026-10-08
 
 > 0.2.4 → **0.2.5**（patch）。

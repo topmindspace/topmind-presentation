@@ -4,7 +4,7 @@ description: "把已有材料做成正式商务演示与多页可视化报告：
 license: MIT
 compatibility: "Python 3 stdlib for HTML generation; Node >=18 + pptxgenjs for PPTX; optional playwright for browser regression / theme captures."
 metadata:
-  version: "0.2.5"
+  version: "0.2.6"
   author: TopMindSpace
   updated: "2026-10-08"
   action_category: write

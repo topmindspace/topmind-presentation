@@ -1,12 +1,18 @@
 # CHANGELOG
 
-## [Unreleased]
+## [0.2.6] - 2026-10-10
+
+> 0.2.5 → **0.2.6**（patch）。
 
 ### 优化
 
-- GitHub Actions 改用 Node 24 运行时的版本：`actions/checkout` v4 → v7、`actions/setup-node` v4 → v7、`actions/setup-python` v5 → v7、`softprops/action-gh-release` v2 → v3；CI 与 Release 的 `node-version` 20 → 24（本地 Node 24 跑 `ci_skill_gates.sh --with-pptx` 全绿）。
+- 调研文档 `docs/industry-pptx-research.md` 改为中性的研究方法说明，示例与参考资料为通用内容。
+- README 中英文的外链与 canonical 指向正确的站点路径。
+- `scripts/ci_privacy_scan.py` 增加自定义盘符路径检查项，扫描覆盖面更完整。
+- GitHub Actions 改用 Node 24 运行时的版本：`actions/checkout` v4 → v7、`actions/setup-node` v4 → v7、`actions/setup-python` v5 → v7、`softprops/action-gh-release` v2 → v3；CI 与 Release 的 `node-version` 20 → 24。
 - `runs-on` 由 `ubuntu-latest` 固定为 `ubuntu-24.04`：GitHub 在 2026-10-19 至 11-19 期间把 `ubuntu-latest` 逐步切到 Ubuntu 26.04，先停在当前已验证的镜像，切 26.04 另行验证后再改。
-- 只改工作流，技能内容与版本号不变。
+- `.gitignore` 补充 Release 附件、npm pack 输出等再生成产物。
+- 技能本体（`SKILL.md` 正文与 references）不变。
 
 ## [0.2.5] - 2026-10-08
 

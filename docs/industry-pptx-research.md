@@ -1,8 +1,7 @@
 # Industry Research: High-Fidelity HTML/Web Slide → Editable PPTX Export
 
-> 备注（2026-10-01）：本研究写于技能独立建仓前，文中 `top-ppt-html` /
-> `tms-skills` 均指现 `topmind-presentation` / `topmind-presentation`，
-> 内容原样保留。
+> 备注（2026-10-01）：本研究写于技能独立建仓前，文中 `top-ppt-html`（原所在的
+> `tms-skills` 仓库）均指现在的 `topmind-presentation`，内容原样保留。
 
 **Context:** Skill generates HTML presentation reports; exports editable 16:9 PPTX via PptxGenJS.  
 **Current pain:** charts overlap tables, table layout breaks, icons/SVGs disappear, text overflow, low fidelity vs HTML.  
@@ -361,7 +360,7 @@ Keep one source of truth: measure at a fixed viewport (e.g. 1280×720 or 1920×1
 
 ## 10. Gap Analysis vs `top-ppt-html` Skill (T6 整改对照)
 
-Current skill (`D:\DP-Dev\tms-skills\top-ppt-html`) already implements most of the industry hybrid pattern. Mapping:
+The current skill (`topmind-presentation`, formerly `top-ppt-html`) already implements most of the industry hybrid pattern. Mapping:
 
 | Research recommendation | Skill status | Evidence | Remaining work |
 |---|---|---|---|

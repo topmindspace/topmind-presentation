@@ -26,10 +26,10 @@
   <sub>Presentation · business-blue (default) · also <a href="./assets/style-gallery.html">style-gallery</a> · <a href="./assets/theme-overview-research.png">research</a> · <a href="./assets/theme-overview-architecture.png">architecture</a></sub>
 </p>
 
-**Live** · [Landing](https://topmindspace.github.io/topmind-presentation/) · [Showcase deck](https://topmindspace.github.io/topmind-presentation/showcase.html) · [Style gallery](https://topmindspace.github.io/topmind-presentation/style-gallery.html)
+**Online** · [Landing](https://topmindspace.github.io/presentation/) (the showcase deck and style gallery are the in-repo files below)
 
 - In-repo gallery: [`assets/style-gallery.html`](./assets/style-gallery.html)
-- Product showcase: [`assets/examples/2026-09-26-topmind-tms-skills-showcase.html`](./assets/examples/2026-09-26-topmind-tms-skills-showcase.html) (Mode A · dual-delivery narrative · **5 chart types** · toolbar page)
+- Product showcase: [`assets/examples/2026-09-26-topmind-tms-skills-showcase.html`](./assets/examples/2026-09-26-topmind-tms-skills-showcase.html) (Mode A · dual-delivery narrative · **5 chart types** · toolbar page). This deck was written in 2026-09 and its install commands and version line still use the retired package name `@topmindspace/tms-skills`; follow the install section of this page instead.
 - Repo shot pack: [`docs/showcase/`](./docs/showcase/)
 
 ## Skill snapshot

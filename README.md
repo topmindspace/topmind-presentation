@@ -26,10 +26,10 @@
   <sub>演示 · business-blue（默认）· 另见 <a href="./assets/style-gallery.html">style-gallery</a> · <a href="./assets/theme-overview-research.png">研究</a> · <a href="./assets/theme-overview-architecture.png">架构</a></sub>
 </p>
 
-**在线体验** · [落地页](https://topmindspace.github.io/topmind-presentation/) · [Showcase 演示文稿](https://topmindspace.github.io/topmind-presentation/showcase.html) · [风格画廊](https://topmindspace.github.io/topmind-presentation/style-gallery.html)
+**在线介绍** · [落地页](https://topmindspace.github.io/presentation/)（Showcase 与风格画廊见下方仓库内文件）
 
 - 交互画廊（仓库内）：[`assets/style-gallery.html`](./assets/style-gallery.html)
-- 产品 Showcase（仓库内）：[`assets/examples/2026-09-26-topmind-tms-skills-showcase.html`](./assets/examples/2026-09-26-topmind-tms-skills-showcase.html)（Mode A · 双交付叙事 · **5 种图表** · Header 工具栏）
+- 产品 Showcase（仓库内）：[`assets/examples/2026-09-26-topmind-tms-skills-showcase.html`](./assets/examples/2026-09-26-topmind-tms-skills-showcase.html)（Mode A · 双交付叙事 · **5 种图表** · Header 工具栏）。这份样张写于 2026-09，文中的安装命令和版本线仍是旧包名 `@topmindspace/tms-skills`，安装请以本页「安装」一节为准。
 - 大图集：[`docs/showcase/`](./docs/showcase/)（不进技能 zip）
 
 ## 一、技能简介（人类速览）

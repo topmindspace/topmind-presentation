@@ -77,6 +77,8 @@ WIN_PERSONAL_TREE = re.compile(
     r"[A-Za-z]:\\(?:Users|Documents|Desktop|OneDrive)\\[^\s\"'<>|]{1,120}",
     re.I,
 )
+# 盘符根下的自定义目录（D: 及之后的盘符），多为开发机路径；C: 盘的系统目录不在此列。
+WIN_DRIVE_TREE = re.compile(r"\b[D-Zd-z]:\\[A-Za-z0-9_.-]+\\")
 
 # Placeholder / shared account names that are safe in docs and CI examples.
 SAFE_HOME_SEGMENTS = {
@@ -192,6 +194,8 @@ def scan_text(rel: Path, text: str, allow: bool, deny_extra: set[str]) -> list[s
         findings.append((m.start(), "AppData path", redact(m.group(0))))
     for m in WIN_PERSONAL_TREE.finditer(text):
         findings.append((m.start(), "host-local personal path", redact(m.group(0))))
+    for m in WIN_DRIVE_TREE.finditer(text):
+        findings.append((m.start(), "host-local drive path", redact(m.group(0))))
 
     for m in EMAIL.finditer(text):
         token = m.group(0)
@@ -248,6 +252,7 @@ def self_check() -> list[str]:
         (sep.join(["C:", "Users", "someuser1", "AppData", "Roaming", "x"]),
          "Windows home username"),
         ("/" + "home/" + "someuser2/project", "Unix/macOS home username"),
+        (sep.join(["D:", "someproj", "src"]), "host-local drive path"),
         ("contact leak@" + "corp-internal.invalid", "email-like token"),
         ("sk-" + "abc123def456ghi789", "API key-shaped token"),
         ("ghp_" + "a" * 22, "GitHub token-shaped"),

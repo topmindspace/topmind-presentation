@@ -8,7 +8,7 @@
 **Current pain:** charts overlap tables, table layout breaks, icons/SVGs disappear, text overflow, low fidelity vs HTML.  
 **Goal:** industry-proven architecture and concrete fixes — not reinvention.
 
-**Research method note:** Browser Use / IAB tools were not available in this subagent surface (permission-blocked bash; no `agent.browsers`). Research used WebFetch on primary documentation pages. Bing CN SERP was low-signal for English technical queries; product docs and official libraries were opened directly. GitHub was SSRF-blocked from fetch; GitHub Pages docs for PptxGenJS and Slidev docs were accessible. Findings marked **[VERIFIED]** come from pages actually opened; **[INDUSTRY]** are well-established patterns inferred from product behavior / standard practice, not page-verified in this session.
+**Research method note:** Research used public documentation pages for each product and library. Search-engine results were low-signal for English technical queries, so product docs and official libraries were opened directly. Findings marked **[VERIFIED]** come from pages that were actually opened; **[INDUSTRY]** are well-established patterns inferred from product behavior and standard practice, not page-verified.
 
 ---
 
@@ -79,7 +79,7 @@ Source: https://gitbrent.github.io/PptxGenJS/html2pptx/
 - **Beautiful.ai:** historically used / forked PptxGenJS (visible in search results: `beautifulai/PptxGenJS`) — confirms JS OOXML generation is industry-standard for web→PPTX.
 - **Google Slides import of PPTX:** re-interprets OOXML; native charts may convert; freeform SVG-like art often becomes images or drops.
 
-### 2.6 think-cell / Mekko Graphics **[INDUSTRY + think-cell KB surface]**
+### 2.6 think-cell / Mekko Graphics **[INDUSTRY + think-cell public docs]**
 Sources: https://think-cell.com/en/resources/kb , product pages  
 - **Not HTML exporters** — PowerPoint **COM add-ins** that insert native chart objects with Excel data links.
 - Fidelity strategy: (1) native PowerPoint chart XML / shape trees, (2) Excel-linked data, (3) their own label/layout engine on top of PowerPoint shapes (waterfall, Gantt, Mekko).
@@ -334,7 +334,7 @@ Keep one source of truth: measure at a fixed viewport (e.g. 1280×720 or 1920×1
 | think-cell knowledge base | https://think-cell.com/en/resources/kb |
 | think-cell developer blog | https://think-cell.com/en/career/devblog |
 
-### Secondary / search-discovered (not fully opened due to SSRF/403)
+### Secondary / search-discovered (not fully opened)
 | Topic | URL |
 |---|---|
 | PptxGenJS GitHub | https://github.com/gitbrent/PptxGenJS |

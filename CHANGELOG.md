@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [0.2.7] - 2026-10-11
+
+> 0.2.6 → **0.2.7**（patch）。
+
+### 优化
+
+- 产品 Showcase 按当前包名重写：`assets/examples/2026-09-26-topmind-tms-skills-showcase.*` 换为 `2026-10-11-topmind-presentation-showcase.*`，安装与分发页写 `@topmindspace/topmind-presentation` 的四种装法，版本图表改用 CHANGELOG 记录的 npm 包体积数据；`docs/showcase.html` 同步，去掉历史样张声明。
+- `docs/showcase/topmind-showcase/`、`assets/showcase/`、`docs/site-assets/` 下的 Showcase 截图按新版重拍。
+- `scripts/capture_showcase_pages.js` 适配独立仓库目录（仓库根即技能根），支持 `PW_CHANNEL=chrome` 使用本机 Chrome、`ONLY=<prefix>` 只重拍指定样张，并等待图表动效结束后再截图。
+- README 目录结构说明与实际的 `docs/` 内容对齐；移除未被引用的行业调研过程文档（`docs/industry-pptx-research.md`）。
+- 技能本体（`SKILL.md` 正文与 references）不变。
+
 ## [0.2.6] - 2026-10-10
 
 > 0.2.5 → **0.2.6**（patch）。

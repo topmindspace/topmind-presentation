@@ -342,6 +342,18 @@ border-color:color-mix(in srgb,var(--accent-on) 20%,transparent);color:var(--acc
 .g-mosaic{grid-template-columns:repeat(3,minmax(0,1fr));
 grid-template-areas:"hero hero hero" "a b c";grid-auto-rows:auto}
 .g-mosaic__hero{grid-area:hero}.g-mosaic__a{grid-area:a}
+/* ── 版式变体（0.2.0 · layoutVariants 注册表）：复用既有组件 ──
+   g-bento：Bento 拼贴卡（3 列；首卡 .card--lead 跨 2 列，主结论优先）
+   tl__ico：图标时间线节点图标（替代 .tl__d 圆点，16–20px，currentColor）
+   col--feature：双栏特性栏（加粗首行 + accent 左线，复用 .card 语义） */
+.g-bento{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+.grid.g-bento>.card{align-self:stretch}
+.grid.g-bento>.card--lead{grid-column:span 2}
+@media (max-width:1180px){.grid.g-bento>.card--lead{grid-column:span 1}}
+.tl__ico{position:absolute;left:-33px;top:2px;width:22px;height:22px;color:var(--accent)}
+.tl__ico svg{width:22px;height:22px;display:block}
+.cols-2>.col--feature{border-left:3px solid var(--accent);padding-left:14px}
+.cols-2>.col--feature strong{font-size:1.06em}
 .g-mosaic__b{grid-area:b}.g-mosaic__c{grid-area:c}
 .g-hero-full{grid-template-columns:repeat(3,minmax(0,1fr));
 grid-template-areas:"main main main" "s1 s2 s3"}
@@ -898,8 +910,6 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
 </style>
 </head>
 <body>
-<!-- 历史样张声明（2026-10-01）：本页为 monorepo 时期（2026-09-26）生成的演示样张，其中的安装命令已失效；最新安装方式见 ./index.html -->
-<div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1a2e;color:#fff;font:13px/1.6 system-ui;padding:8px 16px;text-align:center;">本页为 2026-09-26 生成的历史演示样张，其中的安装命令已失效 —— 最新安装方式见 <a href="./index.html" style="color:#8ecae6;">首页</a></div>
 
 <!-- ══ 顶栏 + header 工具组（风格 / 预览 / 帮助 / 全屏 / 主题 / 折叠） ══ -->
 <header class="bar">
@@ -971,8 +981,8 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
 <section class="band band--fit" id="cover">
   <div class="wrap">
     <div class="shead rv">
-      <div class="t-eyebrow">产品介绍 · 2026-09-26 · v0.1.19</div>
-      <h1 class="t-display shead__title">TopMind × tms-skills</h1>
+      <div class="t-eyebrow">产品介绍 · 2026-10-11 · v0.2.7</div>
+      <h1 class="t-display shead__title">TopPPT HTML × topmind-presentation</h1>
       <p class="t-lead shead__desc">HTML + PPT 双交付 · 为正式商务演示而生</p>
     </div>
   </div>
@@ -982,7 +992,7 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
   <div class="wrap">
     <div class="shead rv"><div class="t-eyebrow">目录</div>
       <h2 class="t-h1 shead__title">报告大纲</h2></div>
-    <ol class="agenda rv">      <li class="agenda__i"><a class="agenda__a" href="#s1"><span class="agenda__n">01</span><span><span class="agenda__t">为什么是我们</span><div class="agenda__d">01 · 为什么是我们</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s2"><span class="agenda__n">02</span><span><span class="agenda__t">tms-skills</span><div class="agenda__d">02 · tms-skills</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s3"><span class="agenda__n">03</span><span><span class="agenda__t">top-ppt-html</span><div class="agenda__d">03 · top-ppt-html</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s4"><span class="agenda__n">04</span><span><span class="agenda__t">三模式</span><div class="agenda__d">04 · 三模式</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s5"><span class="agenda__n">05</span><span><span class="agenda__t">图表工艺</span><div class="agenda__d">05 · 图表工艺</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s7"><span class="agenda__n">06</span><span><span class="agenda__t">风格主题</span><div class="agenda__d">06 · 风格主题</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s8"><span class="agenda__n">07</span><span><span class="agenda__t">质量门禁</span><div class="agenda__d">07 · 质量门禁</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s11"><span class="agenda__n">08</span><span><span class="agenda__t">Header 工具栏</span><div class="agenda__d">08 · Header 工具栏</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s12"><span class="agenda__n">09</span><span><span class="agenda__t">Fast Mode</span><div class="agenda__d">09 · Fast Mode</div></span></a></li></ol>
+    <ol class="agenda rv">      <li class="agenda__i"><a class="agenda__a" href="#s1"><span class="agenda__n">01</span><span><span class="agenda__t">为什么是我们</span><div class="agenda__d">01 · 为什么是我们</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s2"><span class="agenda__n">02</span><span><span class="agenda__t">安装与分发</span><div class="agenda__d">02 · 安装与分发</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s3"><span class="agenda__n">03</span><span><span class="agenda__t">双交付</span><div class="agenda__d">03 · 双交付</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s4"><span class="agenda__n">04</span><span><span class="agenda__t">三模式</span><div class="agenda__d">04 · 三模式</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s5"><span class="agenda__n">05</span><span><span class="agenda__t">图表工艺</span><div class="agenda__d">05 · 图表工艺</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s7"><span class="agenda__n">06</span><span><span class="agenda__t">风格主题</span><div class="agenda__d">06 · 风格主题</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s8"><span class="agenda__n">07</span><span><span class="agenda__t">质量门禁</span><div class="agenda__d">07 · 质量门禁</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s11"><span class="agenda__n">08</span><span><span class="agenda__t">Header 工具栏</span><div class="agenda__d">08 · Header 工具栏</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s12"><span class="agenda__n">09</span><span><span class="agenda__t">Fast Mode</span><div class="agenda__d">09 · Fast Mode</div></span></a></li></ol>
   </div>
 </section>
 
@@ -990,14 +1000,14 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
   <div class="wrap">
     <div class="shead rv">
       <div class="t-eyebrow">01 · 为什么是我们</div>
-      <h2 class="t-h1 shead__title">市面 PPT 技能很多，为何还要 top-ppt-html</h2>
+      <h2 class="t-h1 shead__title">市面 PPT 技能很多，为何还要 topmind-presentation</h2>
     </div>
     <div class="grid g-3--equal rv">
-      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="增长"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7l-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg></div><h3 class="t-h3">正式商务演示</h3></div>
+      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="增长"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5h.01"/></svg></div><h3 class="t-h3">正式商务演示</h3></div>
         <ul class="ul"><li><strong>不是花哨 gadget。</strong>为演示报告与上台汇报而生——直观、大气、可编辑</li><li><strong>一屏一主张。</strong>标题即行动句，少装饰堆砌</li></ul></div>
-      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="下降"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17l-8.5-8.5-5 5L2 7"/><path d="M16 17h6v-6"/></svg></div><h3 class="t-h3">HTML + PPT 双交付</h3></div>
+      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="下降"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg></div><h3 class="t-h3">HTML + PPT 双交付</h3></div>
         <ul class="ul"><li><strong>HTML 日常上台。</strong>单文件可翻页，等同幻灯片</li><li><strong>PPTX 按需导出。</strong>版式保真、可继续编辑</li></ul></div>
-      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="数据"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></div><h3 class="t-h3">MD3 式克制</h3></div>
+      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="数据"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></div><h3 class="t-h3">MD3 式克制</h3></div>
         <ul class="ul"><li><strong>密度合适。</strong>文字/图形/形状/颜色克制</li><li><strong>无 AI chrome。</strong>结论条 tonal 满铺，禁左侧装饰轨</li></ul></div>
     </div>
     <div class="sowhat rv"><span class="sowhat__v">产出即上台：同源模型保证 HTML 与 PPTX 一致，图表带数据可核对。</span></div>
@@ -1007,35 +1017,46 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
 <section class="band" id="s2" data-skel="P5" data-page-type="cards">
   <div class="wrap">
     <div class="shead rv">
-      <div class="t-eyebrow">02 · tms-skills</div>
-      <h2 class="t-h1 shead__title">tms-skills：整仓可安装的智能体技能</h2>
+      <div class="t-eyebrow">02 · 安装与分发</div>
+      <h2 class="t-h1 shead__title">安装与分发：仓库即技能，四种装法任选</h2>
     </div>
     <div class="grid g-3--equal rv">
-      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="增长"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7l-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg></div><h3 class="t-h3">Monorepo</h3></div>
-        <ul class="ul"><li><strong>一仓多技能。</strong>根目录技能包 + 统一安装器</li><li><strong>同 tag 发版。</strong>安装器与技能整仓对齐</li></ul></div>
-      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="下降"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17l-8.5-8.5-5 5L2 7"/><path d="M16 17h6v-6"/></svg></div><h3 class="t-h3">双通道安装</h3></div>
-        <ul class="ul"><li><strong>npm 钉版本。</strong>npx @topmindspace/tms-skills</li><li><strong>GitHub 跟 HEAD。</strong>日常可 clone / 直装</li></ul></div>
-      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="数据"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></div><h3 class="t-h3">当前主技能</h3></div>
-        <ul class="ul"><li><strong>top-ppt-html。</strong>正式场合演示文稿</li><li><strong>HTML + PPTX。</strong>同源模型 · 双交付</li></ul></div>
+      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="增长"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5h.01"/></svg></div><h3 class="t-h3">仓库即技能</h3></div>
+        <ul class="ul"><li><strong>根目录即技能本体。</strong>SKILL.md、references、scripts 与 assets 同在一仓</li><li><strong>没有安装器。</strong>宿主能看到 topmind-presentation/SKILL.md 即可</li></ul></div>
+      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="下降"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg></div><h3 class="t-h3">四种装法</h3></div>
+        <ul class="ul"><li><strong>钉版本。</strong>Release 的 topmind-presentation.zip 解压到技能目录</li><li><strong>跟 HEAD。</strong>git clone 或 npx skills add；npm 包需再同步一次</li></ul></div>
+      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="数据"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></div><h3 class="t-h3">只发运行所需</h3></div>
+        <ul class="ul"><li><strong>files 白名单。</strong>不含落地页、截图和评测集</li><li><strong>同 tag 发版。</strong>GitHub Release 与 npm 版本号一致</li></ul></div>
     </div>
-    <div class="sowhat rv"><span class="sowhat__v">安装器与技能同仓同 tag——装一次，版本线对齐。</span></div>
-    <div class="footnote">包名 @topmindspace/tms-skills · 当前线 0.1.19（latest）</div>
+    <div class="sowhat rv"><span class="sowhat__v">版本号与 tag 一致——装哪一版，用的就是哪一版。</span></div>
+    <div class="footnote">包名 @topmindspace/topmind-presentation · 当前线 0.2.7（latest）</div>
   </div>
 </section>
 
 <section class="band" id="s3" data-skel="P1" data-page-type="split">
   <div class="wrap">
     <div class="shead rv">
-      <div class="t-eyebrow">03 · top-ppt-html</div>
+      <div class="t-eyebrow">03 · 双交付</div>
       <h2 class="t-h1 shead__title">双交付：HTML 即演示，PPTX 可继续编</h2>
     </div>
     <div class="grid g-side rv a-start">
       <div class="stack gap-4"><ul class="ul"><li><strong>日常 HTML 上台。</strong>单文件可翻页，等同幻灯片；亮暗与九风格顶栏即切</li><li><strong>需要时再出 PPT。</strong>版式保真可编辑 PPTX；图表数据可标注、可核对</li><li><strong>克制的商务面。</strong>参考 MD3：合适信息密度，少装饰、一屏一主张</li></ul></div>
       <div class="fig"><div class="fig__cap">工艺关注点（产品强调 · 示意权重）</div>
       <svg class="chart" data-chart="bar" viewBox="0 0 560 220">
-        <!-- 数据以 REPORT_MODEL.chart 为准；复杂图形用 extract_snippet --chart bar -->
-        <text x="280" y="110" text-anchor="middle" class="f-txt3" font-size="12">bar · 见模型数据</text>
-      </svg>
+      <line x1="46" y1="170" x2="540" y2="170" class="s-bds" stroke-width="1"/>
+      <rect data-anim="grow" x="92.0" y="58.0" width="56.1" height="112.0" rx="6" class="f-s3"><title>版式 32</title></rect>
+      <text data-anim="fade" x="120.0" y="192" text-anchor="middle" class="f-txt3" font-size="11">版式</text>
+      <text data-anim="fade" x="120.0" y="50.0" text-anchor="middle" class="f-txt2" font-size="12" font-weight="600">32</text>
+      <rect data-anim="grow" x="211.9" y="72.0" width="56.1" height="98.0" rx="6" class="f-s3"><title>排版 28</title></rect>
+      <text data-anim="fade" x="240.0" y="192" text-anchor="middle" class="f-txt3" font-size="11">排版</text>
+      <text data-anim="fade" x="240.0" y="64.0" text-anchor="middle" class="f-txt2" font-size="12" font-weight="600">28</text>
+      <rect data-anim="grow" x="331.9" y="107.0" width="56.1" height="63.0" rx="6" class="f-acc"><title>色彩 18</title></rect>
+      <text data-anim="fade" x="360.0" y="192" text-anchor="middle" class="f-txt3" font-size="11">色彩</text>
+      <text data-anim="fade" x="360.0" y="99.0" text-anchor="middle" class="f-txt2" font-size="12" font-weight="600">18</text>
+      <rect data-anim="grow" x="451.9" y="93.0" width="56.1" height="77.0" rx="6" class="f-acc"><title>内容 22</title></rect>
+      <text data-anim="fade" x="480.0" y="192" text-anchor="middle" class="f-txt3" font-size="11">内容</text>
+      <text data-anim="fade" x="480.0" y="85.0" text-anchor="middle" class="f-txt2" font-size="12" font-weight="600">22</text>
+    </svg>
       </div>
     </div>
     <div class="sowhat rv"><span class="sowhat__v">工艺在结构与密度，不在 gadget——正式场合演讲/汇报才是主场。</span></div>
@@ -1049,11 +1070,11 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
       <h2 class="t-h1 shead__title">模式先定后写：A 演示 · B 研究 · C 架构</h2>
     </div>
     <div class="grid g-3--equal rv">
-      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="增长"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7l-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg></div><h3 class="t-h3">A · 演示</h3></div>
+      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="增长"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5h.01"/></svg></div><h3 class="t-h3">A · 演示</h3></div>
         <ul class="ul"><li><strong>每屏一主张。</strong>标题即行动句，非话题标签</li><li><strong>大气留白。</strong>证据充分但不堆咨询 dump</li></ul></div>
-      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="下降"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17l-8.5-8.5-5 5L2 7"/><path d="M16 17h6v-6"/></svg></div><h3 class="t-h3">B · 研究</h3></div>
+      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="下降"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg></div><h3 class="t-h3">B · 研究</h3></div>
         <ul class="ul"><li><strong>咨询密排。</strong>Exhibit · 来源 · 结论条</li><li><strong>结论可核对。</strong>数字与口径双向对齐</li></ul></div>
-      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="数据"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></div><h3 class="t-h3">C · 架构</h3></div>
+      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="数据"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></div><h3 class="t-h3">C · 架构</h3></div>
         <ul class="ul"><li><strong>图为王。</strong>拓扑 / 泳道 / 分层</li><li><strong>少字多结构。</strong>一图说清关系</li></ul></div>
     </div>
     <div class="sowhat rv"><span class="sowhat__v">先定模式再写页——A/B/C 契约决定密度、图表与结论条用法。</span></div>
@@ -1070,15 +1091,22 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
     <div class="grid g-side rv a-start">
       <div class="fig" style="text-align:center"><div class="fig__cap">构成占比</div>
       <svg class="chart" data-chart="donut" viewBox="0 0 560 220">
-        <!-- 数据以 REPORT_MODEL.chart 为准；复杂图形用 extract_snippet --chart donut -->
-        <text x="280" y="110" text-anchor="middle" class="f-txt3" font-size="12">donut · 见模型数据</text>
-      </svg>
+      <g transform="translate(210,40)">
+        <circle cx="70" cy="70" r="54" class="f-none s-bds" stroke-width="15"/>
+        <circle data-sweep data-circ="339.3" data-p="0.4000" cx="70" cy="70" r="54" class="f-none s-acc" stroke-width="15" stroke-dasharray="135.7 203.6" stroke-linecap="butt" transform="rotate(-90.0 70 70)"><title>可翻页 HTML 40%</title></circle>
+        <circle data-sweep data-circ="339.3" data-p="0.3500" cx="70" cy="70" r="54" class="f-none s-txt2" stroke-width="15" stroke-dasharray="118.8 220.5" stroke-linecap="butt" transform="rotate(54.0 70 70)"><title>保真 PPTX 35%</title></circle>
+        <circle data-sweep data-circ="339.3" data-p="0.2500" cx="70" cy="70" r="54" class="f-none s-txt3" stroke-width="15" stroke-dasharray="84.8 254.5" stroke-linecap="butt" transform="rotate(180.0 70 70)"><title>质检交付说明 25%</title></circle>
+        <text x="70" y="68" text-anchor="middle" class="f-txt" font-size="22" font-weight="600" data-count="40" data-suffix="%">40%</text>
+        <text x="70" y="88" text-anchor="middle" class="f-txt3" font-size="11">同源模型</text>
+      </g>
+    </svg>
       </div>
       <div class="stack gap-4"><h3 class="t-h3">构成明细</h3>
         <ul class="ul">        <li><strong>可翻页 HTML。</strong>40（40%）</li>        <li><strong>保真 PPTX。</strong>35（35%）</li>        <li><strong>质检交付说明。</strong>25（25%）</li></ul>
       </div>
     </div>
     <div class="sowhat rv"><span class="sowhat__v">双通道不是二选一：HTML 上台演示，PPTX 可继续编辑，门禁证明可交付。</span></div>
+    <div class="footnote">注：口径：产品交付构成示意——三者同源 REPORT_MODEL，缺一则不算完整上台交付。</div>
   </div>
 </section>
 
@@ -1086,20 +1114,26 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
   <div class="wrap">
     <div class="shead rv">
       <div class="t-eyebrow">05 · 图表工艺</div>
-      <h2 class="t-h1 shead__title">0.1.x 能力累进：定位与样张随版本加厚</h2>
+      <h2 class="t-h1 shead__title">0.2.5 精简发布内容：npm 解包体积从 16.9 MB 降到 7.3 MB</h2>
     </div>
     <div class="grid g-side rv a-start">
-      <div class="fig"><div class="fig__cap">0.1.x 能力累进：定位与样张随版本加厚</div>
-      <svg class="chart" data-chart="line" viewBox="0 0 560 220">
-        <!-- 数据以 REPORT_MODEL.chart 为准；复杂图形用 extract_snippet --chart line -->
-        <text x="280" y="110" text-anchor="middle" class="f-txt3" font-size="12">line · 见模型数据</text>
-      </svg>
+      <div class="fig"><div class="fig__cap">0.2.5 精简发布内容：npm 解包体积从 16.9 MB 降到 7.3 MB</div>
+      <svg class="chart" data-chart="bar" viewBox="0 0 560 220">
+      <line x1="46" y1="170" x2="540" y2="170" class="s-bds" stroke-width="1"/>
+      <rect data-anim="grow" x="117.3" y="51.7" width="125.4" height="118.3" rx="6" class="f-acc"><title>0.2.4 16.9MB</title></rect>
+      <text data-anim="fade" x="180.0" y="192" text-anchor="middle" class="f-txt3" font-size="11">0.2.4</text>
+      <text data-anim="fade" x="180.0" y="43.7" text-anchor="middle" class="f-txt2" font-size="12" font-weight="600">16.9MB</text>
+      <rect data-anim="grow" x="357.3" y="118.9" width="125.4" height="51.1" rx="6" class="f-acc"><title>0.2.5 7.3MB</title></rect>
+      <text data-anim="fade" x="420.0" y="192" text-anchor="middle" class="f-txt3" font-size="11">0.2.5</text>
+      <text data-anim="fade" x="420.0" y="110.9" text-anchor="middle" class="f-txt2" font-size="12" font-weight="600">7.3MB</text>
+    </svg>
       </div>
       <div class="stack gap-4"><h3 class="t-h3">怎么读这张图</h3>
-        <ul class="ul"><li><strong>真实版本线。</strong>对应 CHANGELOG 已合并能力，非虚构增速</li><li><strong>本版强化。</strong>差异化定位 · 双交付叙事 · README 总览精简</li></ul>
+        <ul class="ul"><li><strong>白名单发布。</strong>package.json 的 files 只留运行所需文件，文件数 266 → 197</li><li><strong>压缩包同步变小。</strong>13.3 MB → 4.6 MB</li></ul>
       </div>
     </div>
-    <div class="sowhat rv"><span class="sowhat__v">质量与叙事同步推进——版本线把门禁、样张与定位一起写清。</span></div>
+    <div class="sowhat rv"><span class="sowhat__v">发布内容更小，安装更快，装进技能目录的都是会被用到的文件。</span></div>
+    <div class="footnote">注：口径：数字取自 CHANGELOG 0.2.5 记录的 npm 包解包体积。</div>
   </div>
 </section>
 
@@ -1144,15 +1178,37 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
     <div class="grid g-side rv a-start">
       <div class="fig"><div class="fig__cap">从想法到上台：工艺链路如何把主张垫实</div>
       <svg class="chart" data-chart="waterfall" viewBox="0 0 560 220">
-        <!-- 数据以 REPORT_MODEL.chart 为准；复杂图形用 extract_snippet --chart waterfall -->
-        <text x="280" y="110" text-anchor="middle" class="f-txt3" font-size="12">waterfall · 见模型数据</text>
-      </svg>
+      <line x1="40" y1="190" x2="540" y2="190" class="s-bds" stroke-width="1"/>
+      <rect data-anim="grow" x="68.4" y="159.1" width="44.9" height="30.9" rx="5" class="f-s3"/>
+      <text x="90.8" y="151.1" text-anchor="middle" class="f-txt2" font-size="12" font-weight="600">20pt</text>
+      <text x="90.8" y="206" text-anchor="middle" class="f-txt3" font-size="11">意图</text>
+      <rect data-anim="grow" x="150.0" y="135.9" width="44.9" height="23.2" rx="5" class="f-acc"/>
+      <text x="172.5" y="127.9" text-anchor="middle" class="f-acc" font-size="12" font-weight="600">+15pt</text>
+      <text x="172.5" y="206" text-anchor="middle" class="f-txt3" font-size="11">模式</text>
+      <line x1="131.7" y1="159.1" x2="150.0" y2="159.1" class="s-bds" stroke-width="1" stroke-dasharray="3 3"/>
+      <rect data-anim="grow" x="231.7" y="97.2" width="44.9" height="38.6" rx="5" class="f-acc"/>
+      <text x="254.2" y="89.2" text-anchor="middle" class="f-acc" font-size="12" font-weight="600">+25pt</text>
+      <text x="254.2" y="206" text-anchor="middle" class="f-txt3" font-size="11">模型</text>
+      <line x1="213.3" y1="135.9" x2="231.7" y2="135.9" class="s-bds" stroke-width="1" stroke-dasharray="3 3"/>
+      <rect data-anim="grow" x="313.4" y="74.1" width="44.9" height="23.2" rx="5" class="f-acc"/>
+      <text x="335.8" y="66.1" text-anchor="middle" class="f-acc" font-size="12" font-weight="600">+15pt</text>
+      <text x="335.8" y="206" text-anchor="middle" class="f-txt3" font-size="11">图表</text>
+      <line x1="295.0" y1="97.2" x2="313.4" y2="97.2" class="s-bds" stroke-width="1" stroke-dasharray="3 3"/>
+      <rect data-anim="grow" x="395.0" y="50.9" width="44.9" height="23.2" rx="5" class="f-acc"/>
+      <text x="417.5" y="42.9" text-anchor="middle" class="f-acc" font-size="12" font-weight="600">+15pt</text>
+      <text x="417.5" y="206" text-anchor="middle" class="f-txt3" font-size="11">门禁</text>
+      <line x1="376.7" y1="74.1" x2="395.0" y2="74.1" class="s-bds" stroke-width="1" stroke-dasharray="3 3"/>
+      <rect data-anim="grow" x="476.7" y="50.9" width="44.9" height="139.1" rx="5" class="f-acc"/>
+      <text x="499.2" y="42.9" text-anchor="middle" class="f-txt2" font-size="12" font-weight="600">90pt</text>
+      <text x="499.2" y="206" text-anchor="middle" class="f-txt3" font-size="11">上台</text>
+    </svg>
       </div>
       <div class="stack gap-4"><h3 class="t-h3">怎么读这张图</h3>
         <ul class="ul"><li><strong>意图定模式。</strong>路演→A · 调研→B · 拓扑→C</li><li><strong>门禁收口。</strong>strict 0/0 前不算交付</li></ul>
       </div>
     </div>
     <div class="sowhat rv"><span class="sowhat__v">上台交付 = 模式契约 + 模型单写 + 多样图表 + 门禁收口。</span></div>
+    <div class="footnote">注：口径：链路贡献为工艺阶段示意分，用于说明流程而非外部 KPI。</div>
   </div>
 </section>
 
@@ -1166,9 +1222,27 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
       <div class="stack gap-4"><ul class="ul"><li><strong>产品已交付能力。</strong>五项均为当前线真实能力，不是预测</li><li><strong>图表选型。</strong>谁大谁小 → hbar；趋势 → line；占比 → donut</li></ul></div>
       <div class="fig"><div class="fig__cap">能力就绪（当前发布线）</div>
       <svg class="chart" data-chart="hbar" viewBox="0 0 560 220">
-        <!-- 数据以 REPORT_MODEL.chart 为准；复杂图形用 extract_snippet --chart hbar -->
-        <text x="280" y="110" text-anchor="middle" class="f-txt3" font-size="12">hbar · 见模型数据</text>
-      </svg>
+      <text x="0" y="30.0" class="f-txt2" font-size="12">strict 0/0</text>
+      <rect x="130" y="20.0" width="340" height="15" rx="7.5" class="f-s2"/>
+      <rect data-anim="grow" x="130" y="20.0" width="340.0" height="15" rx="7.5" class="f-acc"><title>strict 0/0 100%</title></rect>
+      <text x="482" y="32.0" class="f-txt" font-size="12" font-weight="600">100%</text>
+      <text x="0" y="66.0" class="f-txt2" font-size="12">三模式契约</text>
+      <rect x="130" y="56.0" width="340" height="15" rx="7.5" class="f-s2"/>
+      <rect data-anim="grow" x="130" y="56.0" width="340.0" height="15" rx="7.5" class="f-acc"><title>三模式契约 100%</title></rect>
+      <text x="482" y="68.0" class="f-txt" font-size="12" font-weight="600">100%</text>
+      <text x="0" y="102.0" class="f-txt2" font-size="12">九风格皮肤</text>
+      <rect x="130" y="92.0" width="340" height="15" rx="7.5" class="f-s2"/>
+      <rect data-anim="grow" x="130" y="92.0" width="340.0" height="15" rx="7.5" class="f-acc"><title>九风格皮肤 100%</title></rect>
+      <text x="482" y="104.0" class="f-txt" font-size="12" font-weight="600">100%</text>
+      <text x="0" y="138.0" class="f-txt2" font-size="12">双通道交付</text>
+      <rect x="130" y="128.0" width="340" height="15" rx="7.5" class="f-s2"/>
+      <rect data-anim="grow" x="130" y="128.0" width="340.0" height="15" rx="7.5" class="f-acc"><title>双通道交付 100%</title></rect>
+      <text x="482" y="140.0" class="f-txt" font-size="12" font-weight="600">100%</text>
+      <text x="0" y="174.0" class="f-txt2" font-size="12">Fast Mode</text>
+      <rect x="130" y="164.0" width="340" height="15" rx="7.5" class="f-s2"/>
+      <rect data-anim="grow" x="130" y="164.0" width="340.0" height="15" rx="7.5" class="f-acc"><title>Fast Mode 100%</title></rect>
+      <text x="482" y="176.0" class="f-txt" font-size="12" font-weight="600">100%</text>
+    </svg>
       </div>
     </div>
     <div class="sowhat rv"><span class="sowhat__v">说服力来自可核对的能力清单与图表多样性，而非单张柱图凑数。</span></div>
@@ -1208,11 +1282,25 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
     <div class="shead rv"><div class="t-eyebrow">下一步</div>
       <h2 class="t-h1 shead__title">让好想法被看见</h2></div>
     <div class="grid g-3 rv a-start">
-<ul class="ul"><li><strong>装技能。</strong>npx @topmindspace/tms-skills install top-ppt-html</li><li><strong>看样张。</strong>Showcase · style-gallery · 顶栏 T/P/H/F/B</li><li><strong>双交付上台。</strong>HTML 日常演示 · PPTX 按需导出 · strict 0/0</li></ul>
+<ul class="ul"><li><strong>装技能。</strong>npm i @topmindspace/topmind-presentation（或下载 Release zip）</li><li><strong>看样张。</strong>Showcase · style-gallery · 顶栏 T/P/H/F/B</li><li><strong>双交付上台。</strong>HTML 日常演示 · PPTX 按需导出 · strict 0/0</li></ul>
     </div>
   </div>
 </section>
 <!-- __TOPPPT_CONTENT_END__ -->
+
+<!-- ══ 页脚 ══ -->
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div class="brand">
+      <div class="brand__mark">R</div>
+      <div class="brand__txt">
+        <div class="brand__title">报告名</div>
+        <div class="brand__sub">副标题 · YYYY-MM-DD</div>
+      </div>
+    </div>
+    <div class="t-xs">密级说明</div>
+  </div>
+</footer>
 
 <!-- ══ 页码指示（翻页导航） ══ -->
 <aside class="pager" id="pager" aria-label="页码导航">
@@ -1823,9 +1911,9 @@ window.REPORT_MODEL = {
   "mode": "presentation",
   "style": "business-blue",
   "theme": "light",
-  "title": "TopMind × tms-skills",
+  "title": "TopPPT HTML × topmind-presentation",
   "subtitle": "HTML + PPT 双交付 · 为正式商务演示而生",
-  "meta": "产品介绍 · 2026-09-26 · v0.1.19",
+  "meta": "产品介绍 · 2026-10-11 · v0.2.7",
   "agenda": [
     [
       "01",
@@ -1834,13 +1922,13 @@ window.REPORT_MODEL = {
     ],
     [
       "02",
-      "tms-skills",
-      "02 · tms-skills"
+      "安装与分发",
+      "02 · 安装与分发"
     ],
     [
       "03",
-      "top-ppt-html",
-      "03 · top-ppt-html"
+      "双交付",
+      "03 · 双交付"
     ],
     [
       "04",
@@ -1878,7 +1966,7 @@ window.REPORT_MODEL = {
       "type": "cards",
       "layoutPreset": "P5",
       "eyebrow": "01 · 为什么是我们",
-      "title": "市面 PPT 技能很多，为何还要 top-ppt-html",
+      "title": "市面 PPT 技能很多，为何还要 topmind-presentation",
       "columns": 3,
       "cards": [
         {
@@ -1929,60 +2017,60 @@ window.REPORT_MODEL = {
     {
       "type": "cards",
       "layoutPreset": "P5",
-      "eyebrow": "02 · tms-skills",
-      "title": "tms-skills：整仓可安装的智能体技能",
+      "eyebrow": "02 · 安装与分发",
+      "title": "安装与分发：仓库即技能，四种装法任选",
       "columns": 3,
       "cards": [
         {
-          "title": "Monorepo",
+          "title": "仓库即技能",
           "points": [
             [
-              "一仓多技能",
-              "根目录技能包 + 统一安装器"
+              "根目录即技能本体",
+              "SKILL.md、references、scripts 与 assets 同在一仓"
             ],
             [
-              "同 tag 发版",
-              "安装器与技能整仓对齐"
+              "没有安装器",
+              "宿主能看到 topmind-presentation/SKILL.md 即可"
             ]
           ],
           "icon": "增长"
         },
         {
-          "title": "双通道安装",
+          "title": "四种装法",
           "points": [
             [
-              "npm 钉版本",
-              "npx @topmindspace/tms-skills"
+              "钉版本",
+              "Release 的 topmind-presentation.zip 解压到技能目录"
             ],
             [
-              "GitHub 跟 HEAD",
-              "日常可 clone / 直装"
+              "跟 HEAD",
+              "git clone 或 npx skills add；npm 包需再同步一次"
             ]
           ],
           "icon": "下降"
         },
         {
-          "title": "当前主技能",
+          "title": "只发运行所需",
           "points": [
             [
-              "top-ppt-html",
-              "正式场合演示文稿"
+              "files 白名单",
+              "不含落地页、截图和评测集"
             ],
             [
-              "HTML + PPTX",
-              "同源模型 · 双交付"
+              "同 tag 发版",
+              "GitHub Release 与 npm 版本号一致"
             ]
           ],
           "icon": "数据"
         }
       ],
-      "footnote": "包名 @topmindspace/tms-skills · 当前线 0.1.19（latest）",
-      "soWhat": "安装器与技能同仓同 tag——装一次，版本线对齐。"
+      "footnote": "包名 @topmindspace/topmind-presentation · 当前线 0.2.7（latest）",
+      "soWhat": "版本号与 tag 一致——装哪一版，用的就是哪一版。"
     },
     {
       "type": "split",
       "layoutPreset": "P1",
-      "eyebrow": "03 · top-ppt-html",
+      "eyebrow": "03 · 双交付",
       "title": "双交付：HTML 即演示，PPTX 可继续编",
       "left": {
         "points": [
@@ -2101,39 +2189,32 @@ window.REPORT_MODEL = {
       "type": "bar",
       "layoutPreset": "P7",
       "eyebrow": "05 · 图表工艺",
-      "title": "0.1.x 能力累进：定位与样张随版本加厚",
+      "title": "0.2.5 精简发布内容：npm 解包体积从 16.9 MB 降到 7.3 MB",
       "chart": {
-        "type": "line",
         "labels": [
-          "0.1.7",
-          "0.1.8",
-          "0.1.9",
-          "0.1.10",
-          "0.1.11"
+          "0.2.4",
+          "0.2.5"
         ],
         "values": [
-          8,
-          10,
-          11,
-          12,
-          13
+          16.9,
+          7.3
         ],
-        "unit": "项",
-        "max": 14,
+        "unit": "MB",
+        "max": 20,
         "dataTable": "notes"
       },
       "points": [
         [
-          "真实版本线",
-          "对应 CHANGELOG 已合并能力，非虚构增速"
+          "白名单发布",
+          "package.json 的 files 只留运行所需文件，文件数 266 → 197"
         ],
         [
-          "本版强化",
-          "差异化定位 · 双交付叙事 · README 总览精简"
+          "压缩包同步变小",
+          "13.3 MB → 4.6 MB"
         ]
       ],
-      "note": "口径：累计能力项为发布说明中的能力主题计数（示意刻度），用于展示版本节奏。",
-      "soWhat": "质量与叙事同步推进——版本线把门禁、样张与定位一起写清。"
+      "note": "口径：数字取自 CHANGELOG 0.2.5 记录的 npm 包解包体积。",
+      "soWhat": "发布内容更小，安装更快，装进技能目录的都是会被用到的文件。"
     },
     {
       "type": "metrics",
@@ -2358,7 +2439,7 @@ window.REPORT_MODEL = {
     "points": [
       [
         "装技能",
-        "npx @topmindspace/tms-skills install top-ppt-html"
+        "npm i @topmindspace/topmind-presentation（或下载 Release zip）"
       ],
       [
         "看样张",
@@ -2370,11 +2451,11 @@ window.REPORT_MODEL = {
       ]
     ]
   }
-};
+};;
 
 /* __TOPPPT_RUNTIME_START__ */
 /* ══ PPTX 导出运行时（assets/pptx-export.js 的内联副本 · 由 scripts/sync_runtime.py 注入，禁止手改） ══ */
-/* __TOPPPT_RUNTIME_SHA__:af6e25f25fd2e116 */
+/* __TOPPPT_RUNTIME_SHA__:2b37cd7a4f5f3174 */
 /* ═══════════════════════════════════════════════════════════════════════════
  * TopPPT HTML· 浏览器端 PPTX 预览运行时
  * 零依赖、随报告单文件分发；OOXML 序列化器（仅供预览，页面不导出文件）。
@@ -2429,7 +2510,7 @@ function isRec(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
 var PW = 13.333, PH = 7.5, MX = 0.6, CW = PW - 2 * MX, EMU = 914400;
 var TS_BASE = {"coverTitle":44,"coverSub":18,"h1":30,"h2":17,"lead":14,"body":13,"caption":11,"micro":10};
 var MTS = {"presentation":{"coverTitle":44,"coverSub":18,"h1":30,"h2":17,"lead":14,"body":13,"caption":11,"micro":10},"research":{"coverTitle":36,"coverSub":14,"h1":22,"h2":13.5,"lead":11.5,"body":10.5,"caption":9,"micro":8.5},"architecture":{"coverTitle":44,"coverSub":19,"h1":30,"h2":17,"lead":14,"body":13,"caption":11,"micro":10}};
-var PT = {"layout":{"contentTop":2.35,"contentBottom":6.9,"contentBottomWithNote":6.4,"pageNumY":7.0},"common":{"headEyebrowY":0.48,"headTitleY":0.82,"headRuleY":1.72,"leadY":1.88,"bodyY":2.35,"bodyYWithLead":2.55,"pagerY":7.0},"cover":{"metaY":0.7,"titleY":2.4,"titleH":2.0,"subtitleY":4.5,"subtitleH":0.8},"closing":{"eyebrowY":0.7,"titleY":1.2,"titleH":1.2,"pointsY":3.0,"pointTitleH":0.6,"pointBodyH":1.2},"points":{"listY":2.5,"rowH":0.72,"rowHMin":0.5,"markSize":0.14,"metricY":4.7,"metricW":2.6,"metricValH":0.9,"metricCapY":5.6},"metrics":{"bandY":3.1,"cardH":2.3,"valY":3.45,"valH":1.1,"capY":4.55,"capH":0.7,"gap":0.3,"maxW":2.9},"table":{"y":2.5,"rowH":0.55,"rowHMin":0.32,"headRowH":0.5},"bar":{"hbarY0":2.6,"hbarY1":6.25,"chartX":0.6,"chartY":2.95,"chartW":1.2,"chartH":3.35,"noteY":6.55},"note":{"y":6.55,"h":0.4},"exhibit":{"badgeY":2.35,"chartY":2.75,"chartH":3.25,"soWhatY":6.05,"footnoteY":6.72},"twocol":{"colGap":0.5,"bodyH":3.6,"rowHMin":0.5},"hbar":{"labelW":1.9,"valW":1.0,"rowH":0.55,"barRatio":0.5},"diagram":{"layerBarW":1.35,"layerGap":0.15,"nodeGap":0.15,"bodyStartY":2.9,"maxLayerH":1.15,"nodeMaxW":2.2},"split":{"leftW":0.55,"rightW":0.415,"rightX":0.585,"pointsY":2.7,"rowH":0.78,"capY":2.55,"chartY":3.0,"chartH":3.7,"tableY":2.7,"tableRowH":0.5},"cards":{"startY":3.0,"gap":0.25,"maxH":2.0,"titleH":0.4},"timeline":{"labelY":2.95,"axisY":3.58,"dotY":3.51,"dotR":0.18,"nameY":3.9,"descY":4.45,"descH":1.2},"research":{"col3Gap":0.38,"matrixLabelW":1.5,"matrixCellH":0.85,"matrixY":2.2,"denseTableY":2.2,"denseRowH":0.42,"halfTableW":0.52,"halfChartX":0.57,"halfChartW":0.43},"arch":{"fullStartY":2.1,"fullEndY":6.9,"laneH":0.72,"laneHMin":0.5,"laneGap":0.14,"laneHeadW":1.3,"stepGap":0.12,"stepMaxW":1.9},"kpi":{"heroY":2.9,"heroW":0.52,"heroH":1.6,"dividerX":0.56,"metricY0":2.95,"metricRowH":0.85},"comparison":{"panelGap":0.4,"panelY":2.55,"panelH":3.4,"titleH":0.45,"rowH":0.62},"quote":{"markY":1.75,"textY":2.7,"textH":2.3,"authorY":5.25,"contextY":5.8},"donut":{"centerX":3.05,"centerY":4.6,"r":1.6,"holeR":0.95,"legendX":5.6,"legendRowH":0.55,"legendLabelW":3.4,"legendValW":1.3,"legendPctX":5.3,"legendPctW":1.3},"steps":{"y":3.05,"barH":1.35,"gap":0.12,"arrowW":0.3,"numH":0.3,"titleH":0.34,"pad":0.08,"maxPerRow":6},"heatmap":{"y":2.6,"labelW":1.7,"headH":0.42,"cellH":0.6,"cellGap":0.06,"legendW":1.6},"pyramid":{"y":2.35,"rowH":0.72,"gap":0.08,"minW":0.34,"labelW":3.2},"bullet":{"y":2.6,"rowH":0.8,"labelW":2.4,"valW":1.7,"barH":0.26},"image":{"y":2.3,"h":4.2,"halfW":0.56,"halfGap":0.06,"capY":6.6,"capH":0.3,"radius":0.09,"noteRowH":0.62,"gridGap":0.16,"gridCols":{"2":2,"3":3,"4":4,"6":3},"gridCapH":0.28,"compareGap":0.3,"compareTagH":0.26,"wallCellH":0.92,"wallGap":0.18,"wallMaxRows":2},"flagbar":{"hdH":0.26,"rowH":0.24,"maxRows":3,"gap":0.12},"sankey":{"y":2.45,"h":4.1,"nodeW":0.32,"nodeGap":0.14,"labelW":1.55,"minBandH":0.22,"maxNodes":12,"maxFlows":24},"treemap":{"y":2.45,"h":4.1,"gap":0.05,"labelMinH":0.34,"maxLeaves":16,"maxDepth":3},"boxplot":{"y":2.7,"h":3.7,"labelW":1.5,"groupGap":0.3,"boxMaxW":0.9,"whiskerCapW":0.34,"maxGroups":8},"network":{"y":2.4,"h":4.2,"nodeR":0.28,"nodeRMin":0.18,"labelMaxW":1.4,"maxNodes":18,"maxEdges":30},"marimekko":{"y":2.6,"h":3.75,"labelW":1.55,"colGap":0.06,"legendH":0.42,"maxCols":6,"maxSegs":4},"streamgraph":{"y":2.6,"h":3.75,"labelW":1.4,"bandMinH":0.12,"maxSeries":6}};
+var PT = {"layout":{"contentTop":2.35,"contentBottom":6.9,"contentBottomWithNote":6.4,"pageNumY":7.0},"common":{"headEyebrowY":0.48,"headTitleY":0.82,"headRuleY":1.72,"leadY":1.88,"bodyY":2.35,"bodyYWithLead":2.55,"pagerY":7.0},"cover":{"metaY":0.7,"titleY":2.4,"titleH":2.0,"subtitleY":4.5,"subtitleH":0.8},"closing":{"eyebrowY":0.7,"titleY":1.2,"titleH":1.2,"pointsY":3.0,"pointTitleH":0.6,"pointBodyH":1.2},"points":{"listY":2.5,"rowH":0.72,"rowHMin":0.5,"markSize":0.14,"metricY":4.7,"metricW":2.6,"metricValH":0.9,"metricCapY":5.6},"metrics":{"bandY":3.1,"cardH":2.3,"valY":3.45,"valH":1.1,"capY":4.55,"capH":0.7,"gap":0.3,"maxW":2.9},"table":{"y":2.5,"rowH":0.55,"rowHMin":0.32,"headRowH":0.5},"bar":{"hbarY0":2.6,"hbarY1":6.25,"chartX":0.6,"chartY":2.95,"chartW":1.2,"chartH":3.35,"noteY":6.55},"note":{"y":6.55,"h":0.4},"exhibit":{"badgeY":2.35,"chartY":2.75,"chartH":3.25,"soWhatY":6.05,"footnoteY":6.72},"twocol":{"colGap":0.5,"bodyH":3.6,"rowHMin":0.5},"hbar":{"labelW":1.9,"valW":1.0,"rowH":0.55,"barRatio":0.5},"diagram":{"layerBarW":1.35,"layerGap":0.15,"nodeGap":0.15,"bodyStartY":2.9,"maxLayerH":1.15,"nodeMaxW":2.2},"split":{"leftW":0.55,"rightW":0.415,"rightX":0.585,"pointsY":2.7,"rowH":0.78,"capY":2.55,"chartY":3.0,"chartH":3.7,"tableY":2.7,"tableRowH":0.5},"cards":{"startY":3.0,"gap":0.25,"maxH":2.0,"titleH":0.4},"timeline":{"labelY":2.95,"axisY":3.58,"dotY":3.51,"dotR":0.18,"nameY":3.9,"descY":4.45,"descH":1.2},"research":{"col3Gap":0.38,"matrixLabelW":1.5,"matrixCellH":0.85,"matrixY":2.2,"denseTableY":2.2,"denseRowH":0.42,"halfTableW":0.52,"halfChartX":0.57,"halfChartW":0.43},"arch":{"fullStartY":2.1,"fullEndY":6.9,"laneH":0.72,"laneHMin":0.5,"laneGap":0.14,"laneHeadW":1.3,"stepGap":0.12,"stepMaxW":1.9},"kpi":{"heroY":2.9,"heroW":0.52,"heroH":1.6,"dividerX":0.56,"metricY0":2.95,"metricRowH":0.85},"comparison":{"panelGap":0.4,"panelY":2.55,"panelH":3.4,"titleH":0.45,"rowH":0.62},"quote":{"markY":1.75,"textY":2.7,"textH":2.3,"authorY":5.25,"contextY":5.8},"donut":{"centerX":3.05,"centerY":4.6,"r":1.6,"holeR":0.95,"legendX":5.6,"legendRowH":0.55,"legendLabelW":3.4,"legendValW":1.3,"legendPctX":10.8,"legendPctW":1.3},"steps":{"y":3.05,"barH":1.35,"gap":0.12,"arrowW":0.3,"numH":0.3,"titleH":0.34,"pad":0.08,"maxPerRow":6},"heatmap":{"y":2.6,"labelW":1.7,"headH":0.42,"cellH":0.6,"cellGap":0.06,"legendW":1.6},"pyramid":{"y":2.35,"rowH":0.72,"gap":0.08,"minW":0.34,"labelW":3.2},"bullet":{"y":2.6,"rowH":0.8,"labelW":2.4,"valW":1.7,"barH":0.26},"image":{"y":2.3,"h":4.2,"halfW":0.56,"halfGap":0.06,"capY":6.6,"capH":0.3,"radius":0.09,"noteRowH":0.62,"gridGap":0.16,"gridCols":{"2":2,"3":3,"4":4,"6":3},"gridCapH":0.28,"compareGap":0.3,"compareTagH":0.26,"wallCellH":0.92,"wallGap":0.18,"wallMaxRows":2},"flagbar":{"hdH":0.26,"rowH":0.24,"maxRows":3,"gap":0.12},"sankey":{"y":2.45,"h":4.1,"nodeW":0.32,"nodeGap":0.14,"labelW":1.55,"minBandH":0.22,"maxNodes":12,"maxFlows":24},"treemap":{"y":2.45,"h":4.1,"gap":0.05,"labelMinH":0.34,"maxLeaves":16,"maxDepth":3},"boxplot":{"y":2.7,"h":3.7,"labelW":1.5,"groupGap":0.3,"boxMaxW":0.9,"whiskerCapW":0.34,"maxGroups":8},"network":{"y":2.4,"h":4.2,"nodeR":0.28,"nodeRMin":0.18,"labelMaxW":1.4,"maxNodes":18,"maxEdges":30},"marimekko":{"y":2.6,"h":3.75,"labelW":1.55,"colGap":0.06,"legendH":0.42,"maxCols":6,"maxSegs":4},"streamgraph":{"y":2.6,"h":3.75,"labelW":1.4,"bandMinH":0.12,"maxSeries":6}};
 var PRESETS = {
   'business-blue': { accent:'1A73E8', ink:'202124', body:'5F6368', faint:'80868B', bg:'FFFFFF', surface:'F8F9FA', line:'DADCE0', soft:'E8F0FE', onAccent:'FFFFFF', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
   'apple-mono': { accent:'1D1D1F', ink:'1D1D1F', body:'6E6E73', faint:'86868B', bg:'FFFFFF', surface:'F5F5F7', line:'D2D2D7', soft:'F5F5F7', onAccent:'FFFFFF', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
@@ -2456,7 +2537,7 @@ var STYLE_DATA_COLORS = {"business-blue":["1a73e8","3526bb","21a199","b77148","9
 var STYLE_DATA_COLORS_DARK = {"business-blue":["8ab4f8","7966e0","88e7e5","d4ad91","cbce83"],"apple-mono":["f5f5f7","2997ff","2dd4bf","ff9f0a","bf5af2"],"mckinsey":["7fb2e5","6f6bdb","8ce3d8","d1a694","cbc586"],"brand-red":["ff5a66","e09e66","e788cb","91d4c2","83b4ce"],"warm-sand":["d9b36a","c2d571","df9391","97b5ce","8e89c7"],"deep-teal":["4fc3b0","7aaecd","97d8a4","c99cac","c29c8f"],"graphite-dark":["4da3ff","6c66e0","88e7dc","d4a691","cec983"],"indigo-violet":["a5a4f0","a967e0","89c3e7","d3c792","aece83"],"spectrum":["8ba0f8","9066e0","88d6e7","d4ba91","bdce83"]};
 var GRID = {"columns":12,"gutter":0.16,"colW":0.8644,"x":[0.6,1.6244,2.6488,3.6732,4.6976,5.722,6.7464,7.7708,8.7952,9.8196,10.844,11.8684,12.733],"y":[2.35,3.27,4.19,5.11,6.03,6.9],"safe":{"top":0.4,"bottom":0.4,"left":0.6,"right":0.6}};
 var TYPO = {"levels":[{"id":"C0","name":"封面/章节幕标题","role":"coverTitle","usage":"封面主标题、章节幕标题"},{"id":"T1","name":"页码/章节徽章","role":"caption","usage":"页码徽章、章节编号"},{"id":"T2","name":"页面主标题/结论标题","role":"h1","usage":"每页顶部结论句（research 行动标题）"},{"id":"T3","name":"副标题/语境说明","role":"lead","usage":"主标题下方导语"},{"id":"T4","name":"模块标题/图表标题","role":"h2","usage":"卡片标题、图表标题、面板标题"},{"id":"T5","name":"证据编号/轻量标签","role":"micro","usage":"Exhibit 编号、状态标签"},{"id":"T6","name":"证据块标题/小节标题","role":"h2","usage":"分栏小标题、证据块标题"},{"id":"T7","name":"正文解释段落","role":"body","usage":"证据解释、管理解读正文、表格正文"},{"id":"T8","name":"结论条文字","role":"body","usage":"结论条、核心结论框"},{"id":"T9","name":"结论条标签（可选·默认隐藏）","role":"caption","usage":"结论条可选标签（默认不显示）"},{"id":"T10","name":"结论条正文/业务含义","role":"body","usage":"结论条正文、行动含义、表格行动项"},{"id":"T11","name":"图表轴/图例/刻度/微标签","role":"micro","usage":"坐标轴、图例、刻度、单位（禁用于表格正文与完整短句）"},{"id":"T12","name":"图表数据标签","role":"caption","usage":"折线点值、柱形标签、百分比标注"},{"id":"T13","name":"关键 KPI 大数字","role":"h1","usage":"KPI 大数字、hero 数值"},{"id":"T14","name":"注释/口径/来源/页脚","role":"micro","usage":"footnote、来源行、页脚、小页码"}],"tableSemanticRule":{"body":["T7","T10"],"microAllowed":["T11"],"microForbiddenFor":["表格正文","行动项","风险项","解释句","建议句","长项目符号","完整短句"]}};
-var CONT = {"pad":{"card":0.18,"panel":0.2,"cell":0.08,"band":0.16,"soWhat":0.16,"kpi":0.18,"chart":0.1,"head":0.05,"footer":0.05,"node":0.06},"minPad":0.06,"textMetrics":{"lineFactor":1.45,"emAsciiRatio":0.52},"overflowRule":"溢出处置优先级（禁静默截断）：① 重构承载（列表/卡片/表/图/组合版式）→ ② 拆页/分章（议程→主张→证据卡→明细；01a/01b；信息须完整）→ ③ 换布局形态（V1–V4/多列/卡栅格）→ ④ 有限 fontShrink（阶梯内、模式 floor 以上、最多 4 档）→ ⑤ 禁止：静默截断、砍 so-what/证据/口径、为审美稀疏删决策必需信息。单页字数预算是预警不是删字许可证。","fontShrink":{"ladder":[15,14,13.5,13,12.5,12,11.5,11,10.5,10,9.5,9,8.5],"maxShrinkSteps":4,"floorPt":{"presentation":10,"research":9,"architecture":10},"preferContentFirst":true,"warnBelow":9.5},"continuousTextRule":"语义连续的一句话 / so-what 主句 / 结论句 / 表格单元格正文不得拆成多个独立文本框（避免异常空格、断句、基线漂移）；局部加粗高亮必须用同一文本框内富文本。"};
+var CONT = {"pad":{"card":0.18,"panel":0.2,"cell":0.08,"band":0.16,"soWhat":0.16,"kpi":0.18,"chart":0.1,"head":0.05,"footer":0.05,"node":0.06},"minPad":0.06,"textMetrics":{"lineFactor":1.45,"emAsciiRatio":0.52},"overflowRule":"溢出处置优先级（禁静默截断）：① 重构承载（列表/卡片/表/图/组合版式）→ ② 拆页/分章（议程→主张→证据卡→明细；01a/01b；信息须完整）→ ③ 换布局形态（V1–V4/多列/卡栅格）→ ④ 有限 fontShrink（阶梯内、模式 floor 以上、最多 4 档）→ ⑤ 禁止：静默截断、砍 so-what/证据/口径、为审美稀疏删决策必需信息。单页字数预算是预警不是删字许可证。","fontShrink":{"ladder":[15,14,13.5,13,12.5,12,11.5,11,10.5,10,9.5,9,8.5],"maxShrinkSteps":4,"floorPt":{"presentation":10,"research":9,"architecture":10},"preferContentFirst":true,"warnBelow":9.5},"continuousTextRule":"语义连续的一句话 / so-what 主句 / 结论句 / 表格单元格正文不得拆成多个独立文本框（避免异常空格、断句、基线漂移）；局部加粗高亮必须用同一文本框内富文本。","adaptiveText":{"title":{"base":30,"step1":24,"longChars":28,"longMax":24,"xlongChars":44,"xlongMax":20},"list":{"denseItems":6,"gapFactor":0.5,"denseGapFactor":0.25,"lineFactor":1.45,"denseLineFactor":1.3,"max":14,"denseMax":12},"table":{"cellMax":12.5,"cellFloor":9,"headMax":13,"longCellChars":24,"rowFloorIn":0.22,"cellPadIn":0.07}}};
 var REG = {"bar":{"html":"svg-bars","pptx":"native","nativeType":"bar","dataTable":"notes","min":{"vbHeightMin":160}},"hbar":{"html":"svg-hbars","pptx":"native","nativeType":"bar","dataTable":"notes","min":{"vbHeightMin":100}},"stack":{"html":"svg-stack","pptx":"native","nativeType":"bar","dataTable":"notes","min":{"vbHeightMin":160},"nativeOpt":{"barGrouping":"stacked"}},"stackline":{"html":"svg-stackline","pptx":"native","nativeType":"bar","dataTable":"notes","min":{"vbHeightMin":40},"nativeOpt":{"barGrouping":"percentStacked"}},"line":{"html":"svg-line","pptx":"native","nativeType":"line","dataTable":"notes","min":{"vbHeightMin":160}},"dualline":{"html":"svg-dualline","pptx":"native","nativeType":"line","dataTable":"notes","min":{"vbHeightMin":160}},"area":{"html":"svg-area","pptx":"native","nativeType":"area","dataTable":"notes","min":{"vbHeightMin":160}},"donut":{"html":"svg-donut","pptx":"native","nativeType":"doughnut","dataTable":"notes","min":{"pxWidthMin":140}},"multidonut":{"html":"svg-mdonut","pptx":"native","nativeType":"doughnut","dataTable":"notes","min":{"pxWidthMin":140}},"pie":{"html":"svg-pie","pptx":"native","nativeType":"pie","dataTable":"notes","min":{"pxWidthMin":140}},"radar":{"html":"svg-radar","pptx":"native","nativeType":"radar","dataTable":"notes","min":{"pxWidthMin":220}},"scatter":{"html":"svg-scatter","pptx":"native","nativeType":"scatter","dataTable":"notes","min":{"vbHeightMin":180}},"bubble":{"html":"svg-bubble","pptx":"native","nativeType":"bubble","dataTable":"notes","min":{"vbHeightMin":180}},"waterfall":{"html":"svg-wf","pptx":"native","nativeType":"bar","dataTable":"notes","min":{"vbHeightMin":170},"nativeTrick":"stacked+hiddenBase+connector"},"gauge":{"html":"svg-gauge","pptx":"native","nativeType":"doughnut","dataTable":"notes","min":{"pxWidthMin":180},"nativeTrick":"doughnut+firstSliceAng+hiddenRemainder"},"pareto":{"html":"svg-pareto","pptx":"native","nativeType":"bar","dataTable":"notes","min":{"vbHeightMin":180},"nativeTrick":"multiType+bar+line"},"gantt":{"html":"svg-gantt","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":130},"path":{"forbidPresetShapes":true}},"vsbar":{"html":"svg-vsbar","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":100},"path":{"forbidPresetShapes":true}},"progress":{"html":"svg-progress","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":100},"path":{"forbidPresetShapes":true}},"sparkline":{"html":"svg-spark","pptx":"shape","dataTable":"off","min":{"vbHeightMin":20},"path":{"forbidPresetShapes":true}},"funnel":{"html":"svg-funnel","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":160},"path":{"minSamplePoints":8,"forbidPresetShapes":true}},"treemap":{"html":"svg-treemap","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":170},"path":{"forbidPresetShapes":true}},"marimekko":{"html":"svg-marimekko","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":160},"path":{"forbidPresetShapes":true}},"boxplot":{"html":"svg-boxplot","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":180},"path":{"forbidPresetShapes":true}},"network":{"html":"svg-network","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":200},"path":{"forbidPresetShapes":true}},"sankey":{"html":"svg-sankey","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":200},"path":{"minSamplePoints":16,"trackBothEdges":true,"forbidPresetShapes":true}},"streamgraph":{"html":"svg-stream","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":160},"path":{"minSamplePoints":24,"trackBothEdges":true,"forbidPresetShapes":true}},"slope":{"html":"svg-slope","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":180},"path":{"forbidPresetShapes":true}},"dumbbell":{"html":"svg-dumbbell","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":160},"path":{"forbidPresetShapes":true}},"lollipop":{"html":"svg-lollipop","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":140},"path":{"forbidPresetShapes":true}},"dotplot":{"html":"svg-dotplot","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":120},"path":{"forbidPresetShapes":true}},"bulletchart":{"html":"svg-bullet","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":140},"path":{"forbidPresetShapes":true}},"waffle":{"html":"svg-waffle","pptx":"shape","dataTable":"notes","min":{"vbHeightMin":160},"path":{"forbidPresetShapes":true}},"radialbar":{"html":"svg-radialbar","pptx":"shape","dataTable":"notes","min":{"pxWidthMin":200},"path":{"minSamplePoints":16,"forbidPresetShapes":true}},"rose":{"html":"svg-rose","pptx":"shape","dataTable":"notes","min":{"pxWidthMin":180},"path":{"minSamplePoints":16,"forbidPresetShapes":true}},"candlestick":{"html":"svg-candle","pptx":"shape","dataTable":"appendix","min":{"vbHeightMin":180},"path":{"forbidPresetShapes":true}}};
 var DEEP = {"triggers":["高保真","1:1","一比一","精确还原","按图还原","正式交付","不能偏移","像素级","严格对照","逐页验收"],"complexCharts":["sankey","streamgraph","treemap","marimekko","boxplot","network","rose","radialbar","candlestick","funnel"],"checks":{"anchors":true,"containerOverflow":true,"renderCompare":true,"manifest":true},"renderCompare":{"engine":"soffice","fallback":"powerpoint-com","skipIfMissing":true,"dpi":96}};
 var IMG = {"layouts":["full","half","bleed","grid","compare","wall"],"multiLayouts":["grid","compare","wall"],"fitEnum":["cover","contain"],"fitDefault":"cover","formats":["png","jpeg","jpg","webp","svg"],"ratioDefault":{"full":"3:1","half":"4:3","bleed":"21:9","grid":"4:3","compare":"4:3","wall":"1:1"},"ratioCssClass":{"full":"media--r3-1","half":"media--r4-3","bleed":"media--r21-9","grid":"media--r4-3","compare":"media--r4-3","wall":"media--r1-1"},"recommendedSizePx":{"full":"2400×800","half":"1400×1050","bleed":"2560×1100","grid":"900×675","compare":"1400×1050","wall":"480×480"},"maxInlineBytes":1572864,"maxTotalInlineBytes":8388608,"maxPerPage":6,"placeholderLabel":"配图占位","placeholderHintPrefix":"建议 ","placeholderHintSuffix":"px","zeroExternal":true,"qualityRule":"位图优先提供 ≥2× 显示尺寸；截图用 16:9 或 4:3 锁定比例；数据图不要用截图（应用内联 SVG 图表，可随主题变色）。"};
@@ -2611,7 +2692,7 @@ function regionOf(pageType, slotId, opts) {
 /* __TOPPPT_SCHEMA_START__ */
 /* ── 由 scripts/sync_runtime.py 从 scripts/model-schema.json 注入 · 禁止手改 ── */
 /* DSL schema 单源：浏览器端 validateModel 与 scripts/extract_model.py 消费同一份定义 */
-var MODEL_SCHEMA = {"version":"0.1","modes":["presentation","research","architecture"],"model":{"required":["title","sections:array","closing.title","closing.points:array"],"optional":["mode","style","theme","subtitle","meta","agenda:array"],"agendaMin":{"presentation":3,"research":3,"architecture":0},"agendaMax":7,"agendaMaxWithRefs":8,"agendaHint":"agenda 条目 = 章（篇/section），3–7 条；每章可含多页（sections[] 按页建模）。禁止把逐页标题当大纲。sections[].eyebrow 的 `NN ·` 前缀 = 章键，须与某条 agenda 对应；跳转锚点 = 该章第一页。含「参考资料」条目时 +1 仍 ≤8。","sectionsMin":1,"sectionsRecommended":3,"agendaComfortMax":8},"commonSectionFields":["eyebrow","title","lead","soWhat","footnote","flags","image","exhibitNo","layoutPreset"],"mutualExclusionHint":"verdict 与 soWhat 互斥：二者共用 annotation 结论条槽位，同页双填必叠印。comparison 页填 verdict 时不要再填 soWhat（渲染器已自动二选一，但模型侧应只给一个）。","flagsHint":"flags = 待核实/待二次修改条目字符串数组（如 '2027 增速 xx%（口径未定）'）；渲染为 accent 强调色标注行，提示用户核对。","imageHint":"image = 素材图片/配图占位对象。三选一必填：src（用户图，data: 内联或相对路径，零外链铁律禁 http(s)）｜items（多图版式：grid/compare/wall，元素 {src?, alt?, caption?, placeholder?}）｜placeholder:true（无图时出配图占位，原生形状渲染、pictures 不增）。其余可选：layout（full/half/bleed/grid/compare/wall，见 layout-constants.json imageSpec.layouts）、fit（cover 默认 / contain）、caption、alt、hint、ratio。","imageLayoutHint":"layout 与 HTML 版式对应：full=版心全宽图｜half=左图右注（points 为右栏注解）｜bleed=通栏出血｜grid=多图网格（items 2/3/4/6 张）｜compare=双图 A/B 对比（items 2 张）｜wall=Logo 墙（items 3–12 张小图）。占位符标签文本由双引擎按 imageSpec 拼同一串，保证 A/B 通道逐页文本一致。","chartTypes":["bar","hbar","stack","stackline","line","dualline","area","donut","multidonut","pie","radar","scatter","bubble","waterfall","gauge","pareto","funnel","gantt","vsbar","progress","sparkline","slope","dumbbell","lollipop","dotplot","bulletchart","waffle","radialbar","rose","candlestick"],"chartTypesHint":"chart.type 可取值 = 本表（30 类：16 原生 + 14 形状还原）。其余 6 类复杂信息图（sankey/treemap/boxplot/network/marimekko/streamgraph）是**专属页型**而非 chart.type——它们要按列/段/节点等结构化载荷表达，故走 sections[].type。不变量：charts.registry.types == chartTypes ∪ 上述 6 类页型（sync_runtime.py 校验）。","chartDataTable":{"enum":["notes","inline","appendix","off"],"default":"notes","rule":"非原生图表（registry.pptx=shape）的 dataTable 不得为 off；缺失时按 registry 默认值补齐。"},"pageTypes":{"points":{"label":"要点列表页","modes":["presentation","research","architecture"],"required":["points:array"],"optional":["metrics:array"]},"metrics":{"label":"指标带页（4–6 个核心数字）","modes":["presentation","research"],"required":["metrics:array"]},"kpi":{"label":"大数指标页（hero 大数字 + 支撑指标行）","modes":["presentation","research"],"required":["hero:array"],"optional":["metrics:array"]},"table":{"label":"对比表页","modes":["presentation","research","architecture"],"required":["table.head:array","table.rows:array"],"optional":["table.colW:array"]},"timeline":{"label":"时间线 / 路线页","modes":["presentation","research"],"required":["phases:array"]},"steps":{"label":"步骤条页（N 步横排 + 箭头，可分组）","modes":["presentation","research","architecture"],"required":["steps:array"],"optional":["groups:array","note"]},"bar":{"label":"图表页（chart.type 见 chartTypes；native 通道走原生数据图表，shape 通道走高保真形状还原 + 数据表）","modes":["presentation","research"],"required":["chart.labels:array","chart.values:array"],"optional":["chart.type","chart.series:array","chart.points:array","chart.max","chart.unit","chart.colors:array","chart.start:array","chart.target:array","chart.dataTable","note"]},"donut":{"label":"环形图页（原生 pie 楔形 + 图例）","modes":["presentation","research"],"required":["chart.labels:array","chart.values:array"],"optional":["chart.unit","chart.centerLabel","chart.colors:array","chart.dataTable","note"]},"heatmap":{"label":"热力矩阵页（行 × 列 + 强度色阶）","modes":["presentation","research"],"required":["rowHeads:array","colHeads:array","cells:array"],"optional":["unit","scaleLabel:array","note"]},"bullet":{"label":"达成对比页（实际 vs 目标条）","modes":["presentation","research"],"required":["items:array"],"optional":["unit","max","note"]},"pyramid":{"label":"金字塔页（层级递进，顶层最窄）","modes":["presentation","research","architecture"],"required":["levels:array"],"optional":["note"]},"image":{"label":"素材图片页（full/half/bleed/grid/compare/wall，效果与位置锁定；支持配图占位）","modes":["presentation","research","architecture"],"required":["anyof:image.src:str|image.items:array|image.placeholder"],"optional":["image.caption","image.alt","image.layout","image.fit","image.ratio","image.hint","points:array","note"]},"cards":{"label":"卡片网格页（cards 元素须为 {title, points:[[k,v]…], icon?}，不接受元组）","modes":["presentation","research"],"required":["cards:array"],"optional":["columns"],"cardItemHint":"cards[] 元素：{title:str, points:[[k,v]…]|[{t,d}…]|[str…], icon?:str}。icon = 语义图标名（icon_lib.js 键：增长/下降/数据/图表/趋势/占比/表格/效率/成果/安全/权限/检查/风险/团队/流程/计划/智能/洞察/工具/清单），HTML 与 PPTX 同名真导出；缺省按标题语义自动挑选。"},"split":{"label":"双区组合页（left / right 各可为 要点｜图表｜表格｜图片：type = points（默认）| table | image | 图表类型名；图表/表格字段直接挂在对应侧）","modes":["presentation","research"],"required":["anyof:left.points:array|left.type:str"],"optional":["left.cap","left.image","left.labels:array","left.values:array","left.series:array","left.points:array","left.max","left.unit","left.colors:array","left.dataTable","left.head:array","left.rows:array","left.colW:array","right.type","right.cap","right.image","right.labels:array","right.values:array","right.series:array","right.points:array","right.max","right.unit","right.colors:array","right.dataTable","right.head:array","right.rows:array","right.colW:array"]},"comparison":{"label":"对比页（左右双栏 + 可选结论条）","modes":["presentation","research"],"required":["left.title","left.points:array","right.title","right.points:array"],"optional":["verdict"]},"quote":{"label":"引用 / 金句页（深色全幅）","modes":["presentation","research"],"required":["quote","author"],"optional":["context"]},"diagram":{"label":"分层架构页（architecture 模式走全幅几何）","modes":["presentation","research","architecture"],"required":["layers:array"],"optional":["legend:array"]},"exhibit":{"label":"Exhibit 编号图表页（research R2）","modes":["research"],"required":["chart.labels:array","chart.values:array"],"optional":["exhibitNo","chart.type","chart.series:array","chart.points:array","chart.max","chart.unit","chart.colors:array","chart.dataTable","note"]},"twocol":{"label":"双栏论证页（research R1）","modes":["research"],"required":["paragraphs:array"]},"threecol":{"label":"三栏证据页（research R6）","modes":["research"],"required":["paragraphs:array"]},"halftable":{"label":"半表半图页（research R7）","modes":["research"],"required":["table.head:array","table.rows:array","chart.labels:array","chart.values:array"],"optional":["table.colW:array","chart.type","chart.series:array","chart.points:array","chart.max","chart.unit","chart.colors:array","chart.dataTable","note"]},"matrix":{"label":"矩阵图页（research R8）","modes":["research"],"required":["rowHeads:array","colHeads:array","cells:array"]},"lane":{"label":"泳道页（architecture A2）","modes":["architecture"],"required":["lanes:array"]},"sankey":{"label":"桑基图页（节点-流带，流向与流量）","modes":["research","architecture"],"required":["flows:array"],"optional":["unit","chart.dataTable","note"]},"treemap":{"label":"树图页（面积编码的层级构成）","modes":["research","architecture"],"required":["items:array"],"optional":["unit","chart.dataTable","note"]},"boxplot":{"label":"箱线图页（分布对比：min/q1/median/q3/max）","modes":["research","architecture"],"required":["groups:array"],"optional":["unit","chart.dataTable","note"]},"network":{"label":"关系网络页（节点-边拓扑）","modes":["research","architecture"],"required":["nodes:array","edges:array"],"optional":["chart.dataTable","note"]},"marimekko":{"label":"马赛克图页（列宽 × 列高双重编码）","modes":["research","architecture"],"required":["cols:array","cells:array"],"optional":["unit","chart.dataTable","note"]},"streamgraph":{"label":"流带图页（时间上的构成演变）","modes":["research","architecture"],"required":["series:array"],"optional":["labels:array","chart.dataTable","note"]}}};
+var MODEL_SCHEMA = {"version":"0.1","modes":["presentation","research","architecture"],"model":{"required":["title","sections:array","closing.title","closing.points:array"],"optional":["mode","style","theme","subtitle","meta","agenda:array"],"agendaMin":{"presentation":3,"research":3,"architecture":0},"agendaMax":7,"agendaMaxWithRefs":8,"agendaHint":"agenda 条目 = 章（篇/section），3–7 条；每章可含多页（sections[] 按页建模）。禁止把逐页标题当大纲。sections[].eyebrow 的 `NN ·` 前缀 = 章键，须与某条 agenda 对应；跳转锚点 = 该章第一页。含「参考资料」条目时 +1 仍 ≤8。","sectionsMin":1,"sectionsRecommended":3,"agendaComfortMax":8},"commonSectionFields":["eyebrow","title","lead","soWhat","footnote","note","flags","image","exhibitNo","layoutPreset","variant","anchor"],"mutualExclusionHint":"verdict 与 soWhat 互斥：二者共用 annotation 结论条槽位，同页双填必叠印。comparison 页填 verdict 时不要再填 soWhat（渲染器已自动二选一，但模型侧应只给一个）。","flagsHint":"flags = 待核实/待二次修改条目字符串数组（如 '2027 增速 xx%（口径未定）'）；渲染为 accent 强调色标注行，提示用户核对。","imageHint":"image = 素材图片/配图占位对象。三选一必填：src（用户图，data: 内联或相对路径，零外链铁律禁 http(s)）｜items（多图版式：grid/compare/wall，元素 {src?, alt?, caption?, placeholder?}）｜placeholder:true（无图时出配图占位，原生形状渲染、pictures 不增）。其余可选：layout（full/half/bleed/grid/compare/wall，见 layout-constants.json imageSpec.layouts）、fit（cover 默认 / contain）、caption、alt、hint、ratio。","imageLayoutHint":"layout 与 HTML 版式对应：full=版心全宽图｜half=左图右注（points 为右栏注解）｜bleed=通栏出血｜grid=多图网格（items 2/3/4/6 张）｜compare=双图 A/B 对比（items 2 张）｜wall=Logo 墙（items 3–12 张小图）。占位符标签文本由双引擎按 imageSpec 拼同一串，保证 A/B 通道逐页文本一致。","chartTypes":["bar","hbar","stack","stackline","line","dualline","area","donut","multidonut","pie","radar","scatter","bubble","waterfall","gauge","pareto","funnel","gantt","vsbar","progress","sparkline","slope","dumbbell","lollipop","dotplot","bulletchart","waffle","radialbar","rose","candlestick"],"chartTypesHint":"chart.type 可取值 = 本表（30 类：16 原生 + 14 形状还原）。其余 6 类复杂信息图（sankey/treemap/boxplot/network/marimekko/streamgraph）是**专属页型**而非 chart.type——它们要按列/段/节点等结构化载荷表达，故走 sections[].type。不变量：charts.registry.types == chartTypes ∪ 上述 6 类页型（sync_runtime.py 校验）。","chartDataTable":{"enum":["notes","inline","appendix","off"],"default":"notes","rule":"非原生图表（registry.pptx=shape）的 dataTable 不得为 off；缺失时按 registry 默认值补齐。"},"pageTypes":{"points":{"label":"要点列表页","modes":["presentation","research","architecture"],"required":["points:array"],"optional":["metrics:array"]},"metrics":{"label":"指标带页（4–6 个核心数字）","modes":["presentation","research"],"required":["metrics:array"]},"kpi":{"label":"大数指标页（hero 大数字 + 支撑指标行）","modes":["presentation","research"],"required":["hero:array"],"optional":["metrics:array"]},"table":{"label":"对比表页","modes":["presentation","research","architecture"],"required":["table.head:array","table.rows:array"],"optional":["table.colW:array"]},"timeline":{"label":"时间线 / 路线页","modes":["presentation","research"],"required":["phases:array"]},"steps":{"label":"步骤条页（N 步横排 + 箭头，可分组）","modes":["presentation","research","architecture"],"required":["steps:array"],"optional":["groups:array","note"]},"bar":{"label":"图表页（chart.type 见 chartTypes；native 通道走原生数据图表，shape 通道走高保真形状还原 + 数据表）","modes":["presentation","research"],"required":["chart.labels:array","chart.values:array"],"optional":["chart.type","chart.series:array","chart.points:array","chart.max","chart.unit","chart.colors:array","chart.start:array","chart.target:array","chart.dataTable","note"]},"donut":{"label":"环形图页（原生 pie 楔形 + 图例）","modes":["presentation","research"],"required":["chart.labels:array","chart.values:array"],"optional":["chart.unit","chart.centerLabel","chart.colors:array","chart.dataTable","note"]},"heatmap":{"label":"热力矩阵页（行 × 列 + 强度色阶）","modes":["presentation","research"],"required":["rowHeads:array","colHeads:array","cells:array"],"optional":["unit","scaleLabel:array","note"]},"bullet":{"label":"达成对比页（实际 vs 目标条）","modes":["presentation","research"],"required":["items:array"],"optional":["unit","max","note"]},"pyramid":{"label":"金字塔页（层级递进，顶层最窄）","modes":["presentation","research","architecture"],"required":["levels:array"],"optional":["note"]},"image":{"label":"素材图片页（full/half/bleed/grid/compare/wall，效果与位置锁定；支持配图占位）","modes":["presentation","research","architecture"],"required":["anyof:image.src:str|image.items:array|image.placeholder"],"optional":["image.caption","image.alt","image.layout","image.fit","image.ratio","image.hint","points:array","note"]},"cards":{"label":"卡片网格页（cards 元素须为 {title, points:[[k,v]…], icon?}，不接受元组）","modes":["presentation","research"],"required":["cards:array"],"optional":["columns"],"cardItemHint":"cards[] 元素：{title:str, points:[[k,v]…]|[{t,d}…]|[str…], icon?:str}。icon = 语义图标名（icon_lib.js 键：增长/下降/数据/图表/趋势/占比/表格/效率/成果/安全/权限/检查/风险/团队/流程/计划/智能/洞察/工具/清单），HTML 与 PPTX 同名真导出；缺省按标题语义自动挑选。"},"split":{"label":"双区组合页（left / right 各可为 要点｜图表｜表格｜图片：type = points（默认）| table | image | 图表类型名；图表/表格字段直接挂在对应侧）","modes":["presentation","research"],"required":["anyof:left.points:array|left.type:str"],"optional":["left.cap","left.image","left.labels:array","left.values:array","left.series:array","left.points:array","left.max","left.unit","left.colors:array","left.dataTable","left.head:array","left.rows:array","left.colW:array","right.type","right.cap","right.image","right.labels:array","right.values:array","right.series:array","right.points:array","right.max","right.unit","right.colors:array","right.dataTable","right.head:array","right.rows:array","right.colW:array"]},"comparison":{"label":"对比页（左右双栏 + 可选结论条）","modes":["presentation","research"],"required":["left.title","left.points:array","right.title","right.points:array"],"optional":["verdict"]},"quote":{"label":"引用 / 金句页（深色全幅）","modes":["presentation","research"],"required":["quote","author"],"optional":["context"]},"diagram":{"label":"分层架构页（architecture 模式走全幅几何）","modes":["presentation","research","architecture"],"required":["layers:array"],"optional":["legend:array"]},"exhibit":{"label":"Exhibit 编号图表页（research R2）","modes":["research"],"required":["chart.labels:array","chart.values:array"],"optional":["exhibitNo","chart.type","chart.series:array","chart.points:array","chart.max","chart.unit","chart.colors:array","chart.dataTable","note"]},"twocol":{"label":"双栏论证页（research R1）","modes":["research"],"required":["paragraphs:array"]},"threecol":{"label":"三栏证据页（research R6）","modes":["research"],"required":["paragraphs:array"]},"halftable":{"label":"半表半图页（research R7）","modes":["research"],"required":["table.head:array","table.rows:array","chart.labels:array","chart.values:array"],"optional":["table.colW:array","chart.type","chart.series:array","chart.points:array","chart.max","chart.unit","chart.colors:array","chart.dataTable","note"]},"matrix":{"label":"矩阵图页（research R8）","modes":["research"],"required":["rowHeads:array","colHeads:array","cells:array"]},"lane":{"label":"泳道页（architecture A2）","modes":["architecture"],"required":["lanes:array"]},"sankey":{"label":"桑基图页（节点-流带，流向与流量）","modes":["research","architecture"],"required":["flows:array"],"optional":["unit","chart.dataTable","note"]},"treemap":{"label":"树图页（面积编码的层级构成）","modes":["research","architecture"],"required":["items:array"],"optional":["unit","chart.dataTable","note"]},"boxplot":{"label":"箱线图页（分布对比：min/q1/median/q3/max）","modes":["research","architecture"],"required":["groups:array"],"optional":["unit","chart.dataTable","note"]},"network":{"label":"关系网络页（节点-边拓扑）","modes":["research","architecture"],"required":["nodes:array","edges:array"],"optional":["chart.dataTable","note"]},"marimekko":{"label":"马赛克图页（列宽 × 列高双重编码）","modes":["research","architecture"],"required":["cols:array","cells:array"],"optional":["unit","chart.dataTable","note"]},"streamgraph":{"label":"流带图页（时间上的构成演变）","modes":["research","architecture"],"required":["series:array"],"optional":["labels:array","chart.dataTable","note"]}}};
 /* __TOPPPT_SCHEMA_END__ */
 
 var _mode = 'presentation';   /* 当前模式（slidesOf 里按 model.mode 设置） */
@@ -3370,7 +3451,9 @@ function infoTableRows(sec) {
   if (t === 'marimekko') {
     var head = ['列', '总量' + u].concat((sec.legend || []).map(String));
     return [head].concat((sec.cols || []).map(function (c, i) {
-      return [String(c[0]), String(c[1])].concat(((sec.cells || [])[i] || []).map(String));
+      return [String(c[0]), String(c[1])].concat((((sec.cells || [])[i] || []).map(function (el) {
+        return Array.isArray(el) ? String(el[0]) + ' ' + el[1] : String(el);
+      })));
     }));
   }
   if (t === 'streamgraph') {
@@ -3518,7 +3601,11 @@ function infoApprox(sh, sec, S, y0, y1) {
     var cx1 = MX;
     cols.forEach(function (c, i) {
       var cw = Math.max(0.2, (Number(c[1]) || 0) / total * availW);
-      var shares = ((sec.cells || [])[i] || []).map(Number);
+      /* 单元格兼容 [标签,数值] 对（与 B 通道 marimekkoSegs 同规则）；非数值 → 0 */
+      var shares = ((sec.cells || [])[i] || []).map(function (el) {
+        var v = Number(Array.isArray(el) ? el[1] : el);
+        return isFinite(v) ? v : 0;
+      });
       var sum = shares.reduce(function (a, b) { return a + b; }, 0) || 1;
       var cy = P.y0;
       shares.forEach(function (v, k) {
@@ -3668,13 +3755,20 @@ function slidesOf(model, S) {
     });
   }
 
-  /* 章节页 */
+  /* Exhibit 徽标文本：纯编号补 "Exhibit " 前缀（HTML 为 `Exhibit {no}` + CSS uppercase）；
+   调用方已带前缀的不重复（与 B 通道 exhibitBadge 同规则） */
+function exhibitBadge(no) {
+  var t = String(no == null ? '' : no).trim();
+  if (!t) return t;
+  return /^exhibit[\s\-:]*/i.test(t) ? t.toUpperCase() : ('EXHIBIT ' + t.toUpperCase());
+}
+/* 章节页 */
   (model.sections || []).forEach(function (sec) {
     var type = sec.type || 'points';
     var sh = [];
     if (type !== 'quote') head(sh, sec.eyebrow, sec.title, sec.lead);
     /* 非 exhibit 页型也可带 Exhibit 编号（帧头徽标；正文区下移让位，与 B 通道同规则） */
-    var exBadge = (type !== 'exhibit' && sec.exhibitNo) ? String(sec.exhibitNo).toUpperCase() : null;
+    var exBadge = (type !== 'exhibit' && sec.exhibitNo) ? exhibitBadge(sec.exhibitNo) : null;
     var bodyY0 = sec.lead ? PT.common.bodyYWithLead : CONTENT_TOP;
     var bodyY = exBadge ? bodyY0 + 0.42 : bodyY0;
     if (exBadge) {
@@ -3685,7 +3779,7 @@ function slidesOf(model, S) {
     var _F = PT.flagbar || { hdH: 0.26, rowH: 0.24, maxRows: 3, gap: 0.12 };
     var flagH = flagItems.length
       ? (_F.hdH + Math.min(_F.maxRows, flagItems.length) * _F.rowH + 0.06) : 0;
-    var bodyBottom = chartBottom(!!sec.soWhat, !!sec.footnote);
+    var bodyBottom = chartBottom(!!sec.soWhat, !!(sec.footnote || sec.note));
     var flagY = 0;
     if (flagH) {
       flagY = CONTENT_BOTTOM - flagH;
@@ -3719,9 +3813,14 @@ function slidesOf(model, S) {
       sh.push(shape('rect', kdivX, K.heroY + 0.15, 0.025, 3.1, S.line));
       var mRegK = regOf('kpi', 'metrics') || { x: kdivX + 0.35, y: K.metricY0, w: CW * (1 - K.dividerX) - 0.5 };
       var kmets = sec.metrics || [];
-      var kCap = Math.max(1, Math.floor((CONTENT_BOTTOM - mRegK.y) / K.metricRowH));
+      /* 容量按最小允许行高判断，行高按全部指标自适应压缩 —— 禁静默丢数据（与 B 通道同规则） */
+      var kAvailA = CONTENT_BOTTOM - mRegK.y;
+      var kCap = Math.max(1, Math.floor(kAvailA / 0.42));
       var kRows = Math.min(kmets.length, kCap);
-      var kRowH = fitRowH(CONTENT_BOTTOM - mRegK.y, kRows, K.metricRowH, 0.42);
+      if (kRows < kmets.length && typeof console !== 'undefined')
+        console.warn('[pptx-export] KPI 页「' + (sec.title || '') + '」支撑指标 ' + kmets.length +
+          ' 个超出容量，仅渲染前 ' + kRows + ' 个 —— 建议拆页');
+      var kRowH = fitRowH(kAvailA, kRows, K.metricRowH, 0.42);
       var kTopH = Math.min(0.55, kRowH * 0.62);
       kmets.slice(0, kRows).forEach(function (m, i) {
         var ky = mRegK.y + i * kRowH;
@@ -3872,9 +3971,20 @@ function slidesOf(model, S) {
         var lt = isRec(l) ? (l.t || '') : String(l[0] || '');
         var ld = isRec(l) ? (l.d || '') : String(l[1] || '');
         sh.push(shape('roundRect', x2, y2, w2, rowHP, acc ? S.soft : S.surface, { adj: 5000, line: acc ? undefined : S.line }));
-        var lwP = Math.min(P.labelW, w2 - 0.44);
-        sh.push(txSp(x2 + 0.22, y2, lwP, rowHP, [[{ t: lt, sz: 13.5, b: 1, col: acc ? S.accent : S.ink, font: S.font }]], { anchor: 'ctr' }));
-        if (ld) sh.push(txSp(x2 + 0.22 + lwP, y2, w2 - 0.44 - lwP, rowHP, [[{ t: ld, sz: 11, col: S.faint, font: S.font }]], { anchor: 'ctr' }));
+        var lwP = Math.min(P.labelW, (w2 - 0.44) * (P.labelFrac == null ? 0.32 : P.labelFrac));
+        var descW = w2 - 0.44 - lwP;
+        /* 窄层判定：说明列 < 1.2in，或标题在标题列内放不下单行 → 单框混排（与 B 通道同规则） */
+        var narrowP = descW < 1.2 || (ld && estLines(lt, lwP, 13.5) > 1) || (!ld && estLines(lt, w2 - 0.44, 13.5) > 1);
+        if (narrowP) {
+          /* 顶层窄 → 标题上、说明下单框混排（HTML 窄屏 .pyr__lvl 即单列，与 B 通道同规则） */
+          sh.push(txSp(x2 + 0.22, y2 + 0.03, w2 - 0.44, 0.30,
+            [[{ t: lt, sz: 12.5, b: 1, col: acc ? S.accent : S.ink, font: S.font }]]));
+          sh.push(txSp(x2 + 0.22, y2 + 0.33, w2 - 0.44, Math.max(0.2, rowHP - 0.36),
+            [[{ t: ld, sz: 10.5, col: S.faint, font: S.font }]]));
+        } else {
+          sh.push(txSp(x2 + 0.22, y2, lwP, rowHP, [[{ t: lt, sz: 13.5, b: 1, col: acc ? S.accent : S.ink, font: S.font }]], { anchor: 'ctr' }));
+          if (ld) sh.push(txSp(x2 + 0.22 + lwP, y2, descW, rowHP, [[{ t: ld, sz: 11, col: S.faint, font: S.font }]], { anchor: 'ctr' }));
+        }
       });
     } else if (type === 'steps') {
       var S2 = PT.steps, st = sec.steps || [], maxPer = S2.maxPerRow || 6, groups = sec.groups || [];
@@ -4223,12 +4333,12 @@ function slidesOf(model, S) {
       var eReg = regOf('exhibit', 'primary')
         || { x: MX, y: PT.exhibit.chartY, w: CW, badgeY: PT.exhibit.badgeY };
       if (sec.exhibitNo) {
-        sh.push(txSp(MX, eReg.badgeY != null ? eReg.badgeY : PT.exhibit.badgeY, CW, 0.35, [[{ t: String(sec.exhibitNo).toUpperCase(), sz: 11.5, b: 1, col: S.accent, font: S.font, spc: 200 }]]));
+        sh.push(txSp(MX, eReg.badgeY != null ? eReg.badgeY : PT.exhibit.badgeY, CW, 0.35, [[{ t: exhibitBadge(sec.exhibitNo), sz: 11.5, b: 1, col: S.accent, font: S.font, spc: 200 }]]));
       }
       var ec2 = sec.chart || {};
       if (ec2.labels && ec2.values) {
         var edcols2 = (ec2.colors || dataColors(model.style, model.theme));
-        var hh2 = Math.max(1.2, chartBottom(!!sec.soWhat, !!sec.footnote) - eReg.y - 0.05);
+        var hh2 = Math.max(1.2, chartBottom(!!sec.soWhat, !!(sec.footnote || sec.note)) - eReg.y - 0.05);
         if (ec2.type === 'hbar') {
           chartBlockShapes(sh, ec2, S, eReg.x, eReg.y, eReg.w, hh2, edcols2);
         } else {

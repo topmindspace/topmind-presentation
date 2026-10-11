@@ -4,7 +4,7 @@
 
 assets/examples/ 至少保留 3 份黄金样张（每模式 1）：
   presentation-business-blue · research-mckinsey · architecture-graphite-dark
-另可含产品 showcase（如 2026-09-26-topmind-tms-skills-showcase），不替代黄金样张。
+另可含产品 showcase（如 2026-10-11-topmind-presentation-showcase），不替代黄金样张。
 
 完整 9 风格染色矩阵旧实现：https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/build_examples.py.full
 其余历史示例：https://github.com/topmindspace/topmind-writing-skills/tree/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/examples

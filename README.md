@@ -10,7 +10,7 @@
 **让 idea 飞，好想法被看见。** 为**演示报告 / 正式商务演示**而生的高品质演示文稿技能：**HTML + PPT 双交付**——日常用可翻页 HTML 等同幻灯片；需要时再导出**版式保真可编辑 PPTX**。参考 **MD3**：合适信息密度、克制文字/图形/颜色。核心工艺是版式、排版、色彩与内容组织——不是 gadget 堆砌。
 
 - 技能标识：`topmind-presentation`；品牌名：**TopPPT HTML**
-- 版本：**v0.2.6**（独立仓库，版本独立演进）
+- 版本：**v0.2.7**（独立仓库，版本独立演进）
 - **智能体入口**：`SKILL.md` → `references/playbook.md`（L1）→ L2 按需
 - **人类维护者**：本 README（安装 / 命令 / 目录）；勿把本文件当生成规范
 - 仓库即技能：本仓库根目录就是技能本体（SKILL.md + assets + references + scripts），没有 monorepo 安装器
@@ -29,7 +29,7 @@
 **在线介绍** · [落地页](https://topmindspace.github.io/presentation/)（Showcase 与风格画廊见下方仓库内文件）
 
 - 交互画廊（仓库内）：[`assets/style-gallery.html`](./assets/style-gallery.html)
-- 产品 Showcase（仓库内）：[`assets/examples/2026-09-26-topmind-tms-skills-showcase.html`](./assets/examples/2026-09-26-topmind-tms-skills-showcase.html)（Mode A · 双交付叙事 · **5 种图表** · Header 工具栏）。这份样张写于 2026-09，文中的安装命令和版本线仍是旧包名 `@topmindspace/tms-skills`，安装请以本页「安装」一节为准。
+- 产品 Showcase（仓库内）：[`assets/examples/2026-10-11-topmind-presentation-showcase.html`](./assets/examples/2026-10-11-topmind-presentation-showcase.html)（Mode A · 双交付叙事 · **5 种图表** · Header 工具栏 · 安装与分发）
 - 大图集：[`docs/showcase/`](./docs/showcase/)（不进技能 zip）
 
 ## 一、技能简介（人类速览）
@@ -145,7 +145,7 @@ topmind-presentation/          # 仓库即技能：根目录就是技能本体
 ├─ references/                  # 规范（L1 常读 1 篇 + L2 按需；components/charts 已按族拆分）
 │  └─ playbook.md               #   ★ L1 唯一常读入口
 ├─ evals/                       # Eval 框架（结果/过程/风格/效率四类目标）
-├─ docs/                        # 落地页 / showcase / 风格画廊（Pages 源）· 行业研究
+├─ docs/                        # 落地页 / showcase / 风格画廊（Pages 源）· 发布说明
 ├─ scripts/                      # 生成/校验/回归/维护工具（见下表）
 ├─ .gitignore                   # 出库规则
 └─ dist/                        # 构建与回归产物 + 分发包 zip + 发布清单  ← 不进包、不入库

@@ -9,12 +9,12 @@ const { pathToFileURL } = require('url');
 const { chromium } = require('playwright');
 
 const ROOT = path.resolve(__dirname, '..');
-const REPO = path.resolve(ROOT, '..');
+const REPO = ROOT; // 独立仓库：仓库根即技能根
 const VIEW = { width: 1440, height: 810 }; // 16:9-ish at common laptop
 
 const JOBS = [
   {
-    html: path.join(ROOT, 'assets/examples/2026-09-26-topmind-tms-skills-showcase.html'),
+    html: path.join(ROOT, 'assets/examples/2026-10-11-topmind-presentation-showcase.html'),
     outDir: path.join(REPO, 'docs/showcase/topmind-showcase'),
     prefix: 'showcase',
     sections: ['cover', 'agenda', 's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11', 's12', 'closing'],
@@ -78,12 +78,13 @@ async function captureSection(page, sectionId) {
   const el = await page.$(`section#${sectionId}`);
   if (!el) return null;
   await el.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(1200);
   return el.screenshot({ type: 'png' });
 }
 
 async function run() {
-  const browser = await chromium.launch({ headless: true });
+  // PW_CHANNEL=chrome：没有下载 Playwright 浏览器时改用本机 Chrome；ONLY=<prefix>：只重拍指定样张
+  const browser = await chromium.launch({ headless: true, ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}) });
   const ctx = await browser.newContext({
     viewport: VIEW,
     deviceScaleFactor: 1.25,
@@ -91,6 +92,7 @@ async function run() {
   const page = await ctx.newPage();
 
   for (const job of JOBS) {
+    if (process.env.ONLY && job.prefix !== process.env.ONLY) continue;
     fs.mkdirSync(job.outDir, { recursive: true });
     const url = pathToFileURL(job.html).href;
     console.log('open', path.basename(job.html));

@@ -10,7 +10,7 @@
 **Let ideas fly — make good thinking visible.** A high-craft skill for **demo reports / formal business presentations**: **HTML + PPT dual delivery** — day-to-day, present with paginated HTML like slides; export **layout-faithful editable PPTX** when needed. **MD3-inspired**: fitting information density, restrained type / shapes / color. Core craft is layout, typography, color, and content structure — not gadget soup.
 
 - Skill id: `topmind-presentation`; brand: **TopPPT HTML**
-- Version: **v0.2.6** (standalone repo, independently versioned)
+- Version: **v0.2.7** (standalone repo, independently versioned)
 - **Agent entry**: `SKILL.md` → `references/playbook.md` (L1) → L2 on demand
 - **Human maintainers**: this README (install / commands / layout); do not treat it as the generation spec
 - The repo is the skill: the repo root is the skill body (SKILL.md + assets + references + scripts)
@@ -29,7 +29,7 @@
 **Online** · [Landing](https://topmindspace.github.io/presentation/) (the showcase deck and style gallery are the in-repo files below)
 
 - In-repo gallery: [`assets/style-gallery.html`](./assets/style-gallery.html)
-- Product showcase: [`assets/examples/2026-09-26-topmind-tms-skills-showcase.html`](./assets/examples/2026-09-26-topmind-tms-skills-showcase.html) (Mode A · dual-delivery narrative · **5 chart types** · toolbar page). This deck was written in 2026-09 and its install commands and version line still use the retired package name `@topmindspace/tms-skills`; follow the install section of this page instead.
+- Product showcase: [`assets/examples/2026-10-11-topmind-presentation-showcase.html`](./assets/examples/2026-10-11-topmind-presentation-showcase.html) (Mode A · dual-delivery narrative · **5 chart types** · toolbar page · install and distribution)
 - Repo shot pack: [`docs/showcase/`](./docs/showcase/)
 
 ## Skill snapshot

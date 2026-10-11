@@ -1,0 +1,25 @@
+{
+  "$comment": "TopPPT HTML · 风格目标 rubric（结构化评分）。确定性检查回答「是否做了基本动作」，本 schema 回答「是否按我们想要的方式做的」。用宿主工具的 --output-schema / 结构化输出约束评审模型，字段稳定便于跨版本比较。用法：python evals/run_evals.py --help。",
+  "type": "object",
+  "properties": {
+    "overall_pass": { "type": "boolean", "description": "是否达到交付标准（任一 check 的 score < 60 即 false）" },
+    "score": { "type": "integer", "minimum": 0, "maximum": 100, "description": "加权总分：内容完整度 30 / 版式丰富度 20 / 图表选型 20 / 信息图表达 15 / 去AI味 15" },
+    "checks": {
+      "type": "array",
+      "description": "逐项检查；id 固定为 content / layout / chart / infographic / tone",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "enum": ["content", "layout", "chart", "infographic", "tone"] },
+          "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "pass": { "type": "boolean" },
+          "notes": { "type": "string", "description": "判定依据：引用具体页码/元素，不要泛泛而谈" }
+        },
+        "required": ["id", "score", "pass", "notes"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["overall_pass", "score", "checks"],
+  "additionalProperties": false
+}

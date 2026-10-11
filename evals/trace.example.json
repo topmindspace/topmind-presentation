@@ -1,0 +1,16 @@
+{
+  "$comment": "trace 示例：跑完一条 prompt 后由宿主智能体填写（字段都可选）。run_evals.py --score <报告.html> --trace evals/trace.example.json 会把过程与效率一并计分。预算单源：SKILL.md「预算（硬）」= 轮次 ≤3 / 工具调用 ≤25 / 读取 ≤40KB。",
+  "promptId": "t02",
+  "turns": 3,
+  "toolCalls": 19,
+  "bytesRead": 34500,
+  "readFiles": [
+    "SKILL.md",
+    "references/playbook.md",
+    "references/components.md",
+    "references/charts.md"
+  ],
+  "gate0ReferenceImage": true,
+  "artifacts": ["2026-09-15-主题.html"],
+  "notes": "轻量路径：1 轮六项问询 + 1 轮交付；只读 L1 + 两份 L2；未整份读取模式模板（用 scaffold_report.py）"
+}

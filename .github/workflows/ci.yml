@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  privacy:
+    name: Privacy scan
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Scan for private/local/deprecated identifiers
+        run: python3 scripts/ci_privacy_scan.py
+
+  skill-gates:
+    name: Skill package gates
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install skills-ref (Agent Skills validator)
+        run: python3 -m pip install --quiet skills-ref
+      - name: Skill gates (validator + audits + negatives + PPTX smoke)
+        run: bash scripts/ci_skill_gates.sh --with-pptx

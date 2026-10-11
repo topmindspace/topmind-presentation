@@ -1,0 +1,555 @@
+{
+  "$comment": "TopPPT HTML · REPORT_MODEL DSL schema 单源。双端同源：scripts/sync_runtime.py 把本文件注入 assets/pptx-export.js 的 __TOPPPT_SCHEMA__ 标记块（浏览器端 validateModel）；scripts/extract_model.py 直接读本文件做本地校验。禁止在两端手写副本。字段路径约定：'a.b:c' 中 ':array' 要求非空数组，':str' 要求非空字符串，无后缀仅做真值检查；'anyof:a|b:c' 表示「任一满足即通过」（用于素材图片页：src / items / placeholder 三选一）。pageTypes[].modes = 该页型允许的模式（越界仅告警，不阻断）。commonSectionFields 为任意页型可选的通用字段（flags = 待核实标注清单，image = 素材图片/配图占位）。chartTypes = 图表类型白名单（起含原生与形状两条通道，通道归属见 scripts/layout-constants.json 的 charts.registry）。图片规格与占位约定见同文件 imageSpec。",
+  "version": "0.1",
+  "modes": [
+    "presentation",
+    "research",
+    "architecture"
+  ],
+  "model": {
+    "required": [
+      "title",
+      "sections:array",
+      "closing.title",
+      "closing.points:array"
+    ],
+    "optional": [
+      "mode",
+      "style",
+      "theme",
+      "subtitle",
+      "meta",
+      "agenda:array"
+    ],
+    "agendaMin": {
+      "presentation": 3,
+      "research": 3,
+      "architecture": 0
+    },
+    "agendaMax": 7,
+    "agendaMaxWithRefs": 8,
+    "agendaHint": "agenda 条目 = 章（篇/section），3–7 条；每章可含多页（sections[] 按页建模）。禁止把逐页标题当大纲。sections[].eyebrow 的 `NN ·` 前缀 = 章键，须与某条 agenda 对应；跳转锚点 = 该章第一页。含「参考资料」条目时 +1 仍 ≤8。",
+    "sectionsMin": 1,
+    "sectionsRecommended": 3,
+    "agendaComfortMax": 8
+  },
+  "commonSectionFields": [
+    "eyebrow",
+    "title",
+    "lead",
+    "soWhat",
+    "footnote",
+    "note",
+    "flags",
+    "image",
+    "exhibitNo",
+    "layoutPreset",
+    "variant",
+    "anchor"
+  ],
+  "mutualExclusionHint": "verdict 与 soWhat 互斥：二者共用 annotation 结论条槽位，同页双填必叠印。comparison 页填 verdict 时不要再填 soWhat（渲染器已自动二选一，但模型侧应只给一个）。",
+  "flagsHint": "flags = 待核实/待二次修改条目字符串数组（如 '2027 增速 xx%（口径未定）'）；渲染为 accent 强调色标注行，提示用户核对。",
+  "imageHint": "image = 素材图片/配图占位对象。三选一必填：src（用户图，data: 内联或相对路径，零外链铁律禁 http(s)）｜items（多图版式：grid/compare/wall，元素 {src?, alt?, caption?, placeholder?}）｜placeholder:true（无图时出配图占位，原生形状渲染、pictures 不增）。其余可选：layout（full/half/bleed/grid/compare/wall，见 layout-constants.json imageSpec.layouts）、fit（cover 默认 / contain）、caption、alt、hint、ratio。",
+  "imageLayoutHint": "layout 与 HTML 版式对应：full=版心全宽图｜half=左图右注（points 为右栏注解）｜bleed=通栏出血｜grid=多图网格（items 2/3/4/6 张）｜compare=双图 A/B 对比（items 2 张）｜wall=Logo 墙（items 3–12 张小图）。占位符标签文本由双引擎按 imageSpec 拼同一串，保证 A/B 通道逐页文本一致。",
+  "chartTypes": [
+    "bar",
+    "hbar",
+    "stack",
+    "stackline",
+    "line",
+    "dualline",
+    "area",
+    "donut",
+    "multidonut",
+    "pie",
+    "radar",
+    "scatter",
+    "bubble",
+    "waterfall",
+    "gauge",
+    "pareto",
+    "funnel",
+    "gantt",
+    "vsbar",
+    "progress",
+    "sparkline",
+    "slope",
+    "dumbbell",
+    "lollipop",
+    "dotplot",
+    "bulletchart",
+    "waffle",
+    "radialbar",
+    "rose",
+    "candlestick"
+  ],
+  "chartTypesHint": "chart.type 可取值 = 本表（30 类：16 原生 + 14 形状还原）。其余 6 类复杂信息图（sankey/treemap/boxplot/network/marimekko/streamgraph）是**专属页型**而非 chart.type——它们要按列/段/节点等结构化载荷表达，故走 sections[].type。不变量：charts.registry.types == chartTypes ∪ 上述 6 类页型（sync_runtime.py 校验）。",
+  "chartDataTable": {
+    "$comment": "数据表策略：图表页的数据可追溯开关。notes = 数据写入演讲者备注（默认，零版面占用）；inline = 页内附原生小字号表格；appendix = 自动生成附录数据页（原生表格）；off = 不附（仅 sparkline 这类纯装饰微图允许）。pptx=shape 的非原生图表至少 notes。",
+    "enum": [
+      "notes",
+      "inline",
+      "appendix",
+      "off"
+    ],
+    "default": "notes",
+    "rule": "非原生图表（registry.pptx=shape）的 dataTable 不得为 off；缺失时按 registry 默认值补齐。"
+  },
+  "pageTypes": {
+    "points": {
+      "label": "要点列表页",
+      "modes": [
+        "presentation",
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "points:array"
+      ],
+      "optional": [
+        "metrics:array"
+      ]
+    },
+    "metrics": {
+      "label": "指标带页（4–6 个核心数字）",
+      "modes": [
+        "presentation",
+        "research"
+      ],
+      "required": [
+        "metrics:array"
+      ]
+    },
+    "kpi": {
+      "label": "大数指标页（hero 大数字 + 支撑指标行）",
+      "modes": [
+        "presentation",
+        "research"
+      ],
+      "required": [
+        "hero:array"
+      ],
+      "optional": [
+        "metrics:array"
+      ]
+    },
+    "table": {
+      "label": "对比表页",
+      "modes": [
+        "presentation",
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "table.head:array",
+        "table.rows:array"
+      ],
+      "optional": [
+        "table.colW:array"
+      ]
+    },
+    "timeline": {
+      "label": "时间线 / 路线页",
+      "modes": [
+        "presentation",
+        "research"
+      ],
+      "required": [
+        "phases:array"
+      ]
+    },
+    "steps": {
+      "label": "步骤条页（N 步横排 + 箭头，可分组）",
+      "modes": [
+        "presentation",
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "steps:array"
+      ],
+      "optional": [
+        "groups:array",
+        "note"
+      ]
+    },
+    "bar": {
+      "label": "图表页（chart.type 见 chartTypes；native 通道走原生数据图表，shape 通道走高保真形状还原 + 数据表）",
+      "modes": [
+        "presentation",
+        "research"
+      ],
+      "required": [
+        "chart.labels:array",
+        "chart.values:array"
+      ],
+      "optional": [
+        "chart.type",
+        "chart.series:array",
+        "chart.points:array",
+        "chart.max",
+        "chart.unit",
+        "chart.colors:array",
+        "chart.start:array",
+        "chart.target:array",
+        "chart.dataTable",
+        "note"
+      ]
+    },
+    "donut": {
+      "label": "环形图页（原生 pie 楔形 + 图例）",
+      "modes": [
+        "presentation",
+        "research"
+      ],
+      "required": [
+        "chart.labels:array",
+        "chart.values:array"
+      ],
+      "optional": [
+        "chart.unit",
+        "chart.centerLabel",
+        "chart.colors:array",
+        "chart.dataTable",
+        "note"
+      ]
+    },
+    "heatmap": {
+      "label": "热力矩阵页（行 × 列 + 强度色阶）",
+      "modes": [
+        "presentation",
+        "research"
+      ],
+      "required": [
+        "rowHeads:array",
+        "colHeads:array",
+        "cells:array"
+      ],
+      "optional": [
+        "unit",
+        "scaleLabel:array",
+        "note"
+      ]
+    },
+    "bullet": {
+      "label": "达成对比页（实际 vs 目标条）",
+      "modes": [
+        "presentation",
+        "research"
+      ],
+      "required": [
+        "items:array"
+      ],
+      "optional": [
+        "unit",
+        "max",
+        "note"
+      ]
+    },
+    "pyramid": {
+      "label": "金字塔页（层级递进，顶层最窄）",
+      "modes": [
+        "presentation",
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "levels:array"
+      ],
+      "optional": [
+        "note"
+      ]
+    },
+    "image": {
+      "label": "素材图片页（full/half/bleed/grid/compare/wall，效果与位置锁定；支持配图占位）",
+      "modes": [
+        "presentation",
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "anyof:image.src:str|image.items:array|image.placeholder"
+      ],
+      "optional": [
+        "image.caption",
+        "image.alt",
+        "image.layout",
+        "image.fit",
+        "image.ratio",
+        "image.hint",
+        "points:array",
+        "note"
+      ]
+    },
+    "cards": {
+      "label": "卡片网格页（cards 元素须为 {title, points:[[k,v]…], icon?}，不接受元组）",
+      "modes": [
+        "presentation",
+        "research"
+      ],
+      "required": [
+        "cards:array"
+      ],
+      "optional": [
+        "columns"
+      ],
+      "cardItemHint": "cards[] 元素：{title:str, points:[[k,v]…]|[{t,d}…]|[str…], icon?:str}。icon = 语义图标名（icon_lib.js 键：增长/下降/数据/图表/趋势/占比/表格/效率/成果/安全/权限/检查/风险/团队/流程/计划/智能/洞察/工具/清单），HTML 与 PPTX 同名真导出；缺省按标题语义自动挑选。"
+    },
+    "split": {
+      "label": "双区组合页（left / right 各可为 要点｜图表｜表格｜图片：type = points（默认）| table | image | 图表类型名；图表/表格字段直接挂在对应侧）",
+      "modes": [
+        "presentation",
+        "research"
+      ],
+      "required": [
+        "anyof:left.points:array|left.type:str"
+      ],
+      "optional": [
+        "left.cap",
+        "left.image",
+        "left.labels:array",
+        "left.values:array",
+        "left.series:array",
+        "left.points:array",
+        "left.max",
+        "left.unit",
+        "left.colors:array",
+        "left.dataTable",
+        "left.head:array",
+        "left.rows:array",
+        "left.colW:array",
+        "right.type",
+        "right.cap",
+        "right.image",
+        "right.labels:array",
+        "right.values:array",
+        "right.series:array",
+        "right.points:array",
+        "right.max",
+        "right.unit",
+        "right.colors:array",
+        "right.dataTable",
+        "right.head:array",
+        "right.rows:array",
+        "right.colW:array"
+      ]
+    },
+    "comparison": {
+      "label": "对比页（左右双栏 + 可选结论条）",
+      "modes": [
+        "presentation",
+        "research"
+      ],
+      "required": [
+        "left.title",
+        "left.points:array",
+        "right.title",
+        "right.points:array"
+      ],
+      "optional": [
+        "verdict"
+      ]
+    },
+    "quote": {
+      "label": "引用 / 金句页（深色全幅）",
+      "modes": [
+        "presentation",
+        "research"
+      ],
+      "required": [
+        "quote",
+        "author"
+      ],
+      "optional": [
+        "context"
+      ]
+    },
+    "diagram": {
+      "label": "分层架构页（architecture 模式走全幅几何）",
+      "modes": [
+        "presentation",
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "layers:array"
+      ],
+      "optional": [
+        "legend:array"
+      ]
+    },
+    "exhibit": {
+      "label": "Exhibit 编号图表页（research R2）",
+      "modes": [
+        "research"
+      ],
+      "required": [
+        "chart.labels:array",
+        "chart.values:array"
+      ],
+      "optional": [
+        "exhibitNo",
+        "chart.type",
+        "chart.series:array",
+        "chart.points:array",
+        "chart.max",
+        "chart.unit",
+        "chart.colors:array",
+        "chart.dataTable",
+        "note"
+      ]
+    },
+    "twocol": {
+      "label": "双栏论证页（research R1）",
+      "modes": [
+        "research"
+      ],
+      "required": [
+        "paragraphs:array"
+      ]
+    },
+    "threecol": {
+      "label": "三栏证据页（research R6）",
+      "modes": [
+        "research"
+      ],
+      "required": [
+        "paragraphs:array"
+      ]
+    },
+    "halftable": {
+      "label": "半表半图页（research R7）",
+      "modes": [
+        "research"
+      ],
+      "required": [
+        "table.head:array",
+        "table.rows:array",
+        "chart.labels:array",
+        "chart.values:array"
+      ],
+      "optional": [
+        "table.colW:array",
+        "chart.type",
+        "chart.series:array",
+        "chart.points:array",
+        "chart.max",
+        "chart.unit",
+        "chart.colors:array",
+        "chart.dataTable",
+        "note"
+      ]
+    },
+    "matrix": {
+      "label": "矩阵图页（research R8）",
+      "modes": [
+        "research"
+      ],
+      "required": [
+        "rowHeads:array",
+        "colHeads:array",
+        "cells:array"
+      ]
+    },
+    "lane": {
+      "label": "泳道页（architecture A2）",
+      "modes": [
+        "architecture"
+      ],
+      "required": [
+        "lanes:array"
+      ]
+    },
+    "sankey": {
+      "label": "桑基图页（节点-流带，流向与流量）",
+      "modes": [
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "flows:array"
+      ],
+      "optional": [
+        "unit",
+        "chart.dataTable",
+        "note"
+      ]
+    },
+    "treemap": {
+      "label": "树图页（面积编码的层级构成）",
+      "modes": [
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "items:array"
+      ],
+      "optional": [
+        "unit",
+        "chart.dataTable",
+        "note"
+      ]
+    },
+    "boxplot": {
+      "label": "箱线图页（分布对比：min/q1/median/q3/max）",
+      "modes": [
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "groups:array"
+      ],
+      "optional": [
+        "unit",
+        "chart.dataTable",
+        "note"
+      ]
+    },
+    "network": {
+      "label": "关系网络页（节点-边拓扑）",
+      "modes": [
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "nodes:array",
+        "edges:array"
+      ],
+      "optional": [
+        "chart.dataTable",
+        "note"
+      ]
+    },
+    "marimekko": {
+      "label": "马赛克图页（列宽 × 列高双重编码）",
+      "modes": [
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "cols:array",
+        "cells:array"
+      ],
+      "optional": [
+        "unit",
+        "chart.dataTable",
+        "note"
+      ]
+    },
+    "streamgraph": {
+      "label": "流带图页（时间上的构成演变）",
+      "modes": [
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "series:array"
+      ],
+      "optional": [
+        "labels:array",
+        "chart.dataTable",
+        "note"
+      ]
+    }
+  }
+}

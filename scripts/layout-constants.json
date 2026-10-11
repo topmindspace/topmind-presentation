@@ -1,0 +1,3616 @@
+{
+  "$comment": "TopPPT HTML 版式常量单源 —— 页面几何 / 12 列网格 / 语义字阶 C0–T14 / 三模式独立排版比例尺 / 页型几何 / 9 风格 token + 编码色板 / 图表登记四元组 / 容器内边距 / 锚点容差 / 图片准入门与图片规格 imageSpec / 校验预算 / 强调色表 / 去AI味词表 / 深度模式。改这里，然后跑 python scripts/sync_runtime.py 注入 build_pptx.js（require）/ pptx-export.js（常量块）/ 三模板（引擎·UI·运行时内联副本）。禁止手改各处副本。页型字段约束见 scripts/model-schema.json（DSL schema 单源，两端页型须同步增减）。",
+  "version": "0.1",
+  "page": {
+    "pw": 13.333,
+    "ph": 7.5,
+    "mx": 0.6,
+    "emu": 914400
+  },
+  "grid": {
+    "$comment": "12 列网格 + 安全边距（英寸）。x = 13 条列轨左边界（x[0] = 版心左、x[12] = 版心右）；跨列 i..j 的框 = { x: x[i], w: x[j+1] - x[i] }。y = 内容区 6 条行基线。safe = 绝对安全边距（任何元素不得越过）。HTML 侧对应 engine.css 的 .g12/.c-3/.c-4/.c-6/.c-8 工具类；PPTX 侧由 build_pptx.js 的 span(i,j) 消费。",
+    "columns": 12,
+    "gutter": 0.16,
+    "colW": 0.8644,
+    "x": [
+      0.6,
+      1.6244,
+      2.6488,
+      3.6732,
+      4.6976,
+      5.722,
+      6.7464,
+      7.7708,
+      8.7952,
+      9.8196,
+      10.844,
+      11.8684,
+      12.733
+    ],
+    "y": [
+      2.35,
+      3.27,
+      4.19,
+      5.11,
+      6.03,
+      6.9
+    ],
+    "safe": {
+      "top": 0.4,
+      "bottom": 0.4,
+      "left": 0.6,
+      "right": 0.6
+    }
+  },
+  "typeScale": {
+    "$comment": "PPTX 排版比例尺基准（pt，presentation 基准）。各模式拥有独立比例尺（modeTypeScale）。",
+    "coverTitle": 44,
+    "coverSub": 18,
+    "h1": 30,
+    "h2": 17,
+    "lead": 14,
+    "body": 13,
+    "caption": 11,
+    "micro": 10
+  },
+  "modeTypeScale": {
+    "$comment": "三模式独立排版比例尺（pt）。默认按中型会议室投影。小会议室可保持原值；礼堂/大报告厅宜更大标题档、更少每页单元（见 pptx-export 会场节）。research=咨询密排（正文 10.5pt、标题 22pt）；architecture 与 presentation 同基。",
+    "presentation": {
+      "coverTitle": 44,
+      "coverSub": 18,
+      "h1": 30,
+      "h2": 17,
+      "lead": 14,
+      "body": 13,
+      "caption": 11,
+      "micro": 10
+    },
+    "research": {
+      "coverTitle": 36,
+      "coverSub": 14,
+      "h1": 22,
+      "h2": 13.5,
+      "lead": 11.5,
+      "body": 10.5,
+      "caption": 9,
+      "micro": 8.5
+    },
+    "architecture": {
+      "coverTitle": 44,
+      "coverSub": 19,
+      "h1": 30,
+      "h2": 17,
+      "lead": 14,
+      "body": 13,
+      "caption": 11,
+      "micro": 10
+    }
+  },
+  "typography": {
+    "$comment": "语义字阶（C0–T14）：把 modeTypeScale 的 8 个角色展开为 15 个语义层级，供 HTML 组件类与 PPTX 调用点对齐。pt 值仍以 modeTypeScale 为唯一来源（role 字段指向它），本表只做语义映射与用法约束，不重复存 pt。",
+    "levels": [
+      {
+        "id": "C0",
+        "name": "封面/章节幕标题",
+        "role": "coverTitle",
+        "usage": "封面主标题、章节幕标题"
+      },
+      {
+        "id": "T1",
+        "name": "页码/章节徽章",
+        "role": "caption",
+        "usage": "页码徽章、章节编号"
+      },
+      {
+        "id": "T2",
+        "name": "页面主标题/结论标题",
+        "role": "h1",
+        "usage": "每页顶部结论句（research 行动标题）"
+      },
+      {
+        "id": "T3",
+        "name": "副标题/语境说明",
+        "role": "lead",
+        "usage": "主标题下方导语"
+      },
+      {
+        "id": "T4",
+        "name": "模块标题/图表标题",
+        "role": "h2",
+        "usage": "卡片标题、图表标题、面板标题"
+      },
+      {
+        "id": "T5",
+        "name": "证据编号/轻量标签",
+        "role": "micro",
+        "usage": "Exhibit 编号、状态标签"
+      },
+      {
+        "id": "T6",
+        "name": "证据块标题/小节标题",
+        "role": "h2",
+        "usage": "分栏小标题、证据块标题"
+      },
+      {
+        "id": "T7",
+        "name": "正文解释段落",
+        "role": "body",
+        "usage": "证据解释、管理解读正文、表格正文"
+      },
+      {
+        "id": "T8",
+        "name": "结论条文字",
+        "role": "body",
+        "usage": "结论条、核心结论框"
+      },
+      {
+        "id": "T9",
+        "name": "结论条标签（可选·默认隐藏）",
+        "role": "caption",
+        "usage": "结论条可选标签（默认不显示）"
+      },
+      {
+        "id": "T10",
+        "name": "结论条正文/业务含义",
+        "role": "body",
+        "usage": "结论条正文、行动含义、表格行动项"
+      },
+      {
+        "id": "T11",
+        "name": "图表轴/图例/刻度/微标签",
+        "role": "micro",
+        "usage": "坐标轴、图例、刻度、单位（禁用于表格正文与完整短句）"
+      },
+      {
+        "id": "T12",
+        "name": "图表数据标签",
+        "role": "caption",
+        "usage": "折线点值、柱形标签、百分比标注"
+      },
+      {
+        "id": "T13",
+        "name": "关键 KPI 大数字",
+        "role": "h1",
+        "usage": "KPI 大数字、hero 数值"
+      },
+      {
+        "id": "T14",
+        "name": "注释/口径/来源/页脚",
+        "role": "micro",
+        "usage": "footnote、来源行、页脚、小页码"
+      }
+    ],
+    "tableSemanticRule": {
+      "$comment": "表格语义字号门：表格文字须先按语义分类再套字阶。body 类必须用 T7/T10；micro 仅限轴标签/刻度/图例/极短表格标签/单位/列短标签。",
+      "body": [
+        "T7",
+        "T10"
+      ],
+      "microAllowed": [
+        "T11"
+      ],
+      "microForbiddenFor": [
+        "表格正文",
+        "行动项",
+        "风险项",
+        "解释句",
+        "建议句",
+        "长项目符号",
+        "完整短句"
+      ]
+    }
+  },
+  "pageTypes": {
+    "$comment": "页型几何（英寸）：各页型锁定版式的坐标常量，HTML 版式与 PPTX 页型同源。contentBottom 为内容安全下界（页码区之上）。",
+    "layout": {
+      "contentTop": 2.35,
+      "contentBottom": 6.9,
+      "contentBottomWithNote": 6.4,
+      "pageNumY": 7.0
+    },
+    "common": {
+      "headEyebrowY": 0.48,
+      "headTitleY": 0.82,
+      "headRuleY": 1.72,
+      "leadY": 1.88,
+      "bodyY": 2.35,
+      "bodyYWithLead": 2.55,
+      "pagerY": 7.0
+    },
+    "cover": {
+      "metaY": 0.7,
+      "titleY": 2.4,
+      "titleH": 2.0,
+      "subtitleY": 4.5,
+      "subtitleH": 0.8
+    },
+    "closing": {
+      "eyebrowY": 0.7,
+      "titleY": 1.2,
+      "titleH": 1.2,
+      "pointsY": 3.0,
+      "pointTitleH": 0.6,
+      "pointBodyH": 1.2
+    },
+    "points": {
+      "listY": 2.5,
+      "rowH": 0.72,
+      "rowHMin": 0.5,
+      "markSize": 0.14,
+      "metricY": 4.7,
+      "metricW": 2.6,
+      "metricValH": 0.9,
+      "metricCapY": 5.6
+    },
+    "metrics": {
+      "bandY": 3.1,
+      "cardH": 2.3,
+      "valY": 3.45,
+      "valH": 1.1,
+      "capY": 4.55,
+      "capH": 0.7,
+      "gap": 0.3,
+      "maxW": 2.9
+    },
+    "table": {
+      "y": 2.5,
+      "rowH": 0.55,
+      "rowHMin": 0.32,
+      "headRowH": 0.5
+    },
+    "bar": {
+      "hbarY0": 2.6,
+      "hbarY1": 6.25,
+      "chartX": 0.6,
+      "chartY": 2.95,
+      "chartW": 1.2,
+      "chartH": 3.35,
+      "noteY": 6.55
+    },
+    "note": {
+      "y": 6.55,
+      "h": 0.4
+    },
+    "exhibit": {
+      "badgeY": 2.35,
+      "chartY": 2.75,
+      "chartH": 3.25,
+      "soWhatY": 6.05,
+      "footnoteY": 6.72
+    },
+    "twocol": {
+      "colGap": 0.5,
+      "bodyH": 3.6,
+      "rowHMin": 0.5
+    },
+    "hbar": {
+      "labelW": 1.9,
+      "valW": 1.0,
+      "rowH": 0.55,
+      "barRatio": 0.5
+    },
+    "diagram": {
+      "layerBarW": 1.35,
+      "layerGap": 0.15,
+      "nodeGap": 0.15,
+      "bodyStartY": 2.9,
+      "maxLayerH": 1.15,
+      "nodeMaxW": 2.2
+    },
+    "split": {
+      "$comment": "双区组合页几何（英寸比例，相对版心 CW）。**左宽右窄**，与 HTML 侧 `.grid.g-side`（1.35fr : 1fr）同源——v8 修正了 v7 的左右反向（HTML 左宽 / PPTX 左窄，跨通道文本比对查不出，属静默漂移）。左区与右区各可为 要点/图表/表格/图片。",
+      "leftW": 0.55,
+      "rightW": 0.415,
+      "rightX": 0.585,
+      "pointsY": 2.7,
+      "rowH": 0.78,
+      "capY": 2.55,
+      "chartY": 3.0,
+      "chartH": 3.7,
+      "tableY": 2.7,
+      "tableRowH": 0.5
+    },
+    "cards": {
+      "startY": 3.0,
+      "gap": 0.25,
+      "maxH": 2.0,
+      "titleH": 0.4
+    },
+    "timeline": {
+      "labelY": 2.95,
+      "axisY": 3.58,
+      "dotY": 3.51,
+      "dotR": 0.18,
+      "nameY": 3.9,
+      "descY": 4.45,
+      "descH": 1.2
+    },
+    "research": {
+      "$comment": "research 密排页型几何（R6–R8）：三栏栏距 / 矩阵单元格 / 密表起点与行高 / 半表半图分栏。",
+      "col3Gap": 0.38,
+      "matrixLabelW": 1.5,
+      "matrixCellH": 0.85,
+      "matrixY": 2.2,
+      "denseTableY": 2.2,
+      "denseRowH": 0.42,
+      "halfTableW": 0.52,
+      "halfChartX": 0.57,
+      "halfChartW": 0.43
+    },
+    "arch": {
+      "$comment": "architecture 全幅图页型：图为王，图区从 fullStartY 到 fullEndY 占版面主体。",
+      "fullStartY": 2.1,
+      "fullEndY": 6.9,
+      "laneH": 0.72,
+      "laneHMin": 0.5,
+      "laneGap": 0.14,
+      "laneHeadW": 1.3,
+      "stepGap": 0.12,
+      "stepMaxW": 1.9
+    },
+    "kpi": {
+      "$comment": "大数指标页：hero 巨号数字（左）+ 竖分隔线 + 右列支撑指标。dividerX 为版心内横向占比。",
+      "heroY": 2.9,
+      "heroW": 0.52,
+      "heroH": 1.6,
+      "dividerX": 0.56,
+      "metricY0": 2.95,
+      "metricRowH": 0.85
+    },
+    "comparison": {
+      "$comment": "对比页：左右双面板（左 surface 现状 / 右 soft 目标）+ 可选结论条（复用 soWhatY 槽位）。",
+      "panelGap": 0.4,
+      "panelY": 2.55,
+      "panelH": 3.4,
+      "titleH": 0.45,
+      "rowH": 0.62
+    },
+    "quote": {
+      "$comment": "引用页（深色全幅）：大引号 + 引言 + 署名 + 语境。",
+      "markY": 1.75,
+      "textY": 2.7,
+      "textH": 2.3,
+      "authorY": 5.25,
+      "contextY": 5.8
+    },
+    "donut": {
+      "$comment": "环形图页：pie 楔形（12 点钟起顺时针）+ 背景色圆挖孔 + 中心合计 + 右侧图例。坐标为英寸绝对值。",
+      "centerX": 3.05,
+      "centerY": 4.6,
+      "r": 1.6,
+      "holeR": 0.95,
+      "legendX": 5.6,
+      "legendRowH": 0.55,
+      "legendLabelW": 3.4,
+      "legendValW": 1.3,
+      "legendPctX": 10.8,
+      "legendPctW": 1.3
+    },
+    "steps": {
+      "$comment": "步骤条页：N 步横排（序号 + 标题 + 说明），步间箭头；可按 group 分段（phase 标签）。",
+      "y": 3.05,
+      "barH": 1.35,
+      "gap": 0.12,
+      "arrowW": 0.3,
+      "numH": 0.3,
+      "titleH": 0.34,
+      "pad": 0.08,
+      "maxPerRow": 6
+    },
+    "heatmap": {
+      "$comment": "热力矩阵页：行标签 × 列标签网格，单元格按强度取色阶（accent 明度阶梯，不引入第二色相）。",
+      "y": 2.6,
+      "labelW": 1.7,
+      "headH": 0.42,
+      "cellH": 0.6,
+      "cellGap": 0.06,
+      "legendW": 1.6
+    },
+    "pyramid": {
+      "$comment": "金字塔页：自上而下逐层加宽（顶层最窄），层内左对齐标题 + 右侧说明。",
+      "y": 2.35,
+      "rowH": 0.72,
+      "gap": 0.08,
+      "minW": 0.34,
+      "labelW": 3.2
+    },
+    "bullet": {
+      "$comment": "达成对比页：每行 = 标签 + 底槽 + 实际条 + 目标刻度线 + 数值（实际/目标）。",
+      "y": 2.6,
+      "rowH": 0.8,
+      "labelW": 2.4,
+      "valW": 1.7,
+      "barH": 0.26
+    },
+    "image": {
+      "$comment": "素材图片页：多版式锁定几何——full 版心全宽 / half 左图右注 / bleed 通栏出血 / grid 多图网格 / compare 双图对比 / wall Logo 墙。效果（圆角/比例/裁切 fit/图注/占位符）与位置同源；双引擎按同一套常量渲染。图片源仅允许 data: 内联或相对路径（零外链铁律）；无图时走配图占位（原生形状，pictures 不增）。",
+      "y": 2.3,
+      "h": 4.2,
+      "halfW": 0.56,
+      "halfGap": 0.06,
+      "capY": 6.6,
+      "capH": 0.3,
+      "radius": 0.09,
+      "noteRowH": 0.62,
+      "gridGap": 0.16,
+      "gridCols": {
+        "2": 2,
+        "3": 3,
+        "4": 4,
+        "6": 3
+      },
+      "gridCapH": 0.28,
+      "compareGap": 0.3,
+      "compareTagH": 0.26,
+      "wallCellH": 0.92,
+      "wallGap": 0.18,
+      "wallMaxRows": 2
+    },
+    "flagbar": {
+      "$comment": "待核实清单条（accent 强调色标注）：accent-soft 底 + 左侧 accent 竖条 + 逐项列表；底对齐 contentBottom，正文区随之下移。与 so-what 同页时校验器告警（槽位冲突）。",
+      "hdH": 0.26,
+      "rowH": 0.24,
+      "maxRows": 3,
+      "gap": 0.12
+    },
+    "sankey": {
+      "$comment": "桑基图页：左→右分层节点-流带图。节点 ≤12、流带 ≤24；流带宽度按流量线性编码；流带边界用 SVG path（贝塞尔/三次样条）分别追踪上下边界，采样点 ≥16。",
+      "y": 2.45,
+      "h": 4.1,
+      "nodeW": 0.32,
+      "nodeGap": 0.14,
+      "labelW": 1.55,
+      "minBandH": 0.22,
+      "maxNodes": 12,
+      "maxFlows": 24
+    },
+    "treemap": {
+      "$comment": "树图页：面积编码的矩形切分（squarified treemap）。层级 ≤3、叶节点 ≤16；间隙用 gap 分隔；面积与数值严格成比例。",
+      "y": 2.45,
+      "h": 4.1,
+      "gap": 0.05,
+      "labelMinH": 0.34,
+      "maxLeaves": 16,
+      "maxDepth": 3
+    },
+    "boxplot": {
+      "$comment": "箱线图页：分组箱体（min/q1/median/q3/max）+ 可选异常点。组数 ≤8；箱宽按分组数自适应，须保留须线端帽。",
+      "y": 2.7,
+      "h": 3.7,
+      "labelW": 1.5,
+      "groupGap": 0.3,
+      "boxMaxW": 0.9,
+      "whiskerCapW": 0.34,
+      "maxGroups": 8
+    },
+    "network": {
+      "$comment": "关系网络页：节点-边拓扑（确定性环形布局 + 同环内按度数排序，不用随机力导向）。节点 ≤18、边 ≤30；节点半径按权重线性映射。",
+      "y": 2.4,
+      "h": 4.2,
+      "nodeR": 0.28,
+      "nodeRMin": 0.18,
+      "labelMaxW": 1.4,
+      "maxNodes": 18,
+      "maxEdges": 30
+    },
+    "marimekko": {
+      "$comment": "马赛克图页：列宽按列总量、列高按 100% 构成的双重编码。列 ≤6、每列段 ≤4；列间 gap 分隔，底部图例一行。",
+      "y": 2.6,
+      "h": 3.75,
+      "labelW": 1.55,
+      "colGap": 0.06,
+      "legendH": 0.42,
+      "maxCols": 6,
+      "maxSegs": 4
+    },
+    "streamgraph": {
+      "$comment": "流带图页：堆叠平滑带（基线居中、上下对称展开）。系列 ≤6；带宽按数值编码；带边界用三次样条分别追踪上下边界，采样点 ≥24。",
+      "y": 2.6,
+      "h": 3.75,
+      "labelW": 1.4,
+      "bandMinH": 0.12,
+      "maxSeries": 6
+    }
+  },
+  "pageTypeGeometry": {
+    "$comment": "schema 页型 → 本文件 pageTypes 几何组 的映射（sync_runtime.py 用它校验「页型四件套」不缺几何）。新增页型必须同时出现在 model-schema.json 的 pageTypes 与这里。",
+    "points": "points",
+    "metrics": "metrics",
+    "kpi": "kpi",
+    "table": "table",
+    "timeline": "timeline",
+    "steps": "steps",
+    "bar": "bar",
+    "donut": "donut",
+    "heatmap": "heatmap",
+    "bullet": "bullet",
+    "pyramid": "pyramid",
+    "image": "image",
+    "cards": "cards",
+    "split": "split",
+    "comparison": "comparison",
+    "quote": "quote",
+    "diagram": "diagram",
+    "exhibit": "exhibit",
+    "twocol": "twocol",
+    "threecol": "twocol",
+    "halftable": "research",
+    "matrix": "research",
+    "lane": "arch",
+    "sankey": "sankey",
+    "treemap": "treemap",
+    "boxplot": "boxplot",
+    "network": "network",
+    "marimekko": "marimekko",
+    "streamgraph": "streamgraph"
+  },
+  "charts": {
+    "$comment": "图表登记表（单源）：validate_report.py 按 data-chart 类型核对最小尺寸；charts.md 的实现清单与之一致。pxWidthMin = 内联 width:NNNpx 硬下限（FAIL）；vbHeightMin = 通宽图 viewBox 高度建议下限（WARN）。sizeByComplexity = 面积随信息复杂度（v9，治简单图放大）。",
+    "sizeByComplexity": {
+      "$comment": "图表面积跟随信息复杂度（治「简单图放大成一页大图」）。bands 为占内容区高度比例区间。",
+      "bands": [
+        {
+          "maxCats": 2,
+          "maxPts": 2,
+          "heightPct": [
+            18,
+            28
+          ],
+          "prefer": [
+            "kpi",
+            "progress",
+            "vsbar"
+          ],
+          "forbid": [
+            "donut",
+            "pie",
+            "treemap",
+            "sankey"
+          ]
+        },
+        {
+          "maxCats": 5,
+          "maxPts": 8,
+          "heightPct": [
+            35,
+            55
+          ],
+          "prefer": [
+            "donut",
+            "hbar",
+            "bar",
+            "line"
+          ],
+          "forbid": []
+        },
+        {
+          "maxCats": 99,
+          "maxPts": 99,
+          "heightPct": [
+            55,
+            85
+          ],
+          "prefer": [
+            "line",
+            "stack",
+            "exhibit",
+            "info"
+          ],
+          "forbid": []
+        }
+      ]
+    },
+    "types": [
+      "donut",
+      "multidonut",
+      "radar",
+      "gauge",
+      "bar",
+      "stack",
+      "stackline",
+      "waterfall",
+      "line",
+      "dualline",
+      "area",
+      "scatter",
+      "bubble",
+      "funnel",
+      "gantt",
+      "hbar",
+      "vsbar",
+      "treemap",
+      "progress",
+      "sparkline",
+      "sankey",
+      "slope",
+      "dumbbell",
+      "lollipop",
+      "marimekko",
+      "rose",
+      "dotplot",
+      "bulletchart",
+      "waffle",
+      "boxplot",
+      "pareto",
+      "radialbar",
+      "streamgraph",
+      "candlestick",
+      "pie",
+      "network"
+    ],
+    "minSize": {
+      "donut": {
+        "pxWidthMin": 140
+      },
+      "pie": {
+        "pxWidthMin": 140
+      },
+      "multidonut": {
+        "pxWidthMin": 140
+      },
+      "radar": {
+        "pxWidthMin": 220
+      },
+      "gauge": {
+        "pxWidthMin": 180
+      },
+      "rose": {
+        "pxWidthMin": 180
+      },
+      "treemap": {
+        "vbHeightMin": 170
+      },
+      "bar": {
+        "vbHeightMin": 160
+      },
+      "stack": {
+        "vbHeightMin": 160
+      },
+      "waterfall": {
+        "vbHeightMin": 170
+      },
+      "line": {
+        "vbHeightMin": 160
+      },
+      "dualline": {
+        "vbHeightMin": 160
+      },
+      "area": {
+        "vbHeightMin": 160
+      },
+      "scatter": {
+        "vbHeightMin": 180
+      },
+      "bubble": {
+        "vbHeightMin": 180
+      },
+      "funnel": {
+        "vbHeightMin": 160
+      },
+      "gantt": {
+        "vbHeightMin": 130
+      },
+      "progress": {
+        "vbHeightMin": 100
+      },
+      "hbar": {
+        "vbHeightMin": 100
+      },
+      "vsbar": {
+        "vbHeightMin": 100
+      },
+      "stackline": {
+        "vbHeightMin": 40
+      },
+      "sparkline": {
+        "vbHeightMin": 20
+      },
+      "sankey": {
+        "vbHeightMin": 200
+      },
+      "slope": {
+        "vbHeightMin": 180
+      },
+      "dumbbell": {
+        "vbHeightMin": 160
+      },
+      "lollipop": {
+        "vbHeightMin": 140
+      },
+      "marimekko": {
+        "vbHeightMin": 160
+      },
+      "dotplot": {
+        "vbHeightMin": 120
+      },
+      "bulletchart": {
+        "vbHeightMin": 140
+      },
+      "waffle": {
+        "vbHeightMin": 160
+      },
+      "boxplot": {
+        "vbHeightMin": 180
+      },
+      "pareto": {
+        "vbHeightMin": 180
+      },
+      "radialbar": {
+        "pxWidthMin": 200
+      },
+      "streamgraph": {
+        "vbHeightMin": 160
+      },
+      "candlestick": {
+        "vbHeightMin": 180
+      },
+      "network": {
+        "vbHeightMin": 200
+      }
+    },
+    "scaffold": {
+      "$comment": "scaffold_report.py 骨架图表默认尺寸（唯一事实源；须 ≥ minSize 同口径阈值，sync_runtime.py 校验）。viewBoxHeight = 骨架 svg 的 viewBox 高（通宽图）；pxWidth = 圆形/迷你图需显式内联宽度（无则通宽）；infoTypes = 信息图专属页型全幅骨架（宽×高），亦是 extract_snippet --chart 的信息图路由判据。",
+      "viewBoxHeight": {
+        "donut": 150,
+        "pie": 150,
+        "multidonut": 160,
+        "radar": 240,
+        "gauge": 120,
+        "rose": 200,
+        "bar": 220,
+        "stack": 220,
+        "stackline": 60,
+        "line": 220,
+        "dualline": 200,
+        "area": 200,
+        "scatter": 260,
+        "bubble": 220,
+        "waterfall": 230,
+        "funnel": 240,
+        "gantt": 190,
+        "hbar": 150,
+        "vsbar": 140,
+        "progress": 150,
+        "sparkline": 28,
+        "slope": 200,
+        "dumbbell": 180,
+        "lollipop": 160,
+        "dotplot": 150,
+        "bulletchart": 160,
+        "waffle": 190,
+        "pareto": 200,
+        "radialbar": 240,
+        "candlestick": 200
+      },
+      "pxWidth": {
+        "donut": 160,
+        "pie": 160,
+        "multidonut": 170,
+        "radar": 230,
+        "gauge": 210,
+        "rose": 200,
+        "radialbar": 240,
+        "sparkline": 120
+      },
+      "infoTypes": {
+        "sankey": [
+          900,
+          340
+        ],
+        "treemap": [
+          900,
+          320
+        ],
+        "boxplot": [
+          900,
+          300
+        ],
+        "network": [
+          900,
+          340
+        ],
+        "marimekko": [
+          900,
+          320
+        ],
+        "streamgraph": [
+          900,
+          320
+        ]
+      }
+    },
+    "variety": {
+      "$comment": "图表多样性预算（validate_report.py 与 evals/run_evals.py 消费）——治「图表定义 36 种、实际只用 bar/line/donut」。类型数下限 = min(minTypes[模式], max(1, ⌈图表页数 × minTypesRatio⌉))；noRepeatAdjacent = 相邻图表页不得同 data-chart；compositeMinRatio/compositeModes 只对 research 生效（A 演示一屏一主张，C 架构一页一图）。preferCoreFirst：多样性宜先拉开 layoutSystem.defaultCharts（核图 8）；advanced 图种在使用时同样计入 minTypes（不因用 advanced 受罚），但仅当内容意图命中时选用，禁为凑下限硬上冷门图。禁反模式：简单图全幅、极偏 donut/pie（见 layout-qa / sizeByComplexity）。判据与选型见 references/playbook.md §五。",
+      "minTypes": {
+        "presentation": 4,
+        "research": 6,
+        "architecture": 3
+      },
+      "minTypesRatio": 0.6,
+      "noRepeatAdjacent": true,
+      "compositeMinRatio": 0.3,
+      "compositeModes": [
+        "research"
+      ],
+      "preferCoreFirst": true,
+      "corePreferMin": 3
+    },
+    "fidelityMap": {
+      "$comment": "PPTX 还原度分级：high=双通道等价（原生图表或简单形状）；medium=形状还原可读但视觉降级；low=复杂信息图在 PPTX 显著退化（面积图变实心楔形、桑基/树图/流带近似），建议改 bar/line/hbar 或强制 dataTable=inline。validate_report 对 low 图型发 WARN。",
+      "bar": "high",
+      "hbar": "high",
+      "stack": "high",
+      "stackline": "high",
+      "line": "high",
+      "dualline": "high",
+      "donut": "high",
+      "multidonut": "high",
+      "pie": "high",
+      "scatter": "high",
+      "bubble": "high",
+      "waterfall": "high",
+      "gauge": "high",
+      "pareto": "high",
+      "progress": "high",
+      "vsbar": "high",
+      "sparkline": "high",
+      "funnel": "medium",
+      "slope": "medium",
+      "dumbbell": "medium",
+      "lollipop": "medium",
+      "dotplot": "medium",
+      "bulletchart": "medium",
+      "waffle": "medium",
+      "radialbar": "medium",
+      "rose": "medium",
+      "gantt": "medium",
+      "candlestick": "medium",
+      "area": "low",
+      "radar": "low",
+      "treemap": "low",
+      "sankey": "low",
+      "streamgraph": "low",
+      "marimekko": "low",
+      "boxplot": "low",
+      "network": "low"
+    },
+    "registry": {
+      "$comment": "图表登记四元组：pptx=native 走 addChart（真 chart part + 内嵌 Excel，双击可编辑数据）；pptx=shape 走 OOXML 原生形状/SVG path 高保真还原，且**必须**按 dataTable 策略附数据表保证数据可追溯；nativeTrick = 用原生图表技巧实现的类型；path = 形状还原的几何约束（采样点下限 / 双边界追踪 / 禁预设形状）。build_pptx.js 与 pptx-export.js 双引擎按本表分派，validate_pptx.py 按本表断言。PPTX 还原度分级见 charts.fidelityMap。",
+      "bar": {
+        "html": "svg-bars",
+        "pptx": "native",
+        "nativeType": "bar",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 160
+        }
+      },
+      "hbar": {
+        "html": "svg-hbars",
+        "pptx": "native",
+        "nativeType": "bar",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 100
+        }
+      },
+      "stack": {
+        "html": "svg-stack",
+        "pptx": "native",
+        "nativeType": "bar",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 160
+        },
+        "nativeOpt": {
+          "barGrouping": "stacked"
+        }
+      },
+      "stackline": {
+        "html": "svg-stackline",
+        "pptx": "native",
+        "nativeType": "bar",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 40
+        },
+        "nativeOpt": {
+          "barGrouping": "percentStacked"
+        }
+      },
+      "line": {
+        "html": "svg-line",
+        "pptx": "native",
+        "nativeType": "line",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 160
+        }
+      },
+      "dualline": {
+        "html": "svg-dualline",
+        "pptx": "native",
+        "nativeType": "line",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 160
+        }
+      },
+      "area": {
+        "html": "svg-area",
+        "pptx": "native",
+        "nativeType": "area",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 160
+        }
+      },
+      "donut": {
+        "html": "svg-donut",
+        "pptx": "native",
+        "nativeType": "doughnut",
+        "dataTable": "notes",
+        "min": {
+          "pxWidthMin": 140
+        }
+      },
+      "multidonut": {
+        "html": "svg-mdonut",
+        "pptx": "native",
+        "nativeType": "doughnut",
+        "dataTable": "notes",
+        "min": {
+          "pxWidthMin": 140
+        }
+      },
+      "pie": {
+        "html": "svg-pie",
+        "pptx": "native",
+        "nativeType": "pie",
+        "dataTable": "notes",
+        "min": {
+          "pxWidthMin": 140
+        }
+      },
+      "radar": {
+        "html": "svg-radar",
+        "pptx": "native",
+        "nativeType": "radar",
+        "dataTable": "notes",
+        "min": {
+          "pxWidthMin": 220
+        }
+      },
+      "scatter": {
+        "html": "svg-scatter",
+        "pptx": "native",
+        "nativeType": "scatter",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 180
+        }
+      },
+      "bubble": {
+        "html": "svg-bubble",
+        "pptx": "native",
+        "nativeType": "bubble",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 180
+        }
+      },
+      "waterfall": {
+        "html": "svg-wf",
+        "pptx": "native",
+        "nativeType": "bar",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 170
+        },
+        "nativeTrick": "stacked+hiddenBase+connector"
+      },
+      "gauge": {
+        "html": "svg-gauge",
+        "pptx": "native",
+        "nativeType": "doughnut",
+        "dataTable": "notes",
+        "min": {
+          "pxWidthMin": 180
+        },
+        "nativeTrick": "doughnut+firstSliceAng+hiddenRemainder"
+      },
+      "pareto": {
+        "html": "svg-pareto",
+        "pptx": "native",
+        "nativeType": "bar",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 180
+        },
+        "nativeTrick": "multiType+bar+line"
+      },
+      "gantt": {
+        "html": "svg-gantt",
+        "pptx": "shape",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 130
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "vsbar": {
+        "html": "svg-vsbar",
+        "pptx": "shape",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 100
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "progress": {
+        "html": "svg-progress",
+        "pptx": "shape",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 100
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "sparkline": {
+        "html": "svg-spark",
+        "pptx": "shape",
+        "dataTable": "off",
+        "min": {
+          "vbHeightMin": 20
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "funnel": {
+        "html": "svg-funnel",
+        "pptx": "shape",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 160
+        },
+        "path": {
+          "minSamplePoints": 8,
+          "forbidPresetShapes": true
+        }
+      },
+      "treemap": {
+        "html": "svg-treemap",
+        "pptx": "shape",
+        "dataTable": "appendix",
+        "min": {
+          "vbHeightMin": 170
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "marimekko": {
+        "html": "svg-marimekko",
+        "pptx": "shape",
+        "dataTable": "appendix",
+        "min": {
+          "vbHeightMin": 160
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "boxplot": {
+        "html": "svg-boxplot",
+        "pptx": "shape",
+        "dataTable": "appendix",
+        "min": {
+          "vbHeightMin": 180
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "network": {
+        "html": "svg-network",
+        "pptx": "shape",
+        "dataTable": "appendix",
+        "min": {
+          "vbHeightMin": 200
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "sankey": {
+        "html": "svg-sankey",
+        "pptx": "shape",
+        "dataTable": "appendix",
+        "min": {
+          "vbHeightMin": 200
+        },
+        "path": {
+          "minSamplePoints": 16,
+          "trackBothEdges": true,
+          "forbidPresetShapes": true
+        }
+      },
+      "streamgraph": {
+        "html": "svg-stream",
+        "pptx": "shape",
+        "dataTable": "appendix",
+        "min": {
+          "vbHeightMin": 160
+        },
+        "path": {
+          "minSamplePoints": 24,
+          "trackBothEdges": true,
+          "forbidPresetShapes": true
+        }
+      },
+      "slope": {
+        "html": "svg-slope",
+        "pptx": "shape",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 180
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "dumbbell": {
+        "html": "svg-dumbbell",
+        "pptx": "shape",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 160
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "lollipop": {
+        "html": "svg-lollipop",
+        "pptx": "shape",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 140
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "dotplot": {
+        "html": "svg-dotplot",
+        "pptx": "shape",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 120
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "bulletchart": {
+        "html": "svg-bullet",
+        "pptx": "shape",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 140
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "waffle": {
+        "html": "svg-waffle",
+        "pptx": "shape",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 160
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "radialbar": {
+        "html": "svg-radialbar",
+        "pptx": "shape",
+        "dataTable": "notes",
+        "min": {
+          "pxWidthMin": 200
+        },
+        "path": {
+          "minSamplePoints": 16,
+          "forbidPresetShapes": true
+        }
+      },
+      "rose": {
+        "html": "svg-rose",
+        "pptx": "shape",
+        "dataTable": "notes",
+        "min": {
+          "pxWidthMin": 180
+        },
+        "path": {
+          "minSamplePoints": 16,
+          "forbidPresetShapes": true
+        }
+      },
+      "candlestick": {
+        "html": "svg-candle",
+        "pptx": "shape",
+        "dataTable": "appendix",
+        "min": {
+          "vbHeightMin": 180
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      }
+    }
+  },
+  "checkBudgets": {
+    "$comment": "单页预算（validate_report 消费）：char=文字量预警（WARN，非「字多就删」）；unit=并列单元预警；empty=过空页 FAIL；fit=满屏页文字；wrap=版心；trow=表行。Mode A 密卡/列表页允许偏密；超 char 先走 overflowRule，不对字数单独 FAIL。",
+    "presentation": {
+      "char": 1800,
+      "unit": 8,
+      "empty": 80,
+      "fit": 1000,
+      "wrap": 1400,
+      "trow": 8,
+      "bodyPx": 17,
+      "$comment": "预警阈值；结构合理的密页可接近此值；溢出无拆页→ layout-qa FAIL"
+    },
+    "research": {
+      "char": 3200,
+      "unit": 12,
+      "empty": 120,
+      "fit": 2200,
+      "wrap": 1240,
+      "trow": 16,
+      "bodyPx": 15
+    },
+    "architecture": {
+      "char": 600,
+      "unit": 3,
+      "empty": 60,
+      "fit": 600,
+      "wrap": 1600,
+      "trow": 6,
+      "bodyPx": 17
+    }
+  },
+  "pageHeightEstimate": {
+    "$comment": "HTML 页高溢出静态估算参数（validate_report.py 消费）。screenBudgetPx=1080p 内容预算（约 830px + 容差）；wrapInsetPx=版心左右内边距合计；sheadPx=章节头固定高；unitPx=每个并列组件估算高；lineFactor=行高系数。真值以浏览器布局为准，本表只做交付前硬门禁的保守估算。",
+    "screenBudgetPx": 1000,
+    "wrapInsetPx": 112,
+    "sheadPx": 190,
+    "unitPx": 170,
+    "lineFactor": 1.65
+  },
+  "emphasis": {
+    "$comment": "强调带约束（validate_report.py 消费）。band--accent = 主题一致强调带（浅色/深色同向，用于收尾/CTA）；band--accent--solid = 强调色实底带（引言/金句）；band--deep = 反相强调页（浅色主题下渲染为深色，仅限显式选择）。deepMaxPages 限制反相页数量，deepForbiddenLast 禁止末页反相（否则浅色模式末尾出现深色页）。",
+    "deepMaxPages": 1,
+    "deepForbiddenLast": true,
+    "deepAllowedIds": [
+      "quote",
+      "cover"
+    ]
+  },
+  "annotations": {
+    "$comment": "待核实标注（validate_report.py 消费）。.tbd 内联标注需配 .tbd-legend（页级图例）或 .flagbar（块级清单）说明，否则提示；flagMaxPerPage 单页标注上限。",
+    "flagMaxPerPage": 12,
+    "requireLegend": true
+  },
+  "contentQuality": {
+    "$comment": "内容级质量门禁（validate_report.py 消费）——结构校验回答「有没有做」，本节回答「做得像不像专业材料」。rhythm.maxSameLayoutStreak = 同一版式签名连续页上限（超过 WARN）；sowhat.minChars/forbidden = so-what 结论条禁空洞套话；researchTitle.requireDigitOrJudgment = research 行动标题须含数字或判断词（治「主题词式短标题」）。阈值只改这里。",
+    "rhythm": {
+      "maxSameLayoutStreak": 2,
+      "skipIds": [
+        "cover",
+        "agenda",
+        "refs",
+        "appendix",
+        "next"
+      ]
+    },
+    "sowhat": {
+      "minChars": 12,
+      "maxChars": 90,
+      "forbidden": [
+        "需要持续关注",
+        "值得进一步研究",
+        "有待观察",
+        "持续关注",
+        "值得关注",
+        "深入分析",
+        "进一步研究",
+        "需要进一步",
+        "保持关注"
+      ],
+      "$comment": "结论条无 So what 标签、无左侧 accent 装饰轨（anti-AI-flavor：tonal soft 满铺）；HTML margin 与 PPTX chartBottom/soWhatY 共同保证呼吸间距。"
+    },
+    "researchTitle": {
+      "$comment": "判断词负向前瞻（应用/需求/一览/将来…）不可省：去掉后『智能体平台的应用架构说明』这类主题词式长标题会因命中单字『应』而被误判为结论句，门禁形同虚设。",
+      "minChars": 12,
+      "requireDigitOrJudgment": true,
+      "judgmentPattern": "\\d|[二两三四五六七八九十半]|一(?!览|体|致|直|些|般|系列|同|起|方面)|是(?!否)|应(?!用|急|对|届)|需(?!求)|将(?!来|近)|增|降|优先|瓶颈|关键|高于|低于|快于|慢于|第一|唯一|从.{1,12}到|翻倍|过半|不足|领先|落后|卡在|分化|出现|成为|仍|并非|必须|才能|才是|最大|最浅|最深|马当先|明显|尚在|已(?!知)|提升|贡献|占比|领跑|先行|滞后|分野|显著|差异|穿越|兑现|放量|[：:—–]"
+    },
+    "agenda": {
+      "$comment": "大纲 = 章节大纲（3–7 章），不是逐页标题罗列。chapterMin/Max = 章数预算；含「参考资料」条目 +1 仍 ≤8。singleMax 单列上限；>singleMax 才 .agenda--2col（异常安全网）。splitMax 仅作 PPTX 自动分页兜底，不是设计目标。titleMaxChars = 单条标题字数上限。scaffold / validate_report 消费。",
+      "chapterMin": 3,
+      "chapterMax": 7,
+      "chapterMaxWithRefs": 8,
+      "singleMax": 8,
+      "splitMax": 16,
+      "titleMaxChars": 36,
+      "twoColClass": "agenda--2col"
+    },
+    "pageHeight": {
+      "$comment": "一页一屏：section.band 默认 min-height=100vh(svh)；主内容不得压进结论条/注释带。放不下按 overflowRule：重构承载→拆页→换形态→有限 fontShrink；禁静默截断。band--flow 仅长结构/附录。",
+      "fitContract": "16:9 / band--fit",
+      "forbidCrushAnnotation": true
+    }
+  },
+  "containers": {
+    "$comment": "容器语义与内边距。文字是否溢出按「归属容器」判定（卡片/面板/图表区/单元格/结论条/so-what/标题区/页脚区/KPI 框），**不按整页画布**——即使未越出页面，越过归属容器即失败。pad = 容器内边距下限（英寸），validate_pptx.py 的容器级溢出检查按容器类型扣对应 pad；双引擎自适应排版共用本表。",
+    "pad": {
+      "card": 0.18,
+      "panel": 0.2,
+      "cell": 0.08,
+      "band": 0.16,
+      "soWhat": 0.16,
+      "kpi": 0.18,
+      "chart": 0.1,
+      "head": 0.05,
+      "footer": 0.05,
+      "node": 0.06
+    },
+    "minPad": 0.06,
+    "textMetrics": {
+      "$comment": "PPTX 侧文本度量单源（build_pptx.js estTextH/fitFont 与 validate_pptx.py 溢出估算共用）。lineFactor 偏小会让校验器比生成引擎更宽松，造成溢出假阴——两侧必须同值。emAsciiRatio = 拉丁/数字相对 CJK 的字宽比。",
+      "lineFactor": 1.45,
+      "emAsciiRatio": 0.52
+    },
+    "overflowRule": "溢出处置优先级（禁静默截断）：① 重构承载（列表/卡片/表/图/组合版式）→ ② 拆页/分章（议程→主张→证据卡→明细；01a/01b；信息须完整）→ ③ 换布局形态（V1–V4/多列/卡栅格）→ ④ 有限 fontShrink（阶梯内、模式 floor 以上、最多 4 档）→ ⑤ 禁止：静默截断、砍 so-what/证据/口径、为审美稀疏删决策必需信息。单页字数预算是预警不是删字许可证。",
+    "fontShrink": {
+      "$comment": "有限缩字号（最后手段）。优先：重构承载 → 拆页/分章 → 换布局 → 最后才缩字号。最多 4 档；绝对下限按模式 floor。禁止无限缩字号，禁止用缩字号代替拆页。",
+      "ladder": [
+        15,
+        14,
+        13.5,
+        13,
+        12.5,
+        12,
+        11.5,
+        11,
+        10.5,
+        10,
+        9.5,
+        9,
+        8.5
+      ],
+      "maxShrinkSteps": 4,
+      "floorPt": {
+        "presentation": 10,
+        "research": 9,
+        "architecture": 10
+      },
+      "preferContentFirst": true,
+      "warnBelow": 9.5
+    },
+    "continuousTextRule": "语义连续的一句话 / so-what 主句 / 结论句 / 表格单元格正文不得拆成多个独立文本框（避免异常空格、断句、基线漂移）；局部加粗高亮必须用同一文本框内富文本。",
+    "adaptiveText": {
+      "$comment": "弹性文本单源（0.2.0）：长标题/长列表/长表格单元格的降级规则。build_pptx.js 只读本表（AT），禁止在调用处散落 magic number。tier 语义：字符数按 CJK=1、拉丁/数字≈0.5 折算（与 estLines 同口径）。",
+      "title": {
+        "base": 30,
+        "step1": 24,
+        "longChars": 28,
+        "longMax": 24,
+        "xlongChars": 44,
+        "xlongMax": 20
+      },
+      "list": {
+        "denseItems": 6,
+        "gapFactor": 0.5,
+        "denseGapFactor": 0.25,
+        "lineFactor": 1.45,
+        "denseLineFactor": 1.3,
+        "max": 14,
+        "denseMax": 12
+      },
+      "table": {
+        "cellMax": 12.5,
+        "cellFloor": 9,
+        "headMax": 13,
+        "longCellChars": 24,
+        "rowFloorIn": 0.22,
+        "cellPadIn": 0.07
+      }
+    }
+  },
+  "anchorTolerance": {
+    "$comment": "空间锚点容差（深度模式）。centerPct = 中心点偏差上限（占参考框局部宽高比例）；keyPx = 关键锚点（图标/标签/箭头端点）偏差上限（px，按 1280×720 参考图计）；exactPx = 用户要求 1:1 时的上限。",
+    "centerPct": 2.0,
+    "keyPx": 6,
+    "exactPx": 3,
+    "priority": {
+      "P0": {
+        "tolerancePx": 3,
+        "maxPx": 6,
+        "fail": "Critical",
+        "elements": "标题 / 主图 / so-what / 页脚 / 关键数字 / 核心面板"
+      },
+      "P1": {
+        "tolerancePx": 4,
+        "maxPx": 8,
+        "fail": "High",
+        "elements": "普通卡片 / 图标 / 标签 / 箭头 / 表格 / 分隔线"
+      },
+      "P2": {
+        "tolerancePx": 6,
+        "maxPx": 12,
+        "fail": "Medium",
+        "elements": "装饰线 / 点阵 / 纹理 / 重复刻度 / 背景纹样"
+      }
+    }
+  },
+  "layoutSystem": {
+    "$comment": "布局语法单源（layout-grammar.md）：预设骨架 P1–P12 / 元素规格 / 填充率 / 对齐。validate_report LAYOUT_* 与生成选型共用。",
+    "presets": {
+      "P1": {
+        "name": "主从图文",
+        "cols": [
+          7,
+          5
+        ],
+        "html": [
+          "g-side",
+          "g-side--rev"
+        ],
+        "weight": [
+          60,
+          40
+        ],
+        "pptx": [
+          "split"
+        ],
+        "fill": [
+          62,
+          78
+        ]
+      },
+      "P2": {
+        "name": "通栏+底带",
+        "cols": [
+          12
+        ],
+        "html": [
+          "g-hero-full",
+          "g-3",
+          "rows-2"
+        ],
+        "weight": [
+          55,
+          45
+        ],
+        "pptx": [
+          "bar",
+          "diagram",
+          "cards"
+        ],
+        "fill": [
+          70,
+          80
+        ]
+      },
+      "P3": {
+        "name": "大数佐证",
+        "cols": [
+          5,
+          7
+        ],
+        "html": [
+          "g-hero",
+          "g-41",
+          "g-14"
+        ],
+        "weight": [
+          45,
+          55
+        ],
+        "pptx": [
+          "kpi"
+        ],
+        "fill": [
+          60,
+          70
+        ]
+      },
+      "P4": {
+        "name": "对称对照",
+        "cols": [
+          6,
+          6
+        ],
+        "html": [
+          "g-2",
+          "g-half",
+          "comparison"
+        ],
+        "weight": [
+          50,
+          50
+        ],
+        "pptx": [
+          "comparison"
+        ],
+        "fill": [
+          70,
+          80
+        ]
+      },
+      "P5": {
+        "name": "三栏并列",
+        "cols": [
+          4,
+          4,
+          4
+        ],
+        "html": [
+          "g-3"
+        ],
+        "weight": [
+          33,
+          33,
+          34
+        ],
+        "pptx": [
+          "cards",
+          "threecol"
+        ],
+        "fill": [
+          70,
+          80
+        ]
+      },
+      "P6": {
+        "name": "四象限",
+        "cols": [
+          6,
+          6
+        ],
+        "html": [
+          "g-2",
+          "g-quad"
+        ],
+        "weight": [
+          50,
+          50
+        ],
+        "pptx": [
+          "cards",
+          "split"
+        ],
+        "fill": [
+          75,
+          85
+        ]
+      },
+      "P7": {
+        "name": "侧栏主区",
+        "cols": [
+          3,
+          6,
+          3
+        ],
+        "html": [
+          "g-aside",
+          "g-211"
+        ],
+        "weight": [
+          25,
+          55,
+          20
+        ],
+        "pptx": [
+          "split"
+        ],
+        "fill": [
+          65,
+          75
+        ]
+      },
+      "P8": {
+        "name": "主区+注解列",
+        "cols": [
+          8,
+          4
+        ],
+        "html": [
+          "g-side",
+          "g-31"
+        ],
+        "weight": [
+          70,
+          30
+        ],
+        "pptx": [
+          "exhibit",
+          "split"
+        ],
+        "fill": [
+          70,
+          80
+        ]
+      },
+      "P9": {
+        "name": "全幅结构",
+        "cols": [
+          12
+        ],
+        "html": [
+          "g-hero-full",
+          "arch",
+          "fig--full"
+        ],
+        "weight": [
+          100
+        ],
+        "pptx": [
+          "diagram",
+          "image",
+          "lane"
+        ],
+        "fill": [
+          75,
+          90
+        ]
+      },
+      "P10": {
+        "name": "拼贴Bento",
+        "cols": [
+          4
+        ],
+        "html": [
+          "g-bento"
+        ],
+        "weight": [
+          40,
+          20,
+          20,
+          20
+        ],
+        "pptx": [
+          "cards"
+        ],
+        "fill": [
+          75,
+          85
+        ]
+      },
+      "P11": {
+        "name": "主+双辅",
+        "cols": [
+          2,
+          1,
+          1
+        ],
+        "html": [
+          "g-211"
+        ],
+        "weight": [
+          50,
+          25,
+          25
+        ],
+        "pptx": [
+          "split"
+        ],
+        "fill": [
+          70,
+          80
+        ]
+      },
+      "P12": {
+        "name": "双辅+主",
+        "cols": [
+          1,
+          1,
+          2
+        ],
+        "html": [
+          "g-121"
+        ],
+        "weight": [
+          25,
+          25,
+          50
+        ],
+        "pptx": [
+          "split"
+        ],
+        "fill": [
+          70,
+          80
+        ]
+      }
+    },
+    "vMap": {
+      "V1": "P1",
+      "V2": "P2",
+      "V3": "P3",
+      "V4": "P4"
+    },
+    "pageToPreset": {
+      "points": "P4",
+      "cards": "P5",
+      "metrics": "P2",
+      "kpi": "P3",
+      "table": "P8",
+      "bar": "P8",
+      "donut": "P3",
+      "exhibit": "P8",
+      "twocol": "P4",
+      "threecol": "P5",
+      "halftable": "P8",
+      "matrix": "P7",
+      "heatmap": "P7",
+      "bullet": "P8",
+      "pyramid": "P3",
+      "timeline": "P2",
+      "steps": "P2",
+      "comparison": "P4",
+      "split": "P1",
+      "quote": "P3",
+      "image": "P1",
+      "diagram": "P9",
+      "lane": "P9",
+      "sankey": "P9",
+      "treemap": "P9",
+      "boxplot": "P9",
+      "network": "P9",
+      "marimekko": "P9",
+      "streamgraph": "P9"
+    },
+    "defaultCharts": [
+      "bar",
+      "hbar",
+      "line",
+      "donut",
+      "progress",
+      "area",
+      "stack",
+      "dualline"
+    ],
+    "advancedCharts": [
+      "waterfall",
+      "gantt",
+      "funnel",
+      "slope",
+      "dumbbell",
+      "lollipop",
+      "dotplot",
+      "bulletchart",
+      "waffle",
+      "radialbar",
+      "rose",
+      "candlestick",
+      "pareto",
+      "gauge",
+      "scatter",
+      "bubble",
+      "radar",
+      "multidonut",
+      "pie",
+      "stackline",
+      "vsbar",
+      "sparkline"
+    ],
+    "fillTarget": {
+      "presentation": [
+        58,
+        75
+      ],
+      "research": [
+        70,
+        85
+      ],
+      "architecture": [
+        75,
+        90
+      ]
+    },
+    "zones": {
+      "chromePct": [
+        18,
+        24
+      ],
+      "bodyPct": [
+        58,
+        70
+      ],
+      "annotationPct": [
+        10,
+        18
+      ]
+    },
+    "elements": {
+      "icon": {
+        "sizesPx": [
+          16,
+          18,
+          20,
+          24
+        ],
+        "stroke": 1.8,
+        "textGapPx": 8,
+        "perScreen": [
+          3,
+          8
+        ]
+      },
+      "list": {
+        "maxItemLines": 3,
+        "maxItemChars": 72,
+        "itemGap": "sp-3",
+        "maxPerCard": 5,
+        "$comment": "结构引导（非硬砍刀）：条目宜可读完整；超长→加行/拆项/拆页，禁省略号截断充数。maxItemChars/maxItemLines 为投影可读建议，校验不因「字多」单独 FAIL。",
+        "preferItemChars": 45
+      },
+      "card": {
+        "padToken": "sp-5",
+        "equalHeight": true,
+        "maxBullets": 5,
+        "$comment": "maxBullets 为建议；更多→拆卡/跟进页，勿截断条目。"
+      },
+      "metric": {
+        "perRow": [
+          4,
+          6
+        ],
+        "unitScale": 0.45,
+        "tabular": true
+      },
+      "chart": {
+        "labelNoOverlap": true,
+        "labelMinPadPx": 8,
+        "donutMaxHeightPct": 45,
+        "simpleMaxHeightPct": 28
+      },
+      "media": {
+        "ratioLocked": true,
+        "align": "top",
+        "caption": "below"
+      },
+      "info": {
+        "connector": "orthogonal",
+        "maxNodes": 24,
+        "nodePadPx": [
+          8,
+          12
+        ]
+      }
+    },
+    "spacingTokens": [
+      "sp-1",
+      "sp-2",
+      "sp-3",
+      "sp-4",
+      "sp-5",
+      "sp-6",
+      "sp-7",
+      "sp-8",
+      "gap",
+      "band-pad"
+    ],
+    "multiFocus": {
+      "$comment": "同页大件判定：图显示宽>版心55% 或 metric 字号>40px 或 全幅媒体。≥2 个大件且无主从权重声明 → LAYOUT_MULTI_FOCUS。",
+      "chartWidthPct": 55,
+      "metricFontPx": 40,
+      "maxPrimary": 1
+    },
+    "align": {
+      "mixedGridClasses": [
+        "a-start",
+        "a-c",
+        "a-end",
+        "align-items"
+      ],
+      "requireOnMixed": true,
+      "$comment": "混排须显式对齐类；layout-qa 另检列节奏（多列网格共享顶边/左缘意图）。",
+      "requireColumnRhythm": true
+    },
+    "fillTargetComment": "填充率目标带。Mode A 大气留白：cover/section/quote/closing 等休止页为 intentional whitespace，不按 underfill/FILL_LOW 惩罚（见 qualityGates.underfill.exemptIds + validate LAYOUT_FILL 轻量页豁免）。内容页半空仍属 underfill。硬规则守舞台；自适应留给内容。",
+    "modeSkels": {
+      "$comment": "Mode A 主力骨架 = P1–P4 + P6/P10；P7–P9、P11–P12 为 A 次级（research/architecture 场景下可升主力）。P5 三卡为 A 常用扩展（非默认轮换）。次级仍合法、文档与画廊可引用，禁止删除。",
+      "presentation": {
+        "primary": [
+          "P1",
+          "P2",
+          "P3",
+          "P4",
+          "P6",
+          "P10"
+        ],
+        "secondary": [
+          "P7",
+          "P8",
+          "P9",
+          "P11",
+          "P12"
+        ],
+        "extended": [
+          "P5"
+        ]
+      },
+      "research": {
+        "primary": [
+          "P5",
+          "P7",
+          "P8",
+          "P4",
+          "P6"
+        ],
+        "secondary": [
+          "P1",
+          "P2",
+          "P3",
+          "P9",
+          "P10",
+          "P11",
+          "P12"
+        ]
+      },
+      "architecture": {
+        "primary": [
+          "P9",
+          "P10",
+          "P11"
+        ],
+        "secondary": [
+          "P1",
+          "P2",
+          "P3",
+          "P4",
+          "P5",
+          "P6",
+          "P7",
+          "P8",
+          "P12"
+        ]
+      }
+    }
+  },
+  "qualityGates": {
+    "$comment": "v9+ 硬门禁。tagLeakPatterns / titleOnly / underfill / roundtripMin / chartSkew / chartOversize 同前。antiTruncation：截断迹象与溢出未拆页；chromeDriftIn：跨页 chrome y 容差（英寸）。 contentCoverage：模型文本→渲染文本覆盖率下限（validate_report 只 WARN）。",
+    "tagLeakPatterns": [
+      "<a ",
+      "</a>",
+      "class=\"cite\"",
+      "class='cite'",
+      "href=",
+      "<strong",
+      "</strong>",
+      "<span",
+      "</span>",
+      "<div",
+      "</div>"
+    ],
+    "titleOnly": {
+      "minBodyChars": 40
+    },
+    "underfill": {
+      "minCarriers": 2,
+      "exemptIds": [
+        "quote",
+        "cover",
+        "refs",
+        "appendix",
+        "next",
+        "closing",
+        "section",
+        "chapter"
+      ],
+      "$comment": "intentional whitespace 豁免：封面/章节幕/金句/收尾/参考资料等休止页不要求承载数下限；其余内容页半空 = underfill FAIL。"
+    },
+    "roundtripMin": 0.8,
+    "chartSkew": {
+      "$comment": "donut/pie/multidonut：最小扇区占比下限；maxMinRatio = 最大/最小超过该值则极偏，应改 KPI/进度/对比条。",
+      "minSectorPct": 5,
+      "maxMinRatio": 20,
+      "types": [
+        "donut",
+        "pie",
+        "multidonut"
+      ]
+    },
+    "chartOversize": {
+      "$comment": "简单图（类别≤simpleMaxCats 或数据点≤simpleMaxPts）占内容区面积上限；全幅仅限结构/全景/素材。",
+      "simpleMaxCats": 2,
+      "simpleMaxPts": 3,
+      "maxContentAreaPct": 55
+    },
+    "antiTruncation": {
+      "$comment": "截断/内容损失启发式。ellipsisInContent=正文/列表中的截断省略号；overflowNoSplit 与 layout-qa 同源。",
+      "ellipsisPatterns": [
+        "…",
+        "...",
+        "……",
+        "…。",
+        "...。"
+      ],
+      "forbidEllipsisTruncate": true,
+      "overflowNoSplitFail": true
+    },
+    "chromeDriftIn": {
+      "$comment": "PPTX 内容页页脚/页码 y 相对中位数漂移超过此值（英寸）→ WARN CHROME_DRIFT。封面/收尾豁免。默认 0.2in，抓明显漂移、不挡正常页型微差。",
+      "maxAbsDeltaIn": 0.2
+    },
+    "halfEmpty": {
+      "$comment": "半空卡：同页多卡时，正文过短的卡占比过高 → layout-qa WARN/FAIL。",
+      "minCards": 3,
+      "shortPlainChars": 12,
+      "maxShortRatio": 0.5
+    },
+    "contentCoverage": 0.95
+  },
+  "imageAdmission": {
+    "$comment": "图片资产准入门。forbidden = 禁止图片化的区域（主信息层与简单图表必须原生重建）；allowed = 可保留为图片的复杂视觉资产；maxPageAreaPct = 单页图片覆盖面积上限（超过须逐项说明）；fullSlideRiskPct = 按整页背景风险处理阈值（内容页默认失败）；placeholderIsNative = 配图占位由原生形状渲染（不是图片，不触发 pictures 门禁）。",
+    "forbidden": [
+      "标题",
+      "副标题",
+      "正文",
+      "关键数字",
+      "页脚",
+      "页码",
+      "so-what",
+      "折线图",
+      "柱状图",
+      "坐标轴",
+      "标签",
+      "对比条",
+      "简单流程箭头",
+      "基础表格"
+    ],
+    "allowed": [
+      "照片",
+      "官方 Logo",
+      "产品 UI",
+      "复杂插画",
+      "复杂纹理",
+      "3D",
+      "玻璃拟态",
+      "光影材质"
+    ],
+    "maxPageAreaPct": 40,
+    "fullSlideRiskPct": 90,
+    "placeholderIsNative": true
+  },
+  "imageSpec": {
+    "$comment": "素材图片规格与配图占位约定（HTML 与 PPTX 双引擎共用）。layouts = 支持的 image.layout 取值；multiLayouts = 支持 image.items 多图的版式；fitEnum = 裁切策略（cover 裁切填满 / contain 完整显示留白）；recommendedSizePx = 各版式建议像素尺寸（占位符提示文本与 prepare_images.py 检查共用同一份）；maxInlineBytes = 单图 data: 内联体积上限；maxTotalInlineBytes = 单份报告内联总量上限（超限改用相对路径）；maxPerPage = 单页图片数上限；placeholderLabel/placeholderHintPrefix/Suffix 由双引擎拼接同一占位文本（cross_verify 逐页文本一致）。",
+    "layouts": [
+      "full",
+      "half",
+      "bleed",
+      "grid",
+      "compare",
+      "wall"
+    ],
+    "multiLayouts": [
+      "grid",
+      "compare",
+      "wall"
+    ],
+    "fitEnum": [
+      "cover",
+      "contain"
+    ],
+    "fitDefault": "cover",
+    "formats": [
+      "png",
+      "jpeg",
+      "jpg",
+      "webp",
+      "svg"
+    ],
+    "ratioDefault": {
+      "full": "3:1",
+      "half": "4:3",
+      "bleed": "21:9",
+      "grid": "4:3",
+      "compare": "4:3",
+      "wall": "1:1"
+    },
+    "ratioCssClass": {
+      "full": "media--r3-1",
+      "half": "media--r4-3",
+      "bleed": "media--r21-9",
+      "grid": "media--r4-3",
+      "compare": "media--r4-3",
+      "wall": "media--r1-1"
+    },
+    "recommendedSizePx": {
+      "full": "2400×800",
+      "half": "1400×1050",
+      "bleed": "2560×1100",
+      "grid": "900×675",
+      "compare": "1400×1050",
+      "wall": "480×480"
+    },
+    "maxInlineBytes": 1572864,
+    "maxTotalInlineBytes": 8388608,
+    "maxPerPage": 6,
+    "placeholderLabel": "配图占位",
+    "placeholderHintPrefix": "建议 ",
+    "placeholderHintSuffix": "px",
+    "zeroExternal": true,
+    "qualityRule": "位图优先提供 ≥2× 显示尺寸；截图用 16:9 或 4:3 锁定比例；数据图不要用截图（应用内联 SVG 图表，可随主题变色）。"
+  },
+  "deepMode": {
+    "$comment": "按需深度模式。触发词命中或页面含复杂信息图时自动升级：启用锚点注册、容器级溢出、渲染对照与 manifest 输出。默认关闭（保持轻量：一次问询 + 自动生成 + 校验闭环）。",
+    "triggers": [
+      "高保真",
+      "1:1",
+      "一比一",
+      "精确还原",
+      "按图还原",
+      "正式交付",
+      "不能偏移",
+      "像素级",
+      "严格对照",
+      "逐页验收"
+    ],
+    "complexCharts": [
+      "sankey",
+      "streamgraph",
+      "treemap",
+      "marimekko",
+      "boxplot",
+      "network",
+      "rose",
+      "radialbar",
+      "candlestick",
+      "funnel"
+    ],
+    "checks": {
+      "anchors": true,
+      "containerOverflow": true,
+      "renderCompare": true,
+      "manifest": true
+    },
+    "renderCompare": {
+      "engine": "soffice",
+      "fallback": "powerpoint-com",
+      "skipIfMissing": true,
+      "dpi": 96
+    }
+  },
+  "styleAccents": {
+    "$comment": "各风格「强调色族」全部合法 hex（light/dark 主色 + 派生 hover/active 色）。validate_report.py 用它做「单一强调色」检查：正文出现其它风格的强调色即第二色相。audit_styles.py 校验本表覆盖 styles/stylesDark 的 accent。",
+    "business-blue": [
+      "1a73e8",
+      "8ab4f8",
+      "1b66c9",
+      "4285f4",
+      "a8c7fa"
+    ],
+    "apple-mono": [
+      "1d1d1f",
+      "f5f5f7",
+      "0071e3",
+      "2997ff",
+      "e8e8ed"
+    ],
+    "mckinsey": [
+      "003a70",
+      "7fb2e5",
+      "002a52",
+      "a3c7ea"
+    ],
+    "brand-red": [
+      "d0021b",
+      "ff5a66",
+      "b00217",
+      "ff7a83"
+    ],
+    "warm-sand": [
+      "96681f",
+      "b07d2b",
+      "d9b36a",
+      "8f6117",
+      "e0c184"
+    ],
+    "deep-teal": [
+      "0f6b5c",
+      "4fc3b0",
+      "0d5a4e",
+      "66cfbd"
+    ],
+    "graphite-dark": [
+      "0369a1",
+      "4da3ff",
+      "075985",
+      "6fb2ff"
+    ],
+    "indigo-violet": [
+      "5b5bd6",
+      "a5a4f0",
+      "4848c0",
+      "b6b5f5"
+    ],
+    "spectrum": [
+      "4563ef",
+      "8ba0f8",
+      "3d5bef",
+      "93a7f9"
+    ]
+  },
+  "aiFlavor": {
+    "$comment": "去AI味：words=文案高危词（validate_report.py）；visual=视觉禁则（结论条等，由 engine/PPTX/docs 落实，非词表扫描）。",
+    "visual": {
+      "forbidConclusionLeftRail": true,
+      "$comment": "结论条/.sowhat 禁止左侧 accent 装饰轨；用 accent-soft 满铺 + 舒适字阶/行高/内边距。禁止把竖色条/霓虹边/装饰 chip 当 AI chrome。"
+    },
+    "words": [
+      "赋能",
+      "彰显",
+      "凸显",
+      "格局",
+      "不仅",
+      "大幅提升",
+      "显著提升",
+      "深刻",
+      "至关重要",
+      "无缝",
+      "极致",
+      "未来可期",
+      "迈上新",
+      "开启新",
+      "见证了",
+      "标志着",
+      "充满活力",
+      "值得一提",
+      "众所周知",
+      "毫无疑问",
+      "随着.{0,6}的不断",
+      "在.{0,6}的背景下"
+    ]
+  },
+  "stylesFontPolicy": "PPTX font/fontDisplay 一律 Microsoft YaHei（Windows/Mac Office 可用；禁 PingFang SC / SimSun 单点）。HTML 侧 engine.css 用完整 fallback 栈承载风格字体语汇（衬线/系统栈/字阶/字距/圆角/密度），色 token 与本表双源一致。PPTX 不跟 HTML 换字体族——投影可读性优先于字体个性。",
+  "styleIdentity": {
+    "$comment": "HTML 侧风格语汇清单（与 engine.css 的 html[data-style=X] 覆盖块一一对应）。audit_styles.py 校验：每套至少含 font-body / font-display / radius；声明 serifDisplay 的必须是 serif 栈；声明 typeBoost 的必须覆盖 fs-display；声明 link 的必须有 --link。改语汇改 engine.css + 本表 + styles.md 三处，再跑 sync_runtime + audit_styles。",
+    "business-blue": {
+      "radius": "16px",
+      "serifDisplay": false,
+      "typeBoost": false,
+      "density": "normal",
+      "mood": "google-material"
+    },
+    "apple-mono": {
+      "radius": "20px",
+      "serifDisplay": false,
+      "typeBoost": true,
+      "density": "airy",
+      "link": "#0071e3",
+      "mood": "apple-minimal"
+    },
+    "mckinsey": {
+      "radius": "6px",
+      "serifDisplay": true,
+      "typeBoost": false,
+      "density": "dense",
+      "letterEyebrow": ".14em",
+      "mood": "consulting"
+    },
+    "brand-red": {
+      "radius": "14px",
+      "serifDisplay": false,
+      "typeBoost": false,
+      "density": "normal",
+      "mood": "formal-brand"
+    },
+    "warm-sand": {
+      "radius": "12px",
+      "serifDisplay": true,
+      "typeBoost": false,
+      "density": "airy",
+      "mood": "editorial"
+    },
+    "deep-teal": {
+      "radius": "12px",
+      "serifDisplay": false,
+      "typeBoost": false,
+      "density": "normal",
+      "mood": "trust-finance"
+    },
+    "graphite-dark": {
+      "radius": "14px",
+      "serifDisplay": false,
+      "typeBoost": false,
+      "density": "dense",
+      "mood": "immersive-graphite"
+    },
+    "indigo-violet": {
+      "radius": "16px",
+      "serifDisplay": false,
+      "typeBoost": false,
+      "density": "normal",
+      "mood": "tech-frontier"
+    },
+    "spectrum": {
+      "radius": "14px",
+      "serifDisplay": false,
+      "typeBoost": false,
+      "density": "dense",
+      "mood": "data-board"
+    }
+  },
+  "styles": {
+    "business-blue": {
+      "accent": "1A73E8",
+      "ink": "202124",
+      "body": "5F6368",
+      "faint": "80868B",
+      "bg": "FFFFFF",
+      "surface": "F8F9FA",
+      "line": "DADCE0",
+      "soft": "E8F0FE",
+      "onAccent": "FFFFFF",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "apple-mono": {
+      "accent": "1D1D1F",
+      "ink": "1D1D1F",
+      "body": "6E6E73",
+      "faint": "86868B",
+      "bg": "FFFFFF",
+      "surface": "F5F5F7",
+      "line": "D2D2D7",
+      "soft": "F5F5F7",
+      "onAccent": "FFFFFF",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "mckinsey": {
+      "accent": "003A70",
+      "ink": "101828",
+      "body": "475467",
+      "faint": "667085",
+      "bg": "FFFFFF",
+      "surface": "F2F4F7",
+      "line": "D0D5DD",
+      "soft": "EEF4FB",
+      "onAccent": "FFFFFF",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "brand-red": {
+      "accent": "D0021B",
+      "ink": "1F1A1B",
+      "body": "5D5456",
+      "faint": "8A8083",
+      "bg": "FFFFFF",
+      "surface": "FAF7F7",
+      "line": "E2D9DA",
+      "soft": "FBECEC",
+      "onAccent": "FFFFFF",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "warm-sand": {
+      "accent": "96681F",
+      "ink": "2A2521",
+      "body": "6B5F52",
+      "faint": "93836F",
+      "bg": "FBF9F6",
+      "surface": "F6F2EC",
+      "line": "E0D7C9",
+      "soft": "F3ECDD",
+      "onAccent": "FFFFFF",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "deep-teal": {
+      "accent": "0F6B5C",
+      "ink": "14201E",
+      "body": "4A5A57",
+      "faint": "73837F",
+      "bg": "FFFFFF",
+      "surface": "F2F6F5",
+      "line": "CFDEDC",
+      "soft": "E4F1EE",
+      "onAccent": "FFFFFF",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "graphite-dark": {
+      "accent": "0369A1",
+      "ink": "1A1D21",
+      "body": "4B5158",
+      "faint": "767C84",
+      "bg": "F4F5F7",
+      "surface": "ECEEF1",
+      "line": "CED1D6",
+      "soft": "E2EFF7",
+      "onAccent": "FFFFFF",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "indigo-violet": {
+      "accent": "5B5BD6",
+      "ink": "1B1A2E",
+      "body": "52506B",
+      "faint": "7A779A",
+      "bg": "FFFFFF",
+      "surface": "F4F4FB",
+      "line": "D7D7E8",
+      "soft": "ECECF9",
+      "onAccent": "FFFFFF",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "spectrum": {
+      "accent": "4563EF",
+      "ink": "171A21",
+      "body": "4D5566",
+      "faint": "7B8494",
+      "bg": "FBFCFE",
+      "surface": "F4F6FA",
+      "line": "D6DCE6",
+      "soft": "ECEEFF",
+      "onAccent": "FFFFFF",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    }
+  },
+  "stylesDark": {
+    "business-blue": {
+      "accent": "8AB4F8",
+      "ink": "E8EAED",
+      "body": "ADB4BD",
+      "faint": "868D96",
+      "bg": "0D0F13",
+      "surface": "191D23",
+      "line": "2F353D",
+      "soft": "16243A",
+      "onAccent": "0D1B2E",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "apple-mono": {
+      "accent": "F5F5F7",
+      "ink": "F5F5F7",
+      "body": "A1A1A6",
+      "faint": "86868B",
+      "bg": "000000",
+      "surface": "161617",
+      "line": "38383D",
+      "soft": "1D1D1F",
+      "onAccent": "000000",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "mckinsey": {
+      "accent": "7FB2E5",
+      "ink": "E4E7EC",
+      "body": "AAB3C2",
+      "faint": "8A94A6",
+      "bg": "0C1116",
+      "surface": "12181F",
+      "line": "2A3342",
+      "soft": "12233A",
+      "onAccent": "0C1A2E",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "brand-red": {
+      "accent": "FF5A66",
+      "ink": "F3ECEC",
+      "body": "C4B6B7",
+      "faint": "9A8D8E",
+      "bg": "130D0E",
+      "surface": "1A1213",
+      "line": "37272A",
+      "soft": "331518",
+      "onAccent": "2A0D10",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "warm-sand": {
+      "accent": "D9B36A",
+      "ink": "ECE5DB",
+      "body": "C4B8A8",
+      "faint": "9B8D7A",
+      "bg": "15120E",
+      "surface": "1D1913",
+      "line": "3A3128",
+      "soft": "2E2417",
+      "onAccent": "2A1F10",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "deep-teal": {
+      "accent": "4FC3B0",
+      "ink": "E2ECEA",
+      "body": "B3C2BF",
+      "faint": "86948F",
+      "bg": "0D1312",
+      "surface": "131B1A",
+      "line": "293834",
+      "soft": "12312C",
+      "onAccent": "0C2420",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "graphite-dark": {
+      "accent": "4DA3FF",
+      "ink": "EEF2F6",
+      "body": "B9C2CD",
+      "faint": "85909D",
+      "bg": "0B0E12",
+      "surface": "171D24",
+      "line": "2B3540",
+      "soft": "132841",
+      "onAccent": "07182B",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "indigo-violet": {
+      "accent": "A5A4F0",
+      "ink": "E6E5F5",
+      "body": "B6B4D4",
+      "faint": "8B89B0",
+      "bg": "100F1C",
+      "surface": "171629",
+      "line": "322F52",
+      "soft": "232146",
+      "onAccent": "171631",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "spectrum": {
+      "accent": "8BA0F8",
+      "ink": "E8EBF2",
+      "body": "A7AFBF",
+      "faint": "7E8798",
+      "bg": "0E1116",
+      "surface": "171C26",
+      "line": "2B3342",
+      "soft": "1B2242",
+      "onAccent": "141A38",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    }
+  },
+  "styleDataColors": {
+    "$comment": "编码色板（单源）：**每套风格各自的 5 色数据系列色板**，供多系列图表（多段环形/分组柱/多折线/散点分组/桑基流带/马赛克段）使用，经 .f-c1~c5 / .s-c1~c5 语义类生效（HTML）与 dataColors()（PPTX 双引擎）。与结构色纪律正交：结构色（标题/正文/边框/按钮/大面积底色）永远中性 + 单一强调色，编码色只出现在数据本体。c1 恒等于该风格强调色；c2/c3 为近似色，c4/c5 为降饱和补色。**色值一律为不带 # 的裸 hex**（与 styles / stylesDark / styleAccents 同口径）——# 前缀会原样流入 OOXML srgbClr val 造成非法色值；HTML 侧由 engine.css 覆盖块补 #。改色值改这里，再跑 sync_runtime.py + audit_styles.py。",
+    "business-blue": [
+      "1a73e8",
+      "3526bb",
+      "21a199",
+      "b77148",
+      "99983d"
+    ],
+    "apple-mono": [
+      "1d1d1f",
+      "0071e3",
+      "0f7b6c",
+      "c2410c",
+      "7c3aed"
+    ],
+    "mckinsey": [
+      "003a70",
+      "2826bb",
+      "21a18e",
+      "b76848",
+      "99903d"
+    ],
+    "brand-red": [
+      "d0021b",
+      "bb6326",
+      "d634ae",
+      "40a182",
+      "438aa8"
+    ],
+    "warm-sand": [
+      "96681f",
+      "839324",
+      "cf3b3e",
+      "4d88b2",
+      "4a47a4"
+    ],
+    "deep-teal": [
+      "0f6b5c",
+      "2683bb",
+      "22aa3e",
+      "b74870",
+      "a85c43"
+    ],
+    "graphite-dark": [
+      "0369a1",
+      "2637bb",
+      "1f9977",
+      "b75948",
+      "a18a40"
+    ],
+    "indigo-violet": [
+      "5b5bd6",
+      "7432ae",
+      "4197c8",
+      "a08f4b",
+      "7ca04b"
+    ],
+    "spectrum": [
+      "4563ef",
+      "5b26bb",
+      "269ebb",
+      "af8746",
+      "83993d"
+    ]
+  },
+  "styleDataColorsDark": {
+    "$comment": "编码色板 · 深色主题版（同一套风格的深色变体，明度抬高以保证在近黑底上可辨）。HTML 侧由 engine.css 的 [data-theme=dark] 覆盖块消费；PPTX 侧按 model.theme 选择本表或 styleDataColors。",
+    "business-blue": [
+      "8ab4f8",
+      "7966e0",
+      "88e7e5",
+      "d4ad91",
+      "cbce83"
+    ],
+    "apple-mono": [
+      "f5f5f7",
+      "2997ff",
+      "2dd4bf",
+      "ff9f0a",
+      "bf5af2"
+    ],
+    "mckinsey": [
+      "7fb2e5",
+      "6f6bdb",
+      "8ce3d8",
+      "d1a694",
+      "cbc586"
+    ],
+    "brand-red": [
+      "ff5a66",
+      "e09e66",
+      "e788cb",
+      "91d4c2",
+      "83b4ce"
+    ],
+    "warm-sand": [
+      "d9b36a",
+      "c2d571",
+      "df9391",
+      "97b5ce",
+      "8e89c7"
+    ],
+    "deep-teal": [
+      "4fc3b0",
+      "7aaecd",
+      "97d8a4",
+      "c99cac",
+      "c29c8f"
+    ],
+    "graphite-dark": [
+      "4da3ff",
+      "6c66e0",
+      "88e7dc",
+      "d4a691",
+      "cec983"
+    ],
+    "indigo-violet": [
+      "a5a4f0",
+      "a967e0",
+      "89c3e7",
+      "d3c792",
+      "aece83"
+    ],
+    "spectrum": [
+      "8ba0f8",
+      "9066e0",
+      "88d6e7",
+      "d4ba91",
+      "bdce83"
+    ]
+  },
+  "layoutSlots": {
+    "$comment": "页型布局 IR（Layout Intermediate Representation）：全部可交付页型的语义槽位。双通道按同一槽位语义落位；坐标以 layout-constants.json pageTypes 为唯一几何源，scripts/lib_layout_regions.js 将槽位映射为英寸矩形。role: primary/secondary/annotation/chrome。required: true 表示缺了即不合格。",
+    "version": "0.1",
+    "pageTypes": {
+      "points": {
+        "mode": [
+          "presentation",
+          "research",
+          "architecture"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".grid.g-2 / .card / .ul",
+            "pptx": "points columns",
+            "minUnits": 1
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": false,
+            "html": ".sowhat / .note",
+            "pptx": "soWhatBar / footnoteLine"
+          }
+        ]
+      },
+      "metrics": {
+        "mode": [
+          "presentation",
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".metric",
+            "pptx": "metric row",
+            "minUnits": 4
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": false,
+            "html": "口径行 / .sowhat",
+            "pptx": "footnoteLine / soWhatBar"
+          }
+        ]
+      },
+      "kpi": {
+        "mode": [
+          "presentation",
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "hero",
+            "role": "primary",
+            "required": true,
+            "html": ".t-metric hero",
+            "pptx": "hero number"
+          },
+          {
+            "id": "metrics",
+            "role": "secondary",
+            "required": false,
+            "html": ".metric",
+            "pptx": "support metrics"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": false,
+            "html": ".sowhat / .note",
+            "pptx": "soWhatBar"
+          }
+        ]
+      },
+      "exhibit": {
+        "mode": [
+          "research",
+          "presentation"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead / .exhibit__hd",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": "svg[data-chart] / .exhibit",
+            "pptx": "nativeChart | shapeChart",
+            "channel": "registry"
+          },
+          {
+            "id": "secondary",
+            "role": "secondary",
+            "required": false,
+            "html": "要点列表",
+            "pptx": "side bullets"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": true,
+            "html": ".exhibit__src / .sowhat",
+            "pptx": "footnoteLine / soWhatBar / notes"
+          }
+        ]
+      },
+      "split": {
+        "mode": [
+          "presentation",
+          "research",
+          "architecture"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "left",
+            "role": "primary",
+            "required": true,
+            "html": "左区（points/table/image/chart）",
+            "pptx": "left zone"
+          },
+          {
+            "id": "right",
+            "role": "secondary",
+            "required": true,
+            "html": "右区（points/table/image/chart）",
+            "pptx": "right zone"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": false,
+            "html": ".sowhat / .note",
+            "pptx": "soWhatBar"
+          }
+        ]
+      },
+      "table": {
+        "mode": [
+          "presentation",
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".tbl-wrap table",
+            "pptx": "addTable",
+            "maxRows": {
+              "presentation": 8,
+              "research": 16
+            }
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": false,
+            "html": ".sowhat / .note",
+            "pptx": "soWhatBar / footnoteLine"
+          }
+        ]
+      },
+      "bar": {
+        "mode": [
+          "presentation",
+          "research",
+          "architecture"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": "svg[data-chart]",
+            "pptx": "nativeChart | shapeChart",
+            "channel": "registry"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": true,
+            "html": "note / dataTable",
+            "pptx": "footnoteLine / notes / inline table"
+          }
+        ]
+      },
+      "donut": {
+        "mode": [
+          "presentation",
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": "svg[data-chart=donut]",
+            "pptx": "addChart doughnut"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": false,
+            "html": "中心合计 / 图例 / .note",
+            "pptx": "center label / legend / notes"
+          }
+        ]
+      },
+      "twocol": {
+        "mode": [
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".cols-2",
+            "pptx": "two text columns"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": false,
+            "html": ".sowhat",
+            "pptx": "soWhatBar"
+          }
+        ]
+      },
+      "threecol": {
+        "mode": [
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".cols-3",
+            "pptx": "three text columns"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": false,
+            "html": ".sowhat",
+            "pptx": "soWhatBar"
+          }
+        ]
+      },
+      "halftable": {
+        "mode": [
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": "左表",
+            "pptx": "addTable left"
+          },
+          {
+            "id": "secondary",
+            "role": "secondary",
+            "required": true,
+            "html": "右图",
+            "pptx": "chart right"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": false,
+            "html": ".sowhat",
+            "pptx": "soWhatBar"
+          }
+        ]
+      },
+      "matrix": {
+        "mode": [
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".matrix",
+            "pptx": "matrix cells"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": false,
+            "html": ".sowhat",
+            "pptx": "soWhatBar"
+          }
+        ]
+      },
+      "comparison": {
+        "mode": [
+          "presentation",
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "left",
+            "role": "primary",
+            "required": true,
+            "html": "左面板",
+            "pptx": "left panel"
+          },
+          {
+            "id": "right",
+            "role": "secondary",
+            "required": true,
+            "html": "右面板",
+            "pptx": "right panel"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": false,
+            "html": "verdict / .sowhat",
+            "pptx": "verdict bar"
+          }
+        ]
+      },
+      "quote": {
+        "mode": [
+          "presentation",
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": "金句正文",
+            "pptx": "quote text"
+          }
+        ]
+      },
+      "timeline": {
+        "mode": [
+          "presentation",
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".tl",
+            "pptx": "timeline axis"
+          }
+        ]
+      },
+      "steps": {
+        "mode": [
+          "presentation",
+          "architecture"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".steps",
+            "pptx": "step row"
+          }
+        ]
+      },
+      "cards": {
+        "mode": [
+          "presentation",
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".card grid",
+            "pptx": "card grid"
+          }
+        ]
+      },
+      "heatmap": {
+        "mode": [
+          "presentation",
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".heat",
+            "pptx": "heat cells"
+          }
+        ]
+      },
+      "bullet": {
+        "mode": [
+          "presentation",
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".bul",
+            "pptx": "bullet rows"
+          }
+        ]
+      },
+      "pyramid": {
+        "mode": [
+          "presentation",
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".pyr",
+            "pptx": "pyramid layers"
+          }
+        ]
+      },
+      "image": {
+        "mode": [
+          "presentation",
+          "research",
+          "architecture"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".media*",
+            "pptx": "imageLayoutShapes"
+          }
+        ]
+      },
+      "diagram": {
+        "mode": [
+          "architecture",
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".arch / layers",
+            "pptx": "layered nodes + edges",
+            "maxNodes": 24,
+            "maxLayers": 4
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": false,
+            "html": ".arch__legend / .note",
+            "pptx": "legend chips / notes"
+          }
+        ]
+      },
+      "lane": {
+        "mode": [
+          "architecture",
+          "research"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".lane",
+            "pptx": "lanes + steps"
+          }
+        ]
+      },
+      "sankey": {
+        "mode": [
+          "research",
+          "architecture"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": "svg[data-chart=sankey]",
+            "pptx": "infoSankey",
+            "maxNodes": 12
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": true,
+            "html": "dataTable / .note",
+            "pptx": "notes"
+          }
+        ]
+      },
+      "treemap": {
+        "mode": [
+          "research",
+          "architecture"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": "svg[data-chart=treemap]",
+            "pptx": "infoTreemap"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": true,
+            "html": "dataTable / .note",
+            "pptx": "notes"
+          }
+        ]
+      },
+      "boxplot": {
+        "mode": [
+          "research",
+          "architecture"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": "svg[data-chart=boxplot]",
+            "pptx": "infoBoxplot"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": true,
+            "html": "dataTable / .note",
+            "pptx": "notes"
+          }
+        ]
+      },
+      "network": {
+        "mode": [
+          "research",
+          "architecture"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": "svg[data-chart=network]",
+            "pptx": "infoNetwork"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": true,
+            "html": "dataTable / .note",
+            "pptx": "notes"
+          }
+        ]
+      },
+      "marimekko": {
+        "mode": [
+          "research",
+          "architecture"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": "svg[data-chart=marimekko]",
+            "pptx": "infoMarimekko"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": true,
+            "html": "dataTable / .note",
+            "pptx": "notes"
+          }
+        ]
+      },
+      "streamgraph": {
+        "mode": [
+          "research",
+          "architecture"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".shead",
+            "pptx": "head()"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": "svg[data-chart=streamgraph]",
+            "pptx": "infoStreamgraph"
+          },
+          {
+            "id": "annotation",
+            "role": "annotation",
+            "required": true,
+            "html": "dataTable / .note",
+            "pptx": "notes"
+          }
+        ]
+      }
+    }
+  },
+  "layoutVariants": {
+    "$comment": "版式变体注册表（0.2.0 新增）：复用既有页型/组件的组合版式，不新增 DSL 页型。variant 写在 section.variant；HTML 侧 render_from_model 按 base 页型渲染 + 变体类名；PPTX 侧 build_pptx 同名映射。新增变体：在此登记 + references/layout-variants.md 写骨架文档；禁止为变体另起渲染器。",
+    "version": "0.1",
+    "variants": {
+      "bento-grid": {
+        "name": "Bento 拼贴卡",
+        "base": "cards",
+        "html": ".grid.g-bento（复用 .card；首卡 .card--lead 跨 2 列）",
+        "components": [
+          "card",
+          "card__ico",
+          "pts_list"
+        ],
+        "sectionAttr": "data-variant=\"bento-grid\"",
+        "when": "4–6 张卡、其中 1 张是主结论/总览时；信息密度高于等权卡片",
+        "budget": {
+          "maxCards": 6,
+          "recommendCards": "4–5",
+          "leadMaxPoints": 4,
+          "otherMaxPoints": 3
+        },
+        "pptx": "cards 分支：首卡跨 2 列，其余顺排（build_pptx.js variant 分支）"
+      },
+      "timeline": {
+        "name": "图标时间线",
+        "base": "timeline",
+        "html": "复用 .tl；phase 字典加 icon 键 → 节点图标 .tl__ico[data-icon]",
+        "components": [
+          "tl",
+          "icon:<name>"
+        ],
+        "sectionAttr": "data-variant=\"timeline\"",
+        "when": "阶段有明确类型语义（里程碑/风险/交付）且图标能加速扫读时；无语义用基础 timeline",
+        "budget": {
+          "maxPhases": 6,
+          "iconPerPhase": 1,
+          "descMaxChars": 60
+        },
+        "pptx": "timeline 分支：节点圆点旁贴 icon: 图标（build_pptx.js phaseKV 第 5 元）"
+      },
+      "2-col-feature": {
+        "name": "双栏特性",
+        "base": "twocol",
+        "html": ".cols-2；左栏 .col--feature（复用 .card 语义：加粗标题 + accent 左线）",
+        "components": [
+          "cols-2",
+          "card"
+        ],
+        "sectionAttr": "data-variant=\"2-col-feature\"",
+        "when": "左栏是核心主张/特性、右栏是支撑细节时；两栏对等论证用基础 twocol",
+        "budget": {
+          "maxParas": 6,
+          "featureMaxParas": 2
+        },
+        "pptx": "twocol 分支：首栏加 accent 左线 + 标题放大（build_pptx.js variant 分支）"
+      }
+    }
+  }
+}

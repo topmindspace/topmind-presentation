@@ -768,14 +768,50 @@ def inject_sowhat(h: str) -> str:
 
 
 # ── 页面骨架：封面 / Agenda / 收尾 / 参考资料 / 页脚 ────────────────────────────
+GHOST_MARK = '【待填】'
+
+
+def _schema_page_types():
+    try:
+        sch = json.loads((ROOT / 'scripts' / 'model-schema.json').read_text(encoding='utf-8'))
+    except Exception:
+        return {}
+    for key in ('pageTypes', 'sectionTypes', 'types'):
+        v = sch.get(key)
+        if isinstance(v, dict):
+            return v
+    for v in sch.values():
+        if isinstance(v, dict) and 'points' in v and isinstance(v['points'], dict) and 'label' in v['points']:
+            return v
+    return {}
+
+
+def pg_ghost(i, sec):
+    """标题初稿页（--plan）：只有 eyebrow + 标题 + 页型；正文位置是明确的空位标记，不放示例正文或数字。"""
+    pt = _schema_page_types().get(sec['type'], {})
+    label = pt.get('label', sec['type']).split('（')[0]
+    need = '、'.join(f.split(':')[0].replace('anyof', '') for f in pt.get('required', []) if f != 'title') or '正文'
+    html = f'''<section class="band" id="s{i}" data-ghost="1">
+  <div class="wrap">
+{shead(sec['eyebrow'], sec['title'], '')}
+    <div class="ghost-slot rv" style="border:2px dashed var(--border);border-radius:var(--r-lg);padding:var(--sp-6);
+      min-height:46vh;display:flex;flex-direction:column;justify-content:center;gap:var(--sp-2);color:var(--text-3)">
+      <div class="t-h3" style="color:var(--text-2)">{GHOST_MARK}{esc(label)}</div>
+      <div class="t-sm">页型 <code>{esc(sec['type'])}</code> · 需要填写：{esc(need)}</div>
+    </div>
+  </div>
+</section>'''
+    return html, {'type': sec['type'], 'draft': True}
+
+
 def cover(mode, title, subtitle, meta):
     return f'''<!-- 封面 -->
-<section class="band band--fit" id="cover">
-  <div class="wrap">
-    <div class="shead rv">
-      <div class="t-eyebrow">{esc(meta)}</div>
-      <h1 class="t-display shead__title">{esc(title)}</h1>
-      <p class="t-lead shead__desc">{esc(subtitle)}</p>
+<section class="band band--fit band--accent--solid band--cover" id="cover">
+  <div class="wrap cover">
+    <div class="t-eyebrow cover__meta">{esc(meta)}</div>
+    <div class="cover__main rv">
+      <h1 class="t-display cover__title">{esc(title)}</h1>
+      <p class="t-lead cover__sub">{esc(subtitle)}</p>
     </div>
   </div>
 </section>'''
@@ -993,6 +1029,8 @@ def main() -> int:
     for k, p in enumerate(pages, 1):
         p.setdefault('type', 'points')
         b = BUILDERS.get(p['type'])
+        if plan is not None and b is not None:
+            b = pg_ghost   # 标题初稿：不生成示例正文
         if b is None:
             print(f'警告：未知页型 {p["type"]!r}，回落到 points')
             b = pg_points
@@ -1012,7 +1050,7 @@ def main() -> int:
                 h, count=1)
         m['layoutPreset'] = skel
         has_note = bool(HAS_NOTE.search(h))
-        if not has_note and since_note >= 2:      # research 节奏：≤2 页无结论条
+        if not has_note and since_note >= 2 and plan is None:      # research 节奏：≤2 页无结论条（标题初稿不注入示例结论）
             h = inject_sowhat(h)
             has_note = True
         since_note = 0 if has_note else since_note + 1
@@ -1043,12 +1081,17 @@ def main() -> int:
 
     show_agenda = not (mode == 'architecture' and len(pages) <= 4)
     closing_points = [['动作一', '一句话说明。'], ['动作二', '一句话说明。'], ['动作三', '一句话说明。']]
+    closing_title = '收尾主张（回应封面问题）'
+    if plan is not None:
+        closing_points = [[GHOST_MARK + '收尾要点', '确认标题后再写']]
+        closing_title = GHOST_MARK + '收尾主张'
+    ghost_inject = plan is not None
 
     body = [cover(mode, args.title, args.subtitle, args.meta)]
     if show_agenda:
         body.append(agenda(mode, agenda_items))
     body += html_parts
-    body.append(closing(mode, '收尾主张（回应封面问题）', closing_points))
+    body.append(closing(mode, closing_title, closing_points))
     head = '\n\n'.join(body)
 
     # 参考资料：只在有真实来源条目时生成；scaffold 不再写「来源 N（替换为真实来源名称）」占位
@@ -1079,7 +1122,7 @@ def main() -> int:
         'agenda': [[chapters[k]['num'], chapters[k]['title'], chapters[k]['desc']]
                    for k in ch_order] if show_agenda else [],
         'sections': model_secs,
-        'closing': {'title': '收尾主张（回应封面问题）',
+        'closing': {'title': closing_title,
                     'points': [list(x) for x in closing_points]},
     }
     assert MODEL_RE.search(t), f'{tpl_path.name} 缺少 REPORT_MODEL 块'

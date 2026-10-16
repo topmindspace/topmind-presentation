@@ -2115,14 +2115,21 @@ function addTable(s, tbl, x, y, w, availH, opts) {
 (function cover() {
   const s = base();
   const C = PT.cover;
-  s.addShape('rect', { x: 0, y: 0, w: PW, h: PH, fill: { color: STYLE.accent }, line: { type: 'none' } });
+  /* 深色主题：主色 30% 混入底色（与 HTML [data-theme=dark] .band--cover 同式），文字走 ink/body */
+  const _mix = (a, b, t) => { const h = x => [0, 2, 4].map(i => parseInt(String(x).replace('#', '').substr(i, 2), 16));
+    const A = h(a), B = h(b); return A.map((v, i) => Math.round(v * t + B[i] * (1 - t)).toString(16).padStart(2, '0')).join('').toUpperCase(); };
+  const darkCover = THEME === 'dark';
+  const cvFill = darkCover ? _mix(STYLE.accent, STYLE.bg, 0.3) : STYLE.accent;
+  const cvTitle = darkCover ? STYLE.ink : STYLE.onAccent;
+  const cvSub = darkCover ? STYLE.body : STYLE.soft;
+  s.addShape('rect', { x: 0, y: 0, w: PW, h: PH, fill: { color: cvFill }, line: { type: 'none' } });
   s.addText(CONTENT.meta || '', { x: MX, y: C.metaY, w: CW, h: 0.4, fontFace: STYLE.font,
-    fontSize: sz(12), color: STYLE.soft });
+    fontSize: sz(12), color: darkCover ? STYLE.accent : STYLE.soft });
   const tSize = estTextH(CONTENT.title, CW - 1, sz(44), 1.25) > C.titleH ? sz(36) : sz(44);
   s.addText(CONTENT.title, { x: MX, y: C.titleY, w: CW - 1, h: C.titleH, fontFace: STYLE.fontDisplay,
-    fontSize: tSize, bold: true, color: STYLE.onAccent });
+    fontSize: tSize, bold: true, color: cvTitle });
   s.addText(CONTENT.subtitle || '', { x: MX, y: C.subtitleY, w: CW - 1, h: C.subtitleH,
-    fontFace: STYLE.font, fontSize: sz(18), color: STYLE.soft });
+    fontFace: STYLE.font, fontSize: sz(18), color: cvSub });
   const _cn = mergeNotes(CONTENT.coverNotes, [CONTENT.subtitle, CONTENT.meta].filter(Boolean).join('\n'));
   if (_cn) s.addNotes(_cn);
 })();
@@ -2726,24 +2733,50 @@ CONTENT.sections.forEach((sec) => {
     const ps = (sec.phases || []).map(phaseKV);
     const n = Math.max(1, ps.length);
     const stepW = (treg.w - 1.0) / n;
-    s.addShape('line', { x: treg.x + 0.2, y: T.axisY, w: treg.w - 0.4, h: 0.02, line: { color: STYLE.line, width: 1.5 } });
+    /* 短时间线（≤5 阶段、描述短）：字号上调、描述区加高，整组在主体区垂直居中——不再把下半页留空。
+       普通时间线 dy=0 / 原字号，几何不变。 */
+    const tlShort = MODE_NAME === 'presentation' && n <= 5 && ps.every(p => String(p[2] || '').length <= 40);
+    const tlDescH = tlShort ? 1.5 : T.descH;
+    const tlBlockH = T.descY + tlDescH - T.labelY;
+    const tlAvail = bodyBottom - (CONTENT_TOP || T.labelY);
+    const dy = 0;
+    const TY = { labelY: T.labelY + dy, axisY: T.axisY + dy, dotY: T.dotY + dy, nameY: T.nameY + dy, descY: T.descY + dy };
+    const fzLab = tlShort ? 14 : 12, fzName = tlShort ? 21 : 17, fzDesc = tlShort ? 14.5 : 12;
+    s.addShape('line', { x: treg.x + 0.2, y: TY.axisY, w: treg.w - 0.4, h: 0.02, line: { color: STYLE.line, width: 1.5 } });
     ps.forEach((p, i) => {
       const x = treg.x + 0.2 + i * stepW;
       const on = p[3] === 'done' || p[3] === 'now';
       // 变体 timeline：节点图标（icon:<name>）；无图标回落圆点
       const wantIcon = (sec.variant === 'timeline') && p[4];
       if (wantIcon) {
-        addIcon(s, p[4], x - 0.13, T.dotY - 0.06, 0.26, on ? STYLE.accent : STYLE.body);
+        addIcon(s, p[4], x - 0.13, TY.dotY - 0.06, 0.26, on ? STYLE.accent : STYLE.body);
       } else {
-        s.addShape('ellipse', { x: x - T.dotR / 2, y: T.dotY, w: T.dotR, h: T.dotR,
+        s.addShape('ellipse', { x: x - T.dotR / 2, y: TY.dotY, w: T.dotR, h: T.dotR,
           fill: { color: on ? STYLE.accent : STYLE.line }, line: { type: 'none' } });
       }
-      s.addText(p[0], { x: x - 0.1, y: T.labelY, w: stepW - 0.2, h: 0.4, fontFace: STYLE.font,
-        fontSize: sz(12), bold: true, color: STYLE.accent, charSpacing: 1 });
-      s.addText(p[1], { x: x - 0.1, y: T.nameY, w: stepW - 0.2, h: 0.5, fontFace: STYLE.fontDisplay,
-        fontSize: sz(17), bold: true, color: p[3] === 'now' ? STYLE.accent : STYLE.ink });
-      s.addText(p[2] || '', { x: x - 0.1, y: T.descY, w: stepW - 0.25, h: T.descH, fontFace: STYLE.font,
-        fontSize: sz(12), color: STYLE.body, lineSpacing: sz(18) });
+      s.addText(p[0], { x: x - 0.1, y: TY.labelY, w: stepW - 0.2, h: 0.4, fontFace: STYLE.font,
+        fontSize: sz(fzLab), bold: true, color: STYLE.accent, charSpacing: 1 });
+      if (tlShort) {
+        /* 短时间线：轴下每个阶段一张色调卡，卡片铺到主体区底部，名称 + 说明在卡内垂直居中 */
+        const cTop = TY.nameY - 0.22, cH = Math.max(1.6, bodyBottom - 0.12 - cTop);
+        const cW = stepW - 0.18, cx = x - 0.22;
+        const dH = estTextH(String(p[2] || ''), cW - 0.4, sz(fzDesc), 1.5);
+        /* 各卡共用同一偏移（按最长说明算），阶段名保持一条水平线 */
+        const dHMax = Math.max(...ps.map(q => estTextH(String(q[2] || ''), cW - 0.4, sz(fzDesc), 1.5)));
+        const gH = 0.55 + 0.12 + dHMax;
+        const gy = cTop + Math.max(0.2, (cH - gH) / 2);
+        s.addShape('roundRect', { x: cx, y: cTop, w: cW, h: cH, rectRadius: 0.1,
+          fill: { color: p[3] === 'now' ? STYLE.soft : STYLE.surface }, line: { color: STYLE.line, width: 0.75 } });
+        s.addText(p[1], { x: cx + 0.2, y: gy, w: cW - 0.4, h: 0.55, fontFace: STYLE.fontDisplay,
+          fontSize: sz(fzName), bold: true, color: p[3] === 'now' ? STYLE.accent : STYLE.ink, valign: 'middle' });
+        s.addText(p[2] || '', { x: cx + 0.2, y: gy + 0.67, w: cW - 0.4, h: Math.min(cH - 0.9, dH + 0.25), fontFace: STYLE.font,
+          fontSize: sz(fzDesc), color: STYLE.body, lineSpacing: sz(fzDesc * 1.5), valign: 'top' });
+        return;
+      }
+      s.addText(p[1], { x: x - 0.1, y: TY.nameY, w: stepW - 0.2, h: 0.5, fontFace: STYLE.fontDisplay,
+        fontSize: sz(fzName), bold: true, color: p[3] === 'now' ? STYLE.accent : STYLE.ink });
+      s.addText(p[2] || '', { x: x - 0.1, y: TY.descY, w: stepW - 0.25, h: tlDescH, fontFace: STYLE.font,
+        fontSize: sz(fzDesc), color: STYLE.body, lineSpacing: sz(fzDesc * 1.5) });
     });
   } else if (type === 'bar') {
     const c = sec.chart || {};
@@ -2964,7 +2997,11 @@ CONTENT.sections.forEach((sec) => {
     /* 陈述卡用整张卡作文本区（不留标题行、不放图标），字号上限放到 22pt，全卡统一取最小可容纳档 */
     const STMT_PAD = 0.28;
     /* 美化路由的有标题卡：标题与正文都上调一档，短内容不再缩在卡片左上角 */
-    const lockedCards = !statement && !!CONTENT.contentLocked;
+    /* 短内容卡片页（≤4 卡、每卡正文平均 ≤60 字）同样上调字号：与 HTML .cards--roomy 同判据 */
+    const _cl = cd => (cd.points || []).map(p => cardPtText(p)).join('').length;
+    const roomyCards = MODE_NAME === 'presentation' && cds.length > 0 && cds.length <= 4 && !isBento &&
+      cds.reduce((a, cd) => a + _cl(cd), 0) / cds.length <= 64;
+    const lockedCards = !statement && (!!CONTENT.contentLocked || roomyCards);
     const ptsFzB = cds.length ? Math.min(...cds.map((cd, i) => statement
       ? fitFont((cd.points || []).map(String), (isBento && i === 0 ? 2 * gw + cdC.gap : gw) - 2 * STMT_PAD, gh - 2 * STMT_PAD,
         { max: 22, lineFactor: 1.45, gapFactor: 0.3, ladder: BIG_LADDER })
@@ -2995,17 +3032,26 @@ CONTENT.sections.forEach((sec) => {
         return;
       }
       /* 卡片头路标：真导出语义图标（SVG→PNG），与 HTML .card__ico 同源；无资产时回落 accent 方块 */
-      const ico = 0.18;
+      const ico = lockedCards ? 0.26 : 0.18;
       const icoName = cd.icon || ICON_LIB.pickIconName(cd.title || '', i);
-      addIcon(s, icoName, x + 0.18, y + 0.2, ico, STYLE.accent);
-      s.addText(cd.title || '', { x: x + 0.18 + ico + 0.1, y: y + 0.14, w: cw - 0.36 - ico - 0.1, h: cdC.titleH, fontFace: STYLE.font,
+      /* 短内容卡：标题 + 正文作为一组在卡内垂直居中，卡片仍铺满栅格（色调面撑起版面） */
+      const ptLines0 = (cd.points || []).map(cardPtText);
+      const estPts = ptLines0.reduce((a, t) => a + estTextH(t, cw - 0.36, ptsFz, 1.5), 0) + 0.1 * ptLines0.length;
+      /* 同一行卡片共用同一偏移（按最长一张算），标题保持对齐 */
+      const estMax = Math.max(...cds.map(c2 => (c2.points || []).map(cardPtText)
+        .reduce((a, t) => a + estTextH(t, cw - 0.36, ptsFz, 1.5), 0) + 0.1 * (c2.points || []).length));
+      const yOff = roomyCards ? Math.max(0, (gh - (0.14 + cdC.titleH + 0.2 + estMax + 0.2)) / 2) : 0;
+      const y0 = y + yOff;
+      addIcon(s, icoName, x + 0.18, y0 + (lockedCards ? 0.17 : 0.2), ico, STYLE.accent);
+      s.addText(cd.title || '', { x: x + 0.18 + ico + 0.1, y: y0 + 0.14, w: cw - 0.36 - ico - 0.1, h: cdC.titleH, fontFace: STYLE.font,
         fontSize: sz(lockedCards ? 18 : 15), bold: true, color: STYLE.ink, fit: 'shrink' });
       /* points 兼容：[[k,v]…] | [str…] | [{t,d}…]（scaffold v9 契约 {title, points:[[k,v]]}） */
       const ptLines = (cd.points || []).map(cardPtText).map(t => statement ? t.replace(/^· /, '') : t);
       s.addText(ptLines.map((t, li) => ({ text: t + '\n',
           options: { fontSize: ptsFz, color: statement && li === 0 ? STYLE.ink : STYLE.body, bold: statement && li === 0,
             fontFace: STYLE.font, breakLine: true } })),
-        { x: x + 0.18, y: y + 0.14 + cdC.titleH + (lockedCards ? 0.2 : 0.06), w: cw - 0.36, h: ptsBoxH - (lockedCards ? 0.14 : 0),
+        { x: x + 0.18, y: y0 + 0.14 + cdC.titleH + (lockedCards ? 0.2 : 0.06), w: cw - 0.36,
+          h: roomyCards ? Math.min(ptsBoxH - 0.14, estPts + 0.3) : ptsBoxH - (lockedCards ? 0.14 : 0),
           fontFace: STYLE.font, valign: statement ? 'middle' : 'top', lineSpacing: ptsFz * 1.5 });
     });
   } else if (type === 'split') {

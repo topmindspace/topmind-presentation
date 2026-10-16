@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import html
 import re
 import sys
 from pathlib import Path
@@ -109,8 +110,13 @@ def sec_anchor(i: int, sec: dict) -> str:
 def open_sec(i: int, ptype: str, extra: str = '', sec: dict = None) -> str:
     skel = PAGE_TO_PRESET.get(ptype, 'P4')
     sid = sec_anchor(i, sec)
-    return (f'<section class="band" id="{sid}" data-skel="{skel}" '
-            f'data-page-type="{ptype}"{extra}>')
+    # extra 里的裸 band--* 类名并入 class（此前会被写成无效属性）
+    toks = extra.split(' ') if extra else []
+    cls_extra = [t for t in toks if t.startswith('band--') and '=' not in t]
+    attr = ' '.join(t for t in toks if t and t not in cls_extra)
+    cls = ' '.join(['band'] + cls_extra)
+    return (f'<section class="{cls}" id="{sid}" data-skel="{skel}" '
+            f'data-page-type="{ptype}"' + (' ' + attr if attr else '') + '>')
 
 
 def shead(sec: dict) -> str:
@@ -441,6 +447,13 @@ def r_cards(i, sec):
         blocks.append(
             f'      <div class="card{lead_cls}">{card_head(str(title), ci, icon_name)}\n'
             f'        {pts_list(points) if points else ""}</div>')
+    # 短内容卡片页（≤4 卡、每卡正文平均 ≤60 字）：放大字号并让卡片撑到约半屏，避免下半页空白
+    def _clen(cd):
+        pts = (cd.get('points') if isinstance(cd, dict) else []) or []
+        return sum(len(p if isinstance(p, str) else ''.join(str(x) for x in p)) for p in pts)
+    if cards and len(cards) <= 4 and variant != 'bento-grid' and \
+            sum(_clen(c) for c in cards) / len(cards) <= 60:
+        cls += ' cards--roomy'
     body = f'    <div class="grid {cls} rv">\n' + '\n'.join(blocks) + '\n    </div>\n'
     return wrap(i, 'cards', body, sec, extra)
 
@@ -702,7 +715,13 @@ def r_timeline(i, sec):
             f'        <div class="{cls}">{dot}'
             f'<div class="tl__l">{esc(lab)}</div><div class="tl__t">{esc(name)}</div>'
             f'<p class="t-body">{cite(desc)}</p></div>')
-    body = '    <div class="fig rv"><div class="tl">\n' + '\n'.join(items) + '\n    </div></div>\n'
+    _phs = sec.get('phases') or []
+    def _d(ph):
+        return (ph[2] if isinstance(ph,(list,tuple)) and len(ph)>2 else (ph.get('d','') if isinstance(ph,dict) else '')) or ''
+    tl_cls = 'tl'
+    if 2 <= len(_phs) <= 5 and variant != 'timeline' and all(len(str(_d(p))) <= 40 for p in _phs):
+        tl_cls = f'tl tl--h" style="--n:{len(_phs)}'
+    body = f'    <div class="fig rv"><div class="{tl_cls}">\n' + '\n'.join(items) + '\n    </div></div>\n'
     extra = ' data-variant="timeline"' if variant == 'timeline' else ''
     return wrap(i, 'timeline', body, sec, extra)
 
@@ -718,7 +737,11 @@ def r_steps(i, sec):
         cls = 'step step--a' if acc else 'step'
         items.append(f'      <div class="{cls}"><div class="step__n">{si + 1:02d}</div>'
                      f'<div class="step__t">{esc(t)}</div><div class="step__d">{cite(d)}</div></div>')
-    body = '    <div class="steps rv">\n' + '\n'.join(items) + '\n    </div>\n'
+    _st = (sec.get('steps') or [])[:6]
+    def _sd(st):
+        return str((st[1] if len(st) > 1 else '') if isinstance(st, (list, tuple)) else st.get('d', ''))
+    roomy = ' steps--roomy' if _st and len(_st) <= 5 and all(len(_sd(x)) <= 40 for x in _st) else ''
+    body = f'    <div class="steps{roomy} rv">\n' + '\n'.join(items) + '\n    </div>\n'
     return wrap(i, 'steps', body, sec)
 
 
@@ -847,16 +870,32 @@ RENDERERS = {
 }
 
 
+def _fill_chrome(t: str, model: dict, body: str) -> str:
+    """从模板新建时，顶栏品牌、<title> 与章节导航换成模型内容（模板自带「主标题 / 章节一」等占位不得外泄）。"""
+    title = model.get('title') or ''
+    sub = model.get('subtitle') or model.get('meta') or ''
+    t = re.sub(r'<title>[^<]*</title>', f'<title>{esc(title)}</title>', t, count=1)
+    t = re.sub(r'(<div class="brand__title">)[^<]*(</div>\s*<div class="brand__sub">)[^<]*(</div>)',
+               lambda m: f'{m.group(1)}{esc(title)}{m.group(2)}{esc(sub)}{m.group(3)}', t)
+    t = t.replace('<div class="t-xs">密级说明</div>', f'<div class="t-xs">{esc(model.get("meta") or "")}</div>')
+    links = re.findall(r'<a class="agenda__a" href="#(s\d+)">[\s\S]*?class="agenda__t">([^<]+)<', body)
+    nav = '\n'.join(f'      <a href="#{sid}">{esc(html.unescape(tt)[:10])}</a>' for sid, tt in links[:5])
+    if 'id="refs"' in body:
+        nav += '\n      <a href="#refs">参考资料</a>'
+    t = re.sub(r'<nav class="nav">[\s\S]*?</nav>', lambda m: f'<nav class="nav">\n{nav}\n    </nav>', t, count=1)
+    return t
+
+
 def render_body(model: dict) -> str:
     parts = []
     # 封面
     parts.append(f'''<!-- 封面 -->
-<section class="band band--fit" id="cover">
-  <div class="wrap">
-    <div class="shead rv">
-      <div class="t-eyebrow">{esc(model.get("meta") or "")}</div>
-      <h1 class="t-display shead__title">{esc(model.get("title") or "")}</h1>
-      <p class="t-lead shead__desc">{esc(model.get("subtitle") or "")}</p>
+<section class="band band--fit band--accent--solid band--cover" id="cover">
+  <div class="wrap cover">
+    <div class="t-eyebrow cover__meta">{esc(model.get("meta") or "")}</div>
+    <div class="cover__main rv">
+      <h1 class="t-display cover__title">{esc(model.get("title") or "")}</h1>
+      <p class="t-lead cover__sub">{esc(model.get("subtitle") or "")}</p>
     </div>
   </div>
 </section>''')
@@ -1105,6 +1144,9 @@ def main() -> int:
         t = replace_model_json(t, model)
         t = _strip_refs_nav(t, body)
         t = _sync_html_attrs(t, model)
+        # 顶栏 / 页脚仍是模板占位（主标题、章节一、报告名、密级说明）时一并换成模型内容；作者自定义过的不动
+        if re.search(r'>(主标题|报告名|报告标题|架构标题)</div>|>章节一</a>|>密级说明<', t):
+            t = _fill_chrome(t, model, body)
         try:
             src.write_text(t, encoding='utf-8')
         except OSError as e:
@@ -1130,6 +1172,7 @@ def main() -> int:
     t = replace_model_json(t, model)
     t = _strip_refs_nav(t, body)
     t = _sync_html_attrs(t, model)
+    t = _fill_chrome(t, model, body)
     out = Path(args.out or (src.with_suffix('.html')))
     try:
         out.write_text(t, encoding='utf-8')

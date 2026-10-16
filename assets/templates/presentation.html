@@ -336,6 +336,25 @@ border-color:color-mix(in srgb,var(--accent-on) 20%,transparent);color:var(--acc
 .band--accent--solid .ul li{color:color-mix(in srgb,var(--accent-on) 84%,transparent)}
 .band--accent--solid .ul li::before{background:var(--accent-on)}
 .band--deep{background:var(--deep-bg);color:var(--deep-fg)}
+/* 封面：整块主色色块（与 PPTX 封面同构）——meta 顶部、主标题与副标题居左偏中，无装饰 */
+.band--cover .cover{display:flex;flex-direction:column;min-height:calc(100vh - 2*var(--sp-6));justify-content:space-between;padding-block:var(--sp-6)}
+.band--cover .cover__main{display:flex;flex-direction:column;gap:var(--sp-5);max-width:min(1040px,86%);margin-block:auto}
+.band--cover .cover__title{font-size:clamp(2.6rem,5.2vw,4.6rem);line-height:1.15;letter-spacing:-.02em;font-weight:700;margin:0}
+.band--cover .cover__sub{font-size:clamp(1.15rem,1.7vw,1.6rem);margin:0}
+.band--cover .cover__meta{letter-spacing:.06em}
+/* 短内容卡片页：字号整体上调两档、内边距加大，靠内容本身撑起版面（不硬拉空卡片） */
+.cards--roomy>.card{padding:var(--sp-6) var(--sp-6) calc(var(--sp-6) + var(--sp-2))}
+.cards--roomy>.card .card__hd{margin-bottom:var(--sp-5)}
+.cards--roomy>.card .card__ico{width:48px;height:48px;border-radius:14px}
+.cards--roomy>.card .card__ico svg{width:24px;height:24px}
+.cards--roomy>.card .t-h3{font-size:clamp(1.35rem,1.9vw,1.75rem)}
+.cards--roomy>.card .ul{gap:var(--sp-4)}
+.cards--roomy>.card .ul li{font-size:clamp(1.1rem,1.45vw,1.36rem);line-height:1.6}
+/* 深色主题：主色在深色下是浅色调，整块铺满会刺眼 → 主色 30% 混入底色的深色调色块，文字走正文色 */
+[data-theme="dark"] .band--cover{background:color-mix(in srgb,var(--accent) 30%,var(--bg));color:var(--text)}
+[data-theme="dark"] .band--cover .t-display{color:var(--text)}
+[data-theme="dark"] .band--cover .t-lead{color:var(--text-2)}
+[data-theme="dark"] .band--cover .t-eyebrow{color:var(--accent)}
 .band--deep .t-lead,.band--deep .t-body{color:var(--deep-fg-2)}
 .band--deep .t-eyebrow{color:color-mix(in srgb,var(--accent) 40%,#fff)}
 .band--deep .card{background:color-mix(in srgb,var(--deep-fg) 6%,var(--deep-bg));border-color:var(--deep-line);color:var(--deep-fg)}
@@ -978,6 +997,22 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
 @media print{.rv{opacity:1!important;transform:none!important}
 .band{padding-block:24px;break-inside:avoid}body{background:#fff;color:#000}
 .pager{display:none!important}}
+
+/* M6：短时间线横排卡片，铺满下半页 */
+.tl--h{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:var(--sp-4);padding-left:0;padding-top:var(--sp-7,40px)}
+.tl--h::before{left:8px;right:8px;top:7px;bottom:auto;width:auto;height:2px}
+.tl--h .tl__i{padding:var(--sp-6) var(--sp-5);background:var(--surface-2,var(--surface));border-radius:var(--r-lg);min-height:clamp(150px,22vh,240px)}
+.tl--h .tl__i--now{background:var(--accent-soft)}
+.tl--h .tl__d{left:var(--sp-5);top:calc(-1 * var(--sp-7,40px))}
+.tl--h .tl__t{font-size:clamp(1.3rem,1.8vw,1.65rem)}
+.tl--h .t-body{font-size:clamp(1.05rem,1.35vw,1.25rem)}
+@media (max-width:760px){.tl--h{grid-template-columns:1fr}.tl--h .tl__i{min-height:0}}
+/* M6：短步骤放大 */
+.steps--roomy .step{padding:var(--sp-6) var(--sp-5);min-height:clamp(150px,22vh,240px)}
+.steps--roomy .step__n{font-size:clamp(1rem,1.2vw,1.15rem)}
+.steps--roomy .step__t{font-size:clamp(1.3rem,1.8vw,1.65rem);margin-bottom:var(--sp-2)}
+.steps--roomy .step__d{font-size:clamp(1.05rem,1.35vw,1.25rem)}
+@media (max-width:760px){.steps--roomy .step{min-height:0}}
 /* __TOPPPT_ENGINE_END__ */
 
 /* ── 演示模式专属层（本模板即 presentation 形态：版心 1400 / 大字号 / 大留白；无模式切换） ── */

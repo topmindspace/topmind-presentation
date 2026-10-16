@@ -537,7 +537,10 @@ def _check_icons(txt, chk):
         attrs, body = m.group(1), m.group(2)
         pt = re.search(r'data-page-type="([^"]+)"', attrs)
         page_type = (pt.group(1) if pt else '') or ''
-        if page_type not in ('points', 'cards', 'split', 'comparison'):
+        # 对比页（左右两栏）是论证结构而非卡片网格，不要求图标（图标要克制）
+        if page_type == 'comparison':
+            continue
+        if page_type not in ('points', 'cards', 'split'):
             # Also catch sections that clearly use card grids
             if body.count('class="card') + body.count("class='card") < 2:
                 continue

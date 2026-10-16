@@ -141,6 +141,8 @@ const CONTENT_BOTTOM = LAY.contentBottom != null ? LAY.contentBottom : 6.9;
 const CONTENT_BOTTOM_NOTE = LAY.contentBottomWithNote != null ? LAY.contentBottomWithNote : 6.4;
 /* 页型布局区域 IR：语义槽位 → 英寸矩形（与 layout_slots.json 同源；未识别槽位时回落 PT 常量） */
 const REGIONS = require('./lib_layout_regions.js');
+/* M1 布局求解器（行高分配 / 字号放大 / 容量拆页；纯函数、与 HTML 端和测试共用） */
+const SOLVER = require('./lib_solver.js');
 
 /* ══ 语义图标真导出（SVG→PNG · scripts/icon-assets.json 预生成缓存）══
  * HTML .card__ico / .ul--ico 的 SVG 图标在此栅格化为 PNG 嵌入，不再用 accent 方块替代。
@@ -399,6 +401,19 @@ if (modelArg) {
   if (!CONTENT || typeof CONTENT !== 'object' || Array.isArray(CONTENT)) {
     console.error(`[build_pptx] FAIL: 模型根节点必须是对象（${modelArg}）。`);
     process.exit(1);
+  }
+  /* M1 容量求解：超载页（条目/字数超过该页型承载力）必须拆成续页，禁止硬塞或静默截断。
+     --strict：拒绝出稿并提示先跑 solve_model.js（让 HTML 与 PPTX 同源拆页）；非 strict：自动拆页并告警。 */
+  const sp = require('./lib_solver.js').splitModel(CONTENT);
+  if (sp.log.length) {
+    const desc = sp.log.map(l => `「${l.title}」(${l.type} 容量 ${Math.round(l.ratio * 100)}% → ${l.parts} 页)`).join('、');
+    if (process.argv.includes('--strict')) {
+      console.error(`[build_pptx] FAIL: 页面超载 ${desc}`);
+      console.error(`  请先运行 node scripts/solve_model.js "${modelArg}" --write，再同源渲染 HTML 与 PPTX。`);
+      process.exit(4);
+    }
+    console.warn(`[build_pptx] 警告：页面超载已自动拆页 ${desc}（HTML 端请同步运行 solve_model.js）`);
+    CONTENT = sp.model;
   }
   MODEL_DIR = path.dirname(path.resolve(modelArg));   // 素材图片相对路径锚点
   if (CONTENT.style && !styleArg) styleArg = CONTENT.style;   // 模型里的风格作为默认
@@ -1034,7 +1049,11 @@ function waterfallChart(s, c, pos) {
   const deltas = (c.values || []).map(Number);
   let run = 0;
   const bases = [], ups = [], downs = [], cum = [];
-  deltas.forEach(d => {
+  /* 末项等于前项之和 → 视为「合计柱」（从 0 起），否则会被当增量累加、整图失真 */
+  const sumPrev = deltas.slice(0, -1).reduce((a, b) => a + b, 0);
+  const lastIsTotal = deltas.length > 2 && Math.abs(deltas[deltas.length - 1] - sumPrev) < 1e-6;
+  deltas.forEach((d, i) => {
+    if (lastIsTotal && i === deltas.length - 1) { bases.push(0); ups.push(d); downs.push(0); cum.push(d); return; }
     const b = d >= 0 ? run : run + d;
     bases.push(b); ups.push(d >= 0 ? d : 0); downs.push(d < 0 ? -d : 0);
     run += d; cum.push(run);
@@ -1052,12 +1071,23 @@ function waterfallChart(s, c, pos) {
     catGridLine: { style: 'none' }, valGridLine: { style: 'none' }, valAxisMinVal: 0, showTitle: false,
   };
   const outer = Object.assign({}, inner, pos);
+  /* M1：去掉累计折线叠加（组合图在 LibreOffice/WPS 下坐标轴错位，首柱被画成负向）；
+     纯堆叠柱 + 隐形基底即标准瀑布，数值标签由下方文本行给出 */
   try {
-    s.addChart([
-      { type: pptx.ChartType.bar, data: series, options: inner },
-      { type: pptx.ChartType.line, data: [{ name: '累计', labels: labels, values: cum }],
-        options: { lineSize: 1.25, lineSmooth: false, lineDataSymbol: 'none', chartColors: [STYLE.body] } },
-    ], outer);
+    const n = labels.length;
+    const vmax = Math.ceil(Math.max(1e-9, ...cum, ...bases.map((b, i) => b + ups[i] + downs[i])) * 1.12);
+    outer.valAxisMaxVal = vmax;
+    s.addChart(pptx.ChartType.bar, series, outer);
+    const plotTop = pos.y + 0.12, plotH = pos.h - 0.55;
+    labels.forEach((lb, i) => {
+      const top = bases[i] + ups[i] + downs[i];
+      const cw = pos.w / n;
+      const ty = plotTop + plotH * (1 - top / vmax) - 0.3;
+      const d = deltas[i];
+      const isTot = (lastIsTotal && i === n - 1) || i === 0;
+      s.addText((isTot || d < 0 ? '' : '+') + d + (c.unit || ''), { x: pos.x + cw * i, y: Math.max(pos.y - 0.1, ty), w: cw, h: 0.26,
+        align: 'center', fontFace: STYLE.font, fontSize: sz(10.5), bold: isTot, color: d < 0 ? STYLE.faint : (isTot ? STYLE.ink : STYLE.accent) });
+    });
   } catch (e) {
     /* 组合图失败：单柱降级必须可观测，禁止静默空白 */
     console.error(`[build_pptx] WARN: waterfall 组合图失败，降级为堆叠柱: ${e && e.message}`);
@@ -1116,14 +1146,19 @@ function paretoChart(s, c, pos) {
     ], Object.assign({}, barOpts, pos));
   } catch (e) { chartTry(s, pptx.ChartType.bar, chartSeries(c), Object.assign({}, barOpts, pos), c); }
 }
-function nativeDonutChart(s, dcn, dcols, bottomY) {
+function nativeDonutChart(s, dcn, dcols, bottomY, topY) {
   const d = PT.donut;
-  /* 有结论条/脚注时压半径，避免环图底边压进 soWhatY（D11） */
+  /* 有结论条/脚注时压半径，避免环图底边压进 soWhatY（D11）。
+     M1：给出 topY 时按版心求解——圆心取版心垂直中点，半径撑满（上限 2.1in），不再固定 1.6in 下沉 */
   let r = d.r;
-  const cy = d.centerY;
-  if (bottomY != null && cy + r > bottomY) {
+  let cy = d.centerY;
+  if (topY != null && bottomY != null) {
+    cy = (topY + bottomY) / 2;
+    r = Math.max(0.9, Math.min(2.1, (bottomY - topY) / 2 - 0.06));
+  } else if (bottomY != null && cy + r > bottomY) {
     r = Math.max(0.9, bottomY - cy - 0.04);
   }
+  d._cy = cy;
   s.addChart(pptx.ChartType.doughnut, chartSeries(dcn), {
     x: d.centerX - r, y: cy - r, w: r * 2, h: r * 2,
     holeSize: Math.round((d.holeR / d.r) * 100),
@@ -1186,10 +1221,44 @@ function shapeValue(s, c, v, x, y, w, h, hot) {
 /* 玫瑰图（rose）：等角扇区、半径 ∝ 数值（南丁格尔玫瑰）。
  * 扇区用「多段旋转矩形」沿角向铺贴逼近（每扇区 ≥16 段，双边界分别取弧长），
  * 不使用 preset pie/arc 替代曲线语义；标签与数值走底部图例行（文本与 A 通道一致）。 */
+/* M1 组合规则「主图 + 排序面板」：方形图（玫瑰/网络）放在宽版心里会两侧大片留白，
+   改为左图右表——右侧按数值排序的条目列表（色点 + 标签 + 数值 + 比例条），全部取自数据本身，不编造文案。 */
+function rankPanel(s, items, x, y, w, h, fmt) {
+  const list = items.slice().sort((a, b) => b.value - a.value);
+  const vmax = Math.max(1e-9, ...list.map(i => Math.abs(i.value)));
+  const sol = SOLVER.rows(h, list.length, { pref: 0.5, min: 0.3, max: 0.78, gap: 0.08 });
+  s.addShape('roundRect', { x: x, y: y + sol.offset - 0.12, w: w, h: sol.used + 0.24, rectRadius: 0.1,
+    fill: { color: STYLE.surface }, line: { type: 'none' }, objectName: 'rank:bg' });
+  list.forEach((it, i) => {
+    const ry = y + sol.offset + i * (sol.size + sol.gap);
+    const fz = sol.size >= 0.6 ? 12.5 : 11;
+    s.addShape('ellipse', { x: x + 0.2, y: ry + sol.size * 0.32 - 0.06, w: 0.12, h: 0.12, fill: { color: it.color }, line: { type: 'none' } });
+    s.addText(it.label, { x: x + 0.4, y: ry, w: w - 1.6, h: sol.size * 0.64, valign: 'middle',
+      fontFace: STYLE.font, fontSize: sz(fz), bold: !!it.hl, color: STYLE.ink });
+    s.addText(fmt(it.value), { x: x + w - 1.25, y: ry, w: 1.05, h: sol.size * 0.64, align: 'right', valign: 'middle',
+      fontFace: STYLE.font, fontSize: sz(fz), bold: true, color: it.hl ? STYLE.accent : STYLE.body });
+    const bw = w - 0.6, by = ry + sol.size * 0.7;
+    s.addShape('rect', { x: x + 0.4, y: by, w: bw - 0.2, h: 0.06, fill: { color: STYLE.line }, line: { type: 'none' } });
+    s.addShape('rect', { x: x + 0.4, y: by, w: Math.max(0.04, (bw - 0.2) * Math.abs(it.value) / vmax), h: 0.06,
+      fill: { color: it.color }, line: { type: 'none' } });
+  });
+}
 function shapeRose(s, c, x, y, w, h, dcols) {
   const M = shapeMetrics(c, w, h);
-  const legendH = Math.min(0.72, Math.max(0.3, h * 0.18));
-  const plotH = Math.max(0.6, h - legendH - 0.08);
+  const side = w / Math.max(0.1, h) > 1.6 && M.n <= 10;
+  if (side) {
+    const pw = Math.min(w * 0.5, h * 1.25);
+    shapeRoseCore(s, c, M, x + (w * 0.5 - pw) / 2, y, pw, h, h, dcols, false);
+    rankPanel(s, M.labels.map((lb, i) => ({ label: lb, value: M.values[i] || 0,
+      color: dcols ? dcols[i % dcols.length] : (M.values[i] === M.top ? STYLE.accent : STYLE.faint), hl: M.values[i] === M.top })),
+      x + w * 0.54, y, w * 0.46, h, v => String(v) + (c.unit || ''));
+    return;
+  }
+  shapeRoseCore(s, c, M, x, y, w, h, null, dcols, true);
+}
+function shapeRoseCore(s, c, M, x, y, w, h, plotHFix, dcols, withLegend) {
+  const legendH = withLegend ? Math.min(0.72, Math.max(0.3, h * 0.18)) : 0;
+  const plotH = plotHFix || Math.max(0.6, h - legendH - 0.08);
   const cx = x + w / 2, cy = y + plotH / 2;
   const R = Math.max(0.4, Math.min(w, plotH) / 2 - 0.08);
   const rMin = R * 0.2;
@@ -1214,6 +1283,7 @@ function shapeRose(s, c, x, y, w, h, dcols) {
         fill: { color: dc }, line: { type: 'none' } });
     }
   });
+  if (!withLegend) return;
   /* 底部图例：色块 + 标签 + 数值 */
   const itemW = Math.max(0.9, w / M.n);
   M.labels.forEach((lb, i) => {
@@ -1533,7 +1603,17 @@ function ribbonRects(s, pts, color) {
 /* 信息图页型的数据表策略与行（默认 notes：数据入演讲者备注；inline：页内附原生表格） */
 function infoDataTableMode(sec) {
   const m = String(((sec.chart || {}).dataTable) || 'notes').toLowerCase();
-  return m === 'appendix' ? 'inline' : m;
+  const mode = m === 'appendix' ? 'inline' : m;
+  /* M1 容量规则：内联数据表行高下限 0.26in、最多占绘图区 40%（≈1.4in）——装不下时转入备注，
+     不再把 0.15in 的挤压表格压进结论条（LibreOffice/WPS 实际行高会撑开越界） */
+  if (mode === 'inline') {
+    const rows = infoTableRows(sec);
+    if (rows && rows.length * 0.26 > 1.4) {
+      if (!sec._dtWarned) { console.warn(`[build_pptx] 提示：「${sec.title || sec.type}」内联数据表 ${rows.length} 行超出承载，已转入演讲者备注`); sec._dtWarned = true; }
+      return 'notes';
+    }
+  }
+  return mode;
 }
 function infoTableRows(sec) {
   const t = sec.type || '';
@@ -1695,7 +1775,7 @@ function infoBoxplot(s, sec, y0, y1) {
   const plotH = P.y1 - P.y0 - 0.5;
   const yFor = (v) => P.y0 + (1 - (v - lo) / span) * plotH;
   const step = CW / groups.length;
-  const bw = Math.min(G.boxMaxW, step * 0.5);
+  const bw = Math.min(Math.max(G.boxMaxW, 1.6), step * 0.42); /* M1：箱体按组距放宽，避免细条悬空 */
   s.addShape('rect', { x: MX, y: P.y0 + plotH, w: CW, h: 0.015, fill: { color: STYLE.line }, line: { type: 'none' } });
   groups.forEach((g, i) => {
     const mn = Number(g[1]), q1 = Number(g[2]), md = Number(g[3]), q3 = Number(g[4]), mx = Number(g[5]);
@@ -1709,15 +1789,16 @@ function infoBoxplot(s, sec, y0, y1) {
     s.addShape('rect', { x: cx - bw / 2, y: yFor(md) - 0.015, w: bw, h: 0.03, fill: { color: STYLE.accent }, line: { type: 'none' } });
     s.addText(String(g[0]), { x: cx - step / 2, y: P.y1 - 0.42, w: step, h: 0.3, align: 'center',
       fontFace: STYLE.font, fontSize: sz(10.5), color: STYLE.body });
-    s.addText(String(md) + (sec.unit || ''), { x: cx - step / 2, y: yFor(md) - 0.42, w: step, h: 0.26, align: 'center',
-      fontFace: STYLE.font, fontSize: sz(10), bold: true, color: STYLE.accent });
-    /* min 标签默认在须线帽下方；mn 贴轴时会被组标签带（P.y1-0.42 起）压住 →
-       翻到帽上方，同时避开箱体下沿（几何铁律②：禁叠印） */
-    let mnY = yFor(mn) + 0.03;
-    if (mnY + 0.24 > P.y1 - 0.42) mnY = Math.min(yFor(mn) - 0.28, yFor(q1) - 0.30);
-    s.addText(String(mn) + (sec.unit || ''), { x: cx - step / 2, y: mnY, w: step, h: 0.24, align: 'center',
+    /* M1：数值标签统一放在箱体/端帽右侧，不再压在箱线或箱体内（几何铁律②：禁叠印） */
+    const lx = cx + bw / 2 + 0.08;
+    s.addText(String(md) + (sec.unit || ''), { x: lx, y: yFor(md) - 0.13, w: 1.0, h: 0.26, align: 'left', valign: 'middle',
+      fontFace: STYLE.font, fontSize: sz(10.5), bold: true, color: STYLE.accent });
+    const capX = cx + G.whiskerCapW / 2 + 0.06;
+    const mxY = Math.min(yFor(mx) - 0.12, yFor(md) - 0.4);
+    const mnY = Math.max(yFor(mn) - 0.12, yFor(md) + 0.16);
+    s.addText(String(mx) + (sec.unit || ''), { x: capX, y: mxY, w: 0.9, h: 0.24, align: 'left', valign: 'middle',
       fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.faint });
-    s.addText(String(mx) + (sec.unit || ''), { x: cx - step / 2, y: yFor(mx) - 0.28, w: step, h: 0.24, align: 'center',
+    s.addText(String(mn) + (sec.unit || ''), { x: capX, y: Math.min(mnY, P.y1 - 0.7), w: 0.9, h: 0.24, align: 'left', valign: 'middle',
       fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.faint });
   });
 }
@@ -1730,8 +1811,18 @@ function infoNetwork(s, sec, y0, y1) {
   if (!nodes.length) return;
   const edges = (sec.edges || []).slice(0, G.maxEdges);
   const n = nodes.length;
-  const cx = MX + CW / 2, cy = (P.y0 + P.y1) / 2;
-  const r = Math.min(CW / 2, (P.y1 - P.y0) / 2) - G.labelMaxW * 0.55;
+  /* M1：宽版心 → 左侧网络图 + 右侧「连接度排序」面板（数据派生） */
+  const side = n <= 10 && CW / Math.max(0.1, P.y1 - P.y0) > 1.6;
+  const plotW = side ? CW * 0.56 : CW;
+  const cx = MX + plotW / 2, cy = (P.y0 + P.y1) / 2;
+  const r = Math.min(plotW / 2, (P.y1 - P.y0) / 2) - G.labelMaxW * 0.55;
+  if (side) {
+    const degOf = (id) => edges.filter(e => String(e[0]) === id || String(e[1]) === id).length;
+    rankPanel(s, nodes.map(nd => { const d = degOf(String(nd[0])); return {
+      label: String(nd[1] != null ? nd[1] : nd[0]), value: d, color: d ? STYLE.accent : STYLE.faint, hl: false }; })
+      .map((it, i, arr) => Object.assign(it, { hl: it.value === Math.max(...arr.map(a => a.value)) })),
+      MX + CW * 0.6, P.y0, CW * 0.4, P.y1 - P.y0, v => v + ' 条连接');
+  }
   const pos = {};
   nodes.forEach((nd, i) => {
     const a = -Math.PI / 2 + i * 2 * Math.PI / n;
@@ -2242,14 +2333,15 @@ CONTENT.sections.forEach((sec) => {
     if (dcn.labels && dcn.values) {
       const d = PT.donut;
       const dcols = dcn.colors || donutColors(styleArg);
-      const usedR = nativeDonutChart(s, dcn, dcols, bodyBottom) || d.r;
+      const usedR = nativeDonutChart(s, dcn, dcols, Math.min(bodyBottom, CONTENT_BOTTOM_NOTE + 0.3), bodyY) || d.r;
+      const dcy = d._cy || d.centerY;
       const holeR = d.holeR * (usedR / d.r);
       const hb = holeR * 2;
       let total = 0; dcn.values.forEach(v => { total += Math.max(0, v); });
       const totalStr = (Math.round(total * 10) / 10) + (dcn.unit || '');
-      s.addText(totalStr, { x: d.centerX - holeR, y: d.centerY - 0.42, w: hb, h: 0.5, align: 'center',
+      s.addText(totalStr, { x: d.centerX - holeR, y: dcy - 0.42, w: hb, h: 0.5, align: 'center',
         fontFace: STYLE.fontDisplay, fontSize: sz(20), bold: true, color: STYLE.ink, valign: 'middle' });
-      s.addText(dcn.centerLabel || '合计', { x: d.centerX - holeR, y: d.centerY + 0.08, w: hb, h: 0.35, align: 'center',
+      s.addText(dcn.centerLabel || '合计', { x: d.centerX - holeR, y: dcy + 0.08, w: hb, h: 0.35, align: 'center',
         fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.faint, valign: 'middle' });
       const n = Math.max(1, dcn.labels.length);
       const maxLegH = Math.max(1.2, bodyBottom - (d.centerY - 1.7));
@@ -2263,15 +2355,21 @@ CONTENT.sections.forEach((sec) => {
         const ptsH = dpts.length * dpRowH;
         legRowH = Math.max(0.32, Math.min(d.legendRowH, (colAvail - 0.1 - ptsH) / n));
         legY0 = bodyY;
-      } else {
-        legRowH = Math.min(d.legendRowH, maxLegH / n, 3.4 / n);
-        legY0 = Math.min(d.centerY - (n * legRowH) / 2 + 0.1, bodyBottom - n * legRowH - 0.04);
+      }
+      /* M1：无要点时图例改为「图例卡」——行高由求解器撑满右列（每行一张 tonal 卡），不再三行小字挤在中部 */
+      let legGap = 0;
+      if (!dpts.length) {
+        const lsol = SOLVER.rows(Math.min(bodyBottom, CONTENT_BOTTOM_NOTE + 0.3) - bodyY, n, { pref: d.legendRowH, min: 0.3, max: 1.1, gap: 0.16 });
+        legRowH = lsol.size; legGap = lsol.gap; legY0 = bodyY + lsol.offset;
+        dcn.labels.forEach((lb, i) => s.addShape('roundRect', { x: d.legendX - 0.2, y: legY0 + i * (legRowH + legGap),
+          w: d.legendPctX + d.legendPctW - d.legendX + 0.4, h: legRowH, rectRadius: 0.1,
+          fill: { color: STYLE.surface }, line: { type: 'none' }, objectName: 'legend:card' }));
       }
       const sum2 = total || 1;
       dcn.labels.forEach((lb, i) => {
         const v = dcn.values[i] || 0;
-        const y = legY0 + i * legRowH;
-        s.addShape('ellipse', { x: d.legendX, y: y + 0.08, w: 0.16, h: 0.16,
+        const y = legY0 + i * (legRowH + legGap);
+        s.addShape('ellipse', { x: d.legendX, y: y + legRowH / 2 - 0.08, w: 0.16, h: 0.16,
           fill: { color: dcols[i % dcols.length] }, line: { type: 'none' } });
         s.addText(lb, { x: d.legendX + 0.3, y, w: d.legendLabelW, h: legRowH, valign: 'middle',
           fontFace: STYLE.font, fontSize: sz(12), bold: true, color: STYLE.ink });
@@ -2280,7 +2378,7 @@ CONTENT.sections.forEach((sec) => {
         s.addText((Math.round(v / sum2 * 1000) / 10) + '%', { x: d.legendPctX, y, w: d.legendPctW, h: legRowH,
           align: 'right', valign: 'middle', fontFace: STYLE.font, fontSize: sz(10.5), color: STYLE.faint });
       });
-      const dpY0 = legY0 + n * legRowH + 0.1;
+      const dpY0 = legY0 + n * (legRowH + legGap) + 0.1;
       const dpCap = Math.max(0, Math.floor((bodyBottom - dpY0) / dpRowH));
       dpts.slice(0, dpCap).forEach((p, i) => {
         const kk = Array.isArray(p) ? String(p[0] || '') : String((p && p.t) || '');
@@ -2383,12 +2481,14 @@ CONTENT.sections.forEach((sec) => {
     const lv = sec.levels || [];
     const n = Math.max(1, lv.length);
     const availH = preg.h;
-    const rowH = fitRowH(availH - (n - 1) * P.gap, n, P.rowH, 0.26);
+    /* M1：层高由求解器分配，富余时拉伸到 1.35in，余量整体垂直居中 */
+    const pyS = SOLVER.rows(availH, n, { pref: P.rowH, min: 0.26, max: 1.35, gap: P.gap });
+    const rowH = pyS.size;
     lv.forEach((l, i) => {
       const frac = P.minW + (1 - P.minW) * (n === 1 ? 1 : i / (n - 1));
       const w = preg.w * frac;
       const x = preg.x + (preg.w - w) / 2;
-      const y = preg.y + i * (rowH + P.gap);
+      const y = preg.y + pyS.offset + i * (rowH + P.gap);
       const acc = isRec(l) && l.accent;
       const lt = isRec(l) ? (l.t || '') : String(l[0] || '');
       const ld = isRec(l) ? (l.d || '') : String(l[1] || '');
@@ -2545,8 +2645,34 @@ CONTENT.sections.forEach((sec) => {
     /* 自适应：按各栏文本估算高度选字号 */
     const longest = groups.reduce((a, g2) => Math.max(a, g2.map(p => (p[1] || '').length).reduce((x, y) => x + y, 0)), 0);
     const items = []; for (let i = 0; i < longest / 120; i++) items.push('x'.repeat(120));
-    const fz = fitFont(items.length ? items : ['x'.repeat(longest)], g.w, availH, { max: 13.5, gapFactor: 1.2 });
-    groups.forEach((col, ci) => {
+    /* M1：稀疏时字号向上求解（上限 presentation 17 / 其他 15），余量再均分到段间距——不再顶部一小块、下半页空白 */
+    const colNeed = (f) => Math.max(...groups.map(gc => gc.reduce((h, p) =>
+      h + SOLVER.estTextH((p[0] || '') + '　' + (p[1] || ''), g.w, f, 1.5) + f * 1.2 / 72, 0)));
+    const fz0 = fitFont(items.length ? items : ['x'.repeat(longest)], g.w, availH, { max: 13.5, gapFactor: 1.2 });
+    const fz = Math.max(fz0, snapFont(SOLVER.fitUp(colNeed, availH * 0.82, { max: MODE_NAME === 'presentation' ? 17 : 15, min: fz0 })));
+    const maxPer = Math.max(1, ...groups.map(gc => gc.length));
+    const spareIn = Math.max(0, availH * 0.9 - colNeed(fz));
+    const paraGapPt = Math.min(30, Math.round(7 + (spareIn * 72) / maxPer));
+    /* M1 组合规则：内容稀疏（估高 < 版心 55%）时改为「段落卡片网格」——每段一张 MD3 tonal 卡，
+       行高由求解器撑满版心；标签作卡标题、正文在下，避免顶部一小块文字 + 下半页空白。 */
+    const sparse = sec.variant !== '2-col-feature' && colNeed(fz) < availH * 0.55;
+    if (sparse) {
+      const cardSol = SOLVER.rows(availH - 0.05, maxPer, { pref: 1.0, min: 0.5, max: 2.2, gap: 0.2, center: false });
+      const cardFz = snapFont(SOLVER.fitUp(f => Math.max(...ps.map(p =>
+        SOLVER.estTextH(p[0] || '', g.w - 0.5, f + 1.5, 1.3) + SOLVER.estTextH(p[1] || '', g.w - 0.5, f, 1.45))) + 0.36,
+        cardSol.size, { max: MODE_NAME === 'presentation' ? 16 : 14, min: fz0 }));
+      groups.forEach((col, ci) => col.forEach((p, ri) => {
+        const cx2 = treg.x + ci * g.step, cy2 = treg.y + ri * (cardSol.size + cardSol.gap);
+        s.addShape('roundRect', { x: cx2, y: cy2, w: g.w, h: cardSol.size, rectRadius: 0.1,
+          fill: { color: STYLE.surface }, line: { type: 'none' }, objectName: 'para:card' });
+        s.addText([
+          { text: p[0] || '', options: { fontSize: sz(cardFz + 1.5), bold: true, color: STYLE.accent, breakLine: true } },
+          { text: p[1] || '', options: { fontSize: sz(cardFz), color: STYLE.body } },
+        ], { x: cx2 + 0.25, y: cy2 + 0.12, w: g.w - 0.5, h: cardSol.size - 0.24, valign: 'middle',
+          fontFace: STYLE.font, lineSpacing: sz(cardFz * 1.5), paraSpaceBefore: 4 });
+      }));
+    }
+    if (!sparse) groups.forEach((col, ci) => {
       if (!col.length) return;
       const colX = treg.x + ci * g.step;
       // 变体 2-col-feature：首栏特性栏（MD3 tonal 底 + 标题放大一档）
@@ -2567,7 +2693,7 @@ CONTENT.sections.forEach((sec) => {
         { text: p[1] + '\n', options: { fontSize: sz(fz - 1), color: STYLE.body, breakLine: true } },
       ])).flat();
       s.addText(runs, { x: fx, y: treg.y, w: fw, h: availH, fontFace: STYLE.font,
-        valign: 'top', lineSpacing: sz(fz * 1.5), paraSpaceBefore: sz(7) });
+        valign: 'top', lineSpacing: sz(fz * 1.5), paraSpaceBefore: paraGapPt });
     });
   } else if (type === 'halftable') {
     let yH = sec.lead ? PT.common.bodyYWithLead : PT.research.denseTableY;
@@ -2591,7 +2717,8 @@ CONTENT.sections.forEach((sec) => {
     const rowsC = sec.cells || [];
     const nR = Math.max(1, rowsC.length);
     const availH = bodyBottom - mY - 0.42;
-    const mCH = fitRowH(availH, nR, PT.research.matrixCellH, 0.3);
+    /* M1：矩阵格高由求解器分配，富余时拉伸到 1.6in（格子撑满版心，不再悬在中部） */
+    const mCH = SOLVER.rows(availH, nR, { pref: PT.research.matrixCellH, min: 0.3, max: 1.6, center: false }).size;
     const mW = (CW - mLW) / Math.max(1, chH.length);
     chH.forEach((ch2, ci) => {
       s.addText(ch2, { x: MX + mLW + ci * mW, y: mY, w: mW, h: 0.34, align: 'center',
@@ -2617,11 +2744,13 @@ CONTENT.sections.forEach((sec) => {
     const lnS = sec.lanes || [];
     const n = Math.max(1, lnS.length);
     const start = sec.lead ? PT.common.bodyYWithLead : PT.arch.fullStartY;
-    const availH = bodyBottom - start;
-    const lnH = fitRowH(availH - (n - 1) * PT.arch.laneGap, n, PT.arch.laneH, 0.3);
+    const availH = Math.min(bodyBottom, CONTENT_BOTTOM_NOTE + 0.3) - start;
+    /* M1：泳道高度由求解器分配（富余时拉伸到 1.5in，仍有余量整组垂直居中） */
+    const lnSol = SOLVER.rows(availH, n, { pref: PT.arch.laneH, min: 0.3, max: n <= 2 ? 2.4 : 1.5, gap: PT.arch.laneGap });
+    const lnH = lnSol.size;
     const lnGap = PT.arch.laneGap, lnHW = PT.arch.laneHeadW;
     lnS.forEach((ln, li) => {
-      const y3 = start + li * (lnH + lnGap);
+      const y3 = start + lnSol.offset + li * (lnH + lnGap);
       s.addShape('roundRect', { x: MX, y: y3, w: CW, h: lnH, rectRadius: 0.07,
         fill: { color: STYLE.surface }, line: { color: STYLE.line, width: 0.75 } });
       s.addShape('rect', { x: MX, y: y3, w: lnHW, h: lnH,
@@ -2752,14 +2881,15 @@ CONTENT.sections.forEach((sec) => {
         fontFace: STYLE.font, fontSize: sz(11), color: STYLE.faint });
     } else if (lt !== 'points') {
       const lc = sec.left;
-      chartBlock(s, lc, lreg.x, SP.chartY, lw, Math.max(1.4, bodyBottom - SP.chartY - (lc.cap ? 0.1 : 0)),
+      chartBlock(s, lc, lreg.x, SP.chartY, lw, Math.max(1.4, Math.min(bodyBottom, CONTENT_BOTTOM_NOTE) - SP.chartY - (lc.cap ? 0.1 : 0)),
         lc.colors || dataColors(styleArg));
       if (lc.cap) s.addText(lc.cap, { x: lreg.x, y: SP.capY, w: lw, h: 0.35, align: 'center',
         fontFace: STYLE.font, fontSize: sz(12), color: STYLE.body });
     } else {
       drawPoints(sec.left, lreg.x, lw);
     }
-    const rt = (sec.right && sec.right.type) || 'bar';
+    /* 右区只给 points 未写 type 时按要点渲染（此前默认 bar → 用空数据画出一张空图） */
+    const rt = (sec.right && sec.right.type) || (sec.right && sec.right.points && !sec.right.values ? 'points' : 'bar');
     if (rt === 'table') {
       addTable(s, { head: sec.right.head, rows: sec.right.rows, colW: sec.right.colW },
         rx, SP.tableY, rw, bodyBottom - SP.tableY, { maxRowH: SP.tableRowH, minRowH: 0.3 });
@@ -2774,7 +2904,7 @@ CONTENT.sections.forEach((sec) => {
     } else {
       const bc = sec.right;
       const dcols = bc.colors || dataColors(styleArg);
-      chartBlock(s, bc, rx, SP.chartY, rw, Math.max(1.4, bodyBottom - SP.chartY - (bc.cap ? 0.1 : 0)), dcols);
+      chartBlock(s, bc, rx, SP.chartY, rw, Math.max(1.4, Math.min(bodyBottom, CONTENT_BOTTOM_NOTE) - SP.chartY - (bc.cap ? 0.1 : 0)), dcols);
       if (bc.cap) s.addText(bc.cap, { x: rx, y: SP.capY, w: rw, h: 0.35, align: 'center',
         fontFace: STYLE.font, fontSize: sz(12), color: STYLE.body });
     }

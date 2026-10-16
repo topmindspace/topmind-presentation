@@ -1,9 +1,31 @@
 # CHANGELOG
 
-## [Unreleased] — M0 止血（fix/m0-stabilize，未发版）
+## [Unreleased] — M1 布局求解器（main，未发版）
+
+### 求解器与容量
+- 新增 `scripts/lib_solver.js`（纯函数、零依赖、确定性）：`rows()` 行/卡/泳道高度分配（紧张时压缩、富余时拉伸到上限并整组居中）、`fitUp()` 稀疏时字号向上求解、`capacity()` 按页型 × 模式估算承载比、`splitModel()` 超载拆续页（标题加「（续）」，结论只在首页、来源只在末页）、`grid12()`。
+- 新增 `scripts/solve_model.js`：报告各页容量比，`--write` / `--out=` 写回拆页后的模型，HTML 与 PPTX 同源消费。
+- `build_pptx.js` 读模型后先做容量求解：`--strict` 下超载直接失败（退出码 4）并提示先跑 solve_model；非 strict 自动拆页并告警。
+
+### 版式（PPTX）
+- 泳道 / 金字塔 / 矩阵改由求解器分配高度，不再「挤在顶部、下半页空白」。
+- 双栏 / 三栏稀疏内容自动切换为「段落卡片网格」（MD3 tonal 卡撑满版心）。
+- 玫瑰图、关系网络在宽版心下采用「主图 + 排序面板」组合（右侧按数值排序的条目 + 比例条，全部取自数据）。
+- 环形图按版心求解圆心与半径（上限 2.1in），无要点时图例改为图例卡。
+- 瀑布图：末项等于前项之和时识别为合计柱；去掉在 LibreOffice/WPS 下错位的累计折线叠加，改为标准瀑布 + 数值标签。
+- 箱线图：箱体按组距放宽，数值标签移到箱体右侧，消除与箱线叠印。
+- 双区组合页：右区只给 points 时按要点渲染（此前默认画出空柱图）；图表下沿收在注释带之上。
+- 信息图内联数据表超过承载（>5 行）自动转入演讲者备注，不再压进结论条。
+
+### 门禁与测试
+- 视觉填充门禁对四份示例（演示 / 研究 / 架构 / 产品展示）全部转为硬门禁；架构样张冒烟转为硬门禁。
+- 新增 `tests/solver/test_solver.js` + 金样 `golden.json`：10 页型族 × 3 模式 × 4 档共 120 例，断言确定性与拆页不变量；CI 增加「同模型两次构建幻灯片 XML 逐字节一致」检查。
+- `regression.py` 全链路回归恢复全绿（修复 showcase 大纲 9 条未双栏、对比页被误要求图标、split 探针越界）。
+
+## M0 止血（PR #6，已合并，未发版）
 
 ### 质量门禁
-- 新增 `scripts/check_visual_fill.py`：PPTX → LibreOffice → PNG，在正文区按 24×12 栅格检查有墨占比（VISUAL_FILL）、最大连续空白（VISUAL_EMPTY_BLOCK）、墨水重心（VISUAL_OFF_CENTER）。business-blue 黄金样张为硬门禁；research / architecture / showcase 先报告不阻断（M1 再转硬门禁）。CI 与 Release 安装 libreoffice-impress、poppler-utils、fonts-noto-cjk。
+- 新增 `scripts/check_visual_fill.py`：PPTX → LibreOffice → PNG，在正文区按 24×12 栅格检查有墨占比（VISUAL_FILL）、最大连续空白（VISUAL_EMPTY_BLOCK）、墨水重心（VISUAL_OFF_CENTER）。business-blue 黄金样张为硬门禁（M1 起四份示例全部硬门禁）。CI 与 Release 安装 libreoffice-impress、poppler-utils、fonts-noto-cjk。
 - `audit_docs.py` 新增 ⑧ 禁止词：「甲板」、结论条「So what」标签、`.sowhat--labeled`、旧品牌名。
 
 ### 引擎（PPTX B 通道）

@@ -91,22 +91,23 @@ run_one() {
 
   "$PY" scripts/negative_tests.py
 
+  # M1：布局求解器金样（10 页型族 × 3 模式；确定性 + 超载拆页不变量）
+  node tests/solver/test_solver.js
+
   if [[ "$WITH_PPTX" == "1" && -f scripts/smoke_pptx.sh ]]; then
     ensure_python_pptx
     # D13: business-blue (default) + research-mckinsey (soWhat+footnote; catches D8)
     bash scripts/smoke_pptx.sh
     bash scripts/smoke_pptx.sh assets/examples/2026-09-09-research-mckinsey.html
     if [[ -f assets/examples/2026-09-09-architecture-graphite-dark.html ]]; then
-      bash scripts/smoke_pptx.sh assets/examples/2026-09-09-architecture-graphite-dark.html || {
-        echo "ci_skill_gates: graphite-dark smoke WARN (non-fatal)" >&2
-      }
+      # M1：架构样张已适配求解器，冒烟转为硬门禁
+      bash scripts/smoke_pptx.sh assets/examples/2026-09-09-architecture-graphite-dark.html
     fi
   elif [[ "$WITH_PPTX" == "1" ]]; then
     echo "ci_skill_gates: smoke_pptx.sh not present — skip"
   fi
 
-  # M0：视觉填充率与重心门禁（渲染后看像素）。presentation 黄金样张硬门禁；
-  # research / architecture 现有页型尚未适配，先报告不阻断（M1 求解器重构后转硬门禁）。
+  # 视觉填充率与重心门禁（渲染后看像素）。M1 起四份示例（演示 / 研究 / 架构 / 产品展示）全部硬门禁。
   if [[ "$WITH_PPTX" == "1" ]]; then
     if command -v soffice >/dev/null 2>&1 && command -v pdftoppm >/dev/null 2>&1; then
       "$PY" -c "import PIL, numpy" 2>/dev/null || "$PY" -m pip install --quiet pillow numpy
@@ -119,11 +120,26 @@ run_one() {
         --model="assets/examples/${VSTEM}.model.json" --strict
       for RSTEM in 2026-09-09-research-mckinsey 2026-09-09-architecture-graphite-dark 2026-10-11-topmind-presentation-showcase; do
         [[ -f "assets/examples/${RSTEM}.model.json" ]] || continue
-        node scripts/build_pptx.js --out="dist/regression/${RSTEM}.vfill.pptx" \
+        node scripts/build_pptx.js --out="dist/regression/${RSTEM}.vfill.pptx" --strict \
           --model="assets/examples/${RSTEM}.model.json" >/dev/null
         "$PY" scripts/check_visual_fill.py "dist/regression/${RSTEM}.vfill.pptx" \
-          --model="assets/examples/${RSTEM}.model.json" | tail -1 | sed "s/^/  [report-only ${RSTEM}] /"
+          --model="assets/examples/${RSTEM}.model.json" --strict | tail -1 | sed "s/^/  [${RSTEM}] /"
+        [[ ${PIPESTATUS[0]} -eq 0 ]] || { echo "ci_skill_gates: 视觉填充门禁失败 ${RSTEM}" >&2; exit 1; }
       done
+      # M1：同一模型两次构建，幻灯片 XML 必须逐字节一致（求解器确定性）
+      node scripts/build_pptx.js --out="dist/regression/${VSTEM}.det.pptx" --strict \
+        --model="assets/examples/${VSTEM}.model.json" >/dev/null
+      "$PY" - "dist/regression/${VSTEM}.vfill.pptx" "dist/regression/${VSTEM}.det.pptx" <<'PYEOF'
+import sys, zipfile, hashlib
+def h(p):
+    z = zipfile.ZipFile(p)
+    return {n: hashlib.sha1(z.read(n)).hexdigest() for n in z.namelist() if n.startswith('ppt/slides/slide')}
+a, b = h(sys.argv[1]), h(sys.argv[2])
+diff = [n for n in a if a.get(n) != b.get(n)]
+if diff or a.keys() != b.keys():
+    print('ci_skill_gates: PPTX 构建不确定，差异页:', diff[:5]); sys.exit(1)
+print(f'  [determinism] {len(a)} 页幻灯片 XML 两次构建一致')
+PYEOF
     elif [[ "${CI:-}" == "true" ]]; then
       echo "ci_skill_gates: CI 缺 soffice/pdftoppm，视觉门禁不得跳过" >&2
       exit 1

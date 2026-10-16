@@ -1,0 +1,1633 @@
+{
+ "rows": {
+  "4.2x3": {
+   "size": 1.32,
+   "gap": 0.12,
+   "offset": 0,
+   "used": 4.2
+  },
+  "4.2x6": {
+   "size": 0.6,
+   "gap": 0.12,
+   "offset": 0,
+   "used": 4.2
+  },
+  "4.2x12": {
+   "size": 0.3,
+   "gap": 0.12,
+   "offset": 0,
+   "used": 4.92
+  },
+  "1.2x6": {
+   "size": 0.3,
+   "gap": 0.12,
+   "offset": 0,
+   "used": 2.4
+  }
+ },
+ "fitUp": {
+  "0.8": 12.5,
+  "1.6": 18,
+  "3.2": 24
+ },
+ "capacity": {
+  "presentation/points/3": 0.5,
+  "presentation/points/6": 1,
+  "presentation/points/12": 2,
+  "presentation/points/20": 3.333,
+  "presentation/cards/3": 0.5,
+  "presentation/cards/6": 1,
+  "presentation/cards/12": 2,
+  "presentation/cards/20": 3.333,
+  "presentation/steps/3": 0.5,
+  "presentation/steps/6": 1,
+  "presentation/steps/12": 2,
+  "presentation/steps/20": 3.333,
+  "presentation/timeline/3": 0.5,
+  "presentation/timeline/6": 1,
+  "presentation/timeline/12": 2,
+  "presentation/timeline/20": 3.333,
+  "presentation/table/3": 0.375,
+  "presentation/table/6": 0.75,
+  "presentation/table/12": 1.5,
+  "presentation/table/20": 2.5,
+  "presentation/twocol/3": 0.5,
+  "presentation/twocol/6": 1,
+  "presentation/twocol/12": 2,
+  "presentation/twocol/20": 3.333,
+  "presentation/threecol/3": 0.333,
+  "presentation/threecol/6": 0.667,
+  "presentation/threecol/12": 1.333,
+  "presentation/threecol/20": 2.222,
+  "presentation/metrics/3": 0.5,
+  "presentation/metrics/6": 1,
+  "presentation/metrics/12": 2,
+  "presentation/metrics/20": 3.333,
+  "presentation/bullet/3": 0.429,
+  "presentation/bullet/6": 0.857,
+  "presentation/bullet/12": 1.714,
+  "presentation/bullet/20": 2.857,
+  "presentation/quote/3": 0,
+  "presentation/quote/6": 0,
+  "presentation/quote/12": 0,
+  "presentation/quote/20": 0,
+  "research/points/3": 0.375,
+  "research/points/6": 0.75,
+  "research/points/12": 1.5,
+  "research/points/20": 2.5,
+  "research/cards/3": 0.375,
+  "research/cards/6": 0.75,
+  "research/cards/12": 1.5,
+  "research/cards/20": 2.5,
+  "research/steps/3": 0.429,
+  "research/steps/6": 0.857,
+  "research/steps/12": 1.714,
+  "research/steps/20": 2.857,
+  "research/timeline/3": 0.429,
+  "research/timeline/6": 0.857,
+  "research/timeline/12": 1.714,
+  "research/timeline/20": 2.857,
+  "research/table/3": 0.214,
+  "research/table/6": 0.429,
+  "research/table/12": 0.857,
+  "research/table/20": 1.429,
+  "research/twocol/3": 0.375,
+  "research/twocol/6": 0.75,
+  "research/twocol/12": 1.5,
+  "research/twocol/20": 2.5,
+  "research/threecol/3": 0.25,
+  "research/threecol/6": 0.5,
+  "research/threecol/12": 1,
+  "research/threecol/20": 1.667,
+  "research/metrics/3": 0.5,
+  "research/metrics/6": 1,
+  "research/metrics/12": 2,
+  "research/metrics/20": 3.333,
+  "research/bullet/3": 0.3,
+  "research/bullet/6": 0.6,
+  "research/bullet/12": 1.2,
+  "research/bullet/20": 2,
+  "research/quote/3": 0,
+  "research/quote/6": 0,
+  "research/quote/12": 0,
+  "research/quote/20": 0,
+  "architecture/points/3": 0.429,
+  "architecture/points/6": 0.857,
+  "architecture/points/12": 1.714,
+  "architecture/points/20": 2.857,
+  "architecture/cards/3": 0.5,
+  "architecture/cards/6": 1,
+  "architecture/cards/12": 2,
+  "architecture/cards/20": 3.333,
+  "architecture/steps/3": 0.429,
+  "architecture/steps/6": 0.857,
+  "architecture/steps/12": 1.714,
+  "architecture/steps/20": 2.857,
+  "architecture/timeline/3": 0.5,
+  "architecture/timeline/6": 1,
+  "architecture/timeline/12": 2,
+  "architecture/timeline/20": 3.333,
+  "architecture/table/3": 0.3,
+  "architecture/table/6": 0.6,
+  "architecture/table/12": 1.2,
+  "architecture/table/20": 2,
+  "architecture/twocol/3": 0.5,
+  "architecture/twocol/6": 1,
+  "architecture/twocol/12": 2,
+  "architecture/twocol/20": 3.333,
+  "architecture/threecol/3": 0.333,
+  "architecture/threecol/6": 0.667,
+  "architecture/threecol/12": 1.333,
+  "architecture/threecol/20": 2.222,
+  "architecture/metrics/3": 0.5,
+  "architecture/metrics/6": 1,
+  "architecture/metrics/12": 2,
+  "architecture/metrics/20": 3.333,
+  "architecture/bullet/3": 0.375,
+  "architecture/bullet/6": 0.75,
+  "architecture/bullet/12": 1.5,
+  "architecture/bullet/20": 2.5,
+  "architecture/quote/3": 0,
+  "architecture/quote/6": 0,
+  "architecture/quote/12": 0,
+  "architecture/quote/20": 0
+ },
+ "split": {
+  "presentation/points/3": [
+   {
+    "title": "P",
+    "soWhat": true,
+    "footnote": true,
+    "n": 142
+   }
+  ],
+  "presentation/points/6": [
+   {
+    "title": "P",
+    "soWhat": true,
+    "footnote": true,
+    "n": 214
+   }
+  ],
+  "presentation/points/12": [
+   {
+    "title": "P",
+    "soWhat": true,
+    "footnote": false,
+    "n": 198
+   },
+   {
+    "title": "P（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 205
+   }
+  ],
+  "presentation/points/20": [
+   {
+    "title": "P",
+    "soWhat": true,
+    "footnote": false,
+    "n": 174
+   },
+   {
+    "title": "P（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 163
+   },
+   {
+    "title": "P（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 168
+   },
+   {
+    "title": "P（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 184
+   }
+  ],
+  "presentation/cards/3": [
+   {
+    "title": "C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 140
+   }
+  ],
+  "presentation/cards/6": [
+   {
+    "title": "C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 212
+   }
+  ],
+  "presentation/cards/12": [
+   {
+    "title": "C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 196
+   },
+   {
+    "title": "C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 203
+   }
+  ],
+  "presentation/cards/20": [
+   {
+    "title": "C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 172
+   },
+   {
+    "title": "C（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 161
+   },
+   {
+    "title": "C（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 166
+   },
+   {
+    "title": "C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 182
+   }
+  ],
+  "presentation/steps/3": [
+   {
+    "title": "S",
+    "soWhat": true,
+    "footnote": true,
+    "n": 140
+   }
+  ],
+  "presentation/steps/6": [
+   {
+    "title": "S",
+    "soWhat": true,
+    "footnote": true,
+    "n": 212
+   }
+  ],
+  "presentation/steps/12": [
+   {
+    "title": "S",
+    "soWhat": true,
+    "footnote": false,
+    "n": 196
+   },
+   {
+    "title": "S（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 203
+   }
+  ],
+  "presentation/steps/20": [
+   {
+    "title": "S",
+    "soWhat": true,
+    "footnote": false,
+    "n": 172
+   },
+   {
+    "title": "S（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 161
+   },
+   {
+    "title": "S（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 166
+   },
+   {
+    "title": "S（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 182
+   }
+  ],
+  "presentation/timeline/3": [
+   {
+    "title": "T",
+    "soWhat": true,
+    "footnote": true,
+    "n": 144
+   }
+  ],
+  "presentation/timeline/6": [
+   {
+    "title": "T",
+    "soWhat": true,
+    "footnote": true,
+    "n": 216
+   }
+  ],
+  "presentation/timeline/12": [
+   {
+    "title": "T",
+    "soWhat": true,
+    "footnote": false,
+    "n": 200
+   },
+   {
+    "title": "T（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 207
+   }
+  ],
+  "presentation/timeline/20": [
+   {
+    "title": "T",
+    "soWhat": true,
+    "footnote": false,
+    "n": 176
+   },
+   {
+    "title": "T（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 165
+   },
+   {
+    "title": "T（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 170
+   },
+   {
+    "title": "T（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 186
+   }
+  ],
+  "presentation/table/3": [
+   {
+    "title": "TB",
+    "soWhat": true,
+    "footnote": true,
+    "n": 128
+   }
+  ],
+  "presentation/table/6": [
+   {
+    "title": "TB",
+    "soWhat": true,
+    "footnote": true,
+    "n": 161
+   }
+  ],
+  "presentation/table/12": [
+   {
+    "title": "TB",
+    "soWhat": true,
+    "footnote": false,
+    "n": 145
+   },
+   {
+    "title": "TB（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 152
+   }
+  ],
+  "presentation/table/20": [
+   {
+    "title": "TB",
+    "soWhat": true,
+    "footnote": false,
+    "n": 156
+   },
+   {
+    "title": "TB（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 149
+   },
+   {
+    "title": "TB（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 156
+   }
+  ],
+  "presentation/twocol/3": [
+   {
+    "title": "2C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 183
+   }
+  ],
+  "presentation/twocol/6": [
+   {
+    "title": "2C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 291
+   }
+  ],
+  "presentation/twocol/12": [
+   {
+    "title": "2C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 275
+   },
+   {
+    "title": "2C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 282
+   }
+  ],
+  "presentation/twocol/20": [
+   {
+    "title": "2C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 239
+   },
+   {
+    "title": "2C（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 228
+   },
+   {
+    "title": "2C（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 233
+   },
+   {
+    "title": "2C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 249
+   }
+  ],
+  "presentation/threecol/3": [
+   {
+    "title": "3C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 161
+   }
+  ],
+  "presentation/threecol/6": [
+   {
+    "title": "3C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 245
+   }
+  ],
+  "presentation/threecol/12": [
+   {
+    "title": "3C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 229
+   },
+   {
+    "title": "3C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 236
+   }
+  ],
+  "presentation/threecol/20": [
+   {
+    "title": "3C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 257
+   },
+   {
+    "title": "3C（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 250
+   },
+   {
+    "title": "3C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 240
+   }
+  ],
+  "presentation/metrics/3": [
+   {
+    "title": "M",
+    "soWhat": true,
+    "footnote": true,
+    "n": 110
+   }
+  ],
+  "presentation/metrics/6": [
+   {
+    "title": "M",
+    "soWhat": true,
+    "footnote": true,
+    "n": 149
+   }
+  ],
+  "presentation/metrics/12": [
+   {
+    "title": "M",
+    "soWhat": true,
+    "footnote": false,
+    "n": 133
+   },
+   {
+    "title": "M（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 143
+   }
+  ],
+  "presentation/metrics/20": [
+   {
+    "title": "M",
+    "soWhat": true,
+    "footnote": false,
+    "n": 120
+   },
+   {
+    "title": "M（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 110
+   },
+   {
+    "title": "M（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 120
+   },
+   {
+    "title": "M（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 136
+   }
+  ],
+  "presentation/bullet/3": [
+   {
+    "title": "B",
+    "soWhat": true,
+    "footnote": true,
+    "n": 90
+   }
+  ],
+  "presentation/bullet/6": [
+   {
+    "title": "B",
+    "soWhat": true,
+    "footnote": true,
+    "n": 111
+   }
+  ],
+  "presentation/bullet/12": [
+   {
+    "title": "B",
+    "soWhat": true,
+    "footnote": false,
+    "n": 95
+   },
+   {
+    "title": "B（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 102
+   }
+  ],
+  "presentation/bullet/20": [
+   {
+    "title": "B",
+    "soWhat": true,
+    "footnote": false,
+    "n": 102
+   },
+   {
+    "title": "B（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 95
+   },
+   {
+    "title": "B（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 106
+   }
+  ],
+  "presentation/quote/3": [
+   {
+    "title": "Q",
+    "soWhat": true,
+    "footnote": true,
+    "n": 71
+   }
+  ],
+  "presentation/quote/6": [
+   {
+    "title": "Q",
+    "soWhat": true,
+    "footnote": true,
+    "n": 71
+   }
+  ],
+  "presentation/quote/12": [
+   {
+    "title": "Q",
+    "soWhat": true,
+    "footnote": true,
+    "n": 71
+   }
+  ],
+  "presentation/quote/20": [
+   {
+    "title": "Q",
+    "soWhat": true,
+    "footnote": true,
+    "n": 71
+   }
+  ],
+  "research/points/3": [
+   {
+    "title": "P",
+    "soWhat": true,
+    "footnote": true,
+    "n": 142
+   }
+  ],
+  "research/points/6": [
+   {
+    "title": "P",
+    "soWhat": true,
+    "footnote": true,
+    "n": 214
+   }
+  ],
+  "research/points/12": [
+   {
+    "title": "P",
+    "soWhat": true,
+    "footnote": false,
+    "n": 198
+   },
+   {
+    "title": "P（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 205
+   }
+  ],
+  "research/points/20": [
+   {
+    "title": "P",
+    "soWhat": true,
+    "footnote": false,
+    "n": 222
+   },
+   {
+    "title": "P（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 215
+   },
+   {
+    "title": "P（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 209
+   }
+  ],
+  "research/cards/3": [
+   {
+    "title": "C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 140
+   }
+  ],
+  "research/cards/6": [
+   {
+    "title": "C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 212
+   }
+  ],
+  "research/cards/12": [
+   {
+    "title": "C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 196
+   },
+   {
+    "title": "C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 203
+   }
+  ],
+  "research/cards/20": [
+   {
+    "title": "C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 220
+   },
+   {
+    "title": "C（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 213
+   },
+   {
+    "title": "C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 207
+   }
+  ],
+  "research/steps/3": [
+   {
+    "title": "S",
+    "soWhat": true,
+    "footnote": true,
+    "n": 140
+   }
+  ],
+  "research/steps/6": [
+   {
+    "title": "S",
+    "soWhat": true,
+    "footnote": true,
+    "n": 212
+   }
+  ],
+  "research/steps/12": [
+   {
+    "title": "S",
+    "soWhat": true,
+    "footnote": false,
+    "n": 196
+   },
+   {
+    "title": "S（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 203
+   }
+  ],
+  "research/steps/20": [
+   {
+    "title": "S",
+    "soWhat": true,
+    "footnote": false,
+    "n": 220
+   },
+   {
+    "title": "S（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 213
+   },
+   {
+    "title": "S（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 207
+   }
+  ],
+  "research/timeline/3": [
+   {
+    "title": "T",
+    "soWhat": true,
+    "footnote": true,
+    "n": 144
+   }
+  ],
+  "research/timeline/6": [
+   {
+    "title": "T",
+    "soWhat": true,
+    "footnote": true,
+    "n": 216
+   }
+  ],
+  "research/timeline/12": [
+   {
+    "title": "T",
+    "soWhat": true,
+    "footnote": false,
+    "n": 200
+   },
+   {
+    "title": "T（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 207
+   }
+  ],
+  "research/timeline/20": [
+   {
+    "title": "T",
+    "soWhat": true,
+    "footnote": false,
+    "n": 224
+   },
+   {
+    "title": "T（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 217
+   },
+   {
+    "title": "T（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 211
+   }
+  ],
+  "research/table/3": [
+   {
+    "title": "TB",
+    "soWhat": true,
+    "footnote": true,
+    "n": 128
+   }
+  ],
+  "research/table/6": [
+   {
+    "title": "TB",
+    "soWhat": true,
+    "footnote": true,
+    "n": 161
+   }
+  ],
+  "research/table/12": [
+   {
+    "title": "TB",
+    "soWhat": true,
+    "footnote": true,
+    "n": 229
+   }
+  ],
+  "research/table/20": [
+   {
+    "title": "TB",
+    "soWhat": true,
+    "footnote": false,
+    "n": 189
+   },
+   {
+    "title": "TB（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 204
+   }
+  ],
+  "research/twocol/3": [
+   {
+    "title": "2C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 183
+   }
+  ],
+  "research/twocol/6": [
+   {
+    "title": "2C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 291
+   }
+  ],
+  "research/twocol/12": [
+   {
+    "title": "2C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 275
+   },
+   {
+    "title": "2C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 282
+   }
+  ],
+  "research/twocol/20": [
+   {
+    "title": "2C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 311
+   },
+   {
+    "title": "2C（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 304
+   },
+   {
+    "title": "2C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 286
+   }
+  ],
+  "research/threecol/3": [
+   {
+    "title": "3C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 161
+   }
+  ],
+  "research/threecol/6": [
+   {
+    "title": "3C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 245
+   }
+  ],
+  "research/threecol/12": [
+   {
+    "title": "3C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 415
+   }
+  ],
+  "research/threecol/20": [
+   {
+    "title": "3C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 341
+   },
+   {
+    "title": "3C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 356
+   }
+  ],
+  "research/metrics/3": [
+   {
+    "title": "M",
+    "soWhat": true,
+    "footnote": true,
+    "n": 110
+   }
+  ],
+  "research/metrics/6": [
+   {
+    "title": "M",
+    "soWhat": true,
+    "footnote": true,
+    "n": 149
+   }
+  ],
+  "research/metrics/12": [
+   {
+    "title": "M",
+    "soWhat": true,
+    "footnote": false,
+    "n": 133
+   },
+   {
+    "title": "M（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 143
+   }
+  ],
+  "research/metrics/20": [
+   {
+    "title": "M",
+    "soWhat": true,
+    "footnote": false,
+    "n": 120
+   },
+   {
+    "title": "M（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 110
+   },
+   {
+    "title": "M（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 120
+   },
+   {
+    "title": "M（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 136
+   }
+  ],
+  "research/bullet/3": [
+   {
+    "title": "B",
+    "soWhat": true,
+    "footnote": true,
+    "n": 90
+   }
+  ],
+  "research/bullet/6": [
+   {
+    "title": "B",
+    "soWhat": true,
+    "footnote": true,
+    "n": 111
+   }
+  ],
+  "research/bullet/12": [
+   {
+    "title": "B",
+    "soWhat": true,
+    "footnote": false,
+    "n": 95
+   },
+   {
+    "title": "B（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 102
+   }
+  ],
+  "research/bullet/20": [
+   {
+    "title": "B",
+    "soWhat": true,
+    "footnote": false,
+    "n": 123
+   },
+   {
+    "title": "B（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 138
+   }
+  ],
+  "research/quote/3": [
+   {
+    "title": "Q",
+    "soWhat": true,
+    "footnote": true,
+    "n": 71
+   }
+  ],
+  "research/quote/6": [
+   {
+    "title": "Q",
+    "soWhat": true,
+    "footnote": true,
+    "n": 71
+   }
+  ],
+  "research/quote/12": [
+   {
+    "title": "Q",
+    "soWhat": true,
+    "footnote": true,
+    "n": 71
+   }
+  ],
+  "research/quote/20": [
+   {
+    "title": "Q",
+    "soWhat": true,
+    "footnote": true,
+    "n": 71
+   }
+  ],
+  "architecture/points/3": [
+   {
+    "title": "P",
+    "soWhat": true,
+    "footnote": true,
+    "n": 142
+   }
+  ],
+  "architecture/points/6": [
+   {
+    "title": "P",
+    "soWhat": true,
+    "footnote": true,
+    "n": 214
+   }
+  ],
+  "architecture/points/12": [
+   {
+    "title": "P",
+    "soWhat": true,
+    "footnote": false,
+    "n": 198
+   },
+   {
+    "title": "P（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 205
+   }
+  ],
+  "architecture/points/20": [
+   {
+    "title": "P",
+    "soWhat": true,
+    "footnote": false,
+    "n": 222
+   },
+   {
+    "title": "P（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 215
+   },
+   {
+    "title": "P（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 209
+   }
+  ],
+  "architecture/cards/3": [
+   {
+    "title": "C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 140
+   }
+  ],
+  "architecture/cards/6": [
+   {
+    "title": "C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 212
+   }
+  ],
+  "architecture/cards/12": [
+   {
+    "title": "C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 196
+   },
+   {
+    "title": "C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 203
+   }
+  ],
+  "architecture/cards/20": [
+   {
+    "title": "C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 172
+   },
+   {
+    "title": "C（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 161
+   },
+   {
+    "title": "C（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 166
+   },
+   {
+    "title": "C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 182
+   }
+  ],
+  "architecture/steps/3": [
+   {
+    "title": "S",
+    "soWhat": true,
+    "footnote": true,
+    "n": 140
+   }
+  ],
+  "architecture/steps/6": [
+   {
+    "title": "S",
+    "soWhat": true,
+    "footnote": true,
+    "n": 212
+   }
+  ],
+  "architecture/steps/12": [
+   {
+    "title": "S",
+    "soWhat": true,
+    "footnote": false,
+    "n": 196
+   },
+   {
+    "title": "S（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 203
+   }
+  ],
+  "architecture/steps/20": [
+   {
+    "title": "S",
+    "soWhat": true,
+    "footnote": false,
+    "n": 220
+   },
+   {
+    "title": "S（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 213
+   },
+   {
+    "title": "S（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 207
+   }
+  ],
+  "architecture/timeline/3": [
+   {
+    "title": "T",
+    "soWhat": true,
+    "footnote": true,
+    "n": 144
+   }
+  ],
+  "architecture/timeline/6": [
+   {
+    "title": "T",
+    "soWhat": true,
+    "footnote": true,
+    "n": 216
+   }
+  ],
+  "architecture/timeline/12": [
+   {
+    "title": "T",
+    "soWhat": true,
+    "footnote": false,
+    "n": 200
+   },
+   {
+    "title": "T（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 207
+   }
+  ],
+  "architecture/timeline/20": [
+   {
+    "title": "T",
+    "soWhat": true,
+    "footnote": false,
+    "n": 176
+   },
+   {
+    "title": "T（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 165
+   },
+   {
+    "title": "T（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 170
+   },
+   {
+    "title": "T（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 186
+   }
+  ],
+  "architecture/table/3": [
+   {
+    "title": "TB",
+    "soWhat": true,
+    "footnote": true,
+    "n": 128
+   }
+  ],
+  "architecture/table/6": [
+   {
+    "title": "TB",
+    "soWhat": true,
+    "footnote": true,
+    "n": 161
+   }
+  ],
+  "architecture/table/12": [
+   {
+    "title": "TB",
+    "soWhat": true,
+    "footnote": false,
+    "n": 145
+   },
+   {
+    "title": "TB（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 152
+   }
+  ],
+  "architecture/table/20": [
+   {
+    "title": "TB",
+    "soWhat": true,
+    "footnote": false,
+    "n": 189
+   },
+   {
+    "title": "TB（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 204
+   }
+  ],
+  "architecture/twocol/3": [
+   {
+    "title": "2C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 183
+   }
+  ],
+  "architecture/twocol/6": [
+   {
+    "title": "2C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 291
+   }
+  ],
+  "architecture/twocol/12": [
+   {
+    "title": "2C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 275
+   },
+   {
+    "title": "2C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 282
+   }
+  ],
+  "architecture/twocol/20": [
+   {
+    "title": "2C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 239
+   },
+   {
+    "title": "2C（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 228
+   },
+   {
+    "title": "2C（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 233
+   },
+   {
+    "title": "2C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 249
+   }
+  ],
+  "architecture/threecol/3": [
+   {
+    "title": "3C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 161
+   }
+  ],
+  "architecture/threecol/6": [
+   {
+    "title": "3C",
+    "soWhat": true,
+    "footnote": true,
+    "n": 245
+   }
+  ],
+  "architecture/threecol/12": [
+   {
+    "title": "3C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 229
+   },
+   {
+    "title": "3C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 236
+   }
+  ],
+  "architecture/threecol/20": [
+   {
+    "title": "3C",
+    "soWhat": true,
+    "footnote": false,
+    "n": 257
+   },
+   {
+    "title": "3C（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 250
+   },
+   {
+    "title": "3C（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 240
+   }
+  ],
+  "architecture/metrics/3": [
+   {
+    "title": "M",
+    "soWhat": true,
+    "footnote": true,
+    "n": 110
+   }
+  ],
+  "architecture/metrics/6": [
+   {
+    "title": "M",
+    "soWhat": true,
+    "footnote": true,
+    "n": 149
+   }
+  ],
+  "architecture/metrics/12": [
+   {
+    "title": "M",
+    "soWhat": true,
+    "footnote": false,
+    "n": 133
+   },
+   {
+    "title": "M（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 143
+   }
+  ],
+  "architecture/metrics/20": [
+   {
+    "title": "M",
+    "soWhat": true,
+    "footnote": false,
+    "n": 120
+   },
+   {
+    "title": "M（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 110
+   },
+   {
+    "title": "M（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 120
+   },
+   {
+    "title": "M（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 136
+   }
+  ],
+  "architecture/bullet/3": [
+   {
+    "title": "B",
+    "soWhat": true,
+    "footnote": true,
+    "n": 90
+   }
+  ],
+  "architecture/bullet/6": [
+   {
+    "title": "B",
+    "soWhat": true,
+    "footnote": true,
+    "n": 111
+   }
+  ],
+  "architecture/bullet/12": [
+   {
+    "title": "B",
+    "soWhat": true,
+    "footnote": false,
+    "n": 95
+   },
+   {
+    "title": "B（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 102
+   }
+  ],
+  "architecture/bullet/20": [
+   {
+    "title": "B",
+    "soWhat": true,
+    "footnote": false,
+    "n": 102
+   },
+   {
+    "title": "B（续）",
+    "soWhat": false,
+    "footnote": false,
+    "n": 95
+   },
+   {
+    "title": "B（续）",
+    "soWhat": false,
+    "footnote": true,
+    "n": 106
+   }
+  ],
+  "architecture/quote/3": [
+   {
+    "title": "Q",
+    "soWhat": true,
+    "footnote": true,
+    "n": 71
+   }
+  ],
+  "architecture/quote/6": [
+   {
+    "title": "Q",
+    "soWhat": true,
+    "footnote": true,
+    "n": 71
+   }
+  ],
+  "architecture/quote/12": [
+   {
+    "title": "Q",
+    "soWhat": true,
+    "footnote": true,
+    "n": 71
+   }
+  ],
+  "architecture/quote/20": [
+   {
+    "title": "Q",
+    "soWhat": true,
+    "footnote": true,
+    "n": 71
+   }
+  ]
+ }
+}

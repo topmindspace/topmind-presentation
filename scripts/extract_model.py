@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-TopPPT HTML· 从 HTML 报告抽取 PPTX 内容模型
+topmind-presentation · 从 HTML 报告抽取 PPTX 内容模型
 用法:
     python extract_model.py <报告.html> [输出.json]
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* TopPPT HTML · 主题参考图生成器（维护工具，非交付依赖、非交付硬门禁）
+/* topmind-presentation · 主题参考图生成器（维护工具，非交付依赖、非交付硬门禁）
  *
  * 用法：
  *   npm install playwright            # 或在任意位置安装 playwright 后设置 NODE_PATH
@@ -76,4 +76,14 @@ const CHANNEL = channelArg || process.env.TOP_PPT_BROWSER_CHANNEL
 
   await browser.close();
   console.log(`done: 3 张主题参考图已刷新（deviceScaleFactor=${SCALE}）`);
+  /* 包体瘦身：256 色调色板量化（UI 截图无可见损失，单张约 1MB → ~350KB）；无 Python/Pillow 时保留原图 */
+  try {
+    require('child_process').execFileSync('python3', ['-c',
+      "import sys;from PIL import Image\n" +
+      "for f in sys.argv[1:]:\n" +
+      "  Image.open(f).convert('RGB').quantize(colors=256,method=Image.Quantize.MEDIANCUT,dither=Image.Dither.NONE).save(f,optimize=True)",
+      ...['theme-overview.png', 'theme-overview-research.png', 'theme-overview-architecture.png'].map(f => path.join(outDir, f))],
+      { stdio: 'inherit' });
+    console.log('quantized: 256 色调色板');
+  } catch (e) { console.warn('[capture] 量化跳过（需 python3 + Pillow）：' + (e && e.message)); }
 })().catch((e) => { console.error(e); process.exit(1); });

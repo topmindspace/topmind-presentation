@@ -1,5 +1,5 @@
 {
-  "$comment": "TopPPT HTML · 风格目标 rubric（结构化评分）。确定性检查回答「是否做了基本动作」，本 schema 回答「是否按我们想要的方式做的」。用宿主工具的 --output-schema / 结构化输出约束评审模型，字段稳定便于跨版本比较。用法：python evals/run_evals.py --help。",
+  "$comment": "topmind-presentation · 风格目标 rubric（结构化评分）。确定性检查回答「是否做了基本动作」，本 schema 回答「是否按我们想要的方式做的」。用宿主工具的 --output-schema / 结构化输出约束评审模型，字段稳定便于跨版本比较。用法：python evals/run_evals.py --help。",
   "type": "object",
   "properties": {
     "overall_pass": { "type": "boolean", "description": "是否达到交付标准（任一 check 的 score < 60 即 false）" },

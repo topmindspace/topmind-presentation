@@ -1,5 +1,5 @@
 /**
- * TopPPT HTML · 语义图标库（48 · 24×24 · stroke 1.8 圆角线帽 · currentColor）
+ * topmind-presentation · 语义图标库（48 · 24×24 · stroke 1.8 圆角线帽 · currentColor）
  * 单源：assets/icons/<name>.svg + assets/icons/index.json（关键词映射 + 默认表）。
  * 由 scripts/make_icon_pack.py 生成。HTML 内联 / build_pptx.js PNG 真导出共用。
  * 图标图 objectName 统一 `icon:` 前缀，validate_pptx 单独计数，不进 pictures 内容图门禁。
@@ -67,7 +67,7 @@ function iconSvg(name, color) {
   return raw.replace('stroke="currentColor"', `stroke="${c}"`);
 }
 
-/** 预渲染 PNG（512px）文件路径；无 sharp 环境下 PPTX 通道的可靠回落 */
+/** 预渲染 PNG（256px）文件路径；无 sharp 环境下 PPTX 通道的可靠回落 */
 function iconPngPath(name) {
   const n = ICONS[name] ? name : pickIconName(name, 0);
   const p = path.join(ICON_DIR, `${n}.png`);

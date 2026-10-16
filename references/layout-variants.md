@@ -66,4 +66,4 @@ base `twocol`。左栏是核心主张/特性、右栏是支撑细节时用；两
 ```
 
 模型：`{type:'twocol', variant:'2-col-feature', paragraphs:[[标题, 正文]…]}`。
-PPTX：首栏 accent 左线 + 标题放大一档。
+PPTX：首栏 MD3 tonal 底 + 标题放大一档（不用左侧装饰竖条）。

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 用户图片素材准备
+"""topmind-presentation · 用户图片素材准备
 
 把用户提供的图片处理成**可直接放进报告**的素材：
   ① 读尺寸/格式/体积（纯标准库解析 PNG/JPEG/GIF/WebP/SVG 头部，无需第三方依赖）；
@@ -200,7 +200,7 @@ def collect_inputs(args_paths: list[str]) -> list[Path]:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description='TopPPT HTML 用户图片素材准备')
+    ap = argparse.ArgumentParser(description='topmind-presentation 用户图片素材准备')
     ap.add_argument('paths', nargs='+', help='图片文件或目录（可多个）')
     ap.add_argument('--layout', default='full', choices=list(SPEC.get('layouts') or
                     ['full', 'half', 'bleed', 'grid', 'compare', 'wall']))

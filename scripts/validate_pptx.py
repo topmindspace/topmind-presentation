@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML· PPTX 质检（交付硬门禁）
+"""topmind-presentation · PPTX 质检（交付硬门禁）
 
 用法:
     python validate_pptx.py <报告.pptx> [--strict] [--model=报告.model.json] [--json-out=报告.json]
@@ -1100,13 +1100,13 @@ def inspect_slide(
         if ratio >= FULL_SLIDE_IMAGE_RATIO:
             warnings.append(
                 issue("FULL_SLIDE_BACKGROUND_RISK",
-                      "单张图片覆盖 ≥90% 页面（整页底图风险；TopPPT HTML 交付基线为全原生可编辑）。",
+                      "单张图片覆盖 ≥90% 页面（整页底图风险；topmind-presentation 交付基线为全原生可编辑）。",
                       slide=slide_number)
             )
         elif ratio >= LARGE_IMAGE_AREA_RATIO:
             warnings.append(
                 issue("UNJUSTIFIED_LARGE_IMAGE",
-                      "单张图片覆盖 ≥40% 页面（TopPPT HTML 要求零图片，请改为原生形状/图表）。",
+                      "单张图片覆盖 ≥40% 页面（topmind-presentation 要求零图片，请改为原生形状/图表）。",
                       slide=slide_number)
             )
 
@@ -1789,7 +1789,7 @@ def validate_pptx(
             elif n_pics > 0:
                 report["warnings"].append(
                     issue("PICTURES_NOT_ALLOWED",
-                          f"PPTX 含 {n_pics} 张图片；TopPPT HTML 默认要求 pictures=0（全原生可编辑）。"
+                          f"PPTX 含 {n_pics} 张图片；topmind-presentation 默认要求 pictures=0（全原生可编辑）。"
                           f"如确需图片，请在模型中显式声明 section.image。")
                 )
             if report["summary"]["native_text_shapes"] == 0:
@@ -1935,7 +1935,7 @@ def _image_real_srcs(img: dict[str, Any]) -> list[str]:
 
 def count_model_images(model: dict[str, Any] | None) -> int:
     """统计模型显式声明的**真实图片**数（section.image / split.right.image 的 src 与 items）。
-    TopPPT HTML 默认零图片（pictures=0 全原生可编辑）；仅当模型显式声明时才允许图片落地。
+    topmind-presentation 默认零图片（pictures=0 全原生可编辑）；仅当模型显式声明时才允许图片落地。
     配图占位（image.placeholder）由原生形状渲染，不计入图片数。"""
     n = 0
     for _, img in _model_image_holders(model):
@@ -2000,10 +2000,10 @@ def model_image_issues(model: dict[str, Any] | None, spec: dict[str, Any],
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="TopPPT HTML PPTX 质检：结构 / 可编辑性 / 版式安全 / 内容保真。"
+        description="topmind-presentation PPTX 质检：结构 / 可编辑性 / 版式安全 / 内容保真。"
     )
     parser.add_argument("pptx", help="PPTX 文件路径")
-    parser.add_argument("--model", help="TopPPT HTML model.json（extract_model.py 产物）：往返保真检查")
+    parser.add_argument("--model", help="topmind-presentation model.json（extract_model.py 产物）：往返保真检查")
     parser.add_argument("--allow-shape-charts", action="store_true",
                         help="豁免 MODEL_CHART_COUNT 与 MODEL_CHART_NOTES_MISSING（仅 A 通道预览引擎回归；"
                              "交付通道要求原生图表与备注数据表）")

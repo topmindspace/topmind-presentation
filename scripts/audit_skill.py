@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 技能工程审计（零依赖 · 体积预算 / 渐进式披露 / 触发门禁 / 冗余）
+"""topmind-presentation · 技能工程审计（零依赖 · 体积预算 / 渐进式披露 / 触发门禁 / 冗余）
 
 用法:
     python scripts/audit_skill.py            # 全量审计

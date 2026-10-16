@@ -1,5 +1,5 @@
 /**
- * TopPPT HTML · 页型布局区域 IR（双通道几何收敛起点）
+ * topmind-presentation · 页型布局区域 IR（双通道几何收敛起点）
  *
  * 从 layout-constants.json（含 layoutSlots）派生「语义槽位 → 英寸矩形」。
  * B 通道（build_pptx.js）直接 require；A 通道消费同一 LC 常量（数字同源）。

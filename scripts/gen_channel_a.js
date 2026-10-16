@@ -1,4 +1,4 @@
-/* TopPPT HTML · A 通道（预览序列化引擎）PPTX 产物生成器（回归内部质量路径）：
+/* topmind-presentation · A 通道（预览序列化引擎）PPTX 产物生成器（回归内部质量路径）：
  * Node 加载浏览器预览运行时（assets/pptx-export.js，仅供页面 WYSIWYG 预览），
  * 用其 slidesOf/slideXml 序列化输出组装完整 PPTX 包（content types / presentation /
  * master / layout / theme / slides + store-only ZIP）。
@@ -64,13 +64,13 @@ function buildPptx(model) {
     '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" ' +
     'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" ' +
     'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
-    '<dc:title>' + esc(model.title || 'TopPPT HTML 报告') + '</dc:title>' +
-    '<dc:creator>TopPPT HTML</dc:creator>' +
+    '<dc:title>' + esc(model.title || 'topmind-presentation 报告') + '</dc:title>' +
+    '<dc:creator>topmind-presentation</dc:creator>' +
     '<dcterms:created xsi:type="dcterms:W3CDTF">' + new Date().toISOString() + '</dcterms:created></cp:coreProperties>';
   files['docProps/app.xml'] =
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">' +
-    '<Application>TopPPT HTML</Application><Slides>' + slides.length + '</Slides></Properties>';
+    '<Application>topmind-presentation</Application><Slides>' + slides.length + '</Slides></Properties>';
 
   const sldIds = slides.map((_, i) => '<p:sldId id="' + (256 + i) + '" r:id="rId' + (i + 2) + '"/>').join('');
   files['ppt/presentation.xml'] =
@@ -111,8 +111,8 @@ function buildPptx(model) {
   ]);
   files['ppt/theme/theme1.xml'] =
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-    '<a:theme xmlns:a="' + NS.a + '" name="TopPPT HTML">' +
-    '<a:themeElements><a:clrScheme name="TopPPT HTML">' +
+    '<a:theme xmlns:a="' + NS.a + '" name="topmind-presentation">' +
+    '<a:themeElements><a:clrScheme name="topmind-presentation">' +
     '<a:dk1><a:srgbClr val="' + S.ink + '"/></a:dk1><a:lt1><a:srgbClr val="' + S.bg + '"/></a:lt1>' +
     '<a:dk2><a:srgbClr val="' + S.body + '"/></a:dk2><a:lt2><a:srgbClr val="' + S.surface + '"/></a:lt2>' +
     '<a:accent1><a:srgbClr val="' + S.accent + '"/></a:accent1>' +
@@ -120,9 +120,9 @@ function buildPptx(model) {
     '<a:accent4><a:srgbClr val="' + A4 + '"/></a:accent4><a:accent5><a:srgbClr val="' + A5 + '"/></a:accent5>' +
     '<a:accent6><a:srgbClr val="' + S.faint + '"/></a:accent6>' +
     '<a:hlink><a:srgbClr val="' + S.accent + '"/></a:hlink><a:folHlink><a:srgbClr val="' + S.faint + '"/></a:folHlink>' +
-    '</a:clrScheme><a:fontScheme name="TopPPT HTML"><a:majorFont><a:latin typeface="' + S.fontDisplay + '"/><a:ea typeface="' + S.fontDisplay + '"/></a:majorFont>' +
+    '</a:clrScheme><a:fontScheme name="topmind-presentation"><a:majorFont><a:latin typeface="' + S.fontDisplay + '"/><a:ea typeface="' + S.fontDisplay + '"/></a:majorFont>' +
     '<a:minorFont><a:latin typeface="' + S.font + '"/><a:ea typeface="' + S.font + '"/></a:minorFont></a:fontScheme>' +
-    '<a:fmtScheme name="TopPPT HTML"><a:fillStyleLst>' + solid(S.accent) + solid(S.surface) + solid(S.soft) + '</a:fillStyleLst>' +
+    '<a:fmtScheme name="topmind-presentation"><a:fillStyleLst>' + solid(S.accent) + solid(S.surface) + solid(S.soft) + '</a:fillStyleLst>' +
     '<a:lnStyleLst><a:ln w="9525">' + solid(S.line) + '</a:ln><a:ln w="25400">' + solid(S.line) + '</a:ln><a:ln w="38100">' + solid(S.line) + '</a:ln></a:lnStyleLst>' +
     '<a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst>' +
     '<a:bgFillStyleLst>' + solid(S.bg) + solid(S.surface) + solid(S.soft) + '</a:bgFillStyleLst></a:fmtScheme>' +

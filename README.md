@@ -1,4 +1,4 @@
-# topmind-presentation · TopPPT HTML
+# topmind-presentation
 
 [English](./README.en.md) | 中文
 
@@ -9,21 +9,17 @@
 
 **让 idea 飞，好想法被看见。** 为**演示报告 / 正式商务演示**而生的高品质演示文稿技能：**HTML + PPT 双交付**——日常用可翻页 HTML 等同幻灯片；需要时再导出**版式保真可编辑 PPTX**。参考 **MD3**：合适信息密度、克制文字/图形/颜色。核心工艺是版式、排版、色彩与内容组织——不是 gadget 堆砌。
 
-- 技能标识：`topmind-presentation`；品牌名：**TopPPT HTML**
+- 技能标识与品牌名：`topmind-presentation`
 - 版本：**v0.2.7**（独立仓库，版本独立演进）
 - **智能体入口**：`SKILL.md` → `references/playbook.md`（L1）→ L2 按需
 - **人类维护者**：本 README（安装 / 命令 / 目录）；勿把本文件当生成规范
 - 仓库即技能：本仓库根目录就是技能本体（SKILL.md + assets + references + scripts），没有 monorepo 安装器
 
-<p align="center">
-  <img src="docs/assets/presentation-cover.png" alt="topmind-presentation · 正式商务演示" width="960" />
-</p>
-
 ### 主题总览（Gate 0）
 
 <p align="center">
   <img src="assets/theme-overview.png" alt="演示模式 · business-blue 主题总览" width="860" /><br/>
-  <sub>演示 · business-blue（默认）· 另见 <a href="./assets/style-gallery.html">style-gallery</a> · <a href="./assets/theme-overview-research.png">研究</a> · <a href="./assets/theme-overview-architecture.png">架构</a></sub>
+  <sub>演示 · business-blue（默认）· 其余风格见 <a href="./assets/style-gallery.html">style-gallery</a></sub>
 </p>
 
 **在线介绍** · [落地页](https://topmindspace.github.io/presentation/)（Showcase 与风格画廊见下方仓库内文件）

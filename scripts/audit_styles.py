@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 风格与单源质量审计工具：
+"""topmind-presentation · 风格与单源质量审计工具：
 ① WCAG 对比度：9 风格 × light/dark 的关键 token 配对（MD3/WCAG 阈值）
 ② 双源一致性：engine.css（HTML 侧 token）vs layout-constants.json（PPTX 侧 token）
 ③ 单源完整性：styleAccents 覆盖各风格 light/dark 强调色；charts.minSize ⊆ charts.types；

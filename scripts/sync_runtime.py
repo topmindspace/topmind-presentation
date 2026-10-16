@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-TopPPT HTML · 单源注入器（版式常量 + DSL schema · 三模板公共片段统一注入）
+topmind-presentation · 单源注入器（版式常量 + DSL schema · 三模板公共片段统一注入）
 用法:
     python scripts/sync_runtime.py
 
@@ -377,10 +377,10 @@ def main() -> int:
     runtime = PE.read_text(encoding='utf-8').rstrip('\n')
 
     engine_repl = ('/* __TOPPPT_ENGINE_START__ */\n'
-                   '/* ══ TopPPT HTML 公共样式引擎（assets/templates/engine.css 的内联副本 · 由 scripts/sync_runtime.py 注入，禁止手改） ══ */\n'
+                   '/* ══ topmind-presentation 公共样式引擎（assets/templates/engine.css 的内联副本 · 由 scripts/sync_runtime.py 注入，禁止手改） ══ */\n'
                    + engine_css + '\n/* __TOPPPT_ENGINE_END__ */')
     ui_repl = ('/* __TOPPPT_UI_START__ */\n'
-               '/* ══ TopPPT HTML 公共 UI 脚本（assets/templates/ui.js 的内联副本 · 由 scripts/sync_runtime.py 注入，禁止手改） ══ */\n'
+               '/* ══ topmind-presentation 公共 UI 脚本（assets/templates/ui.js 的内联副本 · 由 scripts/sync_runtime.py 注入，禁止手改） ══ */\n'
                + ui_js + '\n/* __TOPPPT_UI_END__ */')
     # 运行时同版本戳：对注入源 assets/pptx-export.js（rstrip 后）取 sha256[:16]，
     # 写入模板内联块，供 validate_report 比对防「模板未 sync」漂移。

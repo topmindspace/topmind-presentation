@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 门禁反向验证（故障注入）
+"""topmind-presentation · 门禁反向验证（故障注入）
 
 校验器最容易退化成「只会说 OK 的摆设」。本脚本往合格产物里**注入已知缺陷**，
 断言对应门禁必须报错——门禁抓不到即视为失败。

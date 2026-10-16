@@ -32,6 +32,11 @@ jobs:
 
       - name: Install skills-ref (Agent Skills validator)
         run: python3 -m pip install --quiet skills-ref
+      - name: Install render toolchain (visual fill gate)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends libreoffice-impress poppler-utils fonts-noto-cjk
+          python3 -m pip install --quiet pillow numpy
 
       # Same skill gates as CI (incl. validator, npm pack whitelist, regression fixture + smoke_pptx).
       - name: Skill gates

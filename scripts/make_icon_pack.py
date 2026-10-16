@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 内置图标包生成器（单源）
+"""topmind-presentation · 内置图标包生成器（单源）
 
 产出 assets/icons/：
   - <name>.svg   24×24 手绘线性图标（stroke=currentColor, 1.8, 圆角），HTML 内联用
-  - <name>.png   512px 预渲染（cairosvg），PPTX 通道用（python-pptx 不认 SVG，见报告）
+  - <name>.png   256px 预渲染（cairosvg），PPTX 通道用（python-pptx 不认 SVG，见报告）
   - index.json   关键词→图标映射 + 默认图标表
 
 用法:
   python scripts/make_icon_pack.py            # 写 SVG + index.json
-  python scripts/make_icon_pack.py --png      # 另渲染 512px PNG（需 cairosvg）
+  python scripts/make_icon_pack.py --png      # 另渲染 256px PNG（需 cairosvg）
 
 图标全部手绘原创（24 网格），不复制第三方图标库。
 其中 19 个沿用既有 icon_lib.js 的成熟路径（字节一致，现有渲染不变）；
@@ -163,8 +163,8 @@ def main() -> int:
             svg = SVG_OPEN.replace('currentColor', '#1a56a8') + inner + '</svg>'
             cairosvg.svg2png(bytestring=svg.encode('utf-8'),
                              write_to=str(OUT / f'{name}.png'),
-                             output_width=512, output_height=512)
-        print(f'[make_icon_pack] OK: {len(ICONS)} png(512px) → {OUT}')
+                             output_width=256, output_height=256)
+        print(f'[make_icon_pack] OK: {len(ICONS)} png(256px) → {OUT}')
     return 0
 
 

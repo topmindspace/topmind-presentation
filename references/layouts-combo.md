@@ -62,7 +62,7 @@
 
 ## 39. 大引言 / 金句页（节奏休止页 · 三模式通用 · 主题一致）
 
-> 强调带 + 一句话主张。用于演示模式的"节奏休止"（连续数据页之间的呼吸口）或报告的核心判断页。**全文 1–2 处即可，多了廉价**；不加任何多余的页头角标/页脚信息。
+> 强调带 + 一句话主张 + **2–4 个证据数字（必填，禁空金句页）**；不用装饰大引号。用于演示模式的"节奏休止"（连续数据页之间的呼吸口）或报告的核心判断页。**全文 1–2 处即可，多了廉价**；不加任何多余的页头角标/页脚信息。
 > 默认 `band--accent`（软强调，亮暗同向）；更强用 `band--accent--solid`（强调色实底）。**不用 `band--deep`**——浅色模式下它会渲染成深色页。
 
 ```html
@@ -71,15 +71,19 @@
     <div class="shead shead--center rv">
       <div class="t-eyebrow">03 · 关键判断</div>
       <h2 class="t-h1 shead__title">治理不是把数据管起来，<br>而是让好数据被用起来</h2>
-      <div style="font-size:clamp(40px,4.6vh,56px);font-weight:700;color:var(--accent);line-height:1;margin-top:var(--sp-4)">「</div>
       <p class="t-lead" style="max-width:860px;margin-inline:auto;font-size:clamp(18px,2.2vh,22px);font-weight:600">穿越分水岭的钥匙是平台化，不是更大的模型。</p>
       <p class="t-sm" style="margin-top:var(--sp-4);color:var(--accent-text)">—— 企业智能体发展调研 · 42 家深度访谈</p>
+    </div>
+    <div class="grid g-3 rv" style="margin-top:var(--sp-6)">
+      <div class="metric"><div class="metric__v t-metric">61<small>%</small></div><div class="metric__k">企业已进入试点</div></div>
+      <div class="metric"><div class="metric__v t-metric">18<small>%</small></div><div class="metric__k">规模化运行占比</div></div>
+      <div class="metric"><div class="metric__v t-metric">9/9</div><div class="metric__k">规模化企业均先建平台层</div></div>
     </div>
   </div>
 </section>
 ```
 
-> **PPTX 映射**：金句页 → `quote` 页型（主题一致强调带：accent-soft 底 + 常规文字 + accent 引号/署名；`{quote, author, context?}`）。HTML 版式在标题下加大引号 `「` 与署名行，与 PPTX 同源。
+> **PPTX 映射**：金句页 → `quote` 页型（主题一致强调带：accent-soft 底 + 金句 + 署名 + 证据卡片行；`{quote, author, metrics, context?}`）。不画装饰大引号；缺 `metrics` 会被视觉填充门禁（`check_visual_fill.py`）判为空页。
 
 ---
 
@@ -109,7 +113,7 @@
 </div>
 ```
 
-> 每栏要点 ≤4 条、同构对仗（同一维度正面 vs 反面）；结论条默认**不写标签字样**（无「So what」/「结论」），靠 MD3 衬条强调；罕见需标签时用 `.sowhat--labeled` + （已弃用默认标签）。
+> 每栏要点 ≤4 条、同构对仗（同一维度正面 vs 反面）；结论条默认**不写标签字样**（无「So what」/「结论」），靠 MD3 衬条强调；不提供标签变体。
 > **PPTX 映射**：`comparison` 页型——`left/right = {title, points:[[k,v]…]}`，左 surface / 右 soft 面板 + `verdict`（结论条，accent 实底）。**`verdict` 与 `soWhat` 互斥**（共用 annotation 结论条槽位，同页双填必叠印）：comparison 填 `verdict` 时不要再填 `soWhat`；渲染器已自动二选一（verdict 优先），模型侧应只给一个。
 
 ---

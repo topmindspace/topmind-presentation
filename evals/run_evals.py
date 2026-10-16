@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · Evals 运行器（零依赖 · 确定性检查 + 效率度量 + rubric 落地）
+"""topmind-presentation · Evals 运行器（零依赖 · 确定性检查 + 效率度量 + rubric 落地）
 
 用法:
     python evals/run_evals.py --list                  # 列出 prompt 集（显式/隐式/上下文/负对照）
@@ -149,7 +149,7 @@ def score_trace(trace_path: Path) -> dict:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description='TopPPT HTML Evals 运行器')
+    ap = argparse.ArgumentParser(description='topmind-presentation Evals 运行器')
     ap.add_argument('--list', action='store_true', help='列出 prompt 集')
     ap.add_argument('--budget', action='store_true', help='打印效率预算')
     ap.add_argument('--score', help='对一份报告产物跑确定性检查')

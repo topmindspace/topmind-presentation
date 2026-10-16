@@ -1,5 +1,5 @@
 {
-  "$comment": "TopPPT HTML 版式常量单源 —— 页面几何 / 12 列网格 / 语义字阶 C0–T14 / 三模式独立排版比例尺 / 页型几何 / 9 风格 token + 编码色板 / 图表登记四元组 / 容器内边距 / 锚点容差 / 图片准入门与图片规格 imageSpec / 校验预算 / 强调色表 / 去AI味词表 / 深度模式。改这里，然后跑 python scripts/sync_runtime.py 注入 build_pptx.js（require）/ pptx-export.js（常量块）/ 三模板（引擎·UI·运行时内联副本）。禁止手改各处副本。页型字段约束见 scripts/model-schema.json（DSL schema 单源，两端页型须同步增减）。",
+  "$comment": "topmind-presentation 版式常量单源 —— 页面几何 / 12 列网格 / 语义字阶 C0–T14 / 三模式独立排版比例尺 / 页型几何 / 9 风格 token + 编码色板 / 图表登记四元组 / 容器内边距 / 锚点容差 / 图片准入门与图片规格 imageSpec / 校验预算 / 强调色表 / 去AI味词表 / 深度模式。改这里，然后跑 python scripts/sync_runtime.py 注入 build_pptx.js（require）/ pptx-export.js（常量块）/ 三模板（引擎·UI·运行时内联副本）。禁止手改各处副本。页型字段约束见 scripts/model-schema.json（DSL schema 单源，两端页型须同步增减）。",
   "version": "0.1",
   "page": {
     "pw": 13.333,
@@ -3598,7 +3598,7 @@
       "2-col-feature": {
         "name": "双栏特性",
         "base": "twocol",
-        "html": ".cols-2；左栏 .col--feature（复用 .card 语义：加粗标题 + accent 左线）",
+        "html": ".cols-2；左栏 .col--feature（MD3 tonal 底 + 加粗标题，无左侧竖条）",
         "components": [
           "cols-2",
           "card"
@@ -3609,7 +3609,7 @@
           "maxParas": 6,
           "featureMaxParas": 2
         },
-        "pptx": "twocol 分支：首栏加 accent 左线 + 标题放大（build_pptx.js variant 分支）"
+        "pptx": "twocol 分支：首栏 MD3 tonal 底 + 标题放大（build_pptx.js variant 分支）"
       }
     }
   }

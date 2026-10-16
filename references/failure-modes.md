@@ -247,7 +247,7 @@
 | Agenda 两通道阅读顺序不一致 | `Agenda序=DRIFT`（cross_verify） | 列优先（先左列后右列）；HTML 用 `column-count`，PPTX 用列填充 |
 | low 图型无数据表 | `图表 PPTX 还原度提示`（WARN） | area/radar/treemap/sankey/streamgraph/marimekko/boxplot/network 在 PPTX 显著退化——改 bar/line/hbar/donut 或 `dataTable=inline` |
 | ≥2 卡且无 `.card__ico` | `要点/卡片页含 .card__ico`（WARN） | 从 `icons.md` 取语义图标（`render_from_model.py` 已内置 `card_head()` 自动出图标 + `data-icon`） |
-| PPTX 卡片头是方块不是图标 | `icon_pictures=0`（validate_pptx summary） | 跑 `node scripts/build_icon_assets.js` 生成 `icon-assets.json`（需 sharp）；确认模型 `cards[].icon` 有值。缺资产时引擎回落 accent 方块（可扫读，但非真图标） |
+| PPTX 卡片头是方块不是图标 | `icon_pictures=0`（validate_pptx summary） | 默认直接用包内 `assets/icons/*.png`（无需 sharp）；确认模型 `cards[].icon` 有值、`assets/icons/` 完整。缺资产时引擎回落 accent 方块并报错；`build_pptx.js --strict` 下直接失败（exit 3） |
 | 图标 PNG 进了内容图门禁 | `PICTURES_NOT_DECLARED` 误报 | 图标 `objectName` 必须以 `icon:` 开头；`validate_pptx` 按前缀分流到 `icon_pictures` |
 | 图片占位标签 A/B 不同串 | `图片数=DRIFT` / 文本覆盖不足 | 占位标签由 `imageSpec` 同源拼接；`render_from_model` 与 PPTX `imgPlaceholderLabel` 必须同串 |
 

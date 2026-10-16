@@ -82,7 +82,7 @@ run_one() {
     local STEM=2026-09-09-research-mckinsey
     if [[ -f "assets/examples/${STEM}.model.json" ]]; then
       export NODE_PATH="${PWD}/node_modules${NODE_PATH:+:$NODE_PATH}"
-      node scripts/build_pptx.js "dist/regression/${STEM}.pptx" \
+      node scripts/build_pptx.js "dist/regression/${STEM}.pptx" --strict \
         --model="assets/examples/${STEM}.model.json"
     else
       echo "ci_skill_gates: skip regression fixture (missing assets/examples/${STEM}.model.json)"
@@ -103,6 +103,33 @@ run_one() {
     fi
   elif [[ "$WITH_PPTX" == "1" ]]; then
     echo "ci_skill_gates: smoke_pptx.sh not present — skip"
+  fi
+
+  # M0：视觉填充率与重心门禁（渲染后看像素）。presentation 黄金样张硬门禁；
+  # research / architecture 现有页型尚未适配，先报告不阻断（M1 求解器重构后转硬门禁）。
+  if [[ "$WITH_PPTX" == "1" ]]; then
+    if command -v soffice >/dev/null 2>&1 && command -v pdftoppm >/dev/null 2>&1; then
+      "$PY" -c "import PIL, numpy" 2>/dev/null || "$PY" -m pip install --quiet pillow numpy
+      mkdir -p dist/regression
+      export NODE_PATH="${PWD}/node_modules${NODE_PATH:+:$NODE_PATH}"
+      local VSTEM=2026-09-09-presentation-business-blue
+      node scripts/build_pptx.js --out="dist/regression/${VSTEM}.vfill.pptx" --strict \
+        --model="assets/examples/${VSTEM}.model.json"
+      "$PY" scripts/check_visual_fill.py "dist/regression/${VSTEM}.vfill.pptx" \
+        --model="assets/examples/${VSTEM}.model.json" --strict
+      for RSTEM in 2026-09-09-research-mckinsey 2026-09-09-architecture-graphite-dark 2026-10-11-topmind-presentation-showcase; do
+        [[ -f "assets/examples/${RSTEM}.model.json" ]] || continue
+        node scripts/build_pptx.js --out="dist/regression/${RSTEM}.vfill.pptx" \
+          --model="assets/examples/${RSTEM}.model.json" >/dev/null
+        "$PY" scripts/check_visual_fill.py "dist/regression/${RSTEM}.vfill.pptx" \
+          --model="assets/examples/${RSTEM}.model.json" | tail -1 | sed "s/^/  [report-only ${RSTEM}] /"
+      done
+    elif [[ "${CI:-}" == "true" ]]; then
+      echo "ci_skill_gates: CI 缺 soffice/pdftoppm，视觉门禁不得跳过" >&2
+      exit 1
+    else
+      echo "ci_skill_gates: skip visual fill gate (install libreoffice + poppler-utils)"
+    fi
   fi
 
   # Optional feedback-gate unit tests when present (fast; keep green)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 文档一致性审计（规范与引用完整性 · 零依赖）
+"""topmind-presentation · 文档一致性审计（规范与引用完整性 · 零依赖）
 
 用法:
     python scripts/audit_docs.py            # 全量审计
@@ -18,6 +18,9 @@
   ⑥ 任务路由可解析性 —— extract_snippet.py 的 TASK_ROUTES 每条 (文件, 节) 必须可
      实际抽取（防「文字声明同源」漂移：路由声明的节在文件里找不到即失败；
      空节路由 = 该文件只能整读，≥20KB 的 L2 文件不允许）
+   ⑧ 禁止词 —— SKILL.md / README* / references / 模板与示例 HTML 中不得出现
+     「甲板」（deck 译为「演示文稿」）、「So what」结论条标签（`sowhat__k">So what`、
+     `.sowhat--labeled` 标签变体）以及旧品牌名（M0 锁定规则）
    ⑦ 反引号引用可达 —— 反引号代码引用中的 `references/*.md` / `scripts/*`
      路径必须存在（审计 轻微-15 门禁盲区：①–⑥ 只查 [text](path) 形式，
      `references/pan-style.md` 曾漏网；glob/占位符写法跳过）
@@ -84,6 +87,26 @@ def main() -> int:
             continue
         for m in re.finditer(pat, p.read_text(encoding='utf-8'), re.M):
             owner[m.group(1)] = f
+
+    # ⑧ 禁止词（用户锁定规则）
+    banned = [
+        (re.compile(r'甲板'), 'deck 须译为「演示文稿」，禁用「甲板」'),
+        (re.compile(r'sowhat__k">\s*So\s*what', re.I), '结论条不得带「So what」标签'),
+        (re.compile(r'sowhat--labeled'), '结论条标签变体已移除'),
+        (re.compile('Top' + 'PPT'), '旧名（Top' + 'PPT）须统一为 topmind-presentation'),
+    ]
+    scan = [ROOT / 'SKILL.md'] + sorted(ROOT.glob('README*.md')) + sorted(REF.glob('*.md')) \
+        + sorted((ROOT / 'assets' / 'templates').glob('*')) + sorted((ROOT / 'assets' / 'examples').glob('*.html'))
+    ban_hits = 0
+    for p in scan:
+        if not p.is_file():
+            continue
+        for i, ln in enumerate(p.read_text(encoding='utf-8', errors='replace').splitlines()):
+            for rx, why in banned:
+                if rx.search(ln):
+                    ban_hits += 1
+                    errs.append(f'禁止词 {p.relative_to(ROOT)} L{i+1}: {why}')
+    print(f'⑧ 禁止词：命中 {ban_hits} 处')
 
     # ① § 引用可解析性
     dangling = 0

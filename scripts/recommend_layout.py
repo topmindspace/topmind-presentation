@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 布局选型建议（Batch 2）
+"""topmind-presentation · 布局选型建议（Batch 2）
 
 用法:
   python scripts/recommend_layout.py --mode B --intent "经营分析 占比极偏" --pages 10

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 双通道交叉验证（可选依赖 python-pptx）：
+"""topmind-presentation · 双通道交叉验证（可选依赖 python-pptx）：
 ① A 通道（手写 OOXML）与 B 通道（pptxgenjs）产物均可被 python-pptx 严格解析
 ② 两通道逐页文本集合一致（同一模型 → 同一内容；段落换行表示差异已归一）
    归一化：B 通道带数据的图表为原生 chart part（可编辑数据）——图表类别标签并入

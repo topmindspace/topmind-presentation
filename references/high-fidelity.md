@@ -132,7 +132,7 @@ python scripts/render_compare.py "报告.pptx" --html "报告.html" --out "rende
 
 | 增强 | 做法 | 业界参照 |
 |------|------|---------|
-| **图标真导出** | `icon_lib.js` + sharp 栅格化 PNG，`objectName: icon:*`，`icon_pictures` 单独计数 | Slidev `pptx-editable`：SVG/canvas 按元素降级为图，整页不动 |
+| **图标真导出** | `icon_lib.js` + 包内预渲染 PNG（运行时零原生依赖），`objectName: icon:*`，`icon_pictures` 单独计数 | Slidev `pptx-editable`：SVG/canvas 按元素降级为图，整页不动 |
 | **发射前叠印断言** | `assertNoOverlap` / `rectsOverlap` 在 addShape 前自检组合布局（图表∩inline 数据表等），计入 `OVERLAP_PREEMIT` | IR band allocator；事后裁判（`ELEMENT_OVERLAP`）仍保留 |
 | **表格行高自适应** | `addTable` 超容量压到 hardFloor / 整体缩放；表头独立 `headRowH`；`fit:'shrink'` | Measured `colW[]`/`rowH[]`；文本 `fit:'shrink'` |
 | **图表区对齐版心** | `regionOf('bar')` 纠正 chartX/chartW 双偏移，与标题/表格左边距一致 | 坐标区域映射的静默漂移防护 |

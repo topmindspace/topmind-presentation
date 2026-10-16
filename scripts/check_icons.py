@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 图标包校验（assets/icons/）
+"""topmind-presentation · 图标包校验（assets/icons/）
 
 检查：
   1. 每个 *.svg 合法 XML；根为 svg；viewBox 恰为 "0 0 24 24"
@@ -10,7 +10,7 @@
      无 fill="#..." 彩色填充（禁三方彩色标），无外链
   4. index.json 一致性：icons 键 ↔ <name>.svg 文件一一对应；defaults 5~8 个且都在包内；
      keywords 非空且含自身名
-  5. 每个图标有同名 512px PNG（PPTX 通道预渲染）
+  5. 每个图标有同名 256px PNG（PPTX 通道预渲染）
 
 用法: python scripts/check_icons.py [--strict]
 退出码：0=通过；1=有 FAIL；2=仅 WARN（--strict 下也按 1 处理）

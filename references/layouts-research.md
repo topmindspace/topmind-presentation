@@ -44,7 +44,6 @@
   <div class="exhibit__src">来源：数据平台运行月报，2026-08；使用率 = 半年内有查询的表 / 入湖表总数</div>
 </div>
 <div class="sowhat rv">
-  <span class="sowhat__k">So what</span>
   <span class="sowhat__v">研发域是激活沉睡资产的第一目标：清僵尸表 + 语义化改造，预计抬升整体使用率 8–10 个百分点。</span>
 </div>
 ```

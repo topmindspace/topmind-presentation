@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · HTML 页高与容器裁切真值测量（可选 · 需 playwright）
+"""topmind-presentation · HTML 页高与容器裁切真值测量（可选 · 需 playwright）
 
 静态估算（validate_report 页高溢出）是交付前硬门禁的保守近似，但它看不到
 真实布局：「表格被半幅容器横向裁掉一列」这类缺陷在 strict 全绿时照样发生。

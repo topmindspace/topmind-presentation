@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 报告骨架生成器（零依赖 · 替代"整份复制模板"）
+"""topmind-presentation · 报告骨架生成器（零依赖 · 替代"整份复制模板"）
 
 用法:
     python scripts/scaffold_report.py --mode research --style mckinsey --theme light \
@@ -889,7 +889,7 @@ def build_plan(mode: str, n: int, plan: list | None, preset: str | None = None) 
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description='TopPPT HTML 报告骨架生成器')
+    ap = argparse.ArgumentParser(description='topmind-presentation 报告骨架生成器')
     ap.add_argument('--mode', default='presentation', choices=['presentation', 'research', 'architecture'])
     ap.add_argument('--style', default=None, help='9 套风格之一（默认取模板出厂风格）')
     ap.add_argument('--theme', default=None, choices=['light', 'dark'],

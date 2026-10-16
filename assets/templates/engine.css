@@ -1,4 +1,4 @@
-/* ══ TopPPT HTML 公共样式引擎（assets/templates/engine.css）══
+/* ══ topmind-presentation 公共样式引擎（assets/templates/engine.css）══
    由 scripts/sync_runtime.py 注入到 templates/*.html 的 __TOPPPT_ENGINE__ 标记块 · 禁止在各模板手改。
    含：结构 token / 9 套风格 token / 排版类 / 栅格（含密度版式扩展 g-hero--rev/g-side--rev/g-31/g-13、
        拼贴栅格 g-bento + span 工具类、交错版式 .stagger、键值 .kv）/
@@ -328,7 +328,7 @@ grid-template-areas:"hero hero hero" "a b c";grid-auto-rows:auto}
 @media (max-width:1180px){.grid.g-bento>.card--lead{grid-column:span 1}}
 .tl__ico{position:absolute;left:-33px;top:2px;width:22px;height:22px;color:var(--accent)}
 .tl__ico svg{width:22px;height:22px;display:block}
-.cols-2>.col--feature{border-left:3px solid var(--accent);padding-left:14px}
+.cols-2>.col--feature{background:var(--accent-soft);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4)}
 .cols-2>.col--feature strong{font-size:1.06em}
 .g-mosaic__b{grid-area:b}.g-mosaic__c{grid-area:c}
 .g-hero-full{grid-template-columns:repeat(3,minmax(0,1fr));
@@ -511,8 +511,6 @@ margin-top:clamp(28px,3.6vh,48px); /* ≥ --sp-6 量级，修「贴底」 */
 padding:var(--sp-5) var(--sp-6);background:var(--accent-soft);border:1px solid var(--accent-soft-2);
 border-radius:var(--r-md);max-width:100%}
 .sowhat__k{display:none}
-.sowhat--labeled .sowhat__k{display:inline;font-size:var(--fs-xs);font-weight:700;letter-spacing:.1em;
-text-transform:uppercase;color:var(--accent-text);white-space:nowrap;flex:none;padding-top:.15em}
 .sowhat__v,.sowhat>:not(.sowhat__k){font-size:var(--fs-h3);color:var(--text);font-weight:var(--fw-title);
 line-height:1.65;flex:1;min-width:0}
 .sowhat__v p,.sowhat__stack{margin:0}
@@ -614,8 +612,8 @@ grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:var(--sp-4);align-items:c
 .arch{display:flex;flex-direction:column;gap:0}
 .arch__layer{display:grid;grid-template-columns:120px 1fr;gap:var(--sp-4);align-items:stretch}
 .arch__lname{font-size:var(--fs-xs);font-weight:700;letter-spacing:.06em;color:var(--text-3);
-  display:flex;align-items:center;padding-left:12px;border-left:3px solid var(--border-soft)}
-.arch__layer--focus .arch__lname{color:var(--accent-text);border-left-color:var(--accent)}
+  display:flex;align-items:center;padding:0 12px;background:var(--surface-2);border-radius:var(--r-md)}
+.arch__layer--focus .arch__lname{color:var(--accent-text);background:var(--accent-soft)}
 .arch__nodes{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--sp-3)}
 .arch__node{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--r-md);
   padding:var(--sp-3) var(--sp-4);transition:border-color .18s,box-shadow .18s}
@@ -668,7 +666,7 @@ padding-bottom:1px;white-space:nowrap}
 font-size:var(--fs-xs);color:var(--text-3);line-height:1.55}
 .tbd-legend svg{width:14px;height:14px;flex:none;margin-top:.18em;color:var(--accent-text)}
 .tbd-legend b{color:var(--accent-text);font-weight:600}
-.flagbar{margin-top:var(--sp-4);border:1px solid var(--border-soft);border-left:3px solid var(--accent);
+.flagbar{margin-top:var(--sp-4);border:1px solid var(--border-soft);
 border-radius:var(--r-md);background:var(--accent-soft);padding:var(--sp-3) var(--sp-4)}
 .flagbar__hd{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-xs);
 font-weight:700;letter-spacing:.04em;color:var(--accent-text);margin-bottom:var(--sp-2)}

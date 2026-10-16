@@ -1,5 +1,5 @@
 /**
- * TopPPT HTML· PPTX 精导（基于 PptxGenJS）
+ * topmind-presentation · PPTX 精导（基于 PptxGenJS）
  *
  * 作用：把报告的「内容模型」（window.REPORT_MODEL，由 extract_model.py 抽取）导出为
  *       16:9 可编辑 PPTX（封面 / Agenda（architecture 可省）/ 章节页 / 收尾），与页面预览
@@ -78,19 +78,22 @@ const path = require('path');
   if (raw.includes('--help') || raw.includes('-h')) {
     console.log(
 `用法：
-  node scripts/build_pptx.js [输出.pptx] --model=<模型.json> [--style=<风格>] [--theme=light|dark]
+  node scripts/build_pptx.js [输出.pptx | --out=<输出.pptx>] --model=<模型.json> [--style=<风格>] [--theme=light|dark] [--strict]
 
   1) 抽模型：python scripts/extract_model.py <报告.html>（生成 <报告>.model.json）
   2) 生成：  node scripts/build_pptx.js 报告.pptx --model=报告.model.json
   3) 质检：  python scripts/validate_pptx.py 报告.pptx --strict --model=报告.model.json
 
 参数：
-  --model=<file>   内容模型 JSON（推荐：由 extract_model.py 从 HTML 报告抽取；缺省用内嵌示例）
+  --model=<file>   内容模型 JSON（必填；由 extract_model.py 从 HTML 报告抽取。--demo 可显式生成内嵌示例）
+  --out=<file>     输出路径（等价于位置参数；二者只能给一个）
+  --strict         图标资产缺失（回落色块）时直接失败（exit 3）
+  --demo           显式使用内嵌示例内容（仅调试）
   --style=<name>   覆盖模型的风格（9 套风格 token 见 scripts/layout-constants.json）
   --theme=light|dark  主题（--theme 覆盖 > 模型 theme > 默认 light）`);
     process.exit(0);
   }
-  const known = /^(--model=|--style=|--theme=)/;
+  const known = /^(--model=|--style=|--theme=|--out=|--strict$|--demo$)/;
   let positional = 0;
   for (const a of raw) {
     if (a.startsWith('-')) {
@@ -98,10 +101,14 @@ const path = require('path');
         console.error(`[build_pptx] FAIL: 未知参数 ${a} —— 拒绝执行（用 --help 查看用法）`);
         process.exit(2);
       }
-    } else if (++positional > 1) {
+    } else if (++positional > 1 || (positional === 1 && raw.some(x => x.startsWith('--out=')))) {
       console.error(`[build_pptx] FAIL: 多余的位置参数 ${a} —— 只接受一个输出文件名`);
       process.exit(2);
     }
+  }
+  if (!raw.some(x => x.startsWith('--model=')) && !raw.includes('--demo')) {
+    console.error('[build_pptx] FAIL: 缺少 --model=<模型.json>。先跑 python scripts/extract_model.py <报告.html>；仅调试示例时显式加 --demo。');
+    process.exit(2);
   }
 })();
 
@@ -140,18 +147,13 @@ const REGIONS = require('./lib_layout_regions.js');
  * 图标图 objectName 统一 `icon:` 前缀 —— validate_pptx 单独计数，不进 pictures 内容图门禁。 */
 const ICON_LIB = require('./icon_lib.js');
 let ICON_ASSETS = { icons: {}, px: 64 };
+/* 预生成缓存可选（scripts/icon-assets.json，需 sharp 离线生成）；缺省直接用包内 assets/icons/*.png，
+   运行时不再隐式调用 sharp。 */
 try {
   ICON_ASSETS = JSON.parse(fs.readFileSync(path.join(__dirname, 'icon-assets.json'), 'utf-8'));
-} catch (e) {
-  try {
-    const { execFileSync } = require('child_process');
-    execFileSync(process.execPath, [path.join(__dirname, 'build_icon_assets.js')],
-      { env: process.env, stdio: 'pipe' });
-    ICON_ASSETS = JSON.parse(fs.readFileSync(path.join(__dirname, 'icon-assets.json'), 'utf-8'));
-  } catch (e2) {
-    console.warn('[build_pptx] 图标资产缺失且生成失败，卡片头回落 accent 方块：' + (e2 && e2.message));
-  }
-}
+} catch (e) { /* 走包内 PNG */ }
+const STRICT = process.argv.includes('--strict');
+const ICON_MISSES = [];
 function _normColor(c) {
   if (typeof c !== 'string') return '#333333';
   let v = c.trim().toLowerCase();
@@ -159,7 +161,7 @@ function _normColor(c) {
   if (/^[0-9a-f]{3}$/.test(v)) v = '#' + v;
   return v;
 }
-/** 取图标 PNG data URI；无缓存时按名挑色兜底（accent → 首色 → 包内 512px PNG → null） */
+/** 取图标 PNG data URI；无缓存时按名挑色兜底（accent → 首色 → 包内 256px PNG → null） */
 function iconPng(name, colorHex) {
   const n = name && ICON_ASSETS.icons[name] ? name : ICON_LIB.pickIconName(name, 0);
   const bag = ICON_ASSETS.icons[n];
@@ -169,7 +171,7 @@ function iconPng(name, colorHex) {
     const keys = Object.keys(bag);
     if (keys.length) return bag[keys[0]];
   }
-  // 无 sharp / 无预生成资产时的可靠回落：包内 512px 预渲染 PNG（python-pptx/pptxgenjs 均可直接嵌入）
+  // 无 sharp / 无预生成资产时的可靠回落：包内 256px 预渲染 PNG（python-pptx/pptxgenjs 均可直接嵌入）
   try {
     const p = ICON_LIB.iconPngPath(n);
     if (p) return 'data:image/png;base64,' + fs.readFileSync(p).toString('base64');
@@ -188,6 +190,7 @@ function addIcon(s, name, x, y, size, colorHex) {
   s.addShape('roundRect', { x, y, w: size, h: size, rectRadius: 0.04,
     fill: { color: (STYLE && STYLE.accent) || '1A73E8' }, line: { type: 'none' },
     objectName: 'icon:' + (name || 'mark') });
+  ICON_MISSES.push(name || '(unnamed)');
   return false;
 }
 
@@ -406,7 +409,7 @@ if (modelArg) {
   console.warn('  真实交付请先跑 python scripts/extract_model.py <报告.html>，再用 --model=<报告.model.json> 重跑。');
 CONTENT = {
   title: '让想法被看见',
-  subtitle: 'TopPPT HTML 报告生成示例 · 16:9 可编辑 PPTX',
+  subtitle: 'topmind-presentation 示例 · 16:9 可编辑 PPTX',
   meta: '示例内容 · 请用 --model= 传入真实模型',
   mode: 'presentation',
   style: 'business-blue',
@@ -483,9 +486,9 @@ if (THEME === 'dark' && styleArg && !STYLE_PRESETS_DARK[styleArg]) {
 const pptx = new pptxgen();
 pptx.defineLayout({ name: 'W16x9', width: PW, height: PH });
 pptx.layout = 'W16x9';
-pptx.title = CONTENT.title || 'TopPPT HTML 报告';
+pptx.title = CONTENT.title || 'topmind-presentation';
 pptx.subject = CONTENT.subtitle || '';
-pptx.author = 'TopPPT HTML';
+pptx.author = 'topmind-presentation';
 pptx.company = 'TopMindspace';
 
 function base() {
@@ -933,6 +936,10 @@ function nativeChart(s, c, x, y, w, h, dcols) {
   const colors = (dcols && dcols.length) ? dcols
     : (multi ? null : vals.map(v => (v === top ? STYLE.accent : STYLE.faint)));
   const pos = { x: x, y: y, w: w, h: h };
+  /* M0：单系列图表（柱/条/线/面积）统一主色——按数据点轮换色板会出现「彩虹柱」，违反克制原则。
+     多系列仍取风格编码色板；显式 chart.colors 尊重作者。饼/环按类目编码，不受此限。 */
+  const singleSeriesMono = !multi && !(c.colors && c.colors.length) && kind !== 'doughnut' && kind !== 'pie';
+  const colorsEff = singleSeriesMono ? [STYLE.accent] : colors;
 
   /* ── 原生技巧 ── */
   if (trick.indexOf('stacked+hiddenBase') === 0) { waterfallChart(s, c, pos); return; }
@@ -963,7 +970,10 @@ function nativeChart(s, c, x, y, w, h, dcols) {
     return;
   }
   /* ── 柱族（bar / hbar / stack / stackline）与线 / 面积 ── */
-  const opts = Object.assign(chartBaseOpts(c, colors, multi, kind), pos);
+  const opts = Object.assign(chartBaseOpts(c, colorsEff, multi, kind), pos);
+  /* 浅色数值网格线：给读数参照，也避免量程留白显得「图浮在半空」 */
+  if (kind === 'bar' || kind === 'line' || kind === 'area')
+    opts.valGridLine = { style: 'solid', color: STYLE.line, size: 0.5 };
   if (kind === 'bar') {
     opts.barDir = (t === 'hbar') ? 'bar' : 'col';
     opts.barGapWidthPct = (t === 'hbar') ? 45 : 55;
@@ -2058,24 +2068,24 @@ CONTENT.sections.forEach((sec) => {
     const hreg = REGIONS.regionOf('kpi', 'hero') ||
       { x: MX, y: K.heroY, w: CW * K.heroW, h: K.heroH };
     const hro = sec.hero || [];
-    s.addText(String(hro[0] || ''), { x: hreg.x, y: hreg.y, w: hreg.w, h: hreg.h,
-      fontFace: STYLE.fontDisplay, fontSize: sz(64), bold: true, color: STYLE.accent });
-    s.addText(String(hro[1] || ''), { x: hreg.x + 0.05, y: hreg.y + 1.5, w: hreg.w - 0.4, h: 0.55,
-      fontFace: STYLE.font, fontSize: sz(15), bold: true, color: STYLE.ink });
-    if (hro[2]) s.addText('▲ ' + hro[2], { x: hreg.x + 0.05, y: hreg.y + 2.1, w: hreg.w - 0.4, h: 0.4,
-      fontFace: STYLE.font, fontSize: sz(12), bold: true, color: STYLE.accent });
-    const kdivX = MX + CW * K.dividerX;
-    /* R6：竖分隔线高度取原设计值与注释带感知下界的较小者——写死 3.1 会在
-       so-what/来源行并存时越过注释带顶（ANNOTATION_BAND_OVERLAP），而无注释时
-       不得比原设计更长（回归：smoke business-blue fixture slide 7）。 */
     const kpiBottom = chartBottom(!!sec.soWhat, !!(sec.footnote || sec.note)) - 0.05;
-    s.addShape('rect', { x: kdivX, y: K.heroY + 0.15, w: 0.025,
-      h: Math.min(3.1, Math.max(0.6, kpiBottom - (K.heroY + 0.15))),
-      fill: { color: STYLE.line }, line: { type: 'none' } });
-    /* 右列：支撑指标行在上、要点在下，共用注释带感知高度；禁越过注释带顶 */
-    const mreg = REGIONS.regionOf('kpi', 'metrics') ||
-      { x: kdivX + 0.35, y: K.metricY0, w: CW * (1 - K.dividerX) - 0.5, h: CONTENT_BOTTOM - K.metricY0 };
-    const kAvail = Math.max(0.8, kpiBottom - mreg.y);
+    const kdivX = MX + CW * K.dividerX;
+    /* M0：hero 落在与正文等高的 MD3 tonal 卡片内（垂直居中），替代「巨号数字 + 竖分隔线」——
+       原版下半页大面积空白、重心偏上 */
+    const hTop = bodyY, hBot = Math.min(kpiBottom, CONTENT_BOTTOM_NOTE + 0.3);
+    const hCardW = kdivX - MX - 0.1;
+    s.addShape('roundRect', { x: MX, y: hTop, w: hCardW, h: hBot - hTop, rectRadius: 0.12,
+      fill: { color: STYLE.soft }, line: { type: 'none' } });
+    const hBlockH = hreg.h + 1.15;
+    const hy = hTop + Math.max(0.2, ((hBot - hTop) - hBlockH) / 2);
+    s.addText(String(hro[0] || ''), { x: MX + 0.4, y: hy, w: hCardW - 0.8, h: hreg.h,
+      fontFace: STYLE.fontDisplay, fontSize: sz(64), bold: true, color: STYLE.accent });
+    s.addText(String(hro[1] || ''), { x: MX + 0.45, y: hy + hreg.h - 0.1, w: hCardW - 0.9, h: 0.55,
+      fontFace: STYLE.font, fontSize: sz(15), bold: true, color: STYLE.ink });
+    if (hro[2]) s.addText('▲ ' + hro[2], { x: MX + 0.45, y: hy + hreg.h + 0.5, w: hCardW - 0.9, h: 0.4,
+      fontFace: STYLE.font, fontSize: sz(12), bold: true, color: STYLE.accent });
+    const mreg = { x: kdivX + 0.35, y: hTop, w: PW - MX - (kdivX + 0.35), h: hBot - hTop };
+    const kAvail = Math.max(0.8, hBot - mreg.y);
     const kmets = sec.metrics || [];
     /* 容量按最小允许行高判断，行高按全部指标自适应压缩 ——
        原 kCap 用默认行高先截断，导致第 N+1 个指标被静默丢弃（禁静默丢数据） */
@@ -2085,9 +2095,13 @@ CONTENT.sections.forEach((sec) => {
     if (kRows < kmets.length)
       console.warn(`[build_pptx] 警告：KPI 页「${sec.title || ''}」支撑指标 ${kmets.length} 个超出容量（${kAvail.toFixed(2)}in），` +
         `仅渲染前 ${kRows} 个 —— 建议拆页`);
-    const kRowH = fitRowH(kAvail, kRows, K.metricRowH, K_MINROWH);
+    const kHasPts = (sec.points || []).filter(Boolean).length > 0;
+    const kRowH = kHasPts ? fitRowH(kAvail, kRows, K.metricRowH, K_MINROWH)
+      : Math.max(K_MINROWH, Math.min(1.4, kAvail / Math.max(1, kRows)));
     kmets.slice(0, kRows).map(metricKV).forEach((m, i) => {
       const ky = mreg.y + i * kRowH;
+      if (i > 0) s.addShape('rect', { x: mreg.x, y: ky - 0.05, w: mreg.w, h: 0.01,
+        fill: { color: STYLE.line }, line: { type: 'none' } });
       s.addText(m[0], { x: mreg.x, y: ky, w: mreg.w, h: Math.min(0.55, kRowH * 0.62),
         fontFace: STYLE.fontDisplay, fontSize: sz(22), bold: true, color: STYLE.accent });
       s.addText(m[1], { x: mreg.x, y: ky + Math.min(0.55, kRowH * 0.62), w: mreg.w,
@@ -2098,7 +2112,7 @@ CONTENT.sections.forEach((sec) => {
     const kpts = (sec.points || []).filter(Boolean);
     const kpRowH = 0.5;
     const kpY0 = mreg.y + kRows * kRowH + 0.12;
-    const kpCap = Math.max(0, Math.floor((kpiBottom - kpY0) / kpRowH));
+    const kpCap = Math.max(0, Math.floor((hBot - kpY0) / kpRowH));
     if (kpts.length > kpCap)
       console.warn(`[build_pptx] 警告：KPI 页「${sec.title || ''}」要点 ${kpts.length} 条超出容量，仅渲染前 ${kpCap} 条 —— 建议拆页`);
     kpts.slice(0, kpCap).forEach((p, i) => {
@@ -2169,15 +2183,38 @@ CONTENT.sections.forEach((sec) => {
     s.addText(sec.title, { x: MX, y: PT.common.headTitleY, w: CW, h: 1.0,
       fontFace: STYLE.fontDisplay, fontSize: sz(30), bold: true, color: STYLE.ink });
     s.addShape('rect', { x: MX, y: PT.common.headRuleY, w: 0.9, h: 0.045, fill: { color: STYLE.accent }, line: { type: 'none' } });
-    s.addText('「', { x: MX + 0.05, y: Q.markY, w: 1.2, h: 1.1,
-      fontFace: STYLE.fontDisplay, fontSize: sz(60), bold: true, color: STYLE.accent });
-    const qSize = estTextH(sec.quote, qreg.w, sz(20), 1.4) > qreg.h ? sz(16) : sz(20);
-    s.addText(sec.quote, { x: qreg.x, y: qreg.y, w: qreg.w, h: qreg.h,
+    /* M0：去掉装饰大引号；金句页必须带证据（metrics：2–4 个支撑数字），否则 strict 门禁拦截。
+       有证据时：金句居上、证据卡片行居下，整页一屏、无空页。 */
+    const qm = (sec.metrics || []).map(metricKV).slice(0, 4);
+    const qBot = Math.min(chartBottom(!!sec.soWhat, !!(sec.footnote || sec.note)) - 0.05, CONTENT_BOTTOM_NOTE + 0.3);
+    const evH = qm.length ? 1.45 : 0;
+    const qTop = bodyY;
+    const qTextH = qm.length ? Math.max(1.0, (qBot - qTop) - evH - 0.95) : qreg.h;
+    const qY = qm.length ? qTop : qreg.y;
+    const qW = qm.length ? CW : qreg.w, qX = qm.length ? MX : qreg.x;
+    const qSize = qm.length
+      ? ([30, 24, 20, 16].map(sz).find(f => estTextH(sec.quote, qW, f, 1.4) <= qTextH) || sz(16))
+      : (estTextH(sec.quote, qreg.w, sz(20), 1.4) > qTextH ? sz(16) : sz(20));
+    s.addText(sec.quote, { x: qX, y: qY, w: qW, h: qTextH,
       fontFace: STYLE.fontDisplay, fontSize: qSize, bold: true, color: STYLE.ink, valign: 'middle' });
-    s.addText('—— ' + sec.author, { x: qreg.x, y: Q.authorY, w: qreg.w, h: 0.45, align: 'right',
+    const authY = qm.length ? qY + qTextH + 0.02 : Q.authorY;
+    s.addText('—— ' + sec.author, { x: qm.length ? MX : qreg.x, y: authY, w: qm.length ? CW : qreg.w, h: 0.45, align: qm.length ? 'left' : 'right',
       fontFace: STYLE.font, fontSize: sz(13), bold: true, color: STYLE.accent });
-    if (sec.context) s.addText(sec.context, { x: qreg.x, y: Q.contextY, w: qreg.w, h: 0.4, align: 'right',
+    if (sec.context) s.addText(sec.context, { x: qreg.x, y: qm.length ? authY + 0.42 : Q.contextY, w: qreg.w, h: 0.4, align: 'right',
       fontFace: STYLE.font, fontSize: sz(11), color: STYLE.faint });
+    if (qm.length) {
+      const g = cols(CW, qm.length, 0.25);
+      const ey = qBot - evH;
+      qm.forEach((m, i) => {
+        const ex = MX + i * g.step;
+        s.addShape('roundRect', { x: ex, y: ey, w: g.w, h: evH, rectRadius: 0.09,
+          fill: { color: STYLE.bg }, line: { type: 'none' } });
+        s.addText(m[0], { x: ex + 0.25, y: ey + 0.12, w: g.w - 0.5, h: 0.7,
+          fontFace: STYLE.fontDisplay, fontSize: sz(28), bold: true, color: STYLE.accent, valign: 'bottom' });
+        s.addText(m[1], { x: ex + 0.25, y: ey + 0.84, w: g.w - 0.5, h: evH - 0.96,
+          fontFace: STYLE.font, fontSize: sz(11), color: STYLE.body, valign: 'top' });
+      });
+    }
   } else if (type === 'image') {
     /* 素材图片页：full 版心全宽 / half 左图右注 / bleed 通栏出血 / grid 多图网格 /
        compare 双图对比 / wall Logo 墙；无图（image.placeholder）走原生占位框 + 标签文本 */
@@ -2396,7 +2433,8 @@ CONTENT.sections.forEach((sec) => {
     }
     const rowsN = chunks.length;
     const availH = bodyBottom - sreg.y;
-    const rowH = fitRowH(availH - (rowsN - 1) * 0.3, rowsN, sreg.h || S2.barH, 0.3);
+    /* M0：单行步骤卡按可用高度拉伸（上限 3.0in），不再固定 1.35in 让下半页空白 */
+    const rowH = fitRowH(availH - (rowsN - 1) * 0.3, rowsN, Math.max(sreg.h || S2.barH, Math.min(3.0, (availH - (rowsN - 1) * 0.3) / rowsN)), 0.3);
     let cy = sreg.y;
     chunks.forEach((ck) => {
       if (ck.label) {
@@ -2415,13 +2453,16 @@ CONTENT.sections.forEach((sec) => {
           fill: { color: acc ? STYLE.soft : STYLE.surface },
           line: acc ? { type: 'none' } : { color: STYLE.line, width: 0.75 } });
         const pd = S2.pad, numH = S2.numH, ttlH = S2.titleH;
-        s.addText(String(i + 1).padStart(2, '0'), { x: x + 0.14, y: cy + pd, w: g.w - 0.28, h: numH,
-          fontFace: STYLE.font, fontSize: sz(10), bold: true, color: STYLE.accent });
-        s.addText(t, { x: x + 0.14, y: cy + pd + numH, w: g.w - 0.28, h: ttlH,
-          fontFace: STYLE.font, fontSize: sz(13), bold: true, color: acc ? STYLE.accent : STYLE.ink });
-        if (d) s.addText(d, { x: x + 0.14, y: cy + pd + numH + ttlH, w: g.w - 0.28,
-          h: Math.max(0.2, rowH - pd * 2 - numH - ttlH),
-          fontFace: STYLE.font, fontSize: sz(10), color: STYLE.faint });
+        const bigNum = rowH >= 2.2;
+        s.addText(String(i + 1).padStart(2, '0'), { x: x + 0.14, y: cy + pd, w: g.w - 0.28, h: bigNum ? 0.7 : numH,
+          fontFace: bigNum ? STYLE.fontDisplay : STYLE.font, fontSize: bigNum ? sz(28) : sz(10), bold: true, color: STYLE.accent });
+        const nH = bigNum ? 0.8 : numH;
+        s.addText(t, { x: x + 0.14, y: cy + pd + nH, w: g.w - 0.28, h: bigNum ? 0.45 : ttlH,
+          fontFace: STYLE.font, fontSize: bigNum ? sz(15) : sz(13), bold: true, color: acc ? STYLE.accent : STYLE.ink });
+        const tH = bigNum ? 0.55 : ttlH;
+        if (d) s.addText(d, { x: x + 0.14, y: cy + pd + nH + tH, w: g.w - 0.28,
+          h: Math.max(0.2, rowH - pd * 2 - nH - tH),
+          fontFace: STYLE.font, fontSize: bigNum ? sz(12) : sz(10), color: bigNum ? STYLE.body : STYLE.faint, valign: 'top' });
         if (i < n - 1) {
           s.addText('→', { x: x + g.w, y: cy, w: S2.arrowW + S2.gap, h: rowH, align: 'center', valign: 'middle',
             fontFace: STYLE.font, fontSize: sz(12), color: STYLE.faint });
@@ -2508,18 +2549,18 @@ CONTENT.sections.forEach((sec) => {
     groups.forEach((col, ci) => {
       if (!col.length) return;
       const colX = treg.x + ci * g.step;
-      // 变体 2-col-feature：首栏特性栏（accent 左线 + 标题放大一档）
+      // 变体 2-col-feature：首栏特性栏（MD3 tonal 底 + 标题放大一档）
       const isFeature = (sec.variant === '2-col-feature') && ci === 0 && nCol === 2;
       const fx = isFeature ? colX + 0.14 : colX;
       const fw = isFeature ? g.w - 0.14 : g.w;
       if (isFeature) {
-        // 特性栏 accent 左线：高度按首段实际文本估算（不用整栏 availH，避免无墨水区压进注释带触发 severe 门禁）
+        /* M0：特性栏改为 MD3 tonal 底（无左侧装饰竖条），按首段文本估高 */
         const p0 = col[0] || ['', ''];
-        const barH = Math.min(availH,
+        const boxH = Math.min(availH,
           estTextH(p0[0] + '　', fw, sz(fz + 1), 1.5) +
-          estTextH(p0[1] || '', fw, sz(fz - 1), 1.5) + sz(7) / 72 + 0.06);
-        s.addShape('rect', { x: colX, y: treg.y, w: 0.045, h: Math.max(0.2, barH),
-          fill: { color: STYLE.accent }, line: { type: 'none' }, objectName: 'feature:bar' });
+          estTextH(p0[1] || '', fw, sz(fz - 1), 1.5) + sz(7) / 72 + 0.2);
+        s.addShape('roundRect', { x: colX, y: treg.y - 0.08, w: g.w, h: Math.max(0.3, boxH), rectRadius: 0.08,
+          fill: { color: STYLE.soft }, line: { type: 'none' }, objectName: 'feature:bg' });
       }
       const runs = col.map(p => ([
         { text: p[0] + '　', options: { fontSize: sz(isFeature ? fz + 1 : fz), bold: true, color: STYLE.ink } },
@@ -2611,20 +2652,22 @@ CONTENT.sections.forEach((sec) => {
     });
   } else if (type === 'cards') {
     const cdC = PT.cards;
-    const creg = REGIONS.regionOf('cards', 'primary', { bottom: bodyBottom }) ||
-      { x: MX, y: cdC.startY, w: CW, h: bodyBottom - cdC.startY };
+    const creg = Object.assign({}, REGIONS.regionOf('cards', 'primary', { bottom: bodyBottom }) ||
+      { x: MX, y: cdC.startY, w: CW, h: bodyBottom - cdC.startY });
     const cds = (sec.cards || []).map(cd =>
       /* 与 r_cards 同口径：{title,points,icon} 字典 | [标题, 描述] 数组 | 纯字符串标题 */
       isRec(cd) ? cd
         : (Array.isArray(cd)
           ? { title: cd[0] || '', points: cd.length > 1 ? [['', cd[1]]] : [] }
           : { title: String(cd == null ? '' : cd), points: [] }));
+    if (creg.y > bodyY + 0.3) { creg.h += creg.y - bodyY; creg.y = bodyY; }
     const isBento = (sec.variant === 'bento-grid') && cds.length >= 3;
     const c = isBento ? 3 : Math.min(sec.columns || 3, cds.length || 1);
     // bento-grid：首卡占 2 个槽位（跨 2 列），其余顺排；槽位数 = 卡数 + 1
     const r = isBento ? Math.ceil((cds.length + 1) / c) : Math.ceil((cds.length || 1) / c);
     const gw = (creg.w - (c - 1) * cdC.gap) / c;
-    const gh = fitRowH(creg.h - (r - 1) * cdC.gap, r, cdC.maxH, 0.6);
+    /* M0：卡片高度随版心拉伸（上限 3.4in），不再固定 2.0in 让下半页空白 */
+    const gh = fitRowH(creg.h - (r - 1) * cdC.gap, r, Math.max(cdC.maxH, Math.min(3.4, (creg.h - (r - 1) * cdC.gap) / r)), 0.6);
     /* points 文本归一化（scaffold v9 契约 {title, points:[[k,v]]} 兼容三种形态） */
     const cardPtText = (pt) => {
       if (Array.isArray(pt)) {
@@ -2644,7 +2687,7 @@ CONTENT.sections.forEach((sec) => {
     const ptsBoxH = Math.max(0.4, gh - cdC.titleH - 0.34);
     const ptsFzB = cds.length ? Math.min(...cds.map(cd =>
       fitFont((cd.points || []).map(cardPtText), gw - 0.36, ptsBoxH,
-        { max: 12, lineFactor: 1.5, gapFactor: 0 }))) : 12;
+        { max: 14, lineFactor: 1.5, gapFactor: 0 }))) : 12;
     const ptsFz = sz(ptsFzB);
     cds.forEach((cd, i) => {
       let col = i % c, row = Math.floor(i / c), span = 1;
@@ -2851,34 +2894,43 @@ CONTENT.sections.forEach((sec) => {
     const hasMetrics = !!(sec.metrics && sec.metrics.length);
     /* 指标列最多 3 个，列宽按剩余空间收敛，保证文本区不被侵占（原重叠缺陷） */
     const nM = hasMetrics ? Math.min(sec.metrics.length, 3) : 0;
-    const mw = hasMetrics ? Math.min(P.metricW, Math.max(1.6, (CW - 4.8) / nM)) : 0;
-    const textW = hasMetrics
-      ? Math.max(4.2, (PW - MX - nM * mw) - MX - 0.35)
-      : CW - 0.4;
-    const avail = bodyBottom - bodyY;
-    const rowH = fitRowH(avail, pts.length, P.rowH, 0.3);
-    /* 长列表收紧（adaptiveText.list 单源）：条目多时降字号上限/段间距/行距，仍装不下由 fitFont 阶梯下探 */
+    /* M0：指标列改为右侧纵向 MD3 tonal 卡片，与要点区等高；原「指标浮在右下角」造成上半页空洞 */
+    const mcw = hasMetrics ? Math.min(3.4, Math.max(2.4, CW * 0.3)) : 0;
+    const textW = hasMetrics ? Math.max(4.2, CW - mcw - 0.5) - 0.32 : CW - 0.4;
+    /* 无注释带时主内容可用到 withNote+0.3（validate_pptx 安全网 0.35in）*/
+    const avail = Math.min(bodyBottom, CONTENT_BOTTOM_NOTE + 0.3) - bodyY;
+    /* 行高按可用高度均分（上限 1.25in），条目之间用细分隔线——少条目时不再挤在顶部 */
+    const rowH = Math.max(0.3, Math.min(1.25, avail / Math.max(1, pts.length)));
     const _lo = listFitOpts(pts.length);
     const fzB = fitFont(pts.map(p => (p[0] || '') + (p[1] || '')), textW - 0.32, avail,
       { max: Math.min(15, _lo.max), gapFactor: _lo.gapFactor, lineFactor: _lo.lineFactor });
     const fz = sz(fzB), fzSm = sz(snapFont(fzB - 1));
     pts.forEach((p, i) => {
       const y = bodyY + i * rowH;
-      s.addShape('rect', { x: MX, y: y + rowH / 2 - P.markSize / 2, w: P.markSize, h: P.markSize,
+      s.addShape('rect', { x: MX, y: y + 0.16, w: P.markSize, h: P.markSize,
         fill: { color: STYLE.accent }, line: { type: 'none' } });
       s.addText([
         { text: p[0] + '　', options: { fontSize: fz, bold: true, color: STYLE.ink } },
         { text: p[1], options: { fontSize: fzSm, color: STYLE.body } },
-      ], { x: MX + 0.32, y, w: textW, h: rowH - 0.04, fontFace: STYLE.font, valign: 'top' });
+      ], { x: MX + 0.32, y, w: textW, h: rowH - 0.1, fontFace: STYLE.font, valign: 'top' });
+      if (i < pts.length - 1 && rowH >= 0.6)
+        s.addShape('rect', { x: MX, y: y + rowH - 0.06, w: textW + 0.32, h: 0.01,
+          fill: { color: STYLE.line }, line: { type: 'none' } });
     });
     if (hasMetrics) {
-      const gx = PW - MX - nM * mw;
+      const gx = PW - MX - mcw;
+      const mGap = 0.2;
+      const mh = (avail - (nM - 1) * mGap) / nM;
       const vSize = nM >= 3 ? sz(28) : sz(34);
       sec.metrics.slice(0, nM).map(metricKV).forEach((m, i) => {
-        const x = gx + i * mw;
-        s.addText(m[0], { x, y: P.metricY, w: mw - 0.2, h: P.metricValH, fontFace: STYLE.fontDisplay,
-          fontSize: vSize, bold: true, color: STYLE.accent });
-        s.addText(m[1], { x, y: P.metricCapY, w: mw - 0.2, h: 0.9, fontFace: STYLE.font, fontSize: sz(11), color: STYLE.faint });
+        const y = bodyY + i * (mh + mGap);
+        s.addShape('roundRect', { x: gx, y, w: mcw, h: mh, rectRadius: 0.09,
+          fill: { color: STYLE.soft }, line: { type: 'none' } });
+        s.addText(m[0], { x: gx + 0.25, y: y + 0.12, w: mcw - 0.5, h: Math.min(P.metricValH, mh * 0.55),
+          fontFace: STYLE.fontDisplay, fontSize: vSize, bold: true, color: STYLE.accent, valign: 'bottom' });
+        s.addText(m[1], { x: gx + 0.25, y: y + 0.12 + Math.min(P.metricValH, mh * 0.55), w: mcw - 0.5,
+          h: Math.max(0.3, mh - 0.24 - Math.min(P.metricValH, mh * 0.55)),
+          fontFace: STYLE.font, fontSize: sz(11), color: STYLE.body, valign: 'top' });
       });
     }
   }
@@ -2960,7 +3012,11 @@ CONTENT.sections.forEach((sec) => {
 /* 页码 */
 pptx._slides.forEach((s, i) => footer(s, i + 1, pptx._slides.length));
 
-const out = process.argv.slice(2).find(a => !a.startsWith('--')) || 'TopPPT HTML 报告.pptx';
+if (ICON_MISSES.length) {
+  console.error('[build_pptx] 图标资产缺失 ' + ICON_MISSES.length + ' 处（已回落色块）：' + ICON_MISSES.slice(0, 8).join('、'));
+  if (STRICT) { console.error('[build_pptx] FAIL: --strict 下图标缺失不得交付'); process.exit(3); }
+}
+const out = _argVal('--out') || process.argv.slice(2).find(a => !a.startsWith('-')) || 'topmind-presentation-demo.pptx';
 pptx.writeFile({ fileName: out }).then(() => {
   console.log('已生成: ' + out + '  (风格: ' + (STYLE_PRESETS[styleArg] ? styleArg : 'business-blue') +
     ' · 主题: ' + (THEME === 'dark' ? '深色 dark' : '浅色 light') + ' · 模式: ' + MODE_NAME + ')');

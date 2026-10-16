@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 运行环境探测（公共模块 · 被 regression / probe_image_export 等复用）
+"""topmind-presentation · 运行环境探测（公共模块 · 被 regression / probe_image_export 等复用）
 
 统一 Node / pptxgenjs / python-pptx 的探测口径，避免各脚本各写一份导致漂移。
 **不绑定任何机器的固定路径**：环境变量 > PATH > 常见托管目录（存在才用，不存在不影响）。
@@ -151,7 +151,7 @@ def resolve(pkg: str = DEFAULT_PKG) -> tuple[str | None, str | None]:
 
 if __name__ == '__main__':
     node, mods = resolve()
-    print('环境探测（TopPPT HTML）')
+    print('环境探测（topmind-presentation）')
     print(f'  node         : {node or "未找到"}')
     print(f'  node_modules : {mods or "未找到（缺 pptxgenjs）"}')
     print(f'  python-pptx  : {"可用" if has_python_pptx() else "未安装（可选，交叉裁判会跳过）"}')

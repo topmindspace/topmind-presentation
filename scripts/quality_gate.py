@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 交付质量门禁（HTML/PPTX + Evals 确定性检查 + rubric 启发式）
+"""topmind-presentation · 交付质量门禁（HTML/PPTX + Evals 确定性检查 + rubric 启发式）
 
 用法:
     python scripts/quality_gate.py report.html
@@ -212,7 +212,7 @@ def heuristic_rubric(html: Path) -> dict:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description='TopPPT HTML 交付质量门禁')
+    ap = argparse.ArgumentParser(description='topmind-presentation 交付质量门禁')
     ap.add_argument('html', help='报告 HTML 路径')
     ap.add_argument('--pptx', help='可选：PPTX 路径（跑 validate_pptx --strict）')
     ap.add_argument('--model', help='可选：model.json（PPTX 往返保真）')

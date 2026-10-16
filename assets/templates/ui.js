@@ -1,4 +1,4 @@
-/* ══ TopPPT HTML 公共 UI 脚本（assets/templates/ui.js）══
+/* ══ topmind-presentation 公共 UI 脚本（assets/templates/ui.js）══
    由 scripts/sync_runtime.py 注入到 templates/*.html 的 __TOPPPT_UI__ 标记块 · 禁止在各模板手改。
    含：主题切换 / header 工具组（风格下拉·预览·帮助·全屏·折叠）/ 滚动显现 / PPT 翻页页码 /
        图表轻量动效 / PPTX 预览模态（WYSIWYG + 可复制 AI 提示词）/

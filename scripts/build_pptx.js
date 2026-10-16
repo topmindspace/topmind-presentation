@@ -537,6 +537,12 @@ if (!CONTENT.closing || typeof CONTENT.closing !== 'object' || Array.isArray(CON
 STYLE = (THEME === 'dark' ? (STYLE_PRESETS_DARK[styleArg] || STYLE_PRESETS[styleArg])
                           : STYLE_PRESETS[styleArg]) || STYLE_PRESETS['business-blue'];
 MODE_NAME = CONTENT.mode || 'presentation';
+/* M10：风格气质（stylePptx 单源）——标题字族 / 字重 / 标题装饰 / 卡片与表格质感 */
+const SP = Object.assign({ display: 'sans', titleBold: true, rule: 'bar', card: 'tonal', table: 'tonal', lineW: 0.75 },
+  ((LC.stylePptx || {})[STYLE_PRESETS[styleArg] ? styleArg : 'business-blue']) || {});
+const FONT_PAIRS = (LC.stylePptx || {}).fontPairs || {};
+STYLE = Object.assign({}, STYLE);
+if (SP.display === 'serif' && FONT_PAIRS.serif) STYLE.fontDisplay = FONT_PAIRS.serif.latin;
 if (styleArg && !STYLE_PRESETS[styleArg]) {
   console.warn('未知风格 "' + styleArg + '"，回退 business-blue。可选：' + Object.keys(STYLE_PRESETS).join(' / '));
 }
@@ -548,6 +554,59 @@ if (THEME === 'dark' && styleArg && !STYLE_PRESETS_DARK[styleArg]) {
 const pptx = new pptxgen();
 pptx.defineLayout({ name: 'W16x9', width: PW, height: PH });
 pptx.layout = 'W16x9';
+/* M10：语言标记。pptxgenjs 默认每个运行写 lang="en-US"，中文运行在 PowerPoint 里会被当英文做拼写检查、
+   断行与中西文间距按西文规则处理。含汉字的运行改写 lang="zh-CN" altLang="en-US"（pptxgenjs 遇 lang 自动补 altLang）。 */
+const _HAN = /[\u3400-\u9fff\uf900-\ufaff\u3000-\u303f\uff00-\uffef]/;
+/* M10：表格质感按风格。首行视为表头。
+   zebra 斑马纹 · rule 只留横线（表头下 1pt 墨线）· three-line 三线表（顶/底粗线 + 表头下细线，无填充） */
+function tableSkin(rows, opts) {
+  const mode = SP.table || 'tonal';
+  if (mode === 'tonal' || !Array.isArray(rows) || !rows.length) return [rows, opts];
+  const N = { type: 'none' }, hair = { type: 'solid', pt: 0.5, color: STYLE.line };
+  const ink = (pt) => ({ type: 'solid', pt, color: STYLE.ink });
+  const last = rows.length - 1;
+  const out = rows.map((r, ri) => (r || []).map(c => {
+    const cell = (c && typeof c === 'object') ? Object.assign({}, c, { options: Object.assign({}, c.options || {}) }) : { text: String(c == null ? '' : c), options: {} };
+    const o = cell.options, isHl = o.fill && o.fill.color === STYLE.soft && ri > 0;
+    if (mode === 'zebra') {
+      if (ri > 0 && !isHl) o.fill = { color: ri % 2 === 0 ? STYLE.surface : STYLE.bg };
+      return cell;
+    }
+    if (ri === 0) { o.fill = { color: STYLE.bg }; o.color = STYLE.ink; o.bold = true; }
+    else if (!isHl) o.fill = { color: STYLE.bg };
+    if (mode === 'rule') o.border = [N, N, ri === 0 ? ink(1) : hair, N];
+    else o.border = [ri === 0 ? ink(1.5) : N, N, ri === 0 ? ink(0.75) : (ri === last ? ink(1.5) : N), N];
+    return cell;
+  }));
+  return [out, Object.assign({}, opts || {}, mode === 'zebra' ? {} : { border: { type: 'none' } })];
+}
+function _langify(text, opts) {
+  if (Array.isArray(text)) return text.map(r => (r && typeof r === 'object' && _HAN.test(String(r.text || '')))
+    ? Object.assign({}, r, { options: Object.assign({ lang: 'zh-CN' }, r.options || {}) }) : r);
+  return text;
+}
+{
+  const _addSlide = pptx.addSlide.bind(pptx);
+  pptx.addSlide = function (...a) {
+    const sl = _addSlide(...a);
+    const _t = sl.addText.bind(sl), _tb = sl.addTable.bind(sl);
+    const _sh = sl.addShape.bind(sl);
+    /* M10：卡片质感——色块卡（surface 填充的圆角矩形）按风格改为 outline / hairline */
+    sl.addShape = (type, o) => {
+      if (type === 'roundRect' && o && o.fill && o.fill.color === STYLE.surface && SP.card !== 'tonal' && !(o.objectName && /^(mini|treemap|boxplot|network)/.test(o.objectName))) {
+        o = Object.assign({}, o, { fill: { color: STYLE.bg }, line: { color: STYLE.line, width: SP.card === 'hairline' ? 0.5 : (SP.lineW || 0.75) } });
+      }
+      return _sh(type, o);
+    };
+    sl.addText = (text, opts) => _t(_langify(text), (typeof text === 'string' && _HAN.test(text)) ? Object.assign({ lang: 'zh-CN' }, opts || {}) : opts);
+    sl.addTable = (rows, opts) => { [rows, opts] = tableSkin(rows, opts); return _tb((rows || []).map(r => (r || []).map(c => {
+      if (c && typeof c === 'object' && _HAN.test(String(c.text || ''))) return Object.assign({}, c, { options: Object.assign({ lang: 'zh-CN' }, c.options || {}) });
+      if (typeof c === 'string' && _HAN.test(c)) return { text: c, options: { lang: 'zh-CN' } };
+      return c;
+    })), opts); };
+    return sl;
+  };
+}
 pptx.title = CONTENT.title || 'topmind-presentation';
 pptx.subject = CONTENT.subtitle || '';
 pptx.author = 'topmind-presentation';
@@ -558,6 +617,13 @@ function base() {
   s.background = { color: STYLE.bg };
   s.addShape('rect', { x: 0, y: 0, w: PW, h: PH, fill: { color: STYLE.bg }, line: { type: 'none' } });
   return s;
+}
+/* M10：标题下装饰按风格：bar 短条 / bar-thick 粗短条 / long 通栏细线（咨询、学术）/ none（极简） */
+function headRule(s, x, y, w) {
+  if (SP.rule === 'none') return;
+  if (SP.rule === 'long') { s.addShape('rect', { x, y: y + 0.01, w, h: 0.014, fill: { color: STYLE.ink }, line: { type: 'none' }, objectName: 'head:rule' }); return; }
+  const thick = SP.rule === 'bar-thick';
+  s.addShape('rect', { x, y, w: thick ? 1.2 : 0.9, h: thick ? 0.07 : 0.045, fill: { color: STYLE.accent }, line: { type: 'none' }, objectName: 'head:rule' });
 }
 function head(s, eyebrow, title, lead) {
   const H = REGIONS.regionOf('head', 'head') || {
@@ -571,8 +637,8 @@ function head(s, eyebrow, title, lead) {
   const tMax = titleMaxFor(title);
   const tSize = sz(estTextH(title, CW, sz(tMax), 1.25) > titleH ? Math.min(tMax, AT_TITLE.step1 || 24) : tMax);
   s.addText(title, { x: H.x, y: eyebrow ? H.titleY : 0.6, w: H.w, h: Math.max(0.6, titleH),
-    fontFace: STYLE.fontDisplay, fontSize: tSize, bold: true, color: STYLE.ink, fit: 'shrink' });
-  s.addShape('rect', { x: H.x, y: eyebrow ? H.ruleY : 1.6, w: 0.9, h: 0.045, fill: { color: STYLE.accent }, line: { type: 'none' } });
+    fontFace: STYLE.fontDisplay, fontSize: tSize, bold: SP.titleBold !== false, color: STYLE.ink, fit: 'shrink' });
+  headRule(s, H.x, eyebrow ? H.ruleY : 1.6, H.w);
   if (lead) s.addText(lead, { x: H.x, y: H.leadY || PT.common.leadY, w: H.w, h: 0.5, fontFace: STYLE.font,
     fontSize: sz(14), color: STYLE.body });
 }
@@ -2181,7 +2247,7 @@ function addTable(s, tbl, x, y, w, availH, opts) {
   const _ct = roleSz('coverHero', 44);  /* M9：封面主标题与 HTML 主视觉同比例（短标题用 coverHero 档，长标题回落 44 / 36） */
   const tSize = estTextH(CONTENT.title, CW - 1, _ct, 1.2) <= C.titleH ? _ct : (estTextH(CONTENT.title, CW - 1, sz(44), 1.25) > C.titleH ? sz(36) : sz(44));
   s.addText(CONTENT.title, { x: MX, y: C.titleY, w: CW - 1, h: C.titleH, fontFace: STYLE.fontDisplay,
-    fontSize: tSize, bold: true, color: cvTitle });
+    fontSize: tSize, bold: SP.titleBold !== false, color: cvTitle });
   s.addText(CONTENT.subtitle || '', { x: MX, y: C.subtitleY, w: CW - 1, h: C.subtitleH,
     fontFace: STYLE.font, fontSize: sz(18), color: cvSub });
   const _cn = mergeNotes(CONTENT.coverNotes, [CONTENT.subtitle, CONTENT.meta].filter(Boolean).join('\n'));
@@ -2612,7 +2678,7 @@ CONTENT.sections.forEach((sec) => {
     s.addText(ebText, { x: tx, y: CH.titleY - 0.42, w: tw, h: 0.4, fontFace: STYLE.font, fontSize: sz(11), bold: true,
       color: STYLE.accent, charSpacing: 2 });
     s.addText(sec.title || '', { x: tx, y: CH.titleY, w: tw, h: 1.25, fontFace: STYLE.fontDisplay, fontSize: roleSz('chapterTitle', 32),
-      bold: true, color: STYLE.ink, valign: 'top', fit: 'shrink' });
+      bold: SP.titleBold !== false, color: STYLE.ink, valign: 'top', fit: 'shrink' });
     let cy = 3.0;
     if (sec.lead) {
       s.addText(sec.lead, { x: tx, y: cy, w: tw, h: 0.8, fontFace: STYLE.font, fontSize: sz(15), color: STYLE.body, valign: 'top' });
@@ -3643,7 +3709,26 @@ if (ICON_MISSES.length) {
   if (STRICT) { console.error('[build_pptx] FAIL: --strict 下图标缺失不得交付'); process.exit(3); }
 }
 const out = _argVal('--out') || process.argv.slice(2).find(a => !a.startsWith('-')) || 'topmind-presentation-demo.pptx';
-pptx.writeFile({ fileName: out }).then(() => {
+/* M10：字体回退链落到 XML——pptxgenjs 的 fontFace 会把同一字体写进 latin / ea / cs；
+   衬线标题需要「西文 Georgia + 中文 SimSun」分开声明，写盘前对每页 XML 改写 ea / cs。 */
+async function writeWithFontPairs(file) {
+  const pairs = Object.values(FONT_PAIRS).filter(p => p && p.latin && p.ea && p.latin !== p.ea);
+  if (!pairs.length) return pptx.writeFile({ fileName: file });
+  const JSZip = require('jszip');
+  const buf = await pptx.write({ outputType: 'nodebuffer' });
+  const zip = await JSZip.loadAsync(buf);
+  for (const name of Object.keys(zip.files).filter(n => /^ppt\/(slides\/slide\d+|notesSlides\/notesSlide\d+)\.xml$/.test(n))) {
+    let xml = await zip.file(name).async('string');
+    for (const p of pairs) {
+      const L = p.latin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      xml = xml.replace(new RegExp('(<a:latin typeface="' + L + '"[^>]*/>)<a:ea typeface="' + L + '"([^>]*)/><a:cs typeface="' + L + '"', 'g'),
+        '$1<a:ea typeface="' + p.ea + '"$2/><a:cs typeface="' + p.ea + '"');
+    }
+    zip.file(name, xml);
+  }
+  fs.writeFileSync(file, await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }));
+}
+writeWithFontPairs(out).then(() => {
   console.log('已生成: ' + out + '  (风格: ' + (STYLE_PRESETS[styleArg] ? styleArg : 'business-blue') +
     ' · 主题: ' + (THEME === 'dark' ? '深色 dark' : '浅色 light') + ' · 模式: ' + MODE_NAME + ')');
   if (SHRINK_FLOOR_HITS.length) {

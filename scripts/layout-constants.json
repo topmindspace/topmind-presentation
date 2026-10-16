@@ -53,6 +53,22 @@
     "caption": 11,
     "micro": 10
   },
+  "stylePptx": {
+    "$comment": "M10：风格气质在 PPTX 的落地（单源）。display=标题字族（serif → 西文 Georgia / 中文 SimSun；sans → 微软雅黑）；titleBold=标题是否加粗（与 HTML --fw-display 600 对齐；SimSun 无粗体字重，PowerPoint 用合成粗体，标题字号下观感可接受，已在 Noto Serif CJK 回退下验证）；rule=标题下装饰（bar 短条 / bar-thick 粗短条 / long 通栏细线 / none）；card=卡片质感（tonal 色块 / outline 白底描边 / hairline 白底细线）；table=表格质感（tonal 浅底表头 / zebra 斑马纹 / rule 横线无竖线 / three-line 三线表）；lineW=描边粗细 pt。HTML 侧同名语汇见 engine.css 的 data-style 覆盖块。",
+    "fontPairs": {"serif": {"latin": "Georgia", "ea": "SimSun"}, "sans": {"latin": "Microsoft YaHei", "ea": "Microsoft YaHei"}},
+    "business-blue": {"display": "sans", "titleBold": true, "rule": "bar", "card": "tonal", "table": "tonal", "lineW": 0.75},
+    "apple-mono": {"display": "sans", "titleBold": true, "rule": "none", "card": "hairline", "table": "rule", "lineW": 0.5},
+    "mckinsey": {"display": "serif", "titleBold": true, "rule": "long", "card": "outline", "table": "rule", "lineW": 1},
+    "brand-red": {"display": "sans", "titleBold": true, "rule": "bar-thick", "card": "outline", "table": "tonal", "lineW": 1},
+    "warm-sand": {"display": "serif", "titleBold": true, "rule": "bar", "card": "tonal", "table": "zebra", "lineW": 0.75},
+    "deep-teal": {"display": "sans", "titleBold": true, "rule": "bar", "card": "tonal", "table": "zebra", "lineW": 0.75},
+    "graphite-dark": {"display": "sans", "titleBold": true, "rule": "bar", "card": "outline", "table": "zebra", "lineW": 0.75},
+    "indigo-violet": {"display": "sans", "titleBold": true, "rule": "bar", "card": "tonal", "table": "tonal", "lineW": 0.75},
+    "spectrum": {"display": "sans", "titleBold": true, "rule": "bar", "card": "outline", "table": "zebra", "lineW": 0.75},
+    "ink-academic": {"display": "serif", "titleBold": true, "rule": "long", "card": "outline", "table": "three-line", "lineW": 0.75},
+    "coral-launch": {"display": "sans", "titleBold": true, "rule": "bar-thick", "card": "tonal", "table": "tonal", "lineW": 0.75},
+    "sky-airy": {"display": "sans", "titleBold": true, "rule": "bar", "card": "hairline", "table": "rule", "lineW": 0.5}
+  },
   "modeTypeScale": {
     "$comment": "三模式独立排版比例尺（pt）。默认按中型会议室投影。小会议室可保持原值；礼堂/大报告厅宜更大标题档、更少每页单元（见 pptx-export 会场节）。research=咨询密排（正文 11.5pt、页标题 24pt、章节标题 34pt）；chapterTitle / kpiCard / kpiHero / stepTitle / coverHero 为 M9 新增角色（不进 typeScale 映射，只能经 roleSz 显式取用），经 roleSz() 取用；architecture 与 presentation 同基。",
     "presentation": {

@@ -17,6 +17,7 @@
     "assets/templates/",
     "assets/icons/",
     "assets/examples/",
+    "!assets/examples/*showcase*",
     "assets/pptx-export.js",
     "assets/style-gallery.html",
     "assets/theme-overview*.png"

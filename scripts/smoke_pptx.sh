@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# TopPPT HTML · PPTX 轻量冒烟（Batch 2）
+# topmind-presentation · PPTX 轻量冒烟（Batch 2）
 # extract_model → build_pptx → validate_pptx --strict --model=
 # 用法: bash scripts/smoke_pptx.sh [example.html]
 # CI（ci_skill_gates --with-pptx）必跑 business-blue + research-mckinsey（D13；后者覆盖 soWhat+footnote / D8）
@@ -26,7 +26,7 @@ echo "MODEL $MODEL ($(wc -c < "$MODEL") bytes)"
 
 # Prefer local node_modules pptxgenjs
 export NODE_PATH="${ROOT}/node_modules${NODE_PATH:+:$NODE_PATH}"
-node scripts/build_pptx.js "$PPTX" --model="$MODEL"
+node scripts/build_pptx.js "$PPTX" --strict --model="$MODEL"
 echo "PPTX  $PPTX ($(wc -c < "$PPTX") bytes)"
 
 set +e

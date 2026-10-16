@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · HTML 检查公共库（单源：承载正则 / 图表通道 / 多样性下限 / 组合版式）
+"""topmind-presentation · HTML 检查公共库（单源：承载正则 / 图表通道 / 多样性下限 / 组合版式）
 
 消费方：validate_report.py · quality_gate.py · evals/run_evals.py
 禁止在消费方再手抄 CARRIERS / 多样性公式 / 组合版式判定。

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 深度模式渲染对照（可选工具，缺失依赖自动跳过）
+"""topmind-presentation · 深度模式渲染对照（可选工具，缺失依赖自动跳过）
 
 按需深度模式的「渲染对照闭环」：把交付 PPTX 渲染成可逐页对照的产物，并生成
 一张并排对照页与一份**自动可算的偏差登记**（deviations.json）。
@@ -202,7 +202,7 @@ section{{padding:0 24px 8px}}
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description='TopPPT HTML 深度模式渲染对照（可选工具）')
+    parser = argparse.ArgumentParser(description='topmind-presentation 深度模式渲染对照（可选工具）')
     parser.add_argument('pptx', help='交付 PPTX 路径')
     parser.add_argument('--html', help='对应 HTML 报告路径（可选，用于并排对照）')
     parser.add_argument('--out', help='输出目录（默认 <pptx 同目录>/render-compare）')

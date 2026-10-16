@@ -1,8 +1,8 @@
 /**
- * TopPPT HTML · 图标资产预生成（SVG → PNG base64）
+ * topmind-presentation · 图标资产预生成（SVG → PNG base64）
  * 产出 scripts/icon-assets.json：{ "icons": { "<name>": { "<#color>": "data:image/png;base64,..." } } }
- * build_pptx.js 同步读取本文件；缺失时用 execFileSync 调本脚本补齐。
- * 由 sync_runtime.py / 首次 build 调用。依赖 sharp（MIMO_NODE_MODULES 或技能目录 node_modules）。
+ * build_pptx.js 若存在本文件则优先读取；缺失时直接用 assets/icons/*.png。
+ * 维护者离线工具（可选着色缓存）；运行时 build_pptx.js 不再调用。依赖 sharp（MIMO_NODE_MODULES 或技能目录 node_modules）。
  *
  * 用法: node scripts/build_icon_assets.js [--out=scripts/icon-assets.json]
  */

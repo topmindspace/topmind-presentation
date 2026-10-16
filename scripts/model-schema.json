@@ -1,5 +1,5 @@
 {
-  "$comment": "TopPPT HTML · REPORT_MODEL DSL schema 单源。双端同源：scripts/sync_runtime.py 把本文件注入 assets/pptx-export.js 的 __TOPPPT_SCHEMA__ 标记块（浏览器端 validateModel）；scripts/extract_model.py 直接读本文件做本地校验。禁止在两端手写副本。字段路径约定：'a.b:c' 中 ':array' 要求非空数组，':str' 要求非空字符串，无后缀仅做真值检查；'anyof:a|b:c' 表示「任一满足即通过」（用于素材图片页：src / items / placeholder 三选一）。pageTypes[].modes = 该页型允许的模式（越界仅告警，不阻断）。commonSectionFields 为任意页型可选的通用字段（flags = 待核实标注清单，image = 素材图片/配图占位）。chartTypes = 图表类型白名单（起含原生与形状两条通道，通道归属见 scripts/layout-constants.json 的 charts.registry）。图片规格与占位约定见同文件 imageSpec。",
+  "$comment": "topmind-presentation · REPORT_MODEL DSL schema 单源。双端同源：scripts/sync_runtime.py 把本文件注入 assets/pptx-export.js 的 __TOPPPT_SCHEMA__ 标记块（浏览器端 validateModel）；scripts/extract_model.py 直接读本文件做本地校验。禁止在两端手写副本。字段路径约定：'a.b:c' 中 ':array' 要求非空数组，':str' 要求非空字符串，无后缀仅做真值检查；'anyof:a|b:c' 表示「任一满足即通过」（用于素材图片页：src / items / placeholder 三选一）。pageTypes[].modes = 该页型允许的模式（越界仅告警，不阻断）。commonSectionFields 为任意页型可选的通用字段（flags = 待核实标注清单，image = 素材图片/配图占位）。chartTypes = 图表类型白名单（起含原生与形状两条通道，通道归属见 scripts/layout-constants.json 的 charts.registry）。图片规格与占位约定见同文件 imageSpec。",
   "version": "0.1",
   "modes": [
     "presentation",
@@ -351,7 +351,7 @@
       ]
     },
     "quote": {
-      "label": "引用 / 金句页（深色全幅）",
+      "label": "引用 / 金句页（须带 metrics 证据 2–4 个，禁空页）",
       "modes": [
         "presentation",
         "research"
@@ -361,7 +361,8 @@
         "author"
       ],
       "optional": [
-        "context"
+        "context",
+        "metrics:array"
       ]
     },
     "diagram": {

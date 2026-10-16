@@ -1,5 +1,31 @@
 # CHANGELOG
 
+## [Unreleased] — M0 止血（fix/m0-stabilize，未发版）
+
+### 质量门禁
+- 新增 `scripts/check_visual_fill.py`：PPTX → LibreOffice → PNG，在正文区按 24×12 栅格检查有墨占比（VISUAL_FILL）、最大连续空白（VISUAL_EMPTY_BLOCK）、墨水重心（VISUAL_OFF_CENTER）。business-blue 黄金样张为硬门禁；research / architecture / showcase 先报告不阻断（M1 再转硬门禁）。CI 与 Release 安装 libreoffice-impress、poppler-utils、fonts-noto-cjk。
+- `audit_docs.py` 新增 ⑧ 禁止词：「甲板」、结论条「So what」标签、`.sowhat--labeled`、旧品牌名。
+
+### 引擎（PPTX B 通道）
+- 单系列柱 / 条 / 线 / 面积图统一主色（不再按数据点轮换彩虹色），加浅色数值网格线。
+- points + metrics：指标改为右侧纵向 MD3 tonal 卡片，要点按高度均分并加细分隔线。
+- kpi：hero 落在等高 tonal 卡片内垂直居中，支撑指标按高度均分。
+- quote：去掉装饰大引号；新增 `metrics`（2–4 个证据数字）证据卡片行（A 通道与 render_from_model 同步）；schema 增 `quote.metrics`。
+- steps / cards：单行卡片随版心拉伸，留白不再集中在下半页。
+- 2-col-feature 特性栏去掉左侧竖条，改 tonal 底。
+- 图标：运行时不再隐式调用 sharp，直接用包内 `assets/icons/*.png`（降为 256px）；`--strict` 下图标缺失直接失败（exit 3）。
+- CLI：缺 `--model` 直接报错退出（`--demo` 显式调试）；支持 `--out=`。
+
+### 样式与文档
+- engine.css 去掉 `.col--feature` / `.arch__lname` / `.flagbar` 的左侧装饰竖条；research 示例的 so-what 本地覆盖同步去竖条；删除 `.sowhat--labeled`。
+- references 删除「So what」标签示例与标签变体说明；金句页规范改为「金句 + 署名 + 证据」。
+- 旧品牌名统一为 topmind-presentation（代码、模板、示例、文档）。
+- README 中英两版只保留一张主题总览图；主题总览图重拍（去旧名）并做 256 色量化。
+- business-blue 示例：金句页补证据数字；空的「配图占位」页换成推进路线（timeline）页。
+
+### 包
+- npm 包排除 showcase 示例；主题总览图与图标瘦身：4.9 MB → 2.7 MB（压缩后）。
+
 ## [0.2.7] - 2026-10-11
 
 > 0.2.6 → **0.2.7**（patch）。

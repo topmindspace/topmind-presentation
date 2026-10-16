@@ -1,5 +1,5 @@
 /**
- * TopPPT HTML · 图标栅格化（SVG → PNG data URI）
+ * topmind-presentation · 图标栅格化（SVG → PNG data URI）
  * 依赖 sharp（MIMO_NODE_MODULES / 技能目录 npm install）。
  * build_pptx.js 在嵌入前调用；同一 name+color+size 结果缓存。
  * 图标图 objectName 统一 `icon:` 前缀，validate_pptx 单独计数（不进 pictures 内容图门禁）。

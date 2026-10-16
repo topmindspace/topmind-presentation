@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 黄金样张维护
+"""topmind-presentation · 黄金样张维护
 
 assets/examples/ 至少保留 3 份黄金样张（每模式 1）：
   presentation-business-blue · research-mckinsey · architecture-graphite-dark

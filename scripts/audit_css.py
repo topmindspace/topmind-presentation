@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · CSS 类覆盖率审计（engine.css ↔ 消费方语料 · 零依赖 · 报告制）
+"""topmind-presentation · CSS 类覆盖率审计（engine.css ↔ 消费方语料 · 零依赖 · 报告制）
 
 用法:
     python scripts/audit_css.py            # 输出未引用类清单与占比（仅报告，不影响退出码）

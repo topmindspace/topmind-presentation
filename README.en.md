@@ -1,4 +1,4 @@
-# topmind-presentation · TopPPT HTML
+# topmind-presentation
 
 **[中文](./README.md)** | English
 
@@ -9,21 +9,17 @@
 
 **Let ideas fly — make good thinking visible.** A high-craft skill for **demo reports / formal business presentations**: **HTML + PPT dual delivery** — day-to-day, present with paginated HTML like slides; export **layout-faithful editable PPTX** when needed. **MD3-inspired**: fitting information density, restrained type / shapes / color. Core craft is layout, typography, color, and content structure — not gadget soup.
 
-- Skill id: `topmind-presentation`; brand: **TopPPT HTML**
+- Skill id and brand: `topmind-presentation`
 - Version: **v0.2.7** (standalone repo, independently versioned)
 - **Agent entry**: `SKILL.md` → `references/playbook.md` (L1) → L2 on demand
 - **Human maintainers**: this README (install / commands / layout); do not treat it as the generation spec
 - The repo is the skill: the repo root is the skill body (SKILL.md + assets + references + scripts)
 
-<p align="center">
-  <img src="docs/assets/presentation-cover.png" alt="topmind-presentation · formal business presentations" width="960" />
-</p>
-
 ### Theme overview (Gate 0)
 
 <p align="center">
   <img src="assets/theme-overview.png" alt="Presentation · business-blue" width="860" /><br/>
-  <sub>Presentation · business-blue (default) · also <a href="./assets/style-gallery.html">style-gallery</a> · <a href="./assets/theme-overview-research.png">research</a> · <a href="./assets/theme-overview-architecture.png">architecture</a></sub>
+  <sub>Presentation · business-blue (default) · other styles in <a href="./assets/style-gallery.html">style-gallery</a></sub>
 </p>
 
 **Online** · [Landing](https://topmindspace.github.io/presentation/) (the showcase deck and style gallery are the in-repo files below)

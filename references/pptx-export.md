@@ -76,7 +76,7 @@ HTML 侧仍用 MD3 clamp；双端都以「最后一排可读」为准（`present
 | `cards` | 卡片网格（g-3/g-4） | `cards:[{title, points:[]}]`、`columns` |
 | `split` | **双区组合页**（g-side；左/右各可为要点｜图表｜表格｜图片，组合版式的通用解） | `left:{type?:'points'(默认)/'table'/'image'/图表类型名, points?/head?/rows?/labels?/values?/series?/image?/cap?}`、`right:{…同构，缺省 type='bar'}` |
 | `comparison` | 对比页（`components.md` §40：左右双面板） | `left/right:{title, points:[[k,v]…]}`、`verdict` |
-| `quote` | 金句页（`components.md` §39：主题一致强调带，accent-soft 底） | `quote`、`author`、`context?` |
+| `quote` | 金句页（`components.md` §39：主题一致强调带，accent-soft 底） | `quote`、`author`、`metrics`（2–4 个证据数字，必填）、`context?` |
 | `diagram` | 分层架构（.arch / A1，含层间连接；**architecture 模式自动走全幅图页型**） | `layers:[[层名,[节点…],'focus'?]]`、`legend:[]` |
 
 **research 密排专属**
@@ -173,7 +173,7 @@ python scripts/validate_pptx.py "报告.pptx" --strict --model="报告.model.jso
 5. **默认零内容图全原生（声明式放行 + 配图占位）**：默认 `pictures=0`（表格为原生 table、文字为原生文本框，全部可就地编辑）；**仅当模型显式声明 `section.image` / `split.left.image` / `split.right.image` 时才导出内容图片**，且内容图数不得超过声明数（`PICTURES_NOT_DECLARED` 硬拦）——图片源只允许 data: 内联或相对路径（外链报 `IMAGE_SRC_EXTERNAL`）。**语义图标（`objectName: icon:*`）单独计数 `icon_pictures`，不进 `pictures` 门禁**（见第 8 条）。**无素材时用 `image.placeholder` 出配图占位**：原生圆角矩形 + 虚线 + 居中标签（可编辑、`pictures` 不增），交付前替换 `src` 即可；版式/比例/图注位置已由 `imageSpec` 锁死。
 6. **自适应排版（有限缩字号）**：每个文本块按可用高度在字号阶梯里选"装得下"的最大值；内容偏多时按 `containers.fontShrink` **有限下探**（最多 4 档，floor：presentation/architecture 10pt、research 9pt）。优先顺序：列表化/精炼 → 换/扩组合或拆页 → 最后才缩字号。表格行高按可用高度计算，列表/泳道/矩阵/卡片行高随容器收敛——保证不越界、不重叠；`fitFont` 与 `estTextH` 在 `build_pptx.js`（交付）与 `pptx-export.js`（预览）中同算法，两通道排版一致。
 7. **版面安全边界**：所有页型几何来自 `layout-constants.json` 的 `pageTypes`；内容安全下界 `layout.contentBottom`（有 so-what/来源行时收紧为 `contentBottomWithNote`）。校验器对越界（`SHAPE_OUTSIDE_SLIDE`）、负坐标、非正尺寸、文本溢出估算、字号下限、未声明图片数一律拦截。
-8. **图标真导出（PPTX 通道）**：卡片头图标名写入模型 `cards[].icon`（或 HTML `data-icon`），`build_pptx.js` 经 `scripts/icon_lib.js` + sharp 栅格化为 PNG 嵌入（`scripts/icon-assets.json` 预生成缓存，20 图标 × 各风格 accent 色）。`objectName` 前缀 `icon:`，`validate_pptx` 单独计数 `icon_pictures`，**不进** `pictures=0` 内容图门禁。无 sharp/资产时回落 accent 小方块路标（可扫读）。图标名 = `icon_lib.js` 键（增长/下降/数据/图表/趋势/占比/表格/效率/成果/安全/权限/检查/风险/团队/流程/计划/智能/洞察/工具/清单）；缺省按标题语义自动挑选。要点列表项目符号仍用 accent 实心方块（列表行首图标属 `.ul--ico`，下一档接同源 PNG）。
+8. **图标真导出（PPTX 通道）**：卡片头图标名写入模型 `cards[].icon`（或 HTML `data-icon`），`build_pptx.js` 经 `scripts/icon_lib.js` 取包内预渲染 PNG（`assets/icons/*.png`，运行时不依赖 sharp；可选的 `scripts/icon-assets.json` 着色缓存由维护者离线用 sharp 生成）；`--strict` 下图标缺失直接失败。`objectName` 前缀 `icon:`，`validate_pptx` 单独计数 `icon_pictures`，**不进** `pictures=0` 内容图门禁。无 sharp/资产时回落 accent 小方块路标（可扫读）。图标名 = `icon_lib.js` 键（增长/下降/数据/图表/趋势/占比/表格/效率/成果/安全/权限/检查/风险/团队/流程/计划/智能/洞察/工具/清单）；缺省按标题语义自动挑选。要点列表项目符号仍用 accent 实心方块（列表行首图标属 `.ul--ico`，下一档接同源 PNG）。
 
 > A 通道预览引擎（`pptx-export.js`）保持形状渲染作浏览器缩略：**版式与文本所见即所得**；带数据的原生图表在交付 PPTX 中为真 chart part（双击可编辑数据），预览侧为形状近似——**图表形态以精导产物为准**。`cross_verify` 对图表文本做归一化比对（类别标签并入、纯数值 token 过滤），双通道语义一致。
 

@@ -4,9 +4,9 @@
 > **取码**：本节「高频取码」或 `python scripts/extract_snippet.py --task icons`。  
 > **完整 SVG 枚举**（60+）：[writing-skills 归档 `refs/icons-catalog.md`](https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/refs/icons-catalog.md)（生成默认**不**预读；仅当高频未覆盖语义时按名查阅）。
 
-全部 24×24、描边（stroke 1.8，圆角线帽），`currentColor` 随主题变色。共 **48** 个，单源 `assets/icons/`（`*.svg` HTML 内联 + `*.png` 512px 预渲染供 PPTX），`index.json` 为关键词→图标映射 + 默认表。校验：`python scripts/check_icons.py`。
+全部 24×24、描边（stroke 1.8，圆角线帽），`currentColor` 随主题变色。共 **48** 个，单源 `assets/icons/`（`*.svg` HTML 内联 + `*.png` 256px 预渲染供 PPTX），`index.json` 为关键词→图标映射 + 默认表。校验：`python scripts/check_icons.py`。
 
-> **PPTX 通道（真导出）**：图标名写入模型 `cards[].icon`（或 HTML `data-icon` / hydrate 标记 `<i data-icon="名"></i>`），`build_pptx.js` 经 `icon_lib.js` 取 PNG 嵌入（优先 `icon-assets.json` 的 accent 着色版 → 回落 `assets/icons/*.png` 512px 预渲染 → 最后才回落 accent 小方块路标），与 HTML 同名同语义。`objectName` 前缀 `icon:`，`validate_pptx` 单独计数（`icon_pictures`），**不进** `pictures=0` 内容图门禁。图标名取值 = `assets/icons/index.json` 的键（48 个）。
+> **PPTX 通道（真导出）**：图标名写入模型 `cards[].icon`（或 HTML `data-icon` / hydrate 标记 `<i data-icon="名"></i>`），`build_pptx.js` 经 `icon_lib.js` 取 PNG 嵌入（优先 `icon-assets.json` 的 accent 着色版 → 回落 `assets/icons/*.png` 256px 预渲染 → 最后才回落 accent 小方块路标），与 HTML 同名同语义。`objectName` 前缀 `icon:`，`validate_pptx` 单独计数（`icon_pictures`），**不进** `pictures=0` 内容图门禁。图标名取值 = `assets/icons/index.json` 的键（48 个）。
 
 ## 使用准则（先读再用）
 

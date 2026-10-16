@@ -50,7 +50,7 @@ Secret **`NPM_TOKEN`**（granular，scope `@topmindspace` 写权限）配置在 
 | 面 | 规则 | 示例 |
 |----|------|------|
 | 技能 id / frontmatter `name` | kebab-case | `topmind-presentation` |
-| 品牌展示名 | 简短 | `TopPPT HTML` |
+| 品牌展示名 | 简短 | `topmind-presentation` |
 | 环境变量 | `TOP_PPT_*` | `TOP_PPT_NODE_EXE` |
 | 注入标记 | `__TOPPPT_*__` | `__TOPPPT_CONSTANTS__` |
 | JS API | PascalCase | `TopPptHtml` |

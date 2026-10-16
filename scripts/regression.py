@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 全链路回归（维护工具，与机器环境无关）
+"""topmind-presentation · 全链路回归（维护工具，与机器环境无关）
 
 链路：
   ① validate_report.py --strict          每份示例 HTML（三模式预算 + 模型一致性 + 版式断言）
@@ -57,7 +57,7 @@ def run(cmd: list[str], env: dict[str, str] | None = None) -> subprocess.Complet
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description='TopPPT HTML 全链路回归')
+    ap = argparse.ArgumentParser(description='topmind-presentation 全链路回归')
     ap.add_argument('--only', help='只跑名字含该关键字的示例')
     args = ap.parse_args()
 

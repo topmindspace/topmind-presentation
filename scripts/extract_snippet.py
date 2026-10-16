@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · L2 节级片段抽取器（减少整读 components.md / charts.md 的上下文成本）
+"""topmind-presentation · L2 节级片段抽取器（减少整读 components.md / charts.md 的上下文成本）
 
 用法:
     python scripts/extract_snippet.py --list

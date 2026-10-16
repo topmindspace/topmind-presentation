@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-TopPPT HTML· HTML 报告质量校验（交付闭环）
+topmind-presentation · HTML 报告质量校验（交付闭环）
 用法:
     python validate_report.py <报告.html> [--strict] [--layout-qa] [--json]
     python validate_report.py --help
@@ -2029,7 +2029,7 @@ def main():
 
     W = 68
     print("=" * W)
-    print(f"TopPPT HTML· 质量校验 {LC.get('version', '')}  {'[STRICT]' if strict else ''}")
+    print(f"topmind-presentation · 质量校验 {LC.get('version', '')}  {'[STRICT]' if strict else ''}")
     print(f"文件: {path.name}  ({len(txt.encode('utf-8'))/1024:.1f} KB)")
     print("=" * W)
     for level, name, ok, note in results:

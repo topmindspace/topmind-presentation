@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""TopPPT HTML · 模型驱动生成 HTML（消灭双写）
+"""topmind-presentation · 模型驱动生成 HTML（消灭双写）
 
 用法:
     python scripts/render_from_model.py report.model.json --template research.html --out report.html
@@ -363,7 +363,7 @@ def r_twocol(i, sec):
             cols.append(f'      <p class="t-body"><strong>{esc(p[0])}。</strong>{cite(p[1])}</p>')
         else:
             cols.append(f'      <p class="t-body">{cite(p)}</p>')
-    # 变体 2-col-feature：首栏为特性栏（复用 .card 语义：加粗标题 + accent 左线）
+    # 变体 2-col-feature：首栏为特性栏（MD3 tonal 底 + 加粗标题，无左侧竖条）
     extra = ''
     if variant == '2-col-feature' and cols:
         cols[0] = cols[0].replace('class="t-body"', 'class="t-body col--feature"', 1)
@@ -468,13 +468,25 @@ def r_comparison(i, sec):
 
 
 def r_quote(i, sec):
+    # M0：不画装饰大引号；metrics（2–4 个证据数字）渲染为证据行，避免空金句页
+    mets = []
+    for m in (sec.get('metrics') or [])[:4]:
+        if isinstance(m, (list, tuple)):
+            mets.append((str(m[0] if len(m) > 0 else ''), str(m[1] if len(m) > 1 else '')))
+        elif isinstance(m, dict):
+            mets.append((str(m.get('v') or m.get('value') or ''), str(m.get('k') or m.get('label') or '')))
+    ev = ''
+    if mets:
+        ev = ('    <div class="grid g-%d rv" style="margin-top:var(--sp-6)">\n' % max(2, min(4, len(mets)))
+              + ''.join(f'      <div class="metric"><div class="metric__v t-metric">{esc(v)}</div>'
+                        f'<div class="metric__k">{cite(k)}</div></div>\n' for v, k in mets)
+              + '    </div>\n')
     body = (
         '    <div class="shead shead--center rv">\n'
-        f'      <div style="font-size:clamp(40px,4.6vh,56px);font-weight:700;color:var(--accent)">「</div>\n'
         f'      <p class="t-lead" style="max-width:860px;margin-inline:auto;font-weight:600">{cite(sec.get("quote") or "")}</p>\n'
         f'      <p class="t-sm" style="color:var(--accent-text)">—— {esc(sec.get("author") or "")}'
         + (f' · {esc(sec.get("context"))}' if sec.get('context') else '')
-        + '</p>\n    </div>\n')
+        + '</p>\n    </div>\n' + ev)
     return wrap(i, 'quote', body, sec, ' band--accent band--fit')
 
 

@@ -1,5 +1,5 @@
 id,should_trigger,kind,prompt,expect
-t01,true,explicit,"用 TopPPT HTML 做一份 10 页左右的产品发布演示，风格要克制一点","触发技能；产出单文件 HTML；mode=presentation；先给参考图"
+t01,true,explicit,"用 topmind-presentation 做一份 10 页左右的产品发布演示，风格要克制一点","触发技能；产出单文件 HTML；mode=presentation；先给参考图"
 t02,true,implicit,"帮我把这份调研材料做成一份能坐读的咨询风格研究报告","触发技能；mode=research；行动标题为结论句；含 Exhibit 编号"
 t03,true,implicit,"把这套系统架构画成一张汇报图，评审会上看结构","触发技能；mode=architecture；图为王；节点 ≤24"
 t04,true,context,"下周三要给董事会汇报年度经营复盘，材料在 attachments 里，需要能继续改的 PPT","触发技能；HTML+PPTX；research 或 presentation；交付前 strict 0/0"

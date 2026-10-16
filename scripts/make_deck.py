@@ -55,7 +55,9 @@ def run(step: int, name: str, cmd: list[str], env=None) -> tuple[bool, str, floa
     if not ok:
         lines = out.strip().splitlines()
         # 只摘失败行（各门禁统一用 [FAIL] / "code": / ERROR 标记），找不到再退回末尾 12 行
-        bad = [l for l in lines if '[FAIL]' in l or '"code"' in l or 'ERROR' in l or 'FAIL ' in l[:12] or l.startswith('    - ')]
+        bad = [l for l in lines if '[FAIL]' in l or '"code"' in l or '"message"' in l or 'ERROR' in l or 'FAIL ' in l[:12] or l.startswith('    - ')]
+        if not bad:  # strict 下仅 WARN 也算失败：摘 WARN 行，而不是只给一段通用指引
+            bad = [l for l in lines if '[WARN]' in l]
         show = (bad or lines[-12:])[:15]
         print('    ' + '\n    '.join(x.strip() for x in show))
         for h in hint_for('\n'.join(bad or lines)):
@@ -64,8 +66,18 @@ def run(step: int, name: str, cmd: list[str], env=None) -> tuple[bool, str, floa
 
 
 def main(argv: list[str]) -> int:
-    args = [a for a in argv if not a.startswith('--')]
-    flags = {a.split('=')[0]: (a.split('=', 1)[1] if '=' in a else True) for a in argv if a.startswith('--')}
+    # --out 目录 与 --out=目录 两种写法都认（此前空格写法会把目录当成模型路径、--out 变成 True 而崩溃）
+    args, flags, i = [], {}, 0
+    while i < len(argv):
+        a = argv[i]
+        if a.startswith('--'):
+            k, eq, v = a.partition('=')
+            if not eq and k in ('--out',) and i + 1 < len(argv) and not argv[i + 1].startswith('--'):
+                v, i = argv[i + 1], i + 1
+            flags[k] = v if (eq or v) else True
+        else:
+            args.append(a)
+        i += 1
     if not args or '--help' in flags:
         print(__doc__)
         return 0 if '--help' in flags else 2
@@ -82,6 +94,19 @@ def main(argv: list[str]) -> int:
     stem = model.name[:-len('.model.json')] if model.name.endswith('.model.json') else model.stem
     out = Path(flags.get('--out') or model.parent).resolve()
     out.mkdir(parents=True, exist_ok=True)
+    # 相对路径图片按模型目录解析；输出目录不同时一并复制过去，HTML 才能按同一相对路径找到图（此前 HTML 显示破图）
+    if out != model.parent:
+        import shutil
+        for sec in m.get('sections') or []:
+            im = sec.get('image') if isinstance(sec, dict) else None
+            srcs = [im.get('src')] + [it.get('src') for it in (im.get('items') or []) if isinstance(it, dict)] if isinstance(im, dict) else []
+            for src in srcs:
+                if not src or str(src).startswith(('data:', 'http:', 'https:', '/')):
+                    continue
+                a, b = (model.parent / src).resolve(), (out / src).resolve()
+                if a.is_file() and not b.exists():
+                    b.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(a, b)
     html, pptx = out / f'{stem}.html', out / f'{stem}.pptx'
     keep = '--keep-going' in flags
     env = dict(os.environ, NODE_PATH=str(ROOT / 'node_modules') + (os.pathsep + os.environ['NODE_PATH'] if os.environ.get('NODE_PATH') else ''))

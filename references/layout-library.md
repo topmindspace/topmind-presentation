@@ -120,4 +120,4 @@
 
 ## 新增版式
 
-1. 先确认现有 44 个版式组合不出来；2. 在 `layoutLibrary.layouts` 加条目（id / family / name / match / weight）；3. 双渲染器实现（`render_from_model.py` + `build_pptx.js`）；4. `python tests/layouts/build_gallery.py && python tests/layouts/test_layouts.py --update`，看 golden 图再提交。
+1. 先确认现有 48 个版式组合不出来；2. 在 `layoutLibrary.layouts` 加条目（id / family / name / match / weight）；3. 双渲染器实现（`render_from_model.py` + `build_pptx.js`）；4. `python tests/layouts/build_gallery.py && python tests/layouts/test_layouts.py --update`，看 golden 图再提交。

@@ -4,7 +4,7 @@
   "theme": "light",
   "title": "topmind-presentation",
   "subtitle": "HTML + PPT 双交付 · 为正式商务演示而生",
-  "meta": "产品介绍 · 2026-10-11 · v0.2.7",
+  "meta": "产品介绍 · 2026-10-11 · v0.2.8",
   "agenda": [
     [
       "01",
@@ -109,33 +109,33 @@
       "type": "cards",
       "layoutPreset": "P5",
       "eyebrow": "02 · 安装与分发",
-      "title": "安装与分发：仓库即技能，四种装法任选",
+      "title": "安装与分发：一条命令装好，升级不降级",
       "columns": 3,
       "cards": [
         {
           "title": "仓库即技能",
           "points": [
             [
-              "根目录即技能本体",
-              "SKILL.md、references、scripts 与 assets 同在一仓"
+              "仓库即技能",
+              "SKILL.md、脚本与素材同仓"
             ],
             [
-              "没有安装器",
-              "宿主能看到 topmind-presentation/SKILL.md 即可"
+              "一条命令安装",
+              "有新版直接覆盖，不备份"
             ]
           ],
           "icon": "增长"
         },
         {
-          "title": "四种装法",
+          "title": "三条安装规则",
           "points": [
             [
-              "钉版本",
-              "Release 的 topmind-presentation.zip 解压到技能目录"
+              "不悄悄降级",
+              "已装更新版时报错，--force 才降"
             ],
             [
-              "跟 HEAD",
-              "git clone 或 npx skills add；npm 包需再同步一次"
+              "同名目录自动替换",
+              "同一技能直接替换；无关目录需 --force"
             ]
           ],
           "icon": "下降"
@@ -155,8 +155,8 @@
           "icon": "数据"
         }
       ],
-      "footnote": "包名 @topmindspace/topmind-presentation · 当前线 0.2.7（latest）",
-      "soWhat": "版本号与 tag 一致——装哪一版，用的就是哪一版。",
+      "footnote": "包名 @topmindspace/topmind-presentation · 当前线 0.2.8（latest）",
+      "soWhat": "版本号与 tag 一致，装哪一版就用哪一版；升级、拒绝降级、同名替换三条规则都有测试。",
       "variant": "bento-grid"
     },
     {

@@ -31,6 +31,10 @@ CARRIERS = [
     r'class="steps[\s"]',
     r'class="exhibit[\s"]',
     r'class="cols-2',
+    # M11：M7 复合版式的关键数字条 / 解读栏 / 解读带也是承载件（此前漏计，复合页被当成单件页）
+    r'class="kstrip[\s"]',
+    r'class="readout[\s"]',
+    r'class="cband[\s"]',
     r'class="cols-3',
 ]
 

@@ -95,9 +95,17 @@ def cite(text: str) -> str:
                   esc(text))
 
 
+_LOCKED = False  # 美化路由（model.contentLocked）：原稿文字锁定，渲染器不得自行添加标点
+
+
 def kp(k, v) -> str:
+    raw = str(k or '')
     k, v = esc(k), cite(v) if isinstance(v, str) else esc(v)
-    return f'<li><strong>{k}。</strong>{v}</li>' if k else f'<li>{v}</li>'
+    if not k:
+        return f'<li>{v}</li>'
+    # 键后补「。」只在写稿模式、且键本身没有收尾标点时；美化路由用空格分隔，不新增任何字符（此前 ink-academic 美化核对 FAIL）
+    sep = ' ' if _LOCKED or re.search(r'[。！？：；，、.!?:;]$', raw) else '。'
+    return f'<li><strong>{k}{sep if sep != " " else ""}</strong>{" " if sep == " " else ""}{v}</li>'
 
 
 def sec_anchor(i: int, sec: dict) -> str:
@@ -710,7 +718,8 @@ def r_image(i, sec):
             media += f'    <p class="media__src">{cite(cap)}</p>\n'
     body = media
     if layout == 'half' and sec.get('points'):
-        body = ('    <div class="grid g-side rv a-start">\n' + media +
+        # 图与图注包成一格：此前图注是 grid 的第二个子元素，挤占右栏，要点被挤到图下方
+        body = ('    <div class="grid g-side rv a-start">\n      <div class="stack gap-2">\n' + media + '      </div>\n' +
                 f'      <div class="stack gap-4">{pts_list(sec.get("points"))}</div>\n    </div>\n')
     return wrap(i, 'image', body, sec)
 
@@ -1009,6 +1018,8 @@ def _fill_chrome(t: str, model: dict, body: str) -> str:
 
 
 def render_body(model: dict) -> str:
+    global _LOCKED
+    _LOCKED = bool(model.get('contentLocked'))
     parts = []
     # 封面
     parts.append(f'''<!-- 封面 -->
@@ -1095,9 +1106,11 @@ def render_body(model: dict) -> str:
   </div>
 </section>''')
     ex_n = 0
+    # 自动编号只在作者一个 exhibitNo 都没写时启用；写了任何一个即视为手动编号，避免自动号与手写号撞车（PPTX 同规则）
+    auto_ex = not any(s.get('exhibitNo') for s in secs)
     for i, sec in enumerate(secs, 1):
         t = (sec.get('type') or 'points').lower()
-        if model.get('mode') == 'research' and (t in ('exhibit', 'bar', 'halftable', 'donut') or t in LCS.INFO):
+        if auto_ex and model.get('mode') == 'research' and (t in ('exhibit', 'bar', 'halftable', 'donut') or t in LCS.INFO):
             ex_n += 1
             if not sec.get('exhibitNo'):
                 sec = dict(sec)

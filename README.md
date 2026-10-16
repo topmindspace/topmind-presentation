@@ -9,7 +9,7 @@
 
 一个给智能体用的演示文稿技能：把材料做成**可翻页的单文件 HTML**，需要时再导出**可编辑的 16:9 PPTX**。两份交付出自同一份内容模型，配色、版式和数字一致。也能把已有的 PPTX 原文不动地重新排版。
 
-- 版本：**v0.2.7**（1.0.0 待发布）
+- 版本：**v0.2.8**
 - 智能体从 `SKILL.md` 进入；本 README 写给安装和维护的人
 
 <p align="center">
@@ -24,8 +24,11 @@
 | 交付 | 单文件 HTML（零外链、方向键翻页、亮暗切换、风格切换）+ 可编辑 PPTX（原生图表可双击改数据） |
 | 三种模式 | 演示汇报 · 研究报告（高密度、带来源）· 架构图（分层 / 泳道 / 流程 / 拓扑） |
 | 12 套风格 | 清新蓝白（默认）、优雅黑白、麦肯锡咨询、品牌红、暖沙金、墨绿、石墨深灰、靛紫、光谱彩色、学术墨蓝、活力珊瑚、晴空课件 |
-| 版式与图表 | 8 个家族 44 个版式；36 种图表，其中 20 种导出为原生 PPT 图表 |
-| 质量门禁 | HTML 与 PPTX 各自 strict 0 错误 0 警告才交付；渲染后检查填充率、重心和像素回归 |
+| 版式与图表 | 8 个家族 48 个版式；36 种图表，其中 20 种导出为原生 PPT 图表 |
+| 插图 | 图文混排（满版 / 左图右文 / 出血 / 网格 / 对比 / Logo 墙）；分层图、泳道、流程、拓扑在 PPTX 里是可编辑的原生形状 |
+| 已有 PPT 美化 | 原稿只读，逐字逐数、图片与演讲者备注核对一致后出新稿 |
+| 质量门禁 | HTML 与 PPTX 各自 strict 0 错误 0 警告才交付；双端逐页保真比对；渲染后检查填充率、重心和像素回归 |
+| 可扩展 | 规则内自定义版式、风格、图表的扩展点见 [`references/extending.md`](./references/extending.md) |
 
 ## 五条路线
 
@@ -41,7 +44,24 @@
 
 ## 安装
 
-技能目录里要能看到 `topmind-presentation/SKILL.md`。任选一种：
+技能目录里要能看到 `topmind-presentation/SKILL.md`。推荐用安装命令：
+
+```bash
+npx @topmindspace/topmind-presentation install                    # 自动探测 ./.claude、./.agents、./.cursor、./.codex，再找用户目录
+npx @topmindspace/topmind-presentation install --to ~/.claude/skills
+npx @topmindspace/topmind-presentation@latest install             # 升级：旧版直接覆盖
+npx @topmindspace/topmind-presentation@0.2.7 install --force       # 降级必须加 --force
+npx @topmindspace/topmind-presentation install --link             # 开发用：符号链接到包目录，而不是复制
+```
+
+安装规则（`tests/install/test_install.js` 覆盖，CI 硬门禁）：
+
+1. **默认直接升级**：已装版本比安装包旧（或读不到版本号）时直接覆盖，不备份；版本相同提示「已是最新」，加 `--force` 才重装。
+2. **不会悄悄降级**：已装版本比安装包新时报错退出，只有加 `--force` 才降级。
+3. **同名文件夹自动替换**：默认安装方式（复制）下，目标目录如果是之前装的同一技能（`SKILL.md` 的 name 是 `topmind-presentation`，或是指向它的符号链接），直接替换，不用 `--force`；名字相同但内容无关的文件夹（没有 SKILL.md、name 不同）必须加 `--force` 才会被替换。符号链接只删链接本身，不会删到它指向的目录。
+
+其他装法：
+
 
 ```bash
 # Release zip（推荐，版本固定）
@@ -74,6 +94,9 @@ python3 scripts/validate_report.py demo.html --strict
 node scripts/build_pptx.js demo.pptx --model=assets/examples/2026-09-09-presentation-business-blue.model.json
 python3 scripts/validate_pptx.py demo.pptx --strict --model=assets/examples/2026-09-09-presentation-business-blue.model.json
 
+# 一条命令：渲染 → 双端 strict → 密度 → 保真
+npx topmind-presentation build assets/examples/2026-09-09-research-mckinsey.model.json --out out --fidelity
+
 # 美化已有 PPTX（原稿只读）
 python3 scripts/beautify.py 旧稿.pptx --out 美化结果 --style business-blue --compare
 ```
@@ -102,7 +125,7 @@ python3 scripts/sync_runtime.py              # 改了 layout-constants.json / mo
 npm run capture-themes                       # 重拍本页的风格总览图（需 playwright）
 ```
 
-从 0.x 升级到 1.0 的变化见 [`docs/MIGRATION-1.0.md`](./docs/MIGRATION-1.0.md)，逐版记录见 [`CHANGELOG.md`](./CHANGELOG.md)。
+从旧版升级到 0.2.8 的变化见 [`docs/MIGRATION-0.2.8.md`](./docs/MIGRATION-0.2.8.md)，逐版记录见 [`CHANGELOG.md`](./CHANGELOG.md)。
 
 ## 许可证
 

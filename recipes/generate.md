@@ -15,10 +15,11 @@
    `plan.json` 每项 `{"type","eyebrow","title"}`；页型列表 `--list-types`。用户确认或改标题后再写内容，只确认这一轮。
 4. **方向样张（可选）**：用户在两三套风格之间拿不准时，用同一份模型各渲染封面和一张内容页并排给他挑，不要为此多问。
 5. **模型单写**：内容只写进 `REPORT_MODEL`（model.json），不手改 HTML 正文。版式按 `references/layout-library.md` 挑，同一版式不连用超过 2 页，密度 L/M/H 不连续 3 页同档。**每页 = 论点 + 证据 + 解读**：图表页写 `points`（演示 ≥2 条、研究 ≥3 条，写原因 / 影响 / 下一步，不复述图上数字，只用已有事实）和 `keyMetrics`（2–4 个关键数字），需要对照用 `chart2`、看分组用 `minis`（最多 2 张；`references/density.md`）。
-6. **渲染**：`python3 scripts/render_from_model.py 报告.model.json --template presentation --out 报告.html`
+6. **一条命令出稿（推荐）**：`python3 scripts/make_deck.py 报告.model.json --out 交付目录 --fidelity`（= 渲染 → HTML strict → 密度 → PPTX → PPTX strict → 双端保真；失败只摘失败行并给怎么修；只要 HTML 时去掉 `--fidelity` 也照样跑完前三步）。下面第 6–7 步是它的分步写法，排查单步时再用。
+   **渲染**：`python3 scripts/render_from_model.py 报告.model.json --template presentation --out 报告.html`
 7. **校验**：`python3 scripts/check_density.py 报告.model.json --strict`（信息密度 FAIL 0）；`python3 scripts/validate_report.py 报告.html --strict` 必须 0/0。PPTX：
    `node scripts/build_pptx.js 报告.pptx --model=报告.model.json` → `python3 scripts/validate_pptx.py 报告.pptx --strict --model=报告.model.json` 0/0。
 8. **看图复核（五维）**：把每页渲染成图逐页看（`python3 scripts/render_pptx_png.py 报告.pptx --out 预览/`），按 统一性 / 层级感 / 细节精度 / 信息传达 / 排版节奏 五维各记 Keep 与 Fix。空洞、拥挤、字太小、图表太小、版式重复，就地改模型重渲染，最多 2 轮。
 9. **交付**：`python3 scripts/quality_gate.py 报告.html --deliver [--pptx 报告.pptx --model 报告.model.json]` 出交付说明。
 
-需要更多：完整七步大纲 `references/outline-design.md`；演示模式工艺 `references/presentation-craft.md`；图表选型 `references/chart-decision-tree.md`。
+需要更多：现成选项不够用时的扩展点（版式 / 风格 / 图表 / 图文混排 / 可编辑示意图）`references/extending.md`；完整七步大纲 `references/outline-design.md`；演示模式工艺 `references/presentation-craft.md`；图表选型 `references/chart-decision-tree.md`。

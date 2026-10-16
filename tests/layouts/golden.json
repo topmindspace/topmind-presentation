@@ -89,26 +89,26 @@
   {
    "layout": "chart-sidenote",
    "title": "客服域一马当先，研发域势能最大——域间分化明显",
-   "fp": "b5bcb5257368",
-   "shapes": 9
+   "fp": "4c044e8f83fe",
+   "shapes": 10
   },
   {
    "layout": "chart-full",
    "title": "企业智能体采纳率：四个季度四步走至 60%",
-   "fp": "26c6410f35fe",
-   "shapes": 7
+   "fp": "067a3566bd60",
+   "shapes": 8
   },
   {
    "layout": "chart-table",
    "title": "试点率与增幅互证：研发域一年内有望反超",
-   "fp": "e655db66cb98",
-   "shapes": 10
+   "fp": "6543dadf4a7a",
+   "shapes": 11
   },
   {
    "layout": "waterfall",
    "title": "试点率增长归因：工具链补齐贡献过半",
-   "fp": "1ef0ef26fafa",
-   "shapes": 15
+   "fp": "8317725501a2",
+   "shapes": 16
   },
   {
    "layout": "rank-bar",
@@ -119,8 +119,8 @@
   {
    "layout": "composition",
    "title": "试点企业分布：过六成跨越 PoC",
-   "fp": "b19d28773825",
-   "shapes": 26
+   "fp": "6f90bd0ca372",
+   "shapes": 27
   },
   {
    "layout": "matrix-2x2",
@@ -131,20 +131,20 @@
   {
    "layout": "distribution",
    "title": "各域就绪度分布：金融客服中位最高、离散最小",
-   "fp": "15640e9234ac",
-   "shapes": 41
+   "fp": "fd99522a5d65",
+   "shapes": 42
   },
   {
    "layout": "mekko",
    "title": "渠道结构演变：线上占比三年提升 21 个百分点",
-   "fp": "6ea8376bb90c",
-   "shapes": 27
+   "fp": "f2a37daaecc9",
+   "shapes": 28
   },
   {
    "layout": "stream",
    "title": "价值兑现结构演变：副驾协同持续做厚",
-   "fp": "26218227d3fd",
-   "shapes": 382
+   "fp": "7601c245dc7c",
+   "shapes": 383
   },
   {
    "layout": "layer-stack",
@@ -161,14 +161,14 @@
   {
    "layout": "funnel",
    "title": "转化漏斗：访问到签约逐级收窄",
-   "fp": "93a11fa9307c",
-   "shapes": 6
+   "fp": "c32bef3f9aba",
+   "shapes": 7
   },
   {
    "layout": "hub-spoke",
    "title": "组件依赖拓扑：编排层是唯一枢纽，必须双活",
-   "fp": "d2c825608a3c",
-   "shapes": 25
+   "fp": "91b74bb025c4",
+   "shapes": 26
   },
   {
    "layout": "media-full",
@@ -179,8 +179,8 @@
   {
    "layout": "area-tree",
    "title": "规模化企业行业构成：制造与金融合计过半",
-   "fp": "66ef0a58eee3",
-   "shapes": 23
+   "fp": "b4bc1816a0c7",
+   "shapes": 24
   },
   {
    "layout": "steps-h",
@@ -209,14 +209,14 @@
   {
    "layout": "roadmap-gantt",
    "title": "实施排期：四阶段串行推进共 18 周",
-   "fp": "4f4ad0801f1a",
-   "shapes": 9
+   "fp": "6c57faf5703d",
+   "shapes": 10
   },
   {
    "layout": "flow-sankey",
    "title": "线索转化流向：初筛环节流失占比近六成",
-   "fp": "3f3b919df37c",
-   "shapes": 32
+   "fp": "50d1a0956b37",
+   "shapes": 33
   },
   {
    "layout": "bento",
@@ -275,26 +275,26 @@
   {
    "layout": "chart-readout",
    "title": "图表 + 解读栏 + 关键数字：采纳率四步走至 60%",
-   "fp": "4927834df215",
-   "shapes": 23
+   "fp": "ee8af3d0b2fa",
+   "shapes": 24
   },
   {
    "layout": "chart-dual",
    "title": "采纳率与试点率同步抬升：两条曲线互证",
-   "fp": "d4879d107a27",
-   "shapes": 22
+   "fp": "c0c4ea9be4cc",
+   "shapes": 23
   },
   {
    "layout": "chart-minis",
    "title": "主图看总量，小图看结构：客服与研发的爬坡曲线",
-   "fp": "9b192f7473ce",
-   "shapes": 23
+   "fp": "1548226b1eae",
+   "shapes": 24
   },
   {
    "layout": "chart-band",
    "title": "行业构成 + 解读带：制造与金融合计过半",
-   "fp": "1d7aa3278c3c",
-   "shapes": 31
+   "fp": "4b8cab70a123",
+   "shapes": 32
   },
   {
    "layout": "closing",

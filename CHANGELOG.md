@@ -1,6 +1,18 @@
 # CHANGELOG
 
-## [Unreleased]
+## [0.2.8] - 2026-10-17
+
+### M11 复审、安装命令与全新主题试跑
+- 新增 `npx @topmindspace/topmind-presentation install [--to 目录] [--force] [--link]`（`scripts/lib_install.js`）：默认直接升级（旧版覆盖、不备份）；已装版本更新时拒绝降级，`--force` 才降；同名目录是之前装的同一技能时自动替换，无关同名目录需 `--force`；符号链接只删链接不删源；拒绝装进源目录。`tests/install/test_install.js` 14 项覆盖，接入 CI。规则借鉴 topmind-writing-skills，不依赖它。
+- 全新主题端到端试跑（街角咖啡华东扩张评估 · 研究模式 · warm-sand，17 页：复合版式、折线、瀑布、矩阵、分层示意图、图文混排、对比、时间线），样例收进 `tests/trial/` 并接入 CI。试跑发现并修复：
+  - `make_deck --out 目录`（空格写法）崩溃；仅 WARN 导致 strict 失败时不显示 WARN 行；PPTX 质检只显示错误码不显示说明。
+  - 研究模式自动 Exhibit 编号与手写编号撞车；现在一个都没写才自动编号，HTML 与 PPTX 同规则（此前 PPTX 不自动编号）。
+  - 复合版式的关键数字条 / 解读栏 / 解读带未计入「组合版式」承载件，复合页被当成单件页。
+  - PPTX 左图右文页的纯字符串要点被按字符拆成「标题 / 正文」；PPTX 图片用了 pptxgenjs 的椭圆遮罩，照片四角被裁掉。
+  - HTML 左图右文页的图注占了右栏，要点被挤到图下方；`--out` 到其他目录时相对路径图片破图（make_deck 现在一并复制）。
+- 美化路由：渲染器在要点键后自加「。」，ink-academic 等风格下逐字核对 FAIL；美化模式不再新增任何标点，写稿模式在键已有收尾标点时也不再补。`tests/m11/test_m11.py` 覆盖 12 套风格美化核对。
+- 新增 `references/extending.md`：写稿时可自由组合的字段、维护者加风格 / 版式 / 图表 / 字号角色 / 几何 / 阈值的扩展点，以及刻意不开放的部分；`style-pack.md` 补 `stylePptx` 必填项；SKILL.md 与生成食谱指向它，食谱推荐一条命令 `make_deck` 出稿。
+- 文档：README 中英文补安装命令与三条规则、插图 / 美化 / 可扩展能力行、`build` 一条命令；版式数统一为 48；`docs/MIGRATION-1.0.md` 更名为 `docs/MIGRATION-0.2.8.md` 并补齐 M6–M11 变化；showcase 安装页改为安装命令与三条规则。
 
 ### M10 补齐 M9 未完项
 - 研究模式复杂信息图图区：复合 band 页 PPTX 来源行贴在图下、解读带下移、结论条落到页底（底边让开页码），复合页正文起点与 Exhibit 行间距收紧，主图多出约 0.4in；HTML 端复合 band 页主图限高 44vh，整页收进一屏，研究模式版心 1240→1320px。研究示例位置偏移 p90 0.153→0.118，`check_fidelity.py` 删除研究模式放宽（`MODE_THRESH`），四模式统一 ≤0.12。
@@ -68,16 +80,16 @@
 
 ### 文档与素材
 - README 中英两版重写；只保留一张 12 套风格总览图（重新拍摄）。风格画廊文案改为 12 套，补齐三套新风格的中文名、描述与适用场景，单系列柱图改用单一强调色。
-- 新增 `docs/MIGRATION-1.0.md`。
+- 新增升级说明（现为 `docs/MIGRATION-0.2.8.md`）。
 - 清理：`assets/showcase/`、`docs/showcase/`、`scripts/capture_showcase_pages.js`、两张按模式的总览图及其引用。
 
 ### 修复（整体复核中发现）
 - HTML 大数指标页在模型没有要点时会补出「支撑。一句话。」占位；支撑指标在窄列里横排导致数字折行。改为不补字、支撑指标竖排、大数放进色调面板。
 - 环图单位为 % 且合计 100 时中心显示「100%」、图例重复占比列（HTML 与 PPTX 两端）。
 
-## [Unreleased] — M4 已有 PPT 美化（main，未发版）
+### M4 已有 PPT 美化
 
-### 美化路由（新）
+#### 美化路由（新）
 - `scripts/beautify.py 原稿.pptx --out 新目录 [--style] [--theme] [--compare]`：解析 → 锁定原文 → 逐页诊断 → 映射版式库 → 重新排版，交付新的 HTML + PPTX + `verify.json` + `report.md` + 前后对照图；原稿只读，拒绝输出到原稿目录。
 - `scripts/ingest_pptx.py`：读取标题、文本框（层级 / 字号 / 颜色）、表格、原生图表（类别 / 系列）、图片、备注；SmartArt / OLE / 媒体与未迁入的图片列入「不支持对象」，图片导出到 `media/`。
 - 不改字契约：切分只允许原样（keep）、分隔符变分栏（sep）、手打序号改由版式绘制（ordinal）。核对器逐页查片段，PPTX 与 HTML 两端都查；数字逐个找回；图表数据与原生 chart XML 逐项一致；新页不得多出原稿没有的字。
@@ -85,70 +97,70 @@
 - 渲染不再补字：去掉「要点一 / 要点二 / （第二组要点）」「（待填）」、环图「合计」、写死的「AGENDA / 报告大纲 / 下一步」。
 - 测试：`tests/beautify/make_samples.py` 确定性生成三份朴素样例（课件 / 经营汇报 / 方案）；`tests/beautify/test_beautify.py` 断言三份差异 0、图表一致、原稿不变、未迁入对象入报告、三道 strict 校验通过，另有改字 / 改数两类负例，已接入 `ci_skill_gates.sh --with-pptx`。文档 `references/beautify.md`。
 
-### M3 遗留
+#### M3 遗留
 - 风格偏好版式接入自动选版：新增 `scripts/lib_layout_pick.py`（风格偏好 + 节奏评分），美化路由与 `recommend_layout.py --style` 共用。
 - 数值标签避让目标线：柱图 / 折线的数值标签与目标线相交时抬到线上方（`lib_chart_svg._avoid`）。
 - `references/styles.md` 补 §12–14：学术墨蓝 / 活力珊瑚 / 晴空课件的亮暗色值、编码色板与 `engine.css` 覆盖块。
 - `SKILL.md` 精简（13.2KB → 12.3KB），加美化路由一行。
 
-### 修复
+#### 修复
 - HTML 卡片栅格 `g-N--equal` 丢了列定义，等高卡片退化成单列；bento 卡片变体被同名的 4 列拼贴工具类覆盖，导致末行留洞。
 - PPTX 分组柱（≤12 个点）补数值标签，避免值轴隐藏后读不出数；HTML 多系列柱改为分组柱（`grouped()`）。
 - 无注释的图表页图形框下沿留 0.25in，不再贴进注释带；版式 golden 随之更新。
 
-## [Unreleased] — M3 版式库 · 风格库 · 图表系统（main，未发版）
+### M3 版式库 · 风格库 · 图表系统
 
-### 单源可再生（先修根因）
+#### 单源可再生（先修根因）
 - `regression.py` 不再回写示例 model.json（抽取结果写 `dist/regression/`）；新增两道检查：「model.json ≡ HTML 内嵌模型」「示例可由 model.json 完整再生」（`render_from_model --body-only` 与 HTML 内容区逐字一致）。
 - `render_from_model.py --inplace --model X.model.json`：参考资料、锚点、图标、Exhibit 编号、来源行全部从模型渲染，不再丢失；四份示例均由 model.json 完整再生。
 
-### 版式库（8 家族 44 版式）
+#### 版式库（8 家族 44 版式）
 - `layout-constants.json` → `layoutLibrary`：结构 / 观点 / 数据 / 框架 / 流程 / 媒体 / 卡片 / 表格 8 家族 44 版式，每个版式有匹配规则与视觉重量（强调 / 轻 / 中 / 密）。
 - 节奏规则：同重量连续页上限、相邻不同版式、≥8 页至少 5 个家族、≥14 页建议章节扉页；反模式：单页图标 ≤6、系列色 ≤6、同形卡片 ≤8、引言须有佐证、禁用「So what」类标签。新增 `scripts/check_rhythm.py`，CI 对全部示例硬拦。
 - 新页型 `chapter`（章节扉页）；新变体：表格 `highlight`（推荐列高亮）、对比 `problem-solution`（问题 → 方案箭头）、架构图 `aside`（横切护栏列）；bento 卡片末行自动补齐。
 - 版式 golden：`tests/layouts/build_gallery.py` 从示例与合成样例生成每版式一页的画廊，`tests/layouts/test_layouts.py` 校验 44/44 覆盖 + PPTX 几何指纹。文档 `references/layout-library.md`。
 
-### 风格库（12 套）
+#### 风格库（12 套）
 - 默认风格更名「清新蓝白（默认）」；新增学术墨蓝 `ink-academic`、活力珊瑚 `coral-launch`、晴空课件 `sky-airy`，补齐亮暗 token、编码色板、语汇与审计。
 - `styleGrammar`：每套风格绑定偏好家族 / 版式、密度档（airy / normal / dense，HTML `data-density` + 求解器承载系数）与图表皮肤（网格、圆角、标签策略）。
 
-### 图表
+#### 图表
 - 新增 `scripts/lib_chart_svg.py`：HTML 端数据驱动 SVG（核心 15 类 + 6 类信息图），标注层 `annotations`（目标线 / 高亮 / 旁注）与 `dataLabels`；配色规则统一（单系列主色、高亮项主色其余浅主色、多系列 c1–c5、负值 f-neg、K 线不用红绿）。
 - PPTX：高亮逐点着色、柱图目标线为原生组合图虚线系列、图表皮肤随风格；修复横向条形图「彩虹柱」。
 - 桑基图 PPTX 重写：全局比例尺、三次贝塞尔流带（custGeom）、流失节点灰化、标签后绘不被遮挡。
 
-### 示例
+#### 示例
 - 研究：分 6 章（章节扉页），新增引言、方案对比高亮表、标杆共同做法 bento 页（替换图片占位末页），Exhibit 连续编号并补图题与来源。
 - 架构：第 2 页改为 4 层 × 4 节点 + 横切护栏 + 图例；新增指标、选型高亮表、依赖拓扑、章节扉页、里程碑，共 12 页。
 - 演示 / showcase：补参考资料、目标线与高亮、bento 安装卡、问题 → 方案页。
 
-### 修复与清理
+#### 修复与清理
 - 架构图层高求解参数顺序错误（第 4 层越出版心）、排序面板底板压注释带、引言署名与背景叠印、章节号字号进入比例尺（`chapterNum`）。
 - 删除 `scripts/hydrate_charts.py`（被 lib_chart_svg 取代）、未引用的 `.btn--soft` / `.btn--onDark` / `.ul--flow`、「A/B 通道」旧注释；`docs/showcase.html` 与 `docs/style-gallery.html` 同步。
 - 负例自足：N11 注入内联 `.tbd`；IMAGE_CAPTION 检查不再依赖模型含图片页。
 
-## [Unreleased] — M2 HTML ↔ PPTX 同源（main，未发版）
+### M2 HTML ↔ PPTX 同源
 
-### 同源
+#### 同源
 - 新增 `scripts/lib_solver.py`（与 lib_solver.js 逐值对齐同一 golden，120 例），`render_from_model.py` 渲染前同样拆页，HTML 与 PPTX 页序一致。
 - 浏览器运行时 `assets/pptx-export.js` 删除整套 OOXML 几何引擎（与服务端不一致、仅用于预览），只保留 schema 校验、内联求解器（`__TOPPPT_SOLVER__` 注入）与 `pagePlan()`；每份 HTML 约减 90KB。
 - 预览模态改为按 pagePlan 克隆真实 HTML 版块作缩略图，标注页型与续页；修复缩略图网格行被压扁。
 - `cross_verify.py` 改为默认运行的同源核对：页数 = 求解页计划、PPTX/HTML 标题顺序、图表数据与标签、溢出；当即发现 business-blue 引用页顺序漂移并修正。
 
-### 原生图表
+#### 原生图表
 - 甘特 / 进度 / 漏斗 / 对比条改为 PPTX 原生可编辑条形图（隐藏基底、剩余轨道、对称占位技巧），删除 shapeGantt / shapeFunnel / shapeVsbar 形状绘制；新增 `tests/charts/native-rows.model.json` 探针（CI 断言 ≥4 个 chart part）。
 
-### 清理
+#### 清理
 - 删除 `scripts/gen_channel_a.js`、`dist/regression-a`、`validate_pptx --allow-shape-charts`、sync_runtime 中针对旧几何的检查与误报；文档同步改写（pptx-export.md 等）；feedback 门禁改为断言浏览器端不再含几何引擎。
 
-## [Unreleased] — M1 布局求解器（main，未发版）
+### M1 布局求解器
 
-### 求解器与容量
+#### 求解器与容量
 - 新增 `scripts/lib_solver.js`（纯函数、零依赖、确定性）：`rows()` 行/卡/泳道高度分配（紧张时压缩、富余时拉伸到上限并整组居中）、`fitUp()` 稀疏时字号向上求解、`capacity()` 按页型 × 模式估算承载比、`splitModel()` 超载拆续页（标题加「（续）」，结论只在首页、来源只在末页）、`grid12()`。
 - 新增 `scripts/solve_model.js`：报告各页容量比，`--write` / `--out=` 写回拆页后的模型，HTML 与 PPTX 同源消费。
 - `build_pptx.js` 读模型后先做容量求解：`--strict` 下超载直接失败（退出码 4）并提示先跑 solve_model；非 strict 自动拆页并告警。
 
-### 版式（PPTX）
+#### 版式（PPTX）
 - 泳道 / 金字塔 / 矩阵改由求解器分配高度，不再「挤在顶部、下半页空白」。
 - 双栏 / 三栏稀疏内容自动切换为「段落卡片网格」（MD3 tonal 卡撑满版心）。
 - 玫瑰图、关系网络在宽版心下采用「主图 + 排序面板」组合（右侧按数值排序的条目 + 比例条，全部取自数据）。
@@ -158,18 +170,18 @@
 - 双区组合页：右区只给 points 时按要点渲染（此前默认画出空柱图）；图表下沿收在注释带之上。
 - 信息图内联数据表超过承载（>5 行）自动转入演讲者备注，不再压进结论条。
 
-### 门禁与测试
+#### 门禁与测试
 - 视觉填充门禁对四份示例（演示 / 研究 / 架构 / 产品展示）全部转为硬门禁；架构样张冒烟转为硬门禁。
 - 新增 `tests/solver/test_solver.js` + 金样 `golden.json`：10 页型族 × 3 模式 × 4 档共 120 例，断言确定性与拆页不变量；CI 增加「同模型两次构建幻灯片 XML 逐字节一致」检查。
 - `regression.py` 全链路回归恢复全绿（修复 showcase 大纲 9 条未双栏、对比页被误要求图标、split 探针越界）。
 
-## M0 止血（PR #6，已合并，未发版）
+### M0 止血（PR #6）
 
-### 质量门禁
+#### 质量门禁
 - 新增 `scripts/check_visual_fill.py`：PPTX → LibreOffice → PNG，在正文区按 24×12 栅格检查有墨占比（VISUAL_FILL）、最大连续空白（VISUAL_EMPTY_BLOCK）、墨水重心（VISUAL_OFF_CENTER）。business-blue 黄金样张为硬门禁（M1 起四份示例全部硬门禁）。CI 与 Release 安装 libreoffice-impress、poppler-utils、fonts-noto-cjk。
 - `audit_docs.py` 新增 ⑧ 禁止词：「甲板」、结论条「So what」标签、`.sowhat--labeled`、旧品牌名。
 
-### 引擎（PPTX B 通道）
+#### 引擎（PPTX B 通道）
 - 单系列柱 / 条 / 线 / 面积图统一主色（不再按数据点轮换彩虹色），加浅色数值网格线。
 - points + metrics：指标改为右侧纵向 MD3 tonal 卡片，要点按高度均分并加细分隔线。
 - kpi：hero 落在等高 tonal 卡片内垂直居中，支撑指标按高度均分。
@@ -179,14 +191,14 @@
 - 图标：运行时不再隐式调用 sharp，直接用包内 `assets/icons/*.png`（降为 256px）；`--strict` 下图标缺失直接失败（exit 3）。
 - CLI：缺 `--model` 直接报错退出（`--demo` 显式调试）；支持 `--out=`。
 
-### 样式与文档
+#### 样式与文档
 - engine.css 去掉 `.col--feature` / `.arch__lname` / `.flagbar` 的左侧装饰竖条；research 示例的 so-what 本地覆盖同步去竖条；删除 `.sowhat--labeled`。
 - references 删除「So what」标签示例与标签变体说明；金句页规范改为「金句 + 署名 + 证据」。
 - 旧品牌名统一为 topmind-presentation（代码、模板、示例、文档）。
 - README 中英两版只保留一张主题总览图；主题总览图重拍（去旧名）并做 256 色量化。
 - business-blue 示例：金句页补证据数字；空的「配图占位」页换成推进路线（timeline）页。
 
-### 包
+#### 包
 - npm 包排除 showcase 示例；主题总览图与图标瘦身：4.9 MB → 2.7 MB（压缩后）。
 
 ## [0.2.7] - 2026-10-11

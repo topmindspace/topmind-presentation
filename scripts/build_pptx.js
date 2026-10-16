@@ -802,8 +802,7 @@ function addImageEl(s, src, x, y, w, h, radius, opts) {
       }
     }
   }
-  /* pptxgenjs 的 rounding 是椭圆遮罩，会切掉图片四角内容——等比放入（contain）时不加 */
-  if (radius && fit !== 'contain') o.rounding = true;
+  /* pptxgenjs 的 rounding 是椭圆遮罩（不是圆角），cover 时会把照片裁成椭圆、丢掉四角内容——M11 起一律不加，保持直角 */
   try { s.addImage(o); }
   catch (e) {
     delete o.rounding;
@@ -927,7 +926,7 @@ function imageLayoutShapes(s, layout, img, items, points, isPh, fit, y0, y1) {
     one(MX, iy, iw, ihh, img, false);
     const rxI = MX + iw + CW * (IM.halfGap || 0.06);
     const rwI = CW - iw - CW * (IM.halfGap || 0.06);
-    const ptsI = points || [];
+    const ptsI = (points || []).filter(Boolean).map(pointKV);  // M11：纯字符串要点此前被按字符拆成「标题 / 正文」
     const rowHI = fitRowH(ih - 0.1, ptsI.length, IM.noteRowH || 0.62, 0.3);
     const fzI = fitFont(ptsI.map(p => (p[0] || '') + (p[1] || '')), rwI - 0.3, ih, { max: 14, gapFactor: 0.6 });
     const fz = sz(fzI), fzSm = sz(snapFont(fzI - 1));
@@ -936,8 +935,8 @@ function imageLayoutShapes(s, layout, img, items, points, isPh, fit, y0, y1) {
       s.addShape('rect', { x: rxI, y: lyI + rowHI / 2 - 0.06, w: 0.12, h: 0.12,
         fill: { color: STYLE.accent }, line: { type: 'none' } });
       s.addText([
-        { text: (pt[0] || '') + '　', options: { fontSize: fz, bold: true, color: STYLE.ink } },
-        { text: pt[1] || '', options: { fontSize: fzSm, color: STYLE.body } },
+        { text: pt[0] ? pt[0] + '　' : '', options: { fontSize: fz, bold: true, color: STYLE.ink } },
+        { text: pt[1] || '', options: { fontSize: pt[0] ? fzSm : fz, color: pt[0] ? STYLE.body : STYLE.ink } },
       ], { x: rxI + 0.26, y: lyI, w: rwI - 0.3, h: rowHI - 0.04, fontFace: STYLE.font, valign: 'top' });
     });
     capY = iy + Math.max(ihh, ih * 0.5);
@@ -2482,6 +2481,12 @@ function composeSide(s, sec, type, C, y0, y1) {
 }
 
 /* 章节页 · 按页型分发 */
+/* M11：research 模式自动 Exhibit 编号与 HTML 同规则——作者一个 exhibitNo 都没写时，图表 / 信息图页按序编号 */
+if (MODE_NAME === 'research' && !CONTENT.sections.some(x => x && x.exhibitNo)) {
+  let exN = 0;
+  const EXT = new Set(['exhibit', 'bar', 'halftable', 'donut', 'boxplot', 'marimekko', 'network', 'sankey', 'streamgraph', 'treemap']);
+  CONTENT.sections.forEach((x) => { if (x && EXT.has(String(x.type || '').toLowerCase())) x.exhibitNo = ++exN; });
+}
 CONTENT.sections.forEach((sec) => {
   const type = sec.type || 'points';
   // Batch 2: honor layoutPreset (scaffold/recommend_layout → PPTX IR alignment)

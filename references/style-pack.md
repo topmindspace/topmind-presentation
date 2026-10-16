@@ -1,6 +1,6 @@
 # 风格包格式（新增一套风格）
 
-> **何时读**：新增第 10+ 套风格时。风格 token 单源 `scripts/layout-constants.json`，变更后同步与审计见 SKILL.md §12 双单源纪律。
+> **何时读**：新增第 13 套及以后的风格时（全部扩展点见 `extending.md`）。风格 token 单源 `scripts/layout-constants.json`，变更后同步与审计见 SKILL.md §12 双单源纪律。
 
 ## 新增一个风格 = 改 1 个文件 + 跑 2 条命令
 
@@ -14,6 +14,7 @@
 | `styleDataColorsDark.<name>` | 随暗色 | 暗色数据色板 |
 | `styleAccents.<name>` | ✅ | 该风格全部合法强调色 hex 数组（含 accent 及派生 hover/active）；`validate_report` 用它查"第二色相" |
 | `styleIdentity.<name>` | 推荐 | 一句话风格定位（画廊/文档用） |
+| `stylePptx.<name>` | ✅ | PPTX 气质：`display` serif/sans · `titleBold` · `rule` none/long/bar/bar-thick · `card` tonal/outline/hairline · `table` tonal/rule/three-line/zebra · `lineW`；`tests/m10/test_m10.py` 校验 12+ 套全覆盖 |
 
 token 语义：`accent` 唯一强调色（图表主色/链接/图标色）；`ink` 标题墨；`body` 正文；`faint` 次要文字；
 `bg` 页底；`surface` 卡面；`line` 分隔线；`soft` 浅强调底；`onAccent` 强调色上文字（保证对比度）。

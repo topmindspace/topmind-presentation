@@ -1136,7 +1136,7 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
 <!-- 封面 -->
 <section class="band band--fit band--accent--solid band--cover" id="cover">
   <div class="wrap cover">
-    <div class="t-eyebrow cover__meta">产品介绍 · 2026-10-11 · v0.2.7</div>
+    <div class="t-eyebrow cover__meta">产品介绍 · 2026-10-11 · v0.2.8</div>
     <div class="cover__main rv">
       <h1 class="t-display cover__title">topmind-presentation</h1>
       <p class="t-lead cover__sub">HTML + PPT 双交付 · 为正式商务演示而生</p>
@@ -1174,18 +1174,18 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
   <div class="wrap">
     <div class="shead rv">
       <div class="t-eyebrow">02 · 安装与分发</div>
-      <h2 class="t-h1 shead__title">安装与分发：仓库即技能，四种装法任选</h2>
+      <h2 class="t-h1 shead__title">安装与分发：一条命令装好，升级不降级</h2>
     </div>
     <div class="grid g-bento g-bento--cards rv">
       <div class="card card--lead"><div class="card__hd"><div class="card__ico" data-icon="增长"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5h.01"/></svg></div><h3 class="t-h3">仓库即技能</h3></div>
-        <ul class="ul"><li><strong>根目录即技能本体。</strong>SKILL.md、references、scripts 与 assets 同在一仓</li><li><strong>没有安装器。</strong>宿主能看到 topmind-presentation/SKILL.md 即可</li></ul></div>
-      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="下降"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg></div><h3 class="t-h3">四种装法</h3></div>
-        <ul class="ul"><li><strong>钉版本。</strong>Release 的 topmind-presentation.zip 解压到技能目录</li><li><strong>跟 HEAD。</strong>git clone 或 npx skills add；npm 包需再同步一次</li></ul></div>
+        <ul class="ul"><li><strong>仓库即技能。</strong>SKILL.md、脚本与素材同仓</li><li><strong>一条命令安装。</strong>有新版直接覆盖，不备份</li></ul></div>
+      <div class="card"><div class="card__hd"><div class="card__ico" data-icon="下降"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg></div><h3 class="t-h3">三条安装规则</h3></div>
+        <ul class="ul"><li><strong>不悄悄降级。</strong>已装更新版时报错，--force 才降</li><li><strong>同名目录自动替换。</strong>同一技能直接替换；无关目录需 --force</li></ul></div>
       <div class="card card--fill3"><div class="card__hd"><div class="card__ico" data-icon="数据"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></div><h3 class="t-h3">只发运行所需</h3></div>
         <ul class="ul"><li><strong>files 白名单。</strong>不含落地页、截图和评测集</li><li><strong>同 tag 发版。</strong>GitHub Release 与 npm 版本号一致</li></ul></div>
     </div>
-    <div class="sowhat rv"><span class="sowhat__v">版本号与 tag 一致——装哪一版，用的就是哪一版。</span></div>
-    <div class="footnote">包名 @topmindspace/topmind-presentation · 当前线 0.2.7（latest）</div>
+    <div class="sowhat rv"><span class="sowhat__v">版本号与 tag 一致，装哪一版就用哪一版；升级、拒绝降级、同名替换三条规则都有测试。</span></div>
+    <div class="footnote">包名 @topmindspace/topmind-presentation · 当前线 0.2.8（latest）</div>
   </div>
 </section>
 
@@ -2038,7 +2038,7 @@ window.REPORT_MODEL = {
   "theme": "light",
   "title": "topmind-presentation",
   "subtitle": "HTML + PPT 双交付 · 为正式商务演示而生",
-  "meta": "产品介绍 · 2026-10-11 · v0.2.7",
+  "meta": "产品介绍 · 2026-10-11 · v0.2.8",
   "agenda": [
     [
       "01",
@@ -2143,33 +2143,33 @@ window.REPORT_MODEL = {
       "type": "cards",
       "layoutPreset": "P5",
       "eyebrow": "02 · 安装与分发",
-      "title": "安装与分发：仓库即技能，四种装法任选",
+      "title": "安装与分发：一条命令装好，升级不降级",
       "columns": 3,
       "cards": [
         {
           "title": "仓库即技能",
           "points": [
             [
-              "根目录即技能本体",
-              "SKILL.md、references、scripts 与 assets 同在一仓"
+              "仓库即技能",
+              "SKILL.md、脚本与素材同仓"
             ],
             [
-              "没有安装器",
-              "宿主能看到 topmind-presentation/SKILL.md 即可"
+              "一条命令安装",
+              "有新版直接覆盖，不备份"
             ]
           ],
           "icon": "增长"
         },
         {
-          "title": "四种装法",
+          "title": "三条安装规则",
           "points": [
             [
-              "钉版本",
-              "Release 的 topmind-presentation.zip 解压到技能目录"
+              "不悄悄降级",
+              "已装更新版时报错，--force 才降"
             ],
             [
-              "跟 HEAD",
-              "git clone 或 npx skills add；npm 包需再同步一次"
+              "同名目录自动替换",
+              "同一技能直接替换；无关目录需 --force"
             ]
           ],
           "icon": "下降"
@@ -2189,8 +2189,8 @@ window.REPORT_MODEL = {
           "icon": "数据"
         }
       ],
-      "footnote": "包名 @topmindspace/topmind-presentation · 当前线 0.2.7（latest）",
-      "soWhat": "版本号与 tag 一致——装哪一版，用的就是哪一版。",
+      "footnote": "包名 @topmindspace/topmind-presentation · 当前线 0.2.8（latest）",
+      "soWhat": "版本号与 tag 一致，装哪一版就用哪一版；升级、拒绝降级、同名替换三条规则都有测试。",
       "variant": "bento-grid"
     },
     {
@@ -2674,7 +2674,7 @@ window.REPORT_MODEL = {
       ]
     ]
   }
-};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 /* __TOPPPT_RUNTIME_START__ */
 /* ══ PPTX 页序运行时（assets/pptx-export.js 的内联副本 · 由 scripts/sync_runtime.py 注入，禁止手改） ══ */

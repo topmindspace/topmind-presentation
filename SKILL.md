@@ -4,9 +4,9 @@ description: "把已有材料做成正式商务演示与多页可视化报告：
 license: MIT
 compatibility: "Python 3 stdlib for HTML generation; Node >=18 + pptxgenjs for PPTX; optional playwright for browser regression / theme captures."
 metadata:
-  version: "0.2.7"
+  version: "0.2.8"
   author: TopMindSpace
-  updated: "2026-10-11"
+  updated: "2026-10-17"
   action_category: write
   triggers: 演示, 汇报, PPT, PPTX, slides, deck, 路演, 答辩, 培训课件, 可视化报告, 网页报告, 商务演示, 架构图, 流程图
 ---
@@ -82,7 +82,7 @@ metadata:
 - A/Fast L1.5 → `default-surface.md` + `presentation-craft.md` · 骨架 `layout-grammar.md` · 插画规范 → `illustration-layout.md`
 - 组件/版式**代码** → `components.md` · 页型表 `page-type-matrix.md` · 图表门面 `charts.md` + 决策树 `chart-decision-tree.md` · 信息图 → `infographics.md`
 - 配色/主题/字阶 → `styles.md` + `design-system.md` · 写作 → `content-rules.md` · 图标语义 → `icons.md`（48 原创图标包 `assets/icons/`，`icon:<名>` 或 `data-icon`）
-- 风格包 → `references/style-pack.md`（`layout-constants.json` token 单源）· 版式库 → `references/layout-library.md`（8 家族 48 版式 + 节奏门禁 `check_rhythm.py`）· 信息密度 → `references/density.md`（论点 + 证据 + 解读；解读写原因 / 影响 / 下一步、不复述数字、只用已有事实；复合版式；`check_density.py`）· 变体 → `layout-variants.md`
+- 扩展点 → `references/extending.md` · 风格包 → `references/style-pack.md`· 版式库 → `references/layout-library.md`（48 版式 · `check_rhythm.py`）· 信息密度 → `references/density.md`（论点 + 证据 + 解读；解读写原因 / 影响 / 下一步、不复述数字、只用已有事实；复合版式；`check_density.py`）· 变体 → `layout-variants.md`
 - 美化已有 PPTX → `references/beautify.md` · PPTX 精导 → `references/pptx-export.md` · 深度高保真 → `references/high-fidelity.md` · 修复顺序 → `references/failure-modes.md` · 技能维护 → `references/tech-design.md`
 
 

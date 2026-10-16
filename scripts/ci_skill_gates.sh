@@ -103,12 +103,14 @@ run_one() {
   "$PY" tests/density/test_echo_eval.py || { echo "ci_skill_gates: 复述检测评测未达标（检出 ≥7/8、误报 ≤1/8）" >&2; exit 1; }
   "$PY" tests/m8/test_m8.py || { echo "ci_skill_gates: M8 回归自测失败" >&2; exit 1; }
   "$PY" tests/m10/test_m10.py || { echo "ci_skill_gates: M10 回归自测失败（风格气质 / 衬线回退链 / lang）" >&2; exit 1; }
+  node tests/install/test_install.js || { echo "ci_skill_gates: 安装器三条规则自测失败（升级 / 拒绝降级 / 同名替换）" >&2; exit 1; }
 
   if [[ "$WITH_PPTX" == "1" ]]; then
     ensure_python_pptx
     export NODE_PATH="${PWD}/node_modules${NODE_PATH:+:$NODE_PATH}"
     # M4：已有 PPT 美化——3 份朴素样例逐字逐数核对 + 篡改负例
     "$PY" tests/beautify/test_beautify.py || { echo "ci_skill_gates: 美化核对失败" >&2; exit 1; }
+    "$PY" tests/m11/test_m11.py || { echo "ci_skill_gates: M11 回归自测失败（美化 12 风格 / Exhibit 编号 / 复合承载件 / make_deck）" >&2; exit 1; }
   fi
 
   # M5：doctor 自检 + 打包后安装冒烟
@@ -158,6 +160,8 @@ run_one() {
       "$PY" scripts/pixel_regression.py || { echo "ci_skill_gates: 像素回归失败" >&2; exit 1; }
       # M9：HTML ↔ PPTX 逐页保真门禁（配对率 / 字级层级 / 颜色 ΔE / 换行 / 位置 / 字体声明）
       [[ -d node_modules/playwright ]] || npm ci --no-audit --no-fund >/dev/null 2>&1 || npm install --no-audit --no-fund >/dev/null
+      # M11：全新主题端到端试跑（研究模式 · warm-sand · 复合版式 / 瀑布 / 矩阵 / 示意图 / 图文混排），make_deck 六步全过
+      "$PY" scripts/make_deck.py tests/trial/jiejiao.model.json --out dist/trial --fidelity || { echo "ci_skill_gates: 端到端试跑失败（tests/trial）" >&2; exit 1; }
       "$PY" scripts/check_fidelity.py --examples --strict || { echo "ci_skill_gates: HTML↔PPTX 保真门禁失败（逐条修复提示见上）" >&2; exit 1; }
       "$PY" scripts/validate_pptx.py "dist/regression/native-rows.pptx" --strict \
         --model="tests/charts/native-rows.model.json" >/dev/null || { echo "ci_skill_gates: 行式原生图表探针失败" >&2; exit 1; }

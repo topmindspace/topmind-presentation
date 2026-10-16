@@ -945,9 +945,10 @@ def r_matrix(i, sec):
         row = cells[ri] if ri < len(cells) else []
         for ci in range(len(cols)):
             v = row[ci] if ci < len(row) else ''
+            acc = isinstance(v, dict) and bool(v.get('accent'))  # M10：accent 格与 PPTX 一致高亮（此前 HTML 丢了强调）
             if isinstance(v, dict):
                 v = v.get('t') or v.get('v') or ''
-            body += f'<div class="heat__c">{esc(v)}</div>'
+            body += f'<div class="heat__c{" heat__c--1" if acc else ""}">{esc(v)}</div>'
         body += '\n'
     body += '    </div></div>\n'
     return wrap(i, 'matrix', body, sec)

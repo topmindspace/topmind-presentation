@@ -90,7 +90,7 @@ html[data-style="apple-mono"][data-theme="dark"]{
 /* mckinsey 咨询语汇：衬线标题 · 小圆角 6 · hairline · 无阴影 · eyebrow 拉开字距 · 密排 */
 html[data-style="mckinsey"]{
 --font-body:"Inter","IBM Plex Sans",-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
---font-display:"Georgia","Times New Roman","Songti SC","STSong","SimSun",serif;
+--font-display:"Georgia","Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;
 --radius:6px;--fw-display:600;--fw-title:600;
 --letter-display:-.015em;--letter-eyebrow:.14em;--lh-body:1.55;--lh-lead:1.5;
 --gap:clamp(14px,1.3vw,22px);
@@ -122,7 +122,7 @@ html[data-style="brand-red"][data-theme="dark"]{
 /* warm-sand 编辑/年报语汇：暖米底 · 衬线标题 · 圆角 12 · 宽松行高 */
 html[data-style="warm-sand"]{
 --font-body:"Inter","Source Han Sans","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
---font-display:"Georgia","Playfair Display","Songti SC","STSong","SimSun",serif;
+--font-display:"Georgia","Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;
 --radius:12px;--fw-display:600;--fw-title:600;
 --letter-display:-.01em;--letter-eyebrow:.13em;--lh-body:1.72;--lh-lead:1.65;
 --gap:clamp(18px,1.8vw,30px);
@@ -154,7 +154,7 @@ html[data-style="deep-teal"][data-theme="dark"]{
 /* ink-academic 学术墨蓝语汇（M3 新增）*/
 html[data-style="ink-academic"]{
 --font-body:"Inter","Source Han Sans","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
---radius:8px;--font-display:"Georgia","Songti SC","STSong","SimSun",serif;--fw-display:600;--letter-eyebrow:.14em;--lh-body:1.6;--gap:clamp(14px,1.3vw,22px);
+--radius:8px;--font-display:"Georgia","Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;--fw-display:600;--letter-eyebrow:.14em;--lh-body:1.6;--gap:clamp(14px,1.3vw,22px);
 --bg:#ffffff;--surface:#ffffff;--surface-1:#f4f6f9;--surface-2:#eceff4;--surface-3:#dfe4eb;
 --surface-inv:#14181f;--text:#14181f;--text-2:#454d59;--text-3:#6b7380;--text-inv:#ffffff;
 --border:#d5dae1;--border-soft:#e4e8ee;
@@ -585,6 +585,16 @@ color:var(--text-2);vertical-align:top;line-height:1.6}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover{background:var(--surface-1)}
 td strong{color:var(--text);font-weight:600}
+/* M10：表格质感随风格（与 PPTX stylePptx.table 同源）：
+   rule = 无外框、表头墨色粗线（apple-mono / mckinsey / sky-airy）；three-line = 学术三线表（ink-academic）；
+   zebra = 隔行底色（warm-sand / deep-teal / graphite-dark / spectrum）；其余 tonal 为默认样式 */
+:is(html[data-style="apple-mono"],html[data-style="mckinsey"],html[data-style="sky-airy"],html[data-style="ink-academic"]) .tbl-wrap{border:none;border-radius:0;background:transparent}
+:is(html[data-style="apple-mono"],html[data-style="mckinsey"],html[data-style="sky-airy"]) thead th{background:transparent;color:var(--text);font-weight:700;border-bottom:1px solid var(--text)}
+html[data-style="ink-academic"] table{border-top:1.5px solid var(--text);border-bottom:1.5px solid var(--text)}
+html[data-style="ink-academic"] thead th{background:transparent;color:var(--text);font-weight:700;border-bottom:.75px solid var(--text)}
+html[data-style="ink-academic"] tbody td{border-bottom:none}
+:is(html[data-style="warm-sand"],html[data-style="deep-teal"],html[data-style="graphite-dark"],html[data-style="spectrum"]) tbody tr:nth-child(even) td{background:var(--surface-1)}
+:is(html[data-style="warm-sand"],html[data-style="deep-teal"],html[data-style="graphite-dark"],html[data-style="spectrum"]) tbody td{border-bottom:none}
 td.k{color:var(--text);font-weight:500;white-space:nowrap}
 td.num{font-variant-numeric:tabular-nums}
 /* ── 结论条（MD3 tonal surface · 本页重点收口；默认不显示「So what」标签） ──
@@ -1014,6 +1024,8 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
 .readout__k{font-weight:600;color:var(--text);line-height:1.4;font-size:var(--fs-body)}
 .readout__v{margin:4px 0 0;font-size:var(--fs-sm);color:var(--text-2);line-height:1.55}
 .cband{display:grid;gap:var(--sp-4);margin-top:var(--sp-5)}
+/* M10：复合 band 页（图 + 底部解读带）主图限高，整页收在一屏内（不溢出 16:9 页框），与 PPTX 同骨架 */
+.wrap:has(>.cband) .exhibit>.chart,.wrap:has(>.cband) .fig>.chart{max-height:44vh}
 .cband__p{background:var(--accent-soft);border-radius:var(--r-lg);padding:var(--sp-4) var(--sp-5)}
 .minis{display:flex;flex-direction:column;gap:var(--sp-3)}
 .mini{background:var(--surface-1,var(--surface));border-radius:var(--r-lg);padding:var(--sp-3) var(--sp-4)}

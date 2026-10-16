@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### M10 补齐 M9 未完项
+- 研究模式复杂信息图图区：复合 band 页 PPTX 来源行贴在图下、解读带下移、结论条落到页底（底边让开页码），复合页正文起点与 Exhibit 行间距收紧，主图多出约 0.4in；HTML 端复合 band 页主图限高 44vh，整页收进一屏，研究模式版心 1240→1320px。研究示例位置偏移 p90 0.153→0.118，`check_fidelity.py` 删除研究模式放宽（`MODE_THRESH`），四模式统一 ≤0.12。
+- 12 套风格 PPTX 气质：新增 `stylePptx`（标题字体 / 字重 / 标题线 / 卡片质感 / 表格质感 / 线宽）。衬线风格（mckinsey / warm-sand / ink-academic）西文 Georgia + 东亚 SimSun，按运行写入 latin / ea；HTML 衬线回退链统一为 Georgia → Noto Serif SC → Source Han Serif SC → Songti SC → STSong → SimSun → Noto Serif CJK SC。
+- HTML 表格质感与 PPTX 同源：rule（apple-mono / mckinsey / sky-airy）、三线表（ink-academic）、斑马纹（warm-sand / deep-teal / graphite-dark / spectrum）。
+- 暗色主题：12 套风格 HTML 与 PPTX 逐套审查，PPTX 暗色 token 正文 / 弱文字 / 强调色对 bg / surface / soft 对比度全部达标（正文 ≥4.5，强调 ≥3）。
+- 瀑布图：PPTX 首柱与合计柱用实色、增量用品牌浅调、减量用 --neg 红，数值标签统一墨色，与 HTML 一致（此前增量实色、减量灰）。
+- 矩阵图：HTML 补上 accent 格高亮（此前丢失）；PPTX 格子改 tonal 实底、无描边、文字居中，不再被卡片描边风格误套。
+- 中英文间距：含中文的文字运行标注 `lang="zh-CN" altLang="en-US"`；源文本只有一个普通空格，LibreOffice 预览中更宽的间距来自其默认的中西文自动间距，DrawingML 无对应属性，PowerPoint 不会额外加宽。
+- 新增 `tests/m10/test_m10.py`（风格全覆盖、衬线回退链、表格同源、统一阈值、矩阵高亮、zh-CN 标注），接入 CI。
+
 ### M9 全方位优化
 - 新增 HTML ↔ PPTX 逐页保真门禁 `check_fidelity.py` + `fidelity_html.js`：按段落配对，量化字级层级（相对整稿中位比值）、颜色 ΔE、换行、位置、字体声明；修复提示中文可执行；接入 CI（四份示例全部 PASS）。
 - 两端对齐：封面 / 章节标题 / 指标大数 / 卡内大数 / 时间线阶段名改走新增角色字号（coverHero · chapterTitle · kpiHero · kpiCard · stepTitle）；眉题降一级；结论条改 tonal；表头改 tonal；Exhibit 行改「品牌色编号 + 墨色图题」；卡片网格行优先。

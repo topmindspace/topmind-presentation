@@ -54,7 +54,7 @@ VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'met
 _DEFAULTS = {
     'checkBudgets': {
         'presentation': dict(char=1500, unit=8, empty=80, fit=1000, wrap=1400, trow=8),
-        'research': dict(char=3200, unit=12, empty=120, fit=2200, wrap=1240, trow=16),
+        'research': dict(char=3200, unit=12, empty=120, fit=2200, wrap=1320, trow=16),
         'architecture': dict(char=600, unit=3, empty=60, fit=600, wrap=1600, trow=6),
     },
     'charts': {'types': [], 'minSize': {}},

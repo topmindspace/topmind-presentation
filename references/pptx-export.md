@@ -218,5 +218,12 @@ python scripts/validate_pptx.py "报告.pptx" --strict --model="报告.model.jso
 
 ## 双端保真门禁（M9）
 
-`python3 scripts/check_fidelity.py 报告.html 稿件.pptx --strict`（示例全集：`--examples`）。HTML 端用 Chrome 量每个文字块的位置、字号、颜色、行数；PPTX 端逐段落读字号 / 颜色 / 字体声明，LibreOffice 转 PDF 量行数。两端尺寸本来不同，字号按「相对整稿中位比值」比层级（落在 0.8–1.25 算一致）。阈值：配对 ≥80%、字级偏差 ≤15%、颜色 ΔE>12 ≤8%、换行差 ≥2 行 ≤20%、位置 p90 ≤0.12（research 0.16，网页图卡更高）、缺字体声明 0。新增字号角色写进 `modeTypeScale` 后经 `roleSz()` 取用，不要硬编码。
+`python3 scripts/check_fidelity.py 报告.html 稿件.pptx --strict`（示例全集：`--examples`）。HTML 端用 Chrome 量每个文字块的位置、字号、颜色、行数；PPTX 端逐段落读字号 / 颜色 / 字体声明，LibreOffice 转 PDF 量行数。两端尺寸本来不同，字号按「相对整稿中位比值」比层级（落在 0.8–1.25 算一致）。阈值：配对 ≥80%、字级偏差 ≤15%、颜色 ΔE>12 ≤8%、换行差 ≥2 行 ≤20%、位置 p90 ≤0.12（四模式统一；复合 band 页 HTML 主图限高 44vh、PPTX 来源行贴图下、结论条落页底，两端同序）、缺字体声明 0。新增字号角色写进 `modeTypeScale` 后经 `roleSz()` 取用，不要硬编码。
 
+
+## 风格气质与中文排版（M10）
+
+- `layout-constants.json → stylePptx` 为每套风格声明：`display`（serif / sans）、`titleBold`、`rule`（none 无标题线 / long 通栏细线 / bar 短色条 / bar-thick 粗色条）、`card`（tonal / outline / hairline）、`table`（tonal / rule / three-line / zebra）、`lineW`。HTML 端表格同名规则写在 engine.css，`tests/m10/test_m10.py` 校验两端一致、12 套全覆盖。
+- 衬线方案：PPTX 西文 Georgia、东亚 SimSun（Windows 与 Office for Mac 自带），导出后逐运行写入 `<a:latin>` / `<a:ea>`。SimSun 没有粗体字重，标题加粗时 PowerPoint 用合成粗体，标题字号下观感可接受。缺字时由系统回退（Linux / CI：Gelasio、Noto Serif CJK）。HTML 回退链：Georgia → Noto Serif SC → Source Han Serif SC → Songti SC → STSong → SimSun → Noto Serif CJK SC → serif。
+- 语言标注：含汉字的运行与表格单元格写 `lang="zh-CN" altLang="en-US"`，纯西文运行保持 en-US，PowerPoint 据此选东亚字体与断行规则。
+- 中西文间距：源文本只有一个普通空格。LibreOffice 预览会再加一段亚洲 / 非亚洲字符间距（其默认开启的自动间距），DrawingML 没有对应属性，PowerPoint 只显示那一个空格。看到预览图间距偏宽不要去删空格。

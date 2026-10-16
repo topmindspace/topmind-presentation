@@ -593,7 +593,7 @@ function _langify(text, opts) {
     const _sh = sl.addShape.bind(sl);
     /* M10：卡片质感——色块卡（surface 填充的圆角矩形）按风格改为 outline / hairline */
     sl.addShape = (type, o) => {
-      if (type === 'roundRect' && o && o.fill && o.fill.color === STYLE.surface && SP.card !== 'tonal' && !(o.objectName && /^(mini|treemap|boxplot|network)/.test(o.objectName))) {
+      if (type === 'roundRect' && o && o.fill && o.fill.color === STYLE.surface && SP.card !== 'tonal' && !(o.objectName && /^(mini|treemap|boxplot|network|matrix)/.test(o.objectName))) {
         o = Object.assign({}, o, { fill: { color: STYLE.bg }, line: { color: STYLE.line, width: SP.card === 'hairline' ? 0.5 : (SP.lineW || 0.75) } });
       }
       return _sh(type, o);
@@ -706,8 +706,10 @@ function paraKV(p) {
   if (isRec(p)) return [p.title || '', p.text || p.d || ''];
   return ['', String(p == null ? '' : p)];
 }
+/* M10：复合 band 页注释带重排（与 HTML 同序：图 → 来源行 → 解读带 → 结论条），每页开头复位 */
+let ANNOT = null;
 function soWhatBar(s, text) {
-  const R = REGIONS.regionOf('exhibit', 'annotation') ||
+  const R = (ANNOT && ANNOT.soWhat) || REGIONS.regionOf('exhibit', 'annotation') ||
     { x: MX, y: PT.exhibit.soWhatY, w: CW, h: 0.62 };
   /* MD3 结论条：tonal soft 满铺 + 舒适字阶；禁止左 accent 装饰轨（anti-AI-flavor） */
   const padX = 0.28, padY = 0.10;
@@ -721,7 +723,7 @@ function soWhatBar(s, text) {
   });
 }
 function footnoteLine(s, text) {
-  const R = REGIONS.regionOf('exhibit', 'footnote') ||
+  const R = (ANNOT && ANNOT.foot) || REGIONS.regionOf('exhibit', 'footnote') ||
     { x: MX, y: PT.exhibit.footnoteY, w: CW - 1.2, h: 0.32 };
   s.addText(text, { x: R.x, y: R.y, w: R.w, h: R.h,
     fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.body, objectName: trName('footnote'), fit: 'shrink' });
@@ -1297,24 +1299,28 @@ function waterfallChart(s, c, pos) {
   const labels = (c.labels || []).map(String);
   const deltas = (c.values || []).map(Number);
   let run = 0;
-  const bases = [], ups = [], downs = [], cum = [];
+  const bases = [], ups = [], downs = [], cum = [], tots = [];
   /* 末项等于前项之和 → 视为「合计柱」（从 0 起），否则会被当增量累加、整图失真 */
   const sumPrev = deltas.slice(0, -1).reduce((a, b) => a + b, 0);
   const lastIsTotal = deltas.length > 2 && Math.abs(deltas[deltas.length - 1] - sumPrev) < 1e-6;
   deltas.forEach((d, i) => {
-    if (lastIsTotal && i === deltas.length - 1) { bases.push(0); ups.push(d); downs.push(0); cum.push(d); return; }
+    /* M10：首柱（基线）与末项合计柱单列「合计」系列——与 HTML f-acc 实色一致；中间增量走品牌浅调（f-accs2），减量走 --neg */
+    if (lastIsTotal && i === deltas.length - 1) { bases.push(0); tots.push(d); ups.push(0); downs.push(0); cum.push(d); return; }
+    if (i === 0 && d >= 0) { bases.push(0); tots.push(d); ups.push(0); downs.push(0); run += d; cum.push(run); return; }
     const b = d >= 0 ? run : run + d;
-    bases.push(b); ups.push(d >= 0 ? d : 0); downs.push(d < 0 ? -d : 0);
+    bases.push(b); tots.push(0); ups.push(d >= 0 ? d : 0); downs.push(d < 0 ? -d : 0);
     run += d; cum.push(run);
   });
   const series = [
     { name: '基底', labels: labels, values: bases },
+    { name: '合计', labels: labels, values: tots },
     { name: '增量', labels: labels, values: ups },
     { name: '减量', labels: labels, values: downs },
   ];
+  const NEG = STYLE.neg || (THEME === 'dark' ? 'F28B82' : 'C5221F');
   const inner = {
     barDir: 'col', barGrouping: 'stacked', showValue: false, showLegend: false,
-    chartColors: [STYLE.bg, STYLE.accent, STYLE.faint],
+    chartColors: [STYLE.bg, STYLE.accent, mixHex(STYLE.soft, STYLE.accent, 0.22), NEG],
     catAxisLabelColor: STYLE.faint, catAxisLabelFontSize: sz(10.5), catAxisLabelFontFace: STYLE.font,
     valAxisHidden: true, valAxisLineShow: false, catAxisLineShow: false,
     catGridLine: { style: 'none' }, valGridLine: { style: 'none' }, valAxisMinVal: 0, showTitle: false,
@@ -1324,18 +1330,18 @@ function waterfallChart(s, c, pos) {
      纯堆叠柱 + 隐形基底即标准瀑布，数值标签由下方文本行给出 */
   try {
     const n = labels.length;
-    const vmax = Math.ceil(Math.max(1e-9, ...cum, ...bases.map((b, i) => b + ups[i] + downs[i])) * 1.12);
+    const vmax = Math.ceil(Math.max(1e-9, ...cum, ...bases.map((b, i) => b + tots[i] + ups[i] + downs[i])) * 1.12);
     outer.valAxisMaxVal = vmax;
     s.addChart(pptx.ChartType.bar, series, outer);
     const plotTop = pos.y + 0.12, plotH = pos.h - 0.55;
     labels.forEach((lb, i) => {
-      const top = bases[i] + ups[i] + downs[i];
+      const top = bases[i] + tots[i] + ups[i] + downs[i];
       const cw = pos.w / n;
       const ty = plotTop + plotH * (1 - top / vmax) - 0.3;
       const d = deltas[i];
       const isTot = (lastIsTotal && i === n - 1) || i === 0;
       s.addText((isTot || d < 0 ? '' : '+') + d + (c.unit || ''), { x: pos.x + cw * i, y: Math.max(pos.y - 0.1, ty), w: cw, h: 0.26,
-        align: 'center', fontFace: STYLE.font, fontSize: sz(10.5), bold: isTot, color: d < 0 ? STYLE.faint : (isTot ? STYLE.ink : STYLE.accent) });
+        align: 'center', fontFace: STYLE.font, fontSize: sz(10.5), bold: true, color: STYLE.ink });  // M10：与 HTML 同为墨色 600，正负靠柱色区分
     });
   } catch (e) {
     /* 组合图失败：单柱降级必须可观测，禁止静默空白 */
@@ -2313,7 +2319,7 @@ function addTable(s, tbl, x, y, w, availH, opts) {
  *  band 形态（其余图表 / 信息图）：主图保持原几何，底部「关键数字 + 解读」带
  * keyMetrics 缺省时从单序列图表数据推导（只做算术，不编造）。compose:'off' 关闭。 */
 const COMPOSE_SIDE = new Set(['bar', 'donut', 'exhibit']);
-const COMPOSE_TOP = PT.common.headRuleY + 0.33;   // 复合页正文起点：分隔线下 0.33in
+const COMPOSE_TOP = PT.common.headRuleY + 0.22;   // 复合页正文起点：分隔线下 0.22in（M10：从 0.33 收紧，高度还给主图）
 const COMPOSE_BAND = new Set(['halftable', 'heatmap', 'bullet', 'treemap', 'marimekko', 'streamgraph', 'sankey', 'boxplot',
   'network', 'lane', 'pyramid', 'matrix', 'metrics']);
 const DERIVABLE = new Set(['bar', 'hbar', 'donut', 'pie', 'line', 'area', 'lollipop', 'dotplot', 'rose', 'radialbar', 'funnel', 'vsbar']);
@@ -2491,10 +2497,11 @@ CONTENT.sections.forEach((sec) => {
   /* 正文区起点 / 终点（含 lead 与 so-what / 来源行 / 待核实条占位） */
   /* 非 exhibit 页型也可带 Exhibit 编号（帧头徽标；正文区下移让位，避免与主图重叠） */
   /* M7：复合版式页（图 + 解读 + 关键数字）正文区上提到分隔线下方，把纵向空间留给证据，而不是标题下的空带 */
+  ANNOT = null;
   const _C = composeOn(sec, type);
   const exBadge = ((type !== 'exhibit' || _C) && sec.exhibitNo) ? exhibitBadge(sec.exhibitNo) + (sec.cap ? '　' + sec.cap : '') : null;
   const bodyY0 = sec.lead ? PT.common.bodyYWithLead : (_C ? COMPOSE_TOP : CONTENT_TOP);
-  const bodyY = exBadge ? bodyY0 + 0.42 : bodyY0;
+  const bodyY = exBadge ? bodyY0 + (_C ? 0.34 : 0.42) : bodyY0;  // M10：复合页 Exhibit 行与主图间距收紧
   if (exBadge) {
     s.addText(exhibitRuns(sec.exhibitNo, sec.cap, sz(11.5)), { x: MX, y: bodyY0 - 0.06, w: CW, h: 0.3 });
   }
@@ -2517,8 +2524,20 @@ CONTENT.sections.forEach((sec) => {
   /* M7：复合版式（信息密度）——side 形态整页接管；band 形态先画底部解读带、收窄正文区再交给原页型 */
   if (_C && _C.form === 'band') {
     const bandH = Math.min(1.05, Math.max(0.85, (bodyBottom - bodyY) * 0.26));  // M9：解读带收一点，把高度还给图
-    readoutRow(s, _C.km.slice(0, 2), _C.pts.slice(0, 3), MX, bodyBottom - bandH, CW, bandH);
-    bodyBottom -= bandH + 0.2;
+    const hasFoot = !!(sec.footnote || sec.note);
+    if (!flagH && (sec.soWhat || hasFoot)) {
+      /* M10：结论条落到页底（底边让开页码 pageNumY），来源行贴在图下——与 HTML 的 figure 内来源行同序，图区多出 ~0.2in */
+      const BA = PT.composeAnnot || { soWhatY: 6.4, soWhatH: 0.56, footH: 0.28 };
+      const bandBot = sec.soWhat ? BA.soWhatY - 0.18 : CONTENT_BOTTOM_NOTE + 0.3;
+      const bandTop = bandBot - bandH;
+      readoutRow(s, _C.km.slice(0, 2), _C.pts.slice(0, 3), MX, bandTop, CW, bandH);
+      ANNOT = { soWhat: sec.soWhat ? { x: MX, y: BA.soWhatY, w: CW, h: BA.soWhatH } : null,
+        foot: hasFoot ? { x: MX, y: bandTop - 0.12 - BA.footH, w: CW - 1.2, h: BA.footH } : null };
+      bodyBottom = hasFoot ? ANNOT.foot.y - 0.06 : bandTop - 0.2;
+    } else {
+      readoutRow(s, _C.km.slice(0, 2), _C.pts.slice(0, 3), MX, bodyBottom - bandH, CW, bandH);
+      bodyBottom -= bandH + 0.2;
+    }
   }
   if (_C && _C.form === 'side') {
     composeSide(s, sec, type, _C, bodyY, Math.min(bodyBottom, CONTENT_BOTTOM_NOTE + 0.3));
@@ -3216,10 +3235,10 @@ CONTENT.sections.forEach((sec) => {
         const txt = isRec(cell) ? (cell.t || '') : String(cell);
         const cx = MX + mLW + ci * mW;
         s.addShape('roundRect', { x: cx + 0.04, y: y2, w: mW - 0.08, h: mCH - 0.1, rectRadius: 0.05,
-          fill: { color: acc ? STYLE.soft : STYLE.surface },
-          line: acc ? { type: 'none' } : { color: STYLE.line, width: 0.75 } });
+          fill: { color: acc ? STYLE.soft : STYLE.surface }, line: { type: 'none' }, objectName: 'matrix:cell' });
+        /* M10：与 HTML .heat__c 同构——tonal 实底无描边、文字居中；字重 600；accent 格 = heat__c--1（浅调底 + 品牌字） */
         s.addText(txt, { x: cx + 0.14, y: y2 + 0.08, w: mW - 0.28, h: mCH - 0.26,
-          fontFace: STYLE.font, fontSize: sz(11), valign: 'middle',
+          fontFace: STYLE.font, fontSize: sz(11), valign: 'middle', align: 'center', bold: true,
           color: acc ? STYLE.accent : STYLE.body });
       });
     });

@@ -116,7 +116,7 @@ html[data-style="apple-mono"][data-theme="dark"] {
 ```css
 html[data-style="mckinsey"] {
   --font-body: "Inter","IBM Plex Sans",-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-  --font-display: "Georgia","Times New Roman","Songti SC","STSong","SimSun",serif;
+  --font-display: "Georgia","Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;
   --radius: 6px; --fw-display:600; --fw-title:600;
   --letter-display:-.015em; --letter-eyebrow:.14em; --lh-body:1.55; --lh-lead:1.5;
   --gap:clamp(14px,1.3vw,22px);
@@ -174,7 +174,7 @@ html[data-style="brand-red"][data-theme="dark"] {
 ```css
 html[data-style="warm-sand"] {
   --font-body: "Inter","Source Han Sans","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
-  --font-display: "Georgia","Playfair Display","Songti SC","STSong","SimSun",serif;
+  --font-display: "Georgia","Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;
   --radius: 12px; --fw-display:600; --fw-title:600;
   --letter-display:-.01em; --letter-eyebrow:.13em; --lh-body:1.72; --lh-lead:1.65;
   --gap:clamp(18px,1.8vw,30px);
@@ -385,7 +385,7 @@ PPTX 端读 `layout-constants.json` 的 `styles` / `stylesDark` / `styleDataColo
 ```css
 html[data-style="ink-academic"]{
 --font-body:"Inter","Source Han Sans","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
---radius:8px;--font-display:"Georgia","Songti SC","STSong","SimSun",serif;--fw-display:600;--letter-eyebrow:.14em;--lh-body:1.6;--gap:clamp(14px,1.3vw,22px);
+--radius:8px;--font-display:"Georgia","Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;--fw-display:600;--letter-eyebrow:.14em;--lh-body:1.6;--gap:clamp(14px,1.3vw,22px);
 --bg:#ffffff;--surface:#ffffff;--surface-1:#f4f6f9;--surface-2:#eceff4;--surface-3:#dfe4eb;
 --surface-inv:#14181f;--text:#14181f;--text-2:#454d59;--text-3:#6b7380;--text-inv:#ffffff;
 --border:#d5dae1;--border-soft:#e4e8ee;

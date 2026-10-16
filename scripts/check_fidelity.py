@@ -45,7 +45,6 @@ THRESH = {
 }
 # 按模式放宽的项（须有理由并在 CHANGELOG 记为遗留）：research 的 HTML 图卡比 PPTX 图区高约 35%
 # （网页无 16:9 高度上限），复杂信息图的标签纵向位置系统性偏移；字号 / 颜色 / 配对不放宽。
-MODE_THRESH = {'research': {'pos_p90': 0.16}}
 
 
 DECOR_RE = re.compile(r'\d{1,2}\s*/\s*\d{1,3}|\d{1,2}|[A-Z ]{3,12}')   # 页码 / 序号 / 英文装饰标签不计入
@@ -192,7 +191,7 @@ def compare(html_json: Path, pptx: Path, td: Path):
             if pl:
                 agg['wrap_n'] += 1
                 agg['wrap_bad'] += wrap >= 2
-            rows.append({'text': b['text'][:40], 'match': True, 'pos': round(pos, 3), 'font_ratio': round(fr, 2),
+            rows.append({'text': b['text'][:40], 'match': True, 'pos': round(pos, 3), 'dxy': [round(b['x'] - it['x'], 3), round(b['y'] - it['y'], 3)], 'font_ratio': round(fr, 2),
                          'dE': round(de, 1), 'lines': [it['lines'], pl], 'c': [it['color'], b['color']], 'px_pt': [round(it['fs'] * 1440, 1), b['pt']]})
         pages.append({'page': i + 1, 'rows': rows})
     # 字号按「整稿中位比值」归一：PPTX 为投影放大一档是设计意图，比的是字级层级是否一致
@@ -224,7 +223,7 @@ def verdict(s):
                         ('wrap_bad', '换行偏差', '文本框宽度或字号与 HTML 不一致；先查该页 regions 宽度')):
         if s[k] > THRESH[k]:
             bad.append(f"{lab} {s[k]:.0%} > {THRESH[k]:.0%}：{fix}")
-    pos_lim = MODE_THRESH.get(s.get('mode') or '', {}).get('pos_p90', THRESH['pos_p90'])
+    pos_lim = THRESH['pos_p90']  # M10：研究模式不再放宽，四模式统一阈值
     if s['pos_p90'] > pos_lim:
         bad.append(f"位置偏移 p90 {s['pos_p90']} > {pos_lim}：该页 PPTX 版式与 HTML 不是同一骨架，查 lib_layout_regions")
     if s['font_missing'] > THRESH['font_missing']:

@@ -102,6 +102,7 @@ run_one() {
   "$PY" tests/density/test_density.py || { echo "ci_skill_gates: 信息密度自测失败" >&2; exit 1; }
   "$PY" tests/density/test_echo_eval.py || { echo "ci_skill_gates: 复述检测评测未达标（检出 ≥7/8、误报 ≤1/8）" >&2; exit 1; }
   "$PY" tests/m8/test_m8.py || { echo "ci_skill_gates: M8 回归自测失败" >&2; exit 1; }
+  "$PY" tests/m10/test_m10.py || { echo "ci_skill_gates: M10 回归自测失败（风格气质 / 衬线回退链 / lang）" >&2; exit 1; }
 
   if [[ "$WITH_PPTX" == "1" ]]; then
     ensure_python_pptx

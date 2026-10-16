@@ -15,7 +15,7 @@
   {
    "layout": "swimlane",
    "title": "一次任务请求的五步闭环",
-   "fp": "6eb86f350fd8",
+   "fp": "b673a54064ac",
    "shapes": 44
   },
   {
@@ -47,13 +47,13 @@
   {
    "layout": "argument-3",
    "title": "范式跃迁：智能体的本质是目标驱动的自主执行",
-   "fp": "5374c63962a9",
+   "fp": "c47fe7d821ce",
    "shapes": 19
   },
   {
    "layout": "quote-evidence",
    "title": "规模化瓶颈不在模型，而在治理与集成",
-   "fp": "4deb249a4f70",
+   "fp": "6ab7ae73bb55",
    "shapes": 17
   },
   {
@@ -83,7 +83,7 @@
   {
    "layout": "kpi-trend",
    "title": "六成企业已越过 PoC，规模化不足两成",
-   "fp": "6b4498c9f421",
+   "fp": "01760597412a",
    "shapes": 17
   },
   {
@@ -155,7 +155,7 @@
   {
    "layout": "funnel",
    "title": "转化漏斗：访问到签约逐级收窄",
-   "fp": "6429695e28f4",
+   "fp": "93a11fa9307c",
    "shapes": 6
   },
   {
@@ -245,7 +245,7 @@
   {
    "layout": "feature-2col",
    "title": "主张与细节：为什么先做数据底座",
-   "fp": "0ae48bd364d0",
+   "fp": "370004c7cd5e",
    "shapes": 8
   },
   {

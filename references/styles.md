@@ -366,6 +366,105 @@ html[data-style="spectrum"][data-theme="dark"] {
 
 ---
 
+## 12. 学术墨蓝 `ink-academic`
+
+**定位**：严谨、克制，像期刊插图。白底 + 墨蓝强调，衬线标题，图表网格常开。
+**适用**：学术汇报、课题答辩、研究综述、数据分析课。
+**语汇**：衬线标题（Georgia / 宋体）· 卡片圆角 8 · 图表直角 · 密度 dense；版式语法见 §10。
+
+| 项 | light | dark |
+|---|---|---|
+| 强调色 accent | `1F3A5F` | `9DB8DC` |
+| 标题 ink / 正文 body / 弱化 faint | `14181F` / `454D59` / `6B7380` | `E6E9EE` / `B3BAC5` / `8A929E` |
+| 底 bg / 表面 surface / 浅强调 soft | `FFFFFF` / `F4F6F9` / `E9EEF5` | `0E1117` / `151A22` / `18243A` |
+| 分隔线 line / 强调上文字 onAccent | `D5DAE1` / `FFFFFF` | `2B323D` / `0E1626` |
+| 编码色板 c1–c5 | `1f3a5f` `4f7cac` `8a6d3b` `6b8f71` `9a5b6f` | `9db8dc` `7fc4b8` `c9ad7d` `9fc0a4` `c995a6` |
+
+PPTX 端读 `layout-constants.json` 的 `styles` / `stylesDark` / `styleDataColors*`（裸 hex）；HTML 端是下面的 `engine.css` 覆盖块：
+
+```css
+html[data-style="ink-academic"]{
+--font-body:"Inter","Source Han Sans","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
+--radius:8px;--font-display:"Georgia","Songti SC","STSong","SimSun",serif;--fw-display:600;--letter-eyebrow:.14em;--lh-body:1.6;--gap:clamp(14px,1.3vw,22px);
+--bg:#ffffff;--surface:#ffffff;--surface-1:#f4f6f9;--surface-2:#eceff4;--surface-3:#dfe4eb;
+--surface-inv:#14181f;--text:#14181f;--text-2:#454d59;--text-3:#6b7380;--text-inv:#ffffff;
+--border:#d5dae1;--border-soft:#e4e8ee;
+--accent:#1f3a5f;--accent-soft:#e9eef5;--accent-soft-2:#d6e0ee;--accent-text:#1f3a5f;--accent-on:#ffffff}
+html[data-style="ink-academic"][data-theme="dark"]{
+--bg:#0e1117;--surface:#0e1117;--surface-1:#151a22;--surface-2:#1b222c;--surface-3:#232b37;
+--surface-inv:#e6e9ee;--text:#e6e9ee;--text-2:#b3bac5;--text-3:#8a929e;--text-inv:#14181f;
+--border:#2b323d;--border-soft:#202731;
+--accent:#9db8dc;--accent-soft:#18243a;--accent-soft-2:#223452;--accent-text:#b3c9e6;--accent-on:#0e1626}
+```
+
+---
+
+## 13. 活力珊瑚 `coral-launch`
+
+**定位**：热情、外向，有发布会气质。白底 + 珊瑚红强调，大圆角，大留白。
+**适用**：产品发布、品牌活动、招商路演、市场复盘。
+**语汇**：HarmonyOS/Inter 栈 · 圆角 18 · 大字阶 · 密度 airy；版式语法见 §10。
+
+| 项 | light | dark |
+|---|---|---|
+| 强调色 accent | `C4402A` | `FF8A73` |
+| 标题 ink / 正文 body / 弱化 faint | `1E1A19` / `5A5250` / `857C79` | `F3ECEA` / `C9BCB8` / `9C908C` |
+| 底 bg / 表面 surface / 浅强调 soft | `FFFFFF` / `FBF6F5` / `FDEDEA` | `141010` / `1C1615` / `3A1E18` |
+| 分隔线 line / 强调上文字 onAccent | `EADFDC` / `FFFFFF` | `3A2D2A` / `2A0F0A` |
+| 编码色板 c1–c5 | `c4402a` `2f6fde` `c27a12` `2aa39a` `7b5bd6` | `ff8a73` `86aaf0` `e6d27a` `6fd1c8` `ab97ea` |
+
+PPTX 端读 `layout-constants.json` 的 `styles` / `stylesDark` / `styleDataColors*`（裸 hex）；HTML 端是下面的 `engine.css` 覆盖块：
+
+```css
+html[data-style="coral-launch"]{
+--font-body:"HarmonyOS Sans","Inter","Source Han Sans","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;--font-display:var(--font-body);
+--radius:18px;--fw-display:700;--fs-display:clamp(3rem,5.2vw,4.5rem);--letter-display:-.035em;--lh-body:1.72;--gap:clamp(22px,2.2vw,36px);
+--bg:#ffffff;--surface:#ffffff;--surface-1:#fbf6f5;--surface-2:#f6eeec;--surface-3:#eee2df;
+--surface-inv:#1e1a19;--text:#1e1a19;--text-2:#5a5250;--text-3:#857c79;--text-inv:#ffffff;
+--border:#eadfdc;--border-soft:#f2e9e7;
+--accent:#c4402a;--accent-soft:#fdedea;--accent-soft-2:#fad7d0;--accent-text:#c4402a;--accent-on:#ffffff}
+html[data-style="coral-launch"][data-theme="dark"]{
+--bg:#141010;--surface:#141010;--surface-1:#1c1615;--surface-2:#241c1b;--surface-3:#2f2423;
+--surface-inv:#f3ecea;--text:#f3ecea;--text-2:#c9bcb8;--text-3:#9c908c;--text-inv:#1e1a19;
+--border:#3a2d2a;--border-soft:#2b2120;
+--accent:#ff8a73;--accent-soft:#3a1e18;--accent-soft-2:#4d271f;--accent-text:#ffa391;--accent-on:#2a0f0a}
+```
+
+---
+
+## 14. 晴空课件 `sky-airy`
+
+**定位**：轻快、友好、易读。浅天蓝表面 + 天蓝强调，流程版式优先。
+**适用**：培训课件、入职手册、教学课堂、操作指南。
+**语汇**：Inter 栈 · 圆角 20 · 行高 1.8 · 密度 airy；版式语法见 §10。
+
+| 项 | light | dark |
+|---|---|---|
+| 强调色 accent | `0B7BC4` | `7CC4F2` |
+| 标题 ink / 正文 body / 弱化 faint | `0F1D2A` / `4A5968` / `73818F` | `E6EEF5` / `B0C0CE` / `8797A6` |
+| 底 bg / 表面 surface / 浅强调 soft | `FFFFFF` / `F3F8FC` / `E3F1FB` | `0C1218` / `121A22` / `12293A` |
+| 分隔线 line / 强调上文字 onAccent | `D6E4EF` / `FFFFFF` | `26343F` / `0A1E2C` |
+| 编码色板 c1–c5 | `0b7bc4` `16a37f` `c4720f` `8d6ad9` `d9577c` | `7cc4f2` `6fd4b6` `f7bf7f` `b6a1ea` `eb98b0` |
+
+PPTX 端读 `layout-constants.json` 的 `styles` / `stylesDark` / `styleDataColors*`（裸 hex）；HTML 端是下面的 `engine.css` 覆盖块：
+
+```css
+html[data-style="sky-airy"]{
+--font-body:"Inter","Source Han Sans","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;--font-display:var(--font-body);
+--radius:20px;--fw-display:700;--fs-display:clamp(2.9rem,5vw,4.4rem);--lh-body:1.8;--lh-lead:1.7;--gap:clamp(22px,2.2vw,36px);
+--bg:#ffffff;--surface:#ffffff;--surface-1:#f3f8fc;--surface-2:#eaf3fa;--surface-3:#dbe9f4;
+--surface-inv:#0f1d2a;--text:#0f1d2a;--text-2:#4a5968;--text-3:#73818f;--text-inv:#ffffff;
+--border:#d6e4ef;--border-soft:#e6eff6;
+--accent:#0b7bc4;--accent-soft:#e3f1fb;--accent-soft-2:#cbe5f7;--accent-text:#0a6dae;--accent-on:#ffffff}
+html[data-style="sky-airy"][data-theme="dark"]{
+--bg:#0c1218;--surface:#0c1218;--surface-1:#121a22;--surface-2:#18222c;--surface-3:#202d39;
+--surface-inv:#e6eef5;--text:#e6eef5;--text-2:#b0c0ce;--text-3:#8797a6;--text-inv:#0f1d2a;
+--border:#26343f;--border-soft:#1c2731;
+--accent:#7cc4f2;--accent-soft:#12293a;--accent-soft-2:#183a52;--accent-text:#9ad3f6;--accent-on:#0a1e2c}
+```
+
+---
+
 ## 新增一套风格的步骤
 
 > **先过第 10 节的门槛**（新色族 + 新语汇 + 场景缺口，三条全满足）——否则不加。

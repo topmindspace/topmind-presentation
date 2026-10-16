@@ -232,12 +232,10 @@ def r_points(i, sec):
     pts = sec.get('points') or []
     half = (len(pts) + 1) // 2 or 1
     col1, col2 = pts[:half], pts[half:]
-    def card(title, items, idx=0):
-        return (f'      <div class="card">{card_head(title, idx)}\n'
-                f'        {pts_list(items)}</div>')
-    body = ('    <div class="grid g-2 rv a-start">\n'
-            + card('要点一', col1 or pts[:1], 0) + '\n'
-            + card('要点二', col2 or [['', '（第二组要点）']], 1) + '\n'
+    # 要点分两栏无标题卡承载；不足两组时单卡——不再补「要点一 / 要点二 / （第二组要点）」占位字
+    cols = [c for c in (col1, col2) if c] or [pts]
+    body = (f'    <div class="grid {"g-2" if len(cols) > 1 else "g-1"} rv a-start">\n'
+            + '\n'.join(f'      <div class="card">\n        {pts_list(c)}</div>' for c in cols) + '\n'
             + '    </div>\n')
     if sec.get('metrics'):
         body += metrics_row(sec['metrics'])
@@ -400,11 +398,11 @@ def r_cards(i, sec):
     cls = {1: 'g-2', 2: 'g-2', 3: 'g-3', 4: 'g-4'}.get(n, 'g-3')
     # 纯卡片栅格强制等高（g-2--equal / g-3--equal），与 CSS / layout-grammar「同行卡片 stretch」一致
     if cls in ('g-2', 'g-3', 'g-4'):
-        cls = cls + '--equal'
+        cls = f'{cls} {cls}--equal'
     extra = ''
     if variant == 'bento-grid':
         # 变体 bento-grid：首卡跨 2 列（.card--lead），复用 .card 组件
-        cls, extra = 'g-bento', ' data-variant="bento-grid"'
+        cls, extra = 'g-bento g-bento--cards', ' data-variant="bento-grid"'
     blocks = []
     for ci, cd in enumerate(cards):
         if isinstance(cd, dict):
@@ -421,9 +419,17 @@ def r_cards(i, sec):
             rest = -(len(cards) + 1) % 3
             if rest:
                 lead_cls += f' card--fill{rest + 1}'
+        if not str(title or '').strip() and points:
+            # 陈述卡（无标题，正文即原句——美化路由）：首句放大作卡片主体，其余作补充
+            first = points[0] if isinstance(points[0], str) else ' '.join(str(x) for x in points[0])
+            rest = pts_list(points[1:]) if len(points) > 1 else ''
+            blocks.append(
+                f'      <div class="card card--stmt{lead_cls}"><div class="card__ico" data-icon="{esc(icon_name or pick_icon_name(first, ci))}">'
+                f'{pick_icon(first, ci)}</div>\n        <p class="t-lead card__stmt">{cite(first)}</p>{rest}</div>')
+            continue
         blocks.append(
             f'      <div class="card{lead_cls}">{card_head(str(title), ci, icon_name)}\n'
-            f'        {pts_list(points)}</div>')
+            f'        {pts_list(points) if points else ""}</div>')
     body = f'    <div class="grid {cls} rv">\n' + '\n'.join(blocks) + '\n    </div>\n'
     return wrap(i, 'cards', body, sec, extra)
 
@@ -908,10 +914,11 @@ def render_body(model: dict) -> str:
                 f'<span class="agenda__n">{esc(num)}</span>'
                 f'<span><span class="agenda__t">{esc(title)}</span>'
                 f'<div class="agenda__d">{esc(desc)}</div></span></a></li>')
+        _aeb = model.get('agendaEyebrow', '目录')
+        ag_eb = f'<div class="shead rv"><div class="t-eyebrow">{esc(_aeb)}</div>\n      ' if _aeb else '<div class="shead rv">'
         parts.append(f'''<section class="band band--top" id="agenda">
   <div class="wrap">
-    <div class="shead rv"><div class="t-eyebrow">目录</div>
-      <h2 class="t-h1 shead__title">报告大纲</h2></div>
+    {ag_eb}<h2 class="t-h1 shead__title">{esc(model.get("agendaTitle") or "报告大纲")}</h2></div>
     <ol class="agenda{" agenda--2col" if len(lis) > 8 else ""} rv">{''.join(lis)}</ol>
   </div>
 </section>''')
@@ -930,10 +937,13 @@ def render_body(model: dict) -> str:
             parts.append(wrap(i, t, f'    <p class="t-body">渲染失败 {esc(e)}</p>', sec))
     closing = model.get('closing') or {}
     cpts = closing.get('points') or []
-    body = '    <div class="grid g-3 rv a-start">\n' + pts_list(cpts) + '\n    </div>\n'
+    # 收尾要点可为空（美化路由：原稿收尾页只有一句致谢时不补任何文字）；eyebrow 可由模型关闭
+    body = ('    <div class="grid g-3 rv a-start">\n' + pts_list(cpts) + '\n    </div>\n') if cpts else ''
+    _ceb = closing.get('eyebrow', '下一步')
+    ceb = f'<div class="t-eyebrow">{esc(_ceb)}</div>' if _ceb else ''
     parts.append(f'''<section class="band band--accent" id="closing">
   <div class="wrap">
-    <div class="shead rv"><div class="t-eyebrow">下一步</div>
+    <div class="shead rv">{ceb}
       <h2 class="t-h1 shead__title">{esc(closing.get("title") or "收尾")}</h2></div>
 {body}  </div>
 </section>''')

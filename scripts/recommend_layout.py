@@ -333,6 +333,35 @@ def recommend(
     return out
 
 
+# 可互换的页型组：生成新序列时风格可在组内换版式；--from-model 只在同页型的变体里挑（内容已定型）
+ALT_TYPES = {
+    'points': ['points', 'cards', 'threecol'], 'cards': ['cards', 'points', 'threecol'],
+    'kpi': ['kpi', 'metrics'], 'metrics': ['metrics', 'kpi'],
+    'exhibit': ['exhibit', 'bar', 'halftable'], 'bar': ['bar', 'exhibit', 'halftable'],
+    'comparison': ['comparison', 'table'], 'timeline': ['timeline', 'steps'], 'steps': ['steps', 'timeline'],
+}
+
+
+def attach_layouts(rows: list, style: str, mode: str, from_model: bool) -> list:
+    """按风格偏好 + 节奏给每页挑一个具体版式（lib_layout_pick，与美化路由同一套评分）。"""
+    import lib_layout_pick as lp
+    hist = []
+    for r in rows:
+        pt = r['pageType']
+        kinds = [pt] if from_model else ALT_TYPES.get(pt, [pt])
+        cands = [l['id'] for k in kinds for l in lp.LIB['layouts']
+                 if (l['match'].get('type') or l['match'].get('kind')) == k
+                 and (not l['match'].get('chart') or l['match']['chart'] == r.get('chart'))]
+        if not cands:
+            continue
+        lid = lp.pick(cands, style, hist, _norm_mode(mode))
+        pl, _ = lp.style_prefs(style)
+        r['layout'] = lid
+        r['layoutWhy'] = f'{style} 偏好' if lid in pl else ('节奏避让' if lid != cands[0] else '内容默认')
+        hist.append(lid)
+    return rows
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description='Recommend pageType/skel/chart sequence')
     ap.add_argument('--mode', default=None, help='A|B|C or presentation|research|architecture')
@@ -340,6 +369,7 @@ def main() -> int:
     ap.add_argument('--pages', type=int, default=None)
     ap.add_argument('--from-model', default=None, help='path to REPORT_MODEL JSON')
     ap.add_argument('--stdin', action='store_true', help='read JSON {mode,intents,pages,model} from stdin')
+    ap.add_argument('--style', default=None, help='风格 id：按 styleGrammar.preferLayouts + 节奏挑具体版式')
     ap.add_argument('--json', action='store_true', help='machine-readable (default when --stdin/--from-model)')
     args = ap.parse_args()
 
@@ -387,6 +417,9 @@ def main() -> int:
         ap.error('--mode is required (or provide via --from-model/--stdin)')
 
     rows = recommend(mode, intents, pages, model)
+    style = args.style or ((model or {}).get('style') if isinstance(model, dict) else None)
+    if style:
+        rows = attach_layouts(rows, style, mode, bool(model and model.get('sections')))
     as_json = args.json or args.stdin or bool(args.from_model)
     payload = {'mode': _norm_mode(mode), 'pages': rows}
     if as_json:
@@ -399,7 +432,8 @@ def main() -> int:
         for r in rows:
             print(f"{r['page']:>3}  {r['pageType']:<14} {r['skel']:<6} "
                   f"{str(r.get('chart') or '—'):<12} {str(r.get('v') or '—'):<4} "
-                  f"{r.get('rationale') or ''}")
+                  f"{r.get('rationale') or ''}"
+                  + (f"  → {r['layout']}（{r['layoutWhy']}）" if r.get('layout') else ''))
     return 0
 
 

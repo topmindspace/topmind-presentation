@@ -1814,6 +1814,12 @@ def validate_pptx(
     except (ET.ParseError, KeyError, ValueError) as exc:
         report["errors"].append(issue("INVALID_PACKAGE_XML", str(exc)))
 
+    # 美化路由（model.contentLocked）：原稿文字锁定，「信息量偏少」是原稿属性而非排版缺陷——降为说明，不计入 strict
+    if model and model.get("contentLocked"):
+        locked = {"LOW_TEXT_DENSITY", "LOW_CONTENT_DENSITY"}
+        report.setdefault("info", []).extend(w for w in report["warnings"] if w.get("code") in locked)
+        report["warnings"] = [w for w in report["warnings"] if w.get("code") not in locked]
+
     if strict:
         promote_strict_failures(report, deep=deep)
 

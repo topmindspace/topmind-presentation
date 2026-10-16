@@ -143,7 +143,43 @@ def _grid(x0, x1, y0, y1, vmax, skin, unit='', ticks=4) -> list:
 
 
 # ── 核心图表 ────────────────────────────────────────────────────────────────
+def grouped(ch, skin=None, w=W, h=H):
+    """多系列分组柱：系列色 c1..c5，顶部图例；与 PPTX 原生簇状柱同一份数据。"""
+    labels = list(ch.get('labels') or [])
+    series = [s for s in (ch.get('series') or []) if isinstance(s, dict)][:6]
+    unit = ch.get('unit') or ''
+    allv = [float(v) for s in series for v in (s.get('values') or []) if v is not None]
+    vmax = float(ch.get('max') or 0) or _nice_max(max(allv + [t['value'] for t in _targets(ch)] + [0]))
+    x0, x1, y0, y1 = 64, w - 24, 52, h - 46
+    body = _grid(x0, x1, y0, y1, vmax, skin)
+    n, k = max(1, len(labels)), max(1, len(series))
+    step = (x1 - x0) / n
+    gw = min(150, step * 0.72)
+    bw = gw / k
+    rad = min(4, (skin or {}).get('radius', 6))
+    for si, s in enumerate(series):
+        cls = f'f-c{si % 5 + 1}'
+        lx = x0 + si * 120
+        body.append(f'<rect x="{_f(lx)}" y="12" width="12" height="12" rx="3" class="{cls}"/>')
+        body.append(_txt(lx + 18, 22, s.get('name') or '', 'f-txt2', 12.5, 'start'))
+        for i, v in enumerate(s.get('values') or []):
+            if v is None or i >= n:
+                continue
+            hgt = max(0.0, float(v) / vmax * (y1 - y0))
+            x = x0 + i * step + (step - gw) / 2 + si * bw
+            body.append(f'<rect data-anim="grow" x="{_f(x + 1)}" y="{_f(y1 - hgt)}" width="{_f(bw - 2)}" height="{_f(hgt)}" '
+                        f'rx="{rad}" class="{cls}"><title>{esc(s.get("name") or "")} {esc(labels[i] if i < len(labels) else "")} '
+                        f'{num(v)}{esc(unit)}</title></rect>')
+            body.append(_txt(x + bw / 2, y1 - hgt - 6, f'{num(v)}', 'f-txt2', 11.5, weight=600))
+    for i, lb in enumerate(labels):
+        body.append(_txt(x0 + i * step + step / 2, y1 + 24, lb, 'f-txt2', 13))
+    body += _target_lines(ch, x0, x1, y0, y1, vmax)
+    return _svg('bar', body, w, h)
+
+
 def bar(ch, skin=None, w=W, h=H):
+    if len([s for s in (ch.get('series') or []) if isinstance(s, dict)]) >= 2:
+        return grouped(ch, skin, w, h)
     labels, values = list(ch.get('labels') or []), _vals(ch)
     n = max(1, len(values))
     unit = ch.get('unit') or ''
@@ -163,7 +199,10 @@ def bar(ch, skin=None, w=W, h=H):
                     f'rx="{rad}" class="{cls}"><title>{esc(lb)} {num(v)}{esc(unit)}</title></rect>')
         body.append(_txt(x + bw / 2, y1 + 24, lb, 'f-txt2', 13))
         if mask[i]:
-            body.append(_txt(x + bw / 2, (y if v >= 0 else y + hgt + 16) - 8, f'{num(v)}{unit}',
+            ly = (y if v >= 0 else y + hgt + 16) - 8
+            if v >= 0:
+                ly = _avoid(ly, ch, y0, y1, vmax)
+            body.append(_txt(x + bw / 2, ly, f'{num(v)}{unit}',
                              'f-txt' if i in hs else 'f-txt2', 14, weight=600, extra=' data-anim="fade"'))
     body += _target_lines(ch, x0, x1, y0, y1, vmax)
     for a in _notes(ch):
@@ -172,6 +211,15 @@ def bar(ch, skin=None, w=W, h=H):
             v = values[i]
             body += _note_bubble(x0 + i * step + step / 2, y1 - abs(v) / vmax * (y1 - y0) - 26, a['text'], w)
     return _svg('bar', body, w, h)
+
+
+def _avoid(ly, ch, y0, y1, vmax, size=14):
+    """数值标签避让目标线：标签文字盒 [ly-size, ly+3] 与任一目标线相交时，整体抬到线上方。"""
+    for t in _targets(ch):
+        ty = y1 - float(t['value']) / vmax * (y1 - y0)
+        if ly - size - 2 <= ty <= ly + 4:
+            ly = ty - 7
+    return max(y0 - 22 + size, ly)
 
 
 def _target_lines(ch, x0, x1, y0, y1, vmax) -> list:
@@ -244,7 +292,7 @@ def line(ch, skin=None, w=W, h=H, area=False):
         for i, (x, y) in enumerate(pts):
             body.append(f'<circle cx="{_f(x)}" cy="{_f(y)}" r="5" class="f-{col if multi else "acc"}"/>')
             if mask[i]:
-                body.append(_txt(x, y - 12, f'{num(vals[i])}{ch.get("unit") or ""}', 'f-txt', 13, weight=600))
+                body.append(_txt(x, _avoid(y - 12, ch, y0, y1, vmax, 13), f'{num(vals[i])}{ch.get("unit") or ""}', 'f-txt', 13, weight=600))
         if multi and s.get('name'):
             body.append(_txt(pts[-1][0] + 8, pts[-1][1] + 4, s['name'], 'f-txt2', 12, 'start', 600))
     body += _target_lines(ch, x0, x1, y0, y1, vmax)
@@ -314,8 +362,11 @@ def donut(ch, skin=None, w=W, h=H, pie=False):
                     f'<title>{esc(labels[i] if i < len(labels) else "")} {num(v)}</title></path>')
         a0 = a1
     if ri:
-        body.append(_txt(cx, cy + 4, num(total), 'f-txt', 34, weight=700))
-        body.append(_txt(cx, cy + 30, ch.get('centerLabel') or '合计', 'f-txt3', 13))
+        if ch.get('centerTotal', True) is not False:   # 美化路由：合计是派生数，原稿没有就不显示
+            body.append(_txt(cx, cy + 4, num(total), 'f-txt', 34, weight=700))
+        _cl = ch.get('centerLabel', '合计')   # 显式给空串 = 不加中心标签（美化路由不补字）
+        if _cl:
+            body.append(_txt(cx, cy + 30, _cl, 'f-txt3', 13))
     lx = cx + r + 60
     gap = min(52, (h - 40) / max(1, len(values)))
     y = cy - gap * (len(values) - 1) / 2

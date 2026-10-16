@@ -838,6 +838,8 @@ function chartBottom(hasSoWhat, hasFootnote) {
   if (hasSoWhat) bot = Math.min(bot, PT.exhibit.soWhatY - 0.20);
   if (hasFootnote) bot = Math.min(bot, PT.exhibit.footnoteY - 0.12);
   if (hasSoWhat || hasFootnote) bot = Math.min(bot, CONTENT_BOTTOM_NOTE);
+  /* 无注释页：图形框（原生图表 / 形状）也不贴到版心底——留 0.25in 呼吸，避免压进注释带安全网 */
+  else bot = Math.min(bot, CONTENT_BOTTOM_NOTE + 0.25);
   return bot;
 }
 
@@ -913,7 +915,8 @@ function chartBaseOpts(c, colors, multi, kind) {
   const isLine = (kind === 'line' || kind === 'area');
   const _dec = chartDecimals(c), _ds = _dec ? '.' + '0'.repeat(_dec) : '';
   const opts = {
-    showValue: !isLine && !multi,
+    /* 分组柱点数不多（≤12）时也标数值——值轴隐藏，不标数就读不出数（与 HTML grouped() 一致） */
+    showValue: !isLine && (!multi || (c.series || []).reduce((n, se) => n + (se.values || []).length, 0) <= 12),
     dataLabelPosition: 'outEnd',
     dataLabelColor: STYLE.body, dataLabelFontSize: sz(11.5), dataLabelFontFace: STYLE.font,
     dataLabelFormatCode: c.unit ? '0' + _ds + '"' + c.unit + '"' : (_dec ? '0' + _ds : 'General'),
@@ -2099,7 +2102,7 @@ function addTable(s, tbl, x, y, w, availH, opts) {
   pages.forEach((pageItems, pi) => {
     const s = base();
     const sub = pages.length > 1 ? `（${pi + 1}/${pages.length}）` : '';
-    head(s, 'AGENDA', '报告大纲' + sub);
+    head(s, CONTENT.agendaEyebrow != null ? CONTENT.agendaEyebrow : 'AGENDA', (CONTENT.agendaTitle || '报告大纲') + sub);
     const colN = pageItems.length > 8 ? 2 : 1;
     const perCol = Math.ceil(pageItems.length / colN);
     /* 预留 0.25in，避免末行底边落入 severe-overlap 安全网 */
@@ -2422,9 +2425,10 @@ CONTENT.sections.forEach((sec) => {
       const hb = holeR * 2;
       let total = 0; dcn.values.forEach(v => { total += Math.max(0, v); });
       const totalStr = (Math.round(total * 10) / 10) + (dcn.unit || '');
-      s.addText(totalStr, { x: d.centerX - holeR, y: dcy - 0.42, w: hb, h: 0.5, align: 'center',
+      if (dcn.centerTotal !== false) s.addText(totalStr, { x: d.centerX - holeR, y: dcy - 0.42, w: hb, h: 0.5, align: 'center',
         fontFace: STYLE.fontDisplay, fontSize: sz(20), bold: true, color: STYLE.ink, valign: 'middle' });
-      s.addText(dcn.centerLabel || '合计', { x: d.centerX - holeR, y: dcy + 0.08, w: hb, h: 0.35, align: 'center',
+      const _cl = dcn.centerLabel != null ? dcn.centerLabel : '合计';
+      if (_cl) s.addText(_cl, { x: d.centerX - holeR, y: dcy + 0.08, w: hb, h: 0.35, align: 'center',
         fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.faint, valign: 'middle' });
       const n = Math.max(1, dcn.labels.length);
       const maxLegH = Math.max(1.2, bodyBottom - (d.centerY - 1.7));
@@ -2898,9 +2902,11 @@ CONTENT.sections.forEach((sec) => {
     /* 有限缩字号：按最拥挤卡片的要点文本量统一选档（12 起阶梯下探），行距随字号等比；
        取代无脑 autofit shrink，保证估算口径与渲染一致（TEXT_OVERFLOW_VERTICAL） */
     const ptsBoxH = Math.max(0.4, gh - cdC.titleH - 0.34);
+    /* 陈述卡（全部卡无标题，正文即原稿整句——美化路由常见）：字号向上求解到 h2 档、去掉项目符号、垂直居中 */
+    const statement = !!CONTENT.contentLocked && cds.length > 0 && cds.every(cd => !String(cd.title || '').trim());
     const ptsFzB = cds.length ? Math.min(...cds.map(cd =>
       fitFont((cd.points || []).map(cardPtText), gw - 0.36, ptsBoxH,
-        { max: 14, lineFactor: 1.5, gapFactor: 0 }))) : 12;
+        { max: statement ? (MTS[MODE_NAME] || MTS.presentation).h2 : 14, lineFactor: 1.5, gapFactor: 0 }))) : 12;
     const ptsFz = sz(ptsFzB);
     cds.forEach((cd, i) => {
       let col = i % c, row = Math.floor(i / c), span = 1;
@@ -2923,11 +2929,12 @@ CONTENT.sections.forEach((sec) => {
       s.addText(cd.title || '', { x: x + 0.18 + ico + 0.1, y: y + 0.14, w: cw - 0.36 - ico - 0.1, h: cdC.titleH, fontFace: STYLE.font,
         fontSize: sz(15), bold: true, color: STYLE.ink, fit: 'shrink' });
       /* points 兼容：[[k,v]…] | [str…] | [{t,d}…]（scaffold v9 契约 {title, points:[[k,v]]}） */
-      const ptLines = (cd.points || []).map(cardPtText);
-      s.addText(ptLines.map(t => ({ text: t + '\n',
-          options: { fontSize: ptsFz, color: STYLE.body, fontFace: STYLE.font, breakLine: true } })),
+      const ptLines = (cd.points || []).map(cardPtText).map(t => statement ? t.replace(/^· /, '') : t);
+      s.addText(ptLines.map((t, li) => ({ text: t + '\n',
+          options: { fontSize: ptsFz, color: statement && li === 0 ? STYLE.ink : STYLE.body, bold: statement && li === 0,
+            fontFace: STYLE.font, breakLine: true } })),
         { x: x + 0.18, y: y + 0.14 + cdC.titleH + 0.06, w: cw - 0.36, h: ptsBoxH,
-          fontFace: STYLE.font, valign: 'top', lineSpacing: ptsFz * 1.5 });
+          fontFace: STYLE.font, valign: statement ? 'middle' : 'top', lineSpacing: ptsFz * 1.5 });
     });
   } else if (type === 'split') {
     /* 双区自由组合页：左区与右区各可为 要点 / 图表 / 表格 / 图片。
@@ -3235,11 +3242,13 @@ CONTENT.sections.forEach((sec) => {
   /* 收尾页用主题一致强调带（accent-soft 底 + 常规文字）——浅色主题下不再出现深色收尾页 */
   s.addShape('rect', { x: 0, y: 0, w: PW, h: PH, fill: { color: STYLE.soft }, line: { type: 'none' } });
   s.addShape('rect', { x: MX, y: C.eyebrowY, w: 0.9, h: 0.045, fill: { color: STYLE.accent }, line: { type: 'none' } });
-  s.addText('下一步', { x: MX, y: C.eyebrowY + 0.16, w: CW, h: 0.4, fontFace: STYLE.font,
+  const cEb = CONTENT.closing.eyebrow != null ? CONTENT.closing.eyebrow : '下一步';
+  if (cEb) s.addText(cEb, { x: MX, y: C.eyebrowY + 0.16, w: CW, h: 0.4, fontFace: STYLE.font,
     fontSize: sz(13), bold: true, color: STYLE.accent, charSpacing: 2 });
   s.addText(CONTENT.closing.title, { x: MX, y: C.titleY, w: CW - 1, h: C.titleH, fontFace: STYLE.fontDisplay,
     fontSize: sz(30), bold: true, color: STYLE.ink });
-  const pts = CONTENT.closing.points || [];
+  /* 要点可为字符串（美化路由原样搬运）：统一成 [主句, 说明] */
+  const pts = (CONTENT.closing.points || []).map(p => Array.isArray(p) ? p : [String(p), '']);
   const n = Math.max(1, pts.length);
   const cw3 = (CW - (n - 1) * 0.3) / n;
   pts.forEach((p, i) => {
@@ -3251,7 +3260,7 @@ CONTENT.sections.forEach((sec) => {
     s.addText(p[1], { x: x + 0.18, y: C.pointsY + C.pointTitleH, w: cw3 - 0.36, h: C.pointBodyH, fontFace: STYLE.font,
       fontSize: sz(12.5), color: STYLE.body });
   });
-  s.addNotes((CONTENT.closing.points || []).map(p => '· ' + p[0] + '：' + p[1]).join('\n'));
+  if (pts.length) s.addNotes(pts.map(p => '· ' + p[0] + (p[1] ? '：' + p[1] : '')).join('\n'));
 })();
 
 /* 页码 */

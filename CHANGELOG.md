@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## [Unreleased] — M4 已有 PPT 美化（main，未发版）
+
+### 美化路由（新）
+- `scripts/beautify.py 原稿.pptx --out 新目录 [--style] [--theme] [--compare]`：解析 → 锁定原文 → 逐页诊断 → 映射版式库 → 重新排版，交付新的 HTML + PPTX + `verify.json` + `report.md` + 前后对照图；原稿只读，拒绝输出到原稿目录。
+- `scripts/ingest_pptx.py`：读取标题、文本框（层级 / 字号 / 颜色）、表格、原生图表（类别 / 系列）、图片、备注；SmartArt / OLE / 媒体与未迁入的图片列入「不支持对象」，图片导出到 `media/`。
+- 不改字契约：切分只允许原样（keep）、分隔符变分栏（sep）、手打序号改由版式绘制（ordinal）。核对器逐页查片段，PPTX 与 HTML 两端都查；数字逐个找回；图表数据与原生 chart XML 逐项一致；新页不得多出原稿没有的字。
+- 模型新增 `contentLocked`、`agendaTitle`、`agendaEyebrow`、`closing.eyebrow`、`sourceSlide`、`chart.centerTotal`。锁定原文时：校验器不再要求标题写成主张句，低密度只作提示，陈述卡（无标题整句卡）字号向上求解。
+- 渲染不再补字：去掉「要点一 / 要点二 / （第二组要点）」「（待填）」、环图「合计」、写死的「AGENDA / 报告大纲 / 下一步」。
+- 测试：`tests/beautify/make_samples.py` 确定性生成三份朴素样例（课件 / 经营汇报 / 方案）；`tests/beautify/test_beautify.py` 断言三份差异 0、图表一致、原稿不变、未迁入对象入报告、三道 strict 校验通过，另有改字 / 改数两类负例，已接入 `ci_skill_gates.sh --with-pptx`。文档 `references/beautify.md`。
+
+### M3 遗留
+- 风格偏好版式接入自动选版：新增 `scripts/lib_layout_pick.py`（风格偏好 + 节奏评分），美化路由与 `recommend_layout.py --style` 共用。
+- 数值标签避让目标线：柱图 / 折线的数值标签与目标线相交时抬到线上方（`lib_chart_svg._avoid`）。
+- `references/styles.md` 补 §12–14：学术墨蓝 / 活力珊瑚 / 晴空课件的亮暗色值、编码色板与 `engine.css` 覆盖块。
+- `SKILL.md` 精简（13.2KB → 12.3KB），加美化路由一行。
+
+### 修复
+- HTML 卡片栅格 `g-N--equal` 丢了列定义，等高卡片退化成单列；bento 卡片变体被同名的 4 列拼贴工具类覆盖，导致末行留洞。
+- PPTX 分组柱（≤12 个点）补数值标签，避免值轴隐藏后读不出数；HTML 多系列柱改为分组柱（`grouped()`）。
+- 无注释的图表页图形框下沿留 0.25in，不再贴进注释带；版式 golden 随之更新。
+
 ## [Unreleased] — M3 版式库 · 风格库 · 图表系统（main，未发版）
 
 ### 单源可再生（先修根因）

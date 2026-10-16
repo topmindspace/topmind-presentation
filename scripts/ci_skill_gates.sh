@@ -98,6 +98,13 @@ run_one() {
   # M3：版式库节奏 / 家族覆盖 / 反模式（全部示例硬门禁）
   for m in assets/examples/*.model.json; do "$PY" scripts/check_rhythm.py "$m" --strict || exit 1; done
 
+  if [[ "$WITH_PPTX" == "1" ]]; then
+    ensure_python_pptx
+    export NODE_PATH="${PWD}/node_modules${NODE_PATH:+:$NODE_PATH}"
+    # M4：已有 PPT 美化——3 份朴素样例逐字逐数核对 + 篡改负例
+    "$PY" tests/beautify/test_beautify.py || { echo "ci_skill_gates: 美化核对失败" >&2; exit 1; }
+  fi
+
   if [[ "$WITH_PPTX" == "1" && -f scripts/smoke_pptx.sh ]]; then
     ensure_python_pptx
     # D13: business-blue (default) + research-mckinsey (soWhat+footnote; catches D8)

@@ -374,7 +374,10 @@ grid-template-areas:"hero hero hero" "a b c";grid-auto-rows:auto}
    col--feature：双栏特性栏（加粗首行 + accent 左线，复用 .card 语义） */
 .g-bento{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
 .grid.g-bento>.card{align-self:stretch}
+/* 卡片变体固定 3 列：下方 4 列拼贴工具类同名 .g-bento，靠 .g-bento--cards 提高优先级，避免首卡跨 2 列后末行留洞 */
+.grid.g-bento.g-bento--cards{grid-template-columns:repeat(3,minmax(0,1fr))}
 .grid.g-bento>.card--lead{grid-column:span 2}
+.card--stmt{display:flex;flex-direction:column;gap:var(--sp-3);justify-content:center}.card__stmt{color:var(--text);font-weight:600;margin:0}
 .grid.g-bento>.card--fill2{grid-column:span 2}.grid.g-bento>.card--fill3{grid-column:span 3}
 @media (max-width:1180px){.grid.g-bento>.card--lead,.grid.g-bento>.card--fill2,.grid.g-bento>.card--fill3{grid-column:span 1}}
 .tl__ico{position:absolute;left:-33px;top:2px;width:22px;height:22px;color:var(--accent)}

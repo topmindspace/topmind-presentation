@@ -548,6 +548,9 @@ def _check_icons(txt, chk):
         n_cards = len(re.findall(r'class="[^"]*\bcard\b', body))
         if n_cards < 2:
             continue
+        # 无标题卡（陈述卡 / 原稿锁定的纯要点）没有图标的正当位置，不计
+        if 'card--stmt' in body or 'card__title' not in body:
+            continue
         if 'card__ico' not in body:
             bare_card_pages += 1
     chk("要点/卡片页（≥2 卡）含 .card__ico", bare_card_pages == 0,
@@ -1994,6 +1997,8 @@ def main():
             if h in TOPIC_ONLY or (len(h) <= 6 and not re.search(
                     r'\d|是|应|须|将|已|要|可|能|达|超|降|升|破|卡|成|未|无|有', h)):
                 topic_hits.append(h)
+        if re.search(r'"contentLocked"\s*:\s*true', txt):
+            topic_hits = []   # 美化路由：标题是原稿原文（不准改字），不按「行动标题」要求
         chk("presentation 主张/行动标题（禁纯话题标签）", not topic_hits,
             f"话题式: {topic_hits[:4]}" if topic_hits else "", level="WARN")
 

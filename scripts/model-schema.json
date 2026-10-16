@@ -694,5 +694,5 @@
       ]
     }
   },
-  "densityHint": "M7 信息密度契约：每页 = 论点（结论句标题）+ 证据（图表 / 表格 / 数据）+ 解读（points：看到什么 → 意味着什么）。图表页必须配 points（演示 ≥2 条、研究 ≥3 条）与 keyMetrics（2–4 个关键数字；单序列图表缺省时按数据推导最高 / 最低 / 首末变化）。chart2 = 双图对照；minis = 主图 + 2–3 个小图；compose:\"off\" 关闭复合版式。门禁：scripts/check_density.py。"
+  "densityHint": "M7 信息密度契约：每页 = 论点（结论句标题）+ 证据（图表 / 表格 / 数据）+ 解读（points：[事实, 原因 / 影响 / 下一步]，不复述图上数字，只用已有事实）。图表页必须配 points（演示 ≥2 条、研究 ≥3 条）与 keyMetrics（2–4 个关键数字；单序列图表缺省时按数据推导最高 / 最低 / 首末变化）。chart2 = 双图对照；minis = 主图 + 最多 2 个小图；compose:\"off\" 关闭复合版式。门禁：scripts/check_density.py（DENSITY_ECHO / DENSITY_NO_INSIGHT 提示复述，DENSITY_MINIS_MAX 拦 >2 小图）。"
 }

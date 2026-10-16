@@ -674,6 +674,9 @@ justify-content:flex-end;text-align:right;padding:6px 12px 6px 0;border-right:2p
 font-size:var(--fs-sm);font-weight:600;color:var(--text-2);font-variant-numeric:tabular-nums;
 line-height:1.4;display:flex;flex-direction:column;justify-content:center;gap:2px}
 .heat__c small{display:block;font-size:var(--fs-xs);font-weight:500;color:var(--text-3)}
+.heat__legend{display:flex;align-items:center;gap:6px;margin-top:12px;font-size:var(--fs-xs);color:var(--text-3)}
+.heat__sw{display:inline-block;width:26px;height:12px;border-radius:3px;background:var(--surface-1);border:1px solid var(--border-soft)}
+.heat__sw.heat__c--1,.heat__sw.heat__c--2,.heat__sw.heat__c--3{border-color:transparent}
 .heat__c--1{background:var(--accent-soft);color:var(--accent-text)}
 .heat__c--2{background:var(--accent-soft-2);color:var(--accent-text)}
 .heat__c--3{background:var(--accent);color:var(--accent-on)}
@@ -1190,7 +1193,7 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
         <text x="70" y="133.6" text-anchor="start" class="f-acc" font-size="12.5" font-weight="600">2027Q2 目标 60%</text>
       </svg>
       </div>
-      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">前两个季度爬坡最快</div><p class="readout__v">2026Q4 单季 +15pt</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">之后增速放缓</div><p class="readout__v">2027Q1 +10pt、Q2 +5pt，逼近 60% 目标</p></div></li></ol>
+      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">前快后慢：2026Q4 单季 +15pt 最快</div><p class="readout__v">此后 +10pt、+5pt 逐季收窄，说明容易落地的场景已基本铺开</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">Q2 已到 60% 目标</div><p class="readout__v">下一步不再是扩面，而是把已在试点的企业推向规模化</p></div></li></ol>
     </div>
     <div class="footnote">注：口径：试点及以上的企业占比<a class="cite" href="#ref-1">[1]</a></div>
   </div>
@@ -1258,7 +1261,7 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
         <line x1="408" y1="246" x2="870" y2="246" class="s-bds"/>
       </svg>
       </div>
-      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">试点中 43%，是最大群体</div><p class="readout__v">从试点走到规模化是下一阶段的主战场</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">已规模化 18%</div><p class="readout__v">不到试点中企业的一半</p></div></li></ol>
+      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">试点中 43%，是最大群体</div><p class="readout__v">从试点走到规模化是下一阶段的主战场</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">已规模化仅 18%</div><p class="readout__v">不到试点中企业的一半，瓶颈在试点之后的放量环节</p></div></li><li><span class="readout__n">3</span><div><div class="readout__k">仍有 39% 在观望</div><p class="readout__v">是试点及以上 61% 之外的潜在增量</p></div></li></ol>
     </div>
     <div class="footnote">注：口径：试点及以上 = 61%；N=42 深度访谈 + 行业抽样<a class="cite" href="#ref-1">[1]</a></div>
   </div>
@@ -1310,7 +1313,7 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
       <div class="bul__row"><div class="bul__k">工具集成</div><div class="bul__track"><div class="bul__fill" style="width:42.0%"></div><div class="bul__tgt" style="left:70.0%"></div></div><div class="bul__v"><b>42</b> / 70</div></div>
       <div class="bul__row"><div class="bul__k">规模化运行</div><div class="bul__track"><div class="bul__fill" style="width:18.0%"></div><div class="bul__tgt" style="left:60.0%"></div></div><div class="bul__v"><b>18</b> / 60</div></div>
     </div>
-    <div class="cband rv" style="grid-template-columns:minmax(0,.62fr) minmax(0,.62fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__km"><div class="kstrip__v">42pt</div><div class="kstrip__k">规模化运行缺口（18 → 60）</div></div><div class="cband__km"><div class="kstrip__v">41pt</div><div class="kstrip__k">治理就绪缺口（34 → 75）</div></div><div class="cband__p"><div class="readout__k">缺口最大：规模化运行与治理</div><p class="readout__v">分别差 42pt、41pt</p></div><div class="cband__p"><div class="readout__k">场景覆盖最接近目标</div><p class="readout__v">61% 对 80%，差 19pt</p></div></div>
+    <div class="cband rv" style="grid-template-columns:minmax(0,.62fr) minmax(0,.62fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__km"><div class="kstrip__v">42pt</div><div class="kstrip__k">规模化运行缺口（18 → 60）</div></div><div class="cband__km"><div class="kstrip__v">41pt</div><div class="kstrip__k">治理就绪缺口（34 → 75）</div></div><div class="cband__p"><div class="readout__k">规模化运行与治理缺口最大</div><p class="readout__v">分别差 42pt、41pt，是 2027Q2 目标能否达成的关键</p></div><div class="cband__p"><div class="readout__k">场景覆盖已到 61%</div><p class="readout__v">离 80% 只差 19pt，优先级应让位给规模化与治理</p></div></div>
     <div class="footnote">口径：能力就绪度 = 自评「已具备且稳定运行」的企业占比；目标取 2027Q2<a class="cite" href="#ref-2">[2]</a></div>
   </div>
 </section>
@@ -2002,12 +2005,12 @@ window.REPORT_MODEL = {
       "note": "口径：试点及以上的企业占比[1]",
       "points": [
         [
-          "前两个季度爬坡最快",
-          "2026Q4 单季 +15pt"
+          "前快后慢：2026Q4 单季 +15pt 最快",
+          "此后 +10pt、+5pt 逐季收窄，说明容易落地的场景已基本铺开"
         ],
         [
-          "之后增速放缓",
-          "2027Q1 +10pt、Q2 +5pt，逼近 60% 目标"
+          "Q2 已到 60% 目标",
+          "下一步不再是扩面，而是把已在试点的企业推向规模化"
         ]
       ]
     },
@@ -2114,8 +2117,12 @@ window.REPORT_MODEL = {
           "从试点走到规模化是下一阶段的主战场"
         ],
         [
-          "已规模化 18%",
-          "不到试点中企业的一半"
+          "已规模化仅 18%",
+          "不到试点中企业的一半，瓶颈在试点之后的放量环节"
+        ],
+        [
+          "仍有 39% 在观望",
+          "是试点及以上 61% 之外的潜在增量"
         ]
       ]
     },
@@ -2218,12 +2225,12 @@ window.REPORT_MODEL = {
       ],
       "points": [
         [
-          "缺口最大：规模化运行与治理",
-          "分别差 42pt、41pt"
+          "规模化运行与治理缺口最大",
+          "分别差 42pt、41pt，是 2027Q2 目标能否达成的关键"
         ],
         [
-          "场景覆盖最接近目标",
-          "61% 对 80%，差 19pt"
+          "场景覆盖已到 61%",
+          "离 80% 只差 19pt，优先级应让位给规模化与治理"
         ]
       ]
     },
@@ -2311,7 +2318,7 @@ window.REPORT_MODEL = {
       "caliber": "规模化占比与访谈结论，2026-07 至 2026-08"
     }
   ]
-};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 /* __TOPPPT_RUNTIME_START__ */
 /* ══ PPTX 页序运行时（assets/pptx-export.js 的内联副本 · 由 scripts/sync_runtime.py 注入，禁止手改） ══ */

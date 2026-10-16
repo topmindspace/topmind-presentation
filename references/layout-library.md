@@ -61,7 +61,7 @@
 | `stream` | 构成演变（河流图） | type=streamgraph | ◐ 中 |
 | `chart-readout` | 图表 + 解读栏 + 关键数字条 | compose=side（bar/donut/exhibit + points / keyMetrics） | ● 密 |
 | `chart-dual` | 双图对照 + 解读行 | compose=dual（+ chart2） | ● 密 |
-| `chart-minis` | 主图 + 小图组（small multiples） | compose=minis（+ minis） | ● 密 |
+| `chart-minis` | 主图 + 小图组（small multiples，最多 2 张） | compose=minis（+ minis） | ● 密 |
 | `chart-band` | 主图 + 底部解读带 | compose=band（信息图 / 结构图 / 指标页 + points） | ● 密 |
 
 > 复合版式规则与模型写法见 `density.md`；`compose` 匹配优先于单纯页型。

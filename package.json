@@ -60,5 +60,8 @@
   },
   "bin": {
     "topmind-presentation": "scripts/cli.js"
+  },
+  "overrides": {
+    "image-size": "^2.0.4"
   }
 }

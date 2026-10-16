@@ -67,14 +67,35 @@ try:
 except (OSError, subprocess.CalledProcessError) as e:
     fails.append(f'node 执行失败：{e}')
 
+# 8) M8 复述检查：只念数字的要点 → DENSITY_ECHO + DENSITY_NO_INSIGHT；写了原因 / 影响 / 下一步 → 放行
+tm = {'type': 'treemap', 'title': '规模化企业行业构成', 'unit': '家',
+      'items': [['制造', 3], ['金融', 2], ['互联网', 2]], 'keyMetrics': [['55%', '制造 + 金融']]}
+echo = dict(tm, points=[['制造 3 家居首', '占 33%'], ['金融、互联网各 2 家', '各占 22%']])
+rules = {r for _, r, _ in LD.check_section(echo, 'presentation')}
+ok({'DENSITY_ECHO', 'DENSITY_NO_INSIGHT'} <= rules, f'复述要点未被提示 {rules}')
+good = dict(tm, points=[['制造与金融合计 55%', '共同点是流程标准、容错边界清晰，因此可直接复制'],
+                        ['互联网 2 家', '说明规模化并不局限于传统强流程行业']])
+rules = {r for _, r, _ in LD.check_section(good, 'presentation')}
+ok(not ({'DENSITY_ECHO', 'DENSITY_NO_INSIGHT'} & rules), f'有解读的要点被误报 {rules}')
+ok(LD.echo_points(echo) == [0, 1] and LD.echo_points(good) == [], '复述序号判定错误')
+
+# 9) M8 小图组最多 2 张
+mini = {'labels': ['a', 'b'], 'values': [1, 2]}
+three = dict(comp, minis=[mini, mini, mini])
+ok(any(r == 'DENSITY_MINIS_MAX' and lv == 'FAIL' for lv, r, _ in LD.check_section(three, 'presentation')), '3 张小图未被拦截')
+ok(not any(r == 'DENSITY_MINIS_MAX' for _, r, _ in LD.check_section(dict(comp, minis=[mini, mini]), 'presentation')), '2 张小图被误拦')
+for f in ('build_pptx.js', 'render_from_model.py'):
+    t = (ROOT / 'scripts' / f).read_text(encoding='utf-8')
+    ok(('.slice(0, 2)' in t) if f.endswith('.js') else ("m.get('labels')][:2]" in t), f'{f} 小图组上限不是 2')
+
 # 7) 仓库示例全部通过密度门禁
 for m in sorted((ROOT / 'assets' / 'examples').glob('*.model.json')):
     model = json.loads(m.read_text(encoding='utf-8'))
     for i, sec in enumerate(model['sections']):
         for lv, rule, msg in LD.check_section(sec, model.get('mode') or 'presentation'):
-            ok(lv != 'FAIL', f'{m.name} p{i + 1} {rule} {msg}')
+            ok(lv != 'FAIL' and rule not in ('DENSITY_ECHO', 'DENSITY_NO_INSIGHT'), f'{m.name} p{i + 1} {rule} {msg}')
 
 if fails:
     print('[density] FAIL\n  ' + '\n  '.join(fails))
     sys.exit(1)
-print('[density] 自测 PASS（低密度拦截 · 复合版式放行 · 双端推导一致 · 示例全绿）')
+print('[density] 自测 PASS（低密度拦截 · 复合版式放行 · 双端推导一致 · 复述提示 · 小图 ≤2 · 示例全绿）')

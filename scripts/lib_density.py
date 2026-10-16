@@ -70,6 +70,68 @@ def readout_items(sec: dict) -> list:
     return [x for x in r if x]
 
 
+# ── M8：解读要点「复述数字」检测 ─────────────────────────────────────────────
+# 解读 = 原因 / 影响 / 下一步；只把图上的数字换个说法再念一遍不算解读。
+ECHO_STOP = ('最高', '最低', '最大', '最小', '增长', '下降', '提升', '上升', '降到', '降至', '升至', '增至', '增加', '减少',
+             '合计', '同比', '环比', '百分点', '占比', '占', '比', '从', '到', '至', '由', '为', '达', '约', '近', '超',
+             '共', '个', '项', '倍', '点', '年', '月', '季度', '期', '和', '与', '及', '的', '了', '是', '在', '相对',
+             '对比', '变化', '分别', '其中', '仅', '只', '已', '再', '又', '均', '各',
+             '领先', '跟进', '最弱', '居中', '垫底', '居首', '最多', '最快', '最慢', '最长', '最短', '唯一', '首次',
+             '超过', '高于', '低于', '不到', '不足', '过半', '逐年', '持续', '见底', '回升', '新高', '收盘', '中位',
+             '区间', '集中', '分散', '放行', '进入', '流失', '签下', '第', '单季', '单月', '每', '分', '家', '周',
+             '名', '位', '高', '低', '多', '少', '大', '小', '上', '下', '前', '后', '之', '内', '外', '一', '二',
+             '两', '三', '四', '五', '六', '七', '八', '九', '十')
+REASON_MARKERS = ('因为', '由于', '原因', '源于', '导致', '驱动', '带来', '拖累', '受益', '得益', '意味', '说明', '表明',
+                  '所以', '因此', '于是', '影响', '风险', '代价', '建议', '下一步', '需要', '需', '应', '要先', '优先',
+                  '关键', '瓶颈', '取决于', '前提', '若', '如果', '一旦', '才能', '可以', '可', '将', '会', '避免', '防止')
+_PUNCT_RE = re.compile(r'[\s\W_]+', re.U)
+
+
+def _point_text(p) -> str:
+    if isinstance(p, (list, tuple)):
+        return ' '.join(str(x) for x in p if isinstance(x, (str, int, float)))
+    if isinstance(p, dict):
+        return ' '.join(str(p.get(k) or '') for k in ('title', 'text', 'k', 'v', 'desc'))
+    return str(p or '')
+
+
+def _chart_tokens(sec: dict) -> list:
+    toks = []
+    for c in [sec.get('chart') or {}, sec.get('chart2') or {}] + list(sec.get('minis') or []):
+        if isinstance(c, dict):
+            for k in ('labels', 'series'):
+                for x in (c.get(k) or []):
+                    if isinstance(x, str):
+                        toks.append(x)
+                    elif isinstance(x, dict) and isinstance(x.get('name'), str):
+                        toks.append(x['name'])
+            if isinstance(c.get('unit'), str):
+                toks.append(c['unit'])
+    for k in ('rowHeads', 'colHeads', 'labels'):
+        toks += [x for x in (sec.get(k) or []) if isinstance(x, str)]
+    return sorted({t for t in toks if t}, key=len, reverse=True)
+
+
+def echo_points(sec: dict) -> list:
+    """返回只复述图表数字的要点序号：含数字、无原因/影响/下一步信号，
+    去掉数字、图表标签、单位与复述用词后剩余实义字 < 6。"""
+    toks = _chart_tokens(sec)
+    out = []
+    for i, p in enumerate(readout_items(sec)):
+        t = _point_text(p)
+        if not NUM_RE.search(t) or any(m in t for m in REASON_MARKERS):
+            continue
+        rest = NUM_RE.sub('', t)
+        for tok in toks:
+            rest = rest.replace(tok, '')
+        for w in ECHO_STOP:
+            rest = rest.replace(w, '')
+        rest = re.sub(r'[%％a-zA-Z×→~～·]+', '', rest)
+        if len(_PUNCT_RE.sub('', rest)) < 8:
+            out.append(i)
+    return out
+
+
 def key_metrics(sec: dict) -> list:
     return [x for x in (sec.get('keyMetrics') or sec.get('metrics') or []) if x]
 
@@ -197,6 +259,16 @@ def check_section(sec: dict, mode: str) -> list:
                         f'图表页缺解读要点（{a["readout_n"]}/{tier["readout"]} 条）：补 points 写「看到什么 → 意味着什么」'))
         if not has_km:
             out.append(('FAIL', 'DENSITY_KEYNUM', '图表页缺关键数字：补 keyMetrics（或用可推导的单序列图表）'))
+        ech = echo_points(sec)
+        if ech and len(ech) * 2 >= max(1, a['readout_n']):
+            out.append(('WARN', 'DENSITY_ECHO',
+                        f'解读要点第 {"、".join(str(k + 1) for k in ech)} 条只是复述图上数字：改写成原因 / 影响 / 下一步（只用已有事实）'))
+        pts = readout_items(sec)
+        if pts and not any(any(m in _point_text(p) for m in REASON_MARKERS) for p in pts):
+            out.append(('WARN', 'DENSITY_NO_INSIGHT',
+                        '解读要点没有一条讲原因 / 影响 / 下一步：至少一条写「为什么」或「所以要做什么」'))
+        if len(sec.get('minis') or []) > 2:
+            out.append(('FAIL', 'DENSITY_MINIS_MAX', f'小图组最多 2 张（现 {len(sec["minis"])} 张）：多出的拆页或并入主图'))
         if a['data_points'] < tier['data']:
             out.append(('WARN', 'DENSITY_DATA', f'数据点 {a["data_points"]} 少于 {tier["data"]}'))
     elif t in DIAGRAM_TYPES:

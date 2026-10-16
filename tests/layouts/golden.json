@@ -93,16 +93,16 @@
    "shapes": 9
   },
   {
-   "layout": "chart-table",
-   "title": "试点率与增幅互证：研发域一年内有望反超",
-   "fp": "e655db66cb98",
-   "shapes": 10
-  },
-  {
    "layout": "chart-full",
    "title": "企业智能体采纳率：四个季度四步走至 60%",
    "fp": "26c6410f35fe",
    "shapes": 7
+  },
+  {
+   "layout": "chart-table",
+   "title": "试点率与增幅互证：研发域一年内有望反超",
+   "fp": "e655db66cb98",
+   "shapes": 10
   },
   {
    "layout": "waterfall",
@@ -123,6 +123,12 @@
    "shapes": 26
   },
   {
+   "layout": "matrix-2x2",
+   "title": "高价值低难度场景优先——矩阵给出放量顺序",
+   "fp": "917dbbcdaf3d",
+   "shapes": 22
+  },
+  {
    "layout": "distribution",
    "title": "各域就绪度分布：金融客服中位最高、离散最小",
    "fp": "861a95c1b9b4",
@@ -141,10 +147,10 @@
    "shapes": 382
   },
   {
-   "layout": "matrix-2x2",
-   "title": "高价值低难度场景优先——矩阵给出放量顺序",
-   "fp": "917dbbcdaf3d",
-   "shapes": 22
+   "layout": "layer-stack",
+   "title": "四层解耦 + 横切护栏：模型、编排、应用、接入各司其职",
+   "fp": "a93274fac2fb",
+   "shapes": 63
   },
   {
    "layout": "pyramid",
@@ -165,10 +171,10 @@
    "shapes": 56
   },
   {
-   "layout": "layer-stack",
-   "title": "四层解耦 + 横切护栏：模型、编排、应用、接入各司其职",
-   "fp": "a93274fac2fb",
-   "shapes": 63
+   "layout": "media-full",
+   "title": "满版配图：现场全景",
+   "fp": "b53c14f4e63e",
+   "shapes": 8
   },
   {
    "layout": "area-tree",
@@ -189,6 +195,12 @@
    "shapes": 23
   },
   {
+   "layout": "feature-cards",
+   "title": "平台化三件套：编排、记忆、治理缺一不可",
+   "fp": "5ce356da36eb",
+   "shapes": 18
+  },
+  {
    "layout": "milestones-icon",
    "title": "四个里程碑：半年完成平台化",
    "fp": "6e82361fb172",
@@ -207,16 +219,16 @@
    "shapes": 32
   },
   {
+   "layout": "bento",
+   "title": "三家标杆的共同做法：同一套护栏，不同业务形态",
+   "fp": "844f22b7507e",
+   "shapes": 22
+  },
+  {
    "layout": "text-media",
    "title": "平台化先行是穿越分水岭的共同路径",
    "fp": "b3d907c710e3",
    "shapes": 15
-  },
-  {
-   "layout": "media-full",
-   "title": "满版配图：现场全景",
-   "fp": "b53c14f4e63e",
-   "shapes": 8
   },
   {
    "layout": "media-grid",
@@ -231,28 +243,16 @@
    "shapes": 14
   },
   {
-   "layout": "feature-cards",
-   "title": "平台化三件套：编排、记忆、治理缺一不可",
-   "fp": "5ce356da36eb",
+   "layout": "triad",
+   "title": "规模化三重门槛：技术可控、组织就绪、经济可行",
+   "fp": "2b0d3a561a1b",
    "shapes": 18
-  },
-  {
-   "layout": "bento",
-   "title": "三家标杆的共同做法：同一套护栏，不同业务形态",
-   "fp": "844f22b7507e",
-   "shapes": 22
   },
   {
    "layout": "feature-2col",
    "title": "主张与细节：为什么先做数据底座",
    "fp": "370004c7cd5e",
    "shapes": 8
-  },
-  {
-   "layout": "triad",
-   "title": "规模化三重门槛：技术可控、组织就绪、经济可行",
-   "fp": "2b0d3a561a1b",
-   "shapes": 18
   },
   {
    "layout": "compare-table",
@@ -286,9 +286,9 @@
   },
   {
    "layout": "chart-minis",
-   "title": "主图看总量，小图看结构：三域各自的爬坡曲线",
-   "fp": "5e054a71eb16",
-   "shapes": 26
+   "title": "主图看总量，小图看结构：客服与研发的爬坡曲线",
+   "fp": "5e82f7331cd6",
+   "shapes": 23
   },
   {
    "layout": "chart-band",

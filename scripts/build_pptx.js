@@ -163,6 +163,33 @@ function _normColor(c) {
   if (/^[0-9a-f]{3}$/.test(v)) v = '#' + v;
   return v;
 }
+/* M8：图标跟随风格主色。包内 PNG 是调色板图（color type 3，透明度在 tRNS），
+   单色线性图标只需把 PLTE 每个条目的 RGB 改成目标色、alpha 不动，即可无依赖重新着色。 */
+const _CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n;
+  for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function _crc32(buf) { let c = 0xffffffff; for (let i = 0; i < buf.length; i++) c = _CRC_T[(c ^ buf[i]) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; }
+const _RECOLOR_CACHE = new Map();
+function recolorPng(buf, colorHex) {
+  const hex = _normColor(colorHex || '').replace('#', '');
+  if (!/^[0-9a-f]{6}$/.test(hex) || buf.length < 33 || buf[25] !== 3) return buf;
+  const key = hex + ':' + _crc32(buf);
+  if (_RECOLOR_CACHE.has(key)) return _RECOLOR_CACHE.get(key);
+  const rgb = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const out = Buffer.from(buf);
+  let off = 8;
+  while (off + 12 <= out.length) {
+    const len = out.readUInt32BE(off);
+    const type = out.toString('latin1', off + 4, off + 8);
+    if (type === 'PLTE') {
+      for (let i = 0; i + 2 < len; i += 3) { out[off + 8 + i] = rgb[0]; out[off + 9 + i] = rgb[1]; out[off + 10 + i] = rgb[2]; }
+      out.writeUInt32BE(_crc32(out.subarray(off + 4, off + 8 + len)), off + 8 + len);
+      break;
+    }
+    off += 12 + len;
+  }
+  _RECOLOR_CACHE.set(key, out);
+  return out;
+}
 /** 取图标 PNG data URI；无缓存时按名挑色兜底（accent → 首色 → 包内 256px PNG → null） */
 function iconPng(name, colorHex) {
   const n = name && ICON_ASSETS.icons[name] ? name : ICON_LIB.pickIconName(name, 0);
@@ -176,7 +203,7 @@ function iconPng(name, colorHex) {
   // 无 sharp / 无预生成资产时的可靠回落：包内 256px 预渲染 PNG（python-pptx/pptxgenjs 均可直接嵌入）
   try {
     const p = ICON_LIB.iconPngPath(n);
-    if (p) return 'data:image/png;base64,' + fs.readFileSync(p).toString('base64');
+    if (p) return 'data:image/png;base64,' + recolorPng(fs.readFileSync(p), colorHex).toString('base64');
   } catch (e) { /* 继续回落 accent 方块 */ }
   return null;
 }
@@ -2345,7 +2372,7 @@ function composeSide(s, sec, type, C, y0, y1) {
     if (rowH) readoutRow(s, [], C.pts, MX, y1 - rowH, CW, rowH);
     return;
   }
-  const minis = (sec.minis || []).filter(m => m && m.labels).slice(0, 3);
+  const minis = (sec.minis || []).filter(m => m && m.labels).slice(0, 2);
   const sideW = minis.length ? CW * 0.38 : Math.min(4.6, CW * 0.38);
   const mainW = CW - sideW - 0.3;
   if (!C.pts.length && !minis.length) { compChart(s, sec.chart, type, MX, y, CW, H); return; }

@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### M8 遗留问题清理
+- 解读要点：规则写明「原因 / 影响 / 下一步，不复述数字，只用已有事实」；新增 DENSITY_ECHO / DENSITY_NO_INSIGHT 复述提示；四份示例与 Q1 的复述要点按原有事实改写。
+- 小图组最多 2 张（DENSITY_MINIS_MAX），HTML 与 PPTX 同步；PPTX 小图随之放大。
+- showcase 风格页补解读带、改措辞。
+- HTML 热力图按 4 级色阶着色并补色阶图例（两端标数值），与 PPTX 同口径。
+- gallery-research 节奏检查通过，CI 节奏门禁覆盖版式库样例稿。
+- PPTX 图标跟随风格主色（调色板 PNG 无依赖重着色）。
+- 脚手架默认（含不加 --plan）只出空位骨架，示例正文改为显式 --demo。
+- image-size 经 npm overrides 锁到 ^2.0.4（pptxgenjs 运行时不调用该包），npm audit 0。
+
 ### M7 信息密度治理
 - 新增复合版式（chart-readout / chart-dual / chart-minis / chart-band），纳入版式库（48 种），HTML 与 PPTX 同步。
 - 模型层：图表页支持 points / keyMetrics / chart2 / minis / compose；缺关键数字时由单序列数据自动派生，缺解读给出提示。

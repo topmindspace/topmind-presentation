@@ -11,10 +11,10 @@
 1. **Gate 0 参考图**：先给 `assets/theme-overview.png`（12 套风格总览），想边看边挑给 `assets/style-gallery.html`。
 2. **六项问询（一轮问完）**：模式 / 篇幅 / 风格 / 亮暗 / 交付格式 / 已看参考图。每项带推荐，用户不选就按推荐。
 3. **幽灵稿（只有标题）**：初稿每页正文是「【待填】」空位，strict 校验会报 UNDERFILL，属预期；先写 3–7 章、每页一句主张式标题，用页型规划生成只含标题的骨架给用户看一眼：
-   `python3 scripts/scaffold_report.py --mode presentation --plan plan.json --out 草稿.html`
+   `python3 scripts/scaffold_report.py --mode presentation --plan plan.json --out 草稿.html`（默认只出空位骨架，不带示例文字；`--demo` 才出示例正文，仅用于看版式，不得当初稿）
    `plan.json` 每项 `{"type","eyebrow","title"}`；页型列表 `--list-types`。用户确认或改标题后再写内容，只确认这一轮。
 4. **方向样张（可选）**：用户在两三套风格之间拿不准时，用同一份模型各渲染封面和一张内容页并排给他挑，不要为此多问。
-5. **模型单写**：内容只写进 `REPORT_MODEL`（model.json），不手改 HTML 正文。版式按 `references/layout-library.md` 挑，同一版式不连用超过 2 页，密度 L/M/H 不连续 3 页同档。**每页 = 论点 + 证据 + 解读**：图表页写 `points`（演示 ≥2 条、研究 ≥3 条，写含义不复述数字）和 `keyMetrics`（2–4 个关键数字），需要对照用 `chart2`、看分组用 `minis`（`references/density.md`）。
+5. **模型单写**：内容只写进 `REPORT_MODEL`（model.json），不手改 HTML 正文。版式按 `references/layout-library.md` 挑，同一版式不连用超过 2 页，密度 L/M/H 不连续 3 页同档。**每页 = 论点 + 证据 + 解读**：图表页写 `points`（演示 ≥2 条、研究 ≥3 条，写原因 / 影响 / 下一步，不复述图上数字，只用已有事实）和 `keyMetrics`（2–4 个关键数字），需要对照用 `chart2`、看分组用 `minis`（最多 2 张；`references/density.md`）。
 6. **渲染**：`python3 scripts/render_from_model.py 报告.model.json --template presentation --out 报告.html`
 7. **校验**：`python3 scripts/check_density.py 报告.model.json --strict`（信息密度 FAIL 0）；`python3 scripts/validate_report.py 报告.html --strict` 必须 0/0。PPTX：
    `node scripts/build_pptx.js 报告.pptx --model=报告.model.json` → `python3 scripts/validate_pptx.py 报告.pptx --strict --model=报告.model.json` 0/0。

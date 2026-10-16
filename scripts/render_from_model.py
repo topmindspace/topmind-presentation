@@ -398,7 +398,7 @@ def compose_body(i, sec, ptype, fig_html):
         if pts:
             out += _readout_row([], pts)
         return out
-    minis = [m for m in (sec.get('minis') or []) if isinstance(m, dict) and m.get('labels')][:3]
+    minis = [m for m in (sec.get('minis') or []) if isinstance(m, dict) and m.get('labels')][:2]
     if minis:
         out += ('    <div class="grid g-side rv a-start">\n' + fig_html
                 + '      <div class="minis">\n' + ''.join(_mini_fig(m, i * 10 + k) for k, m in enumerate(minis))
@@ -832,8 +832,27 @@ def r_steps(i, sec):
     return wrap(i, 'steps', body, sec)
 
 
+def _heat_level(v, vmin, vmax):
+    """与 build_pptx 同口径的 4 级色阶：0 底色 · 1 浅 · 2 中 · 3 主色。"""
+    try:
+        x = float(v)
+    except (TypeError, ValueError):
+        return None
+    p = (x - vmin) / (vmax - vmin) if vmax > vmin else 0.5
+    return 3 if p >= 0.86 else (2 if p >= 0.55 else (1 if p >= 0.25 else 0))
+
+
 def r_heatmap(i, sec):
     rows, cols, cells = sec.get('rowHeads') or [], sec.get('colHeads') or [], sec.get('cells') or []
+    unit = sec.get('unit') or ''
+    flat = []
+    for r in cells:
+        for v in (r or []):
+            try:
+                flat.append(float(v))
+            except (TypeError, ValueError):
+                pass
+    vmin, vmax = (min(flat), max(flat)) if flat else (0.0, 1.0)
     body = f'    <div class="heat rv" style="--heat-cols:{max(1, len(cols))}"><div class="heat__grid">\n'
     body += '      <div></div>' + ''.join(f'<div class="heat__h">{esc(c)}</div>' for c in cols) + '\n'
     for ri, rh in enumerate(rows):
@@ -841,9 +860,22 @@ def r_heatmap(i, sec):
         row = cells[ri] if ri < len(cells) else []
         for ci in range(len(cols)):
             v = row[ci] if ci < len(row) else ''
-            body += f'<div class="heat__c">{esc(v)}</div>'
+            lv = _heat_level(v, vmin, vmax)
+            cls = f' heat__c--{lv}' if lv else ''
+            txt = (f'{v}{unit}' if lv is not None else (v if v not in ('', None) else '—'))
+            body += f'<div class="heat__c{cls}">{esc(txt)}</div>'
         body += '\n'
-    body += '    </div></div>\n'
+    body += '    </div>\n'
+    # M8：色阶图例（与 PPTX 同 4 级；两端标数值区间，scaleLabel 可覆盖文字）
+    lg = sec.get('scaleLabel') or ['低', '高']
+    def _fmt(x):
+        return (str(int(x)) if float(x).is_integer() else f'{x:g}') + unit
+    lo = f'{esc(lg[0])} {_fmt(vmin)}' if flat else esc(lg[0])
+    hi = f'{esc(lg[1] if len(lg) > 1 else "高")} {_fmt(vmax)}' if flat else esc(lg[1] if len(lg) > 1 else '高')
+    body += ('    <div class="heat__legend" aria-label="色阶图例"><span>' + lo + '</span>'
+             + ''.join(f'<i class="heat__sw heat__c--{k}"></i>' for k in range(4))
+             + '<span>' + hi + '</span></div>\n')
+    body += '    </div>\n'
     return wrap(i, 'heatmap', body, sec)
 
 

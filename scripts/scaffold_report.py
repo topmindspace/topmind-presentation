@@ -793,7 +793,7 @@ def pg_ghost(i, sec):
     need = '、'.join(f.split(':')[0].replace('anyof', '') for f in pt.get('required', []) if f != 'title') or '正文'
     if pt.get('density'):
         # M7：图表页同时要解读要点与关键数字（信息密度契约），初稿就把空位标出来
-        need += '；解读要点 points、关键数字 keyMetrics'
+        need += '；解读要点 points（写原因 / 影响 / 下一步，不复述数字）、关键数字 keyMetrics'
     html = f'''<section class="band" id="s{i}" data-ghost="1">
   <div class="wrap">
 {shead(sec['eyebrow'], sec['title'], '')}
@@ -940,6 +940,8 @@ def main() -> int:
     ap.add_argument('--plan', help='页型规划 JSON 文件：[{"type","eyebrow","title"}…]')
     ap.add_argument('--preset', help='黄金节奏包名：pitch/ops-review/consulting/diagnostic/layered-arch/flow-arch')
     ap.add_argument('--out', help='输出 HTML 路径')
+    ap.add_argument('--demo', action='store_true',
+                    help='生成带示例正文 / 示例数字的演示骨架（仅用于看版式；默认不带任何示例文字）')
     ap.add_argument('--list-types', action='store_true', help='列出可用页型与节奏包后退出')
     args = ap.parse_args()
 
@@ -1012,6 +1014,8 @@ def main() -> int:
             return 2
         n = len(plan)
     pages = build_plan(mode, n, plan, preset=args.preset)
+    # M8：默认（不论是否给 --plan）只出空位骨架，不带示例正文 / 示例数字；--demo 才出示例内容
+    ghost = plan is not None or not args.demo
 
     # ① 风格 / 主题 / 标题 / 品牌
     t = t.replace(f'data-style="{TPL_DEFAULT_STYLE[mode]}"', f'data-style="{style}"', 1)
@@ -1032,7 +1036,7 @@ def main() -> int:
     for k, p in enumerate(pages, 1):
         p.setdefault('type', 'points')
         b = BUILDERS.get(p['type'])
-        if plan is not None and b is not None:
+        if ghost and b is not None:
             b = pg_ghost   # 标题初稿：不生成示例正文
         if b is None:
             print(f'警告：未知页型 {p["type"]!r}，回落到 points')
@@ -1053,7 +1057,7 @@ def main() -> int:
                 h, count=1)
         m['layoutPreset'] = skel
         has_note = bool(HAS_NOTE.search(h))
-        if not has_note and since_note >= 2 and plan is None:      # research 节奏：≤2 页无结论条（标题初稿不注入示例结论）
+        if not has_note and since_note >= 2 and not ghost:      # research 节奏：≤2 页无结论条（标题初稿不注入示例结论）
             h = inject_sowhat(h)
             has_note = True
         since_note = 0 if has_note else since_note + 1
@@ -1085,10 +1089,10 @@ def main() -> int:
     show_agenda = not (mode == 'architecture' and len(pages) <= 4)
     closing_points = [['动作一', '一句话说明。'], ['动作二', '一句话说明。'], ['动作三', '一句话说明。']]
     closing_title = '收尾主张（回应封面问题）'
-    if plan is not None:
+    if ghost:
         closing_points = [[GHOST_MARK + '收尾要点', '确认标题后再写']]
         closing_title = GHOST_MARK + '收尾主张'
-    ghost_inject = plan is not None
+    ghost_inject = ghost
 
     body = [cover(mode, args.title, args.subtitle, args.meta)]
     if show_agenda:

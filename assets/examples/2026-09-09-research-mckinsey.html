@@ -677,6 +677,9 @@ justify-content:flex-end;text-align:right;padding:6px 12px 6px 0;border-right:2p
 font-size:var(--fs-sm);font-weight:600;color:var(--text-2);font-variant-numeric:tabular-nums;
 line-height:1.4;display:flex;flex-direction:column;justify-content:center;gap:2px}
 .heat__c small{display:block;font-size:var(--fs-xs);font-weight:500;color:var(--text-3)}
+.heat__legend{display:flex;align-items:center;gap:6px;margin-top:12px;font-size:var(--fs-xs);color:var(--text-3)}
+.heat__sw{display:inline-block;width:26px;height:12px;border-radius:3px;background:var(--surface-1);border:1px solid var(--border-soft)}
+.heat__sw.heat__c--1,.heat__sw.heat__c--2,.heat__sw.heat__c--3{border-color:transparent}
 .heat__c--1{background:var(--accent-soft);color:var(--accent-text)}
 .heat__c--2{background:var(--accent-soft-2);color:var(--accent-text)}
 .heat__c--3{background:var(--accent);color:var(--accent-on)}
@@ -1323,7 +1326,7 @@ transition:color .18s,background-color .18s}
       </svg>
         <div class="exhibit__src">来源：企业智能体发展调研，2026-08；试点率 = 已进入试点及以上的企业占比</div>
       </div>
-      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">客服 72%，四域最高</div><p class="readout__v">流程标准、容错边界清晰的场景最先进入试点</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">财务 57%、营销 48%</div><p class="readout__v">居中两域相差 9pt，处在从试点走向放量的过渡段</p></div></li><li><span class="readout__n">3</span><div><div class="readout__k">研发 38% 但增速最快</div><p class="readout__v">同比 +15pt，为四域最高（见 Exhibit 2）</p></div></li></ol>
+      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">客服 72%，四域最高</div><p class="readout__v">因为流程标准、容错边界清晰，最先进入试点</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">财务 57%、营销 48%</div><p class="readout__v">居中两域相差 9pt，处在从试点走向放量的过渡段</p></div></li><li><span class="readout__n">3</span><div><div class="readout__k">研发 38% 但增速最快</div><p class="readout__v">同比 +15pt，为四域最高（见 Exhibit 2）</p></div></li></ol>
     </div>
     <div class="sowhat rv"><span class="sowhat__v">研发域渗透最浅但势能最大，工具链成熟后有望一年内反超客服域。</span></div>
   </div>
@@ -1366,7 +1369,7 @@ transition:color .18s,background-color .18s}
         <div class="exhibit__src">来源：企业智能体发展调研，2026-08；同比 = 2025 vs 2024 试点率差值</div>
       </div>
     </div>
-    <div class="cband rv" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__p"><div class="readout__k">增幅与基数反向</div><p class="readout__v">试点率越低的域同比增幅越高：研发 +15pt，客服 +9pt</p></div><div class="cband__p"><div class="readout__k">差距在收窄</div><p class="readout__v">客服与研发的差距一年内缩小 6pt（增幅差 15 − 9）</p></div><div class="cband__p"><div class="readout__k">四域均为正增长</div><p class="readout__v">同比增幅 9–15pt，平均 +12pt</p></div></div>
+    <div class="cband rv" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__p"><div class="readout__k">增幅与基数反向</div><p class="readout__v">试点率越低的域同比增幅越高：研发 +15pt，客服 +9pt</p></div><div class="cband__p"><div class="readout__k">差距一年缩小 6pt</div><p class="readout__v">按当前增幅差推算，研发域在工具链补齐后有望一年内反超客服</p></div><div class="cband__p"><div class="readout__k">四域均为正增长</div><p class="readout__v">说明增长不靠单一业务域拉动，平均 +12pt</p></div></div>
     <div class="sowhat rv"><span class="sowhat__v">增幅与基数负相关，研发域工具链补齐后将进入陡峭爬坡段。</span></div>
   </div>
 </section>
@@ -1418,7 +1421,7 @@ transition:color .18s,background-color .18s}
       </svg>
         <div class="exhibit__src">来源：企业智能体发展调研，2026-08；单位为百分点（pt），按增量归因分解</div>
       </div>
-      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">工具链贡献最大</div><p class="readout__v">+9pt，占净增量 14pt 的 64%</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">流程改造次之</div><p class="readout__v">+6pt，与工具链合计 +15pt，已超过净增量</p></div></li><li><span class="readout__n">3</span><div><div class="readout__k">治理是唯一负项</div><p class="readout__v">−3pt：治理不足抵消了部分增长</p></div></li></ol>
+      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">工具链贡献 +9pt，占净增量 64%</div><p class="readout__v">补齐工具链的边际收益最高，应优先投入</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">流程改造 +6pt 次之</div><p class="readout__v">与工具链合计 +15pt，已超过 14pt 的净增量</p></div></li><li><span class="readout__n">3</span><div><div class="readout__k">治理是唯一负项 −3pt</div><p class="readout__v">治理不足抵消了部分增长，不补治理会继续拖累</p></div></li></ol>
     </div>
     <div class="sowhat rv"><span class="sowhat__v">14 个百分点净增量里工具链补齐贡献 9pt、治理不足拖累 3pt——补齐工具链的边际收益最高。</span></div>
   </div>
@@ -1432,10 +1435,12 @@ transition:color .18s,background-color .18s}
     </div>
     <div class="heat rv" style="--heat-cols:5"><div class="heat__grid">
       <div></div><div class="heat__h">客服</div><div class="heat__h">研发</div><div class="heat__h">营销</div><div class="heat__h">供应链</div><div class="heat__h">财务</div>
-      <div class="heat__rh">金融</div><div class="heat__c">78</div><div class="heat__c">46</div><div class="heat__c">63</div><div class="heat__c">38</div><div class="heat__c">61</div>
-      <div class="heat__rh">制造</div><div class="heat__c">44</div><div class="heat__c">29</div><div class="heat__c">33</div><div class="heat__c">57</div><div class="heat__c">31</div>
-      <div class="heat__rh">互联网</div><div class="heat__c">71</div><div class="heat__c">82</div><div class="heat__c">68</div><div class="heat__c">49</div><div class="heat__c">52</div>
-    </div></div>
+      <div class="heat__rh">金融</div><div class="heat__c heat__c--3">78</div><div class="heat__c heat__c--1">46</div><div class="heat__c heat__c--2">63</div><div class="heat__c">38</div><div class="heat__c heat__c--2">61</div>
+      <div class="heat__rh">制造</div><div class="heat__c heat__c--1">44</div><div class="heat__c">29</div><div class="heat__c">33</div><div class="heat__c heat__c--1">57</div><div class="heat__c">31</div>
+      <div class="heat__rh">互联网</div><div class="heat__c heat__c--2">71</div><div class="heat__c heat__c--3">82</div><div class="heat__c heat__c--2">68</div><div class="heat__c heat__c--1">49</div><div class="heat__c heat__c--1">52</div>
+    </div>
+    <div class="heat__legend" aria-label="色阶图例"><span>低 29</span><i class="heat__sw heat__c--0"></i><i class="heat__sw heat__c--1"></i><i class="heat__sw heat__c--2"></i><i class="heat__sw heat__c--3"></i><span>高 82</span></div>
+    </div>
     <div class="cband rv" style="grid-template-columns:minmax(0,.62fr) minmax(0,.62fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__km"><div class="kstrip__v">82</div><div class="kstrip__k">最高 · 互联网 × 研发</div></div><div class="cband__km"><div class="kstrip__v">29</div><div class="kstrip__k">最低 · 制造 × 研发</div></div><div class="cband__p"><div class="readout__k">金融：客服 78 领先</div><p class="readout__v">营销 63、财务 61 跟进，供应链 38 最弱</p></div><div class="cband__p"><div class="readout__k">制造：供应链 57 是唯一亮点</div><p class="readout__v">其余四域都在 44 及以下，研发仅 29</p></div><div class="cband__p"><div class="readout__k">互联网：四域过 50</div><p class="readout__v">研发 82、客服 71、营销 68、财务 52；仅供应链 49</p></div></div>
     <div class="sowhat rv"><span class="sowhat__v">金融客服与互联网研发是两个可复制样板，制造研发域需先补工具链再谈放量。</span></div>
     <div class="footnote">注：就绪度 = 场景 × 行业维度的能力自评加权得分（0–100），N=42 深度访谈 + 行业抽样<a class="cite" href="#ref-2">[2]</a>。</div>
@@ -1490,7 +1495,7 @@ transition:color .18s,background-color .18s}
       </svg>
         <div class="exhibit__src">来源：季度就绪度评分序列，2025Q1–2026Q4；单位：分（0–100）</div>
       </div>
-      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">25Q3 见底</div><p class="readout__v">收盘 47，此后两期回升</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">26Q1 跳涨</div><p class="readout__v">收盘 68，单季 +16</p></div></li><li><span class="readout__n">3</span><div><div class="readout__k">26Q4 创新高</div><p class="readout__v">最高 76、收盘 73，均为八期最高</p></div></li></ol>
+      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">25Q3 收盘 47 见底</div><p class="readout__v">此后两期回升，下行段已经结束</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">26Q1 单季 +16 跳涨</div><p class="readout__v">振幅收窄后的上行，说明治理投入开始显效</p></div></li><li><span class="readout__n">3</span><div><div class="readout__k">26Q4 收盘 73 创八期新高</div><p class="readout__v">就绪度进入温和上行段，可据此规划下一阶段放量</p></div></li></ol>
     </div>
     <div class="sowhat rv"><span class="sowhat__v">八期振幅收窄后连拉两根阳线——就绪度进入温和上行段，治理投入开始显效。</span></div>
   </div>
@@ -1539,7 +1544,7 @@ transition:color .18s,background-color .18s}
       </svg>
         <div class="exhibit__src">来源：企业智能体发展调研（N=42），2026-08</div>
       </div>
-      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">制造 3 家，单一行业最多</div><p class="readout__v">占 9 家的 33%</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">金融 2 家</div><p class="readout__v">与制造合计 5 家，过半</p></div></li><li><span class="readout__n">3</span><div><div class="readout__k">互联网及其他 4 家</div><p class="readout__v">分散在多个行业，单个行业不超过 2 家（见 Exhibit 6）</p></div></li></ol>
+      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">制造 3 家 + 金融 2 家，合计过半</div><p class="readout__v">规模化先在流程标准化程度高的行业兑现</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">互联网及其他 4 家分散</div><p class="readout__v">单个行业不超过 2 家，尚未形成可复制的行业打法（见 Exhibit 6）</p></div></li><li><span class="readout__n">3</span><div><div class="readout__k">复制路径</div><p class="readout__v">先在制造、金融复制成熟场景，再向长尾行业外溢</p></div></li></ol>
     </div>
     <div class="sowhat rv"><span class="sowhat__v">制造与金融合计 5 / 9 家：规模化先在流程标准化程度高的行业兑现。</span></div>
     <div class="footnote">注：注：行业构成基于 9 家规模化成功企业（N=42 访谈样本）。</div>
@@ -1573,7 +1578,7 @@ transition:color .18s,background-color .18s}
       </svg>
         <div class="exhibit__src">注：行业构成基于 9 家规模化成功企业（N=42 访谈样本）</div>
       </div>
-    <div class="cband rv" style="grid-template-columns:minmax(0,.62fr) minmax(0,.62fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__km"><div class="kstrip__v">55%</div><div class="kstrip__k">制造 + 金融（5 / 9 家）</div></div><div class="cband__km"><div class="kstrip__v">5 个</div><div class="kstrip__k">行业</div></div><div class="cband__p"><div class="readout__k">制造 3 家居首</div><p class="readout__v">占 33%</p></div><div class="cband__p"><div class="readout__k">金融、互联网各 2 家</div><p class="readout__v">各占 22%</p></div><div class="cband__p"><div class="readout__k">能源、医疗各 1 家</div><p class="readout__v">长尾行业合计 22%</p></div></div>
+    <div class="cband rv" style="grid-template-columns:minmax(0,.62fr) minmax(0,.62fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__km"><div class="kstrip__v">55%</div><div class="kstrip__k">制造 + 金融（5 / 9 家）</div></div><div class="cband__km"><div class="kstrip__v">5 个</div><div class="kstrip__k">行业</div></div><div class="cband__p"><div class="readout__k">制造与金融合计 55%</div><p class="readout__v">共同点是流程标准、容错边界清晰，因此可直接复制</p></div><div class="cband__p"><div class="readout__k">互联网 2 家，与金融并列</div><p class="readout__v">说明规模化并不局限于传统强流程行业</p></div><div class="cband__p"><div class="readout__k">能源、医疗各 1 家</div><p class="readout__v">长尾行业合计 22%，样本少，结论暂不外推</p></div></div>
     <div class="sowhat rv"><span class="sowhat__v">制造与金融合计 5 家、占 55%——共同点是流程标准、容错边界清晰，可直接复制。</span></div>
   </div>
 </section>
@@ -1609,7 +1614,7 @@ transition:color .18s,background-color .18s}
       </svg>
         <div class="exhibit__src">注：列宽 ∝ 当年总规模，列高 = 渠道构成占比</div>
       </div>
-    <div class="cband rv" style="grid-template-columns:minmax(0,.62fr) minmax(0,.62fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__km"><div class="kstrip__v">+21pt</div><div class="kstrip__k">线上占比三年提升</div></div><div class="cband__km"><div class="kstrip__v">+65%</div><div class="kstrip__k">总规模（2023 → 2025）</div></div><div class="cband__p"><div class="readout__k">线上占比逐年提升</div><p class="readout__v">40% → 52% → 61%</p></div><div class="cband__p"><div class="readout__k">2024 年线上首次过半</div><p class="readout__v">52% 对 48%</p></div><div class="cband__p"><div class="readout__k">线下绝对量基本持平</div><p class="readout__v">按规模折算：60 → 62 → 64</p></div></div>
+    <div class="cband rv" style="grid-template-columns:minmax(0,.62fr) minmax(0,.62fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__km"><div class="kstrip__v">+21pt</div><div class="kstrip__k">线上占比三年提升</div></div><div class="cband__km"><div class="kstrip__v">+65%</div><div class="kstrip__k">总规模（2023 → 2025）</div></div><div class="cband__p"><div class="readout__k">线上占比 40% → 61%</div><p class="readout__v">三年 +21pt，线上承载能力已成为规模化的前置条件</p></div><div class="cband__p"><div class="readout__k">2024 年线上首次过半</div><p class="readout__v">渠道重心在这一年完成切换</p></div><div class="cband__p"><div class="readout__k">线下绝对量基本持平</div><p class="readout__v">按规模折算 60 → 62 → 64，增量几乎全部来自线上，资源应向线上倾斜</p></div></div>
     <div class="sowhat rv"><span class="sowhat__v">总量三年增长 65%，线上占比从 40% 升到 61%——线上承载能力已成为规模化的前置条件。</span></div>
   </div>
 </section>
@@ -1655,7 +1660,7 @@ transition:color .18s,background-color .18s}
       </svg>
         <div class="exhibit__src">注：占比为各形态场景数占当年总量；带宽 ∝ 场景数</div>
       </div>
-    <div class="cband rv" style="grid-template-columns:minmax(0,.62fr) minmax(0,.62fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__km"><div class="kstrip__v">18%</div><div class="kstrip__k">2027 问答检索（2023 为 52%）</div></div><div class="cband__km"><div class="kstrip__v">44%</div><div class="kstrip__k">2027 副驾协同</div></div><div class="cband__p"><div class="readout__k">问答检索逐年收缩</div><p class="readout__v">52 → 44 → 34 → 26 → 18，五年降 34pt</p></div><div class="cband__p"><div class="readout__k">副驾协同 2025 年成为第一</div><p class="readout__v">36% 首次超过问答检索的 34%</p></div><div class="cband__p"><div class="readout__k">端到端交付增长最快</div><p class="readout__v">五年 +20pt，高于副驾协同的 +14pt</p></div></div>
+    <div class="cband rv" style="grid-template-columns:minmax(0,.62fr) minmax(0,.62fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__km"><div class="kstrip__v">18%</div><div class="kstrip__k">2027 问答检索（2023 为 52%）</div></div><div class="cband__km"><div class="kstrip__v">44%</div><div class="kstrip__k">2027 副驾协同</div></div><div class="cband__p"><div class="readout__k">问答检索五年降 34pt</div><p class="readout__v">52% → 18%，价值重心正从问答检索迁出</p></div><div class="cband__p"><div class="readout__k">副驾协同 2025 年成为第一</div><p class="readout__v">36% 首次超过问答检索的 34%，是当前主要的价值来源</p></div><div class="cband__p"><div class="readout__k">端到端交付五年 +20pt</div><p class="readout__v">增长快于副驾协同（+14pt），意味着下一阶段要提前准备端到端能力</p></div></div>
     <div class="sowhat rv"><span class="sowhat__v">问答检索的占比从 52% 降到 18%，价值重心持续向副驾协同与端到端交付迁移。</span></div>
   </div>
 </section>
@@ -1795,7 +1800,7 @@ transition:color .18s,background-color .18s}
       </svg>
         <div class="exhibit__src">来源：企业智能体发展调研，2026-08；单位：条，自然月去重线索</div>
       </div>
-    <div class="cband rv" style="grid-template-columns:minmax(0,.62fr) minmax(0,.62fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__km"><div class="kstrip__v">58%</div><div class="kstrip__k">初筛流失（580 / 1,000）</div></div><div class="cband__km"><div class="kstrip__v">12%</div><div class="kstrip__k">最终签约率（120 / 1,000）</div></div><div class="cband__p"><div class="readout__k">初筛只放行 42%</div><p class="readout__v">1,000 条里 420 条进入商机</p></div><div class="cband__p"><div class="readout__k">商机转报价 62%</div><p class="readout__v">260 / 420，再流失 160 条</p></div><div class="cband__p"><div class="readout__k">报价到签约 46%</div><p class="readout__v">260 条报价签下 120 条</p></div></div>
+    <div class="cband rv" style="grid-template-columns:minmax(0,.62fr) minmax(0,.62fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__km"><div class="kstrip__v">58%</div><div class="kstrip__k">初筛流失（580 / 1,000）</div></div><div class="cband__km"><div class="kstrip__v">12%</div><div class="kstrip__k">最终签约率（120 / 1,000）</div></div><div class="cband__p"><div class="readout__k">初筛只放行 42%</div><p class="readout__v">流失 580 条、占全链路 58%，是最大的漏损环节</p></div><div class="cband__p"><div class="readout__k">商机转报价 62%、报价到签约 46%</div><p class="readout__v">后两段损耗远小于初筛</p></div><div class="cband__p"><div class="readout__k">因此先修初筛判定规则</div><p class="readout__v">比加大线索投放更快见效</p></div></div>
     <div class="sowhat rv"><span class="sowhat__v">初筛环节流失 580 条、占全链路 58%——先修初筛判定规则，比加大线索投放更快见效。</span></div>
   </div>
 </section>
@@ -1848,7 +1853,7 @@ transition:color .18s,background-color .18s}
       </svg>
         <div class="exhibit__src">来源：项目排期基线，2026-08；时间轴跨度 = 各阶段「起点 + 时长」最大值（18 周）</div>
       </div>
-      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">调研 + 设计 7 周</div><p class="readout__v">第 0–7 周，占总工期 39%</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">开发 8 周</div><p class="readout__v">第 7–15 周，关键路径上最长的一段</p></div></li><li><span class="readout__n">3</span><div><div class="readout__k">试点 3 周</div><p class="readout__v">第 15–18 周，验收后进入放量</p></div></li></ol>
+      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">开发 8 周，占总工期 44%</div><p class="readout__v">关键路径上最长的一段，压缩工期的杠杆在这里</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">调研 + 设计 7 周</div><p class="readout__v">占 39%，压缩空间有限，不宜作为提速重点</p></div></li><li><span class="readout__n">3</span><div><div class="readout__k">试点 3 周</div><p class="readout__v">第 15–18 周，验收后即进入放量</p></div></li></ol>
     </div>
     <div class="sowhat rv"><span class="sowhat__v">开发阶段独占 8 周、占总工期 44%——压缩工期的杠杆在开发，不在调研与设计。</span></div>
   </div>
@@ -1944,7 +1949,7 @@ transition:color .18s,background-color .18s}
       </svg>
         <div class="exhibit__src">注：就绪度 = 场景 × 行业维度的能力自评加权得分（0–100），N=42 深度访谈</div>
       </div>
-    <div class="cband rv" style="grid-template-columns:minmax(0,.62fr) minmax(0,.62fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__km"><div class="kstrip__v">81</div><div class="kstrip__k">金融客服中位数</div></div><div class="cband__km"><div class="kstrip__v">12</div><div class="kstrip__k">金融客服四分位距（74–86）</div></div><div class="cband__p"><div class="readout__k">金融客服：高且集中</div><p class="readout__v">中位 81，四分位区间 74–86</p></div><div class="cband__p"><div class="readout__k">制造研发：低且分散</div><p class="readout__v">中位 49，最低 31、最高 68</p></div><div class="cband__p"><div class="readout__k">互联网营销居中</div><p class="readout__v">中位 62，四分位区间 55–70</p></div></div>
+    <div class="cband rv" style="grid-template-columns:minmax(0,.62fr) minmax(0,.62fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"><div class="cband__km"><div class="kstrip__v">81</div><div class="kstrip__k">金融客服中位数</div></div><div class="cband__km"><div class="kstrip__v">12</div><div class="kstrip__k">金融客服四分位距（74–86）</div></div><div class="cband__p"><div class="readout__k">金融客服：高且集中</div><p class="readout__v">中位 81、四分位区间 74–86，标准化程度高的场景就绪度稳定，可直接复制</p></div><div class="cband__p"><div class="readout__k">制造研发：低且分散</div><p class="readout__v">中位 49、最低 31，同类场景内部差距大，经验不能直接照搬</p></div><div class="cband__p"><div class="readout__k">互联网营销居中</div><p class="readout__v">中位 62，处在可复制与需改造之间</p></div></div>
     <div class="sowhat rv"><span class="sowhat__v">金融客服中位 81 分且四分位区间最窄——标准化程度高的场景，就绪度稳定且可复制。</span></div>
   </div>
 </section>
@@ -2779,7 +2784,7 @@ window.REPORT_MODEL = {
       "points": [
         [
           "客服 72%，四域最高",
-          "流程标准、容错边界清晰的场景最先进入试点"
+          "因为流程标准、容错边界清晰，最先进入试点"
         ],
         [
           "财务 57%、营销 48%",
@@ -2851,12 +2856,12 @@ window.REPORT_MODEL = {
           "试点率越低的域同比增幅越高：研发 +15pt，客服 +9pt"
         ],
         [
-          "差距在收窄",
-          "客服与研发的差距一年内缩小 6pt（增幅差 15 − 9）"
+          "差距一年缩小 6pt",
+          "按当前增幅差推算，研发域在工具链补齐后有望一年内反超客服"
         ],
         [
           "四域均为正增长",
-          "同比增幅 9–15pt，平均 +12pt"
+          "说明增长不靠单一业务域拉动，平均 +12pt"
         ]
       ]
     },
@@ -2904,16 +2909,16 @@ window.REPORT_MODEL = {
       ],
       "points": [
         [
-          "工具链贡献最大",
-          "+9pt，占净增量 14pt 的 64%"
+          "工具链贡献 +9pt，占净增量 64%",
+          "补齐工具链的边际收益最高，应优先投入"
         ],
         [
-          "流程改造次之",
-          "+6pt，与工具链合计 +15pt，已超过净增量"
+          "流程改造 +6pt 次之",
+          "与工具链合计 +15pt，已超过 14pt 的净增量"
         ],
         [
-          "治理是唯一负项",
-          "−3pt：治理不足抵消了部分增长"
+          "治理是唯一负项 −3pt",
+          "治理不足抵消了部分增长，不补治理会继续拖累"
         ]
       ]
     },
@@ -3077,16 +3082,16 @@ window.REPORT_MODEL = {
       ],
       "points": [
         [
-          "25Q3 见底",
-          "收盘 47，此后两期回升"
+          "25Q3 收盘 47 见底",
+          "此后两期回升，下行段已经结束"
         ],
         [
-          "26Q1 跳涨",
-          "收盘 68，单季 +16"
+          "26Q1 单季 +16 跳涨",
+          "振幅收窄后的上行，说明治理投入开始显效"
         ],
         [
-          "26Q4 创新高",
-          "最高 76、收盘 73，均为八期最高"
+          "26Q4 收盘 73 创八期新高",
+          "就绪度进入温和上行段，可据此规划下一阶段放量"
         ]
       ]
     },
@@ -3141,16 +3146,16 @@ window.REPORT_MODEL = {
       ],
       "points": [
         [
-          "制造 3 家，单一行业最多",
-          "占 9 家的 33%"
+          "制造 3 家 + 金融 2 家，合计过半",
+          "规模化先在流程标准化程度高的行业兑现"
         ],
         [
-          "金融 2 家",
-          "与制造合计 5 家，过半"
+          "互联网及其他 4 家分散",
+          "单个行业不超过 2 家，尚未形成可复制的行业打法（见 Exhibit 6）"
         ],
         [
-          "互联网及其他 4 家",
-          "分散在多个行业，单个行业不超过 2 家（见 Exhibit 6）"
+          "复制路径",
+          "先在制造、金融复制成熟场景，再向长尾行业外溢"
         ]
       ]
     },
@@ -3197,16 +3202,16 @@ window.REPORT_MODEL = {
       ],
       "points": [
         [
-          "制造 3 家居首",
-          "占 33%"
+          "制造与金融合计 55%",
+          "共同点是流程标准、容错边界清晰，因此可直接复制"
         ],
         [
-          "金融、互联网各 2 家",
-          "各占 22%"
+          "互联网 2 家，与金融并列",
+          "说明规模化并不局限于传统强流程行业"
         ],
         [
           "能源、医疗各 1 家",
-          "长尾行业合计 22%"
+          "长尾行业合计 22%，样本少，结论暂不外推"
         ]
       ]
     },
@@ -3263,16 +3268,16 @@ window.REPORT_MODEL = {
       ],
       "points": [
         [
-          "线上占比逐年提升",
-          "40% → 52% → 61%"
+          "线上占比 40% → 61%",
+          "三年 +21pt，线上承载能力已成为规模化的前置条件"
         ],
         [
           "2024 年线上首次过半",
-          "52% 对 48%"
+          "渠道重心在这一年完成切换"
         ],
         [
           "线下绝对量基本持平",
-          "按规模折算：60 → 62 → 64"
+          "按规模折算 60 → 62 → 64，增量几乎全部来自线上，资源应向线上倾斜"
         ]
       ]
     },
@@ -3357,16 +3362,16 @@ window.REPORT_MODEL = {
       ],
       "points": [
         [
-          "问答检索逐年收缩",
-          "52 → 44 → 34 → 26 → 18，五年降 34pt"
+          "问答检索五年降 34pt",
+          "52% → 18%，价值重心正从问答检索迁出"
         ],
         [
           "副驾协同 2025 年成为第一",
-          "36% 首次超过问答检索的 34%"
+          "36% 首次超过问答检索的 34%，是当前主要的价值来源"
         ],
         [
-          "端到端交付增长最快",
-          "五年 +20pt，高于副驾协同的 +14pt"
+          "端到端交付五年 +20pt",
+          "增长快于副驾协同（+14pt），意味着下一阶段要提前准备端到端能力"
         ]
       ]
     },
@@ -3611,15 +3616,15 @@ window.REPORT_MODEL = {
       "points": [
         [
           "初筛只放行 42%",
-          "1,000 条里 420 条进入商机"
+          "流失 580 条、占全链路 58%，是最大的漏损环节"
         ],
         [
-          "商机转报价 62%",
-          "260 / 420，再流失 160 条"
+          "商机转报价 62%、报价到签约 46%",
+          "后两段损耗远小于初筛"
         ],
         [
-          "报价到签约 46%",
-          "260 条报价签下 120 条"
+          "因此先修初筛判定规则",
+          "比加大线索投放更快见效"
         ]
       ]
     },
@@ -3669,16 +3674,16 @@ window.REPORT_MODEL = {
       ],
       "points": [
         [
-          "调研 + 设计 7 周",
-          "第 0–7 周，占总工期 39%"
+          "开发 8 周，占总工期 44%",
+          "关键路径上最长的一段，压缩工期的杠杆在这里"
         ],
         [
-          "开发 8 周",
-          "第 7–15 周，关键路径上最长的一段"
+          "调研 + 设计 7 周",
+          "占 39%，压缩空间有限，不宜作为提速重点"
         ],
         [
           "试点 3 周",
-          "第 15–18 周，验收后进入放量"
+          "第 15–18 周，验收后即进入放量"
         ]
       ]
     },
@@ -3833,15 +3838,15 @@ window.REPORT_MODEL = {
       "points": [
         [
           "金融客服：高且集中",
-          "中位 81，四分位区间 74–86"
+          "中位 81、四分位区间 74–86，标准化程度高的场景就绪度稳定，可直接复制"
         ],
         [
           "制造研发：低且分散",
-          "中位 49，最低 31、最高 68"
+          "中位 49、最低 31，同类场景内部差距大，经验不能直接照搬"
         ],
         [
           "互联网营销居中",
-          "中位 62，四分位区间 55–70"
+          "中位 62，处在可复制与需改造之间"
         ]
       ]
     },
@@ -4066,7 +4071,7 @@ window.REPORT_MODEL = {
       "caliber": "域间数据 / 规模化占比 / 访谈结论，2026-07 至 2026-08"
     }
   ]
-};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 /* __TOPPPT_RUNTIME_START__ */
 /* ══ PPTX 页序运行时（assets/pptx-export.js 的内联副本 · 由 scripts/sync_runtime.py 注入，禁止手改） ══ */

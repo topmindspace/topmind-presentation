@@ -1,0 +1,58 @@
+{
+  "mode": "architecture",
+  "style": "business-blue",
+  "theme": "light",
+  "title": "版式画廊 · architecture",
+  "subtitle": "layoutLibrary golden 输入（自动生成，勿手改）",
+  "date": "2026-10-16",
+  "agenda": [
+    "结构",
+    "观点",
+    "数据",
+    "框架"
+  ],
+  "sections": [
+    {
+      "type": "lane",
+      "eyebrow": "process · swimlane",
+      "title": "一次任务请求的五步闭环",
+      "lanes": [
+        [
+          "业务方",
+          [
+            "下达目标",
+            "拆任务",
+            {
+              "t": "人审核",
+              "accent": true
+            }
+          ]
+        ],
+        [
+          "编排层",
+          [
+            {
+              "t": "规划校验",
+              "accent": true
+            },
+            "工具调用",
+            "全程留痕"
+          ]
+        ],
+        [
+          "执行层",
+          [
+            "调用模型",
+            "产出结果",
+            "回写记忆"
+          ]
+        ]
+      ],
+      "anchor": "arch2"
+    }
+  ],
+  "closing": {
+    "title": "谢谢",
+    "body": "版式画廊结束"
+  }
+}

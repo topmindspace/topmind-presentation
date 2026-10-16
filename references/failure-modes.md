@@ -100,7 +100,7 @@
 
 ### F14 风格集漂移 `style_set_drift`
 
-- **识别**：文档里写"18 套风格"而单源只有 9 套；画廊卡片数 ≠ 单源风格数；参考图与当前风格集不符；PPTX 导出找不到某风格的 token。
+- **识别**：文档里写"18 套风格"而单源只有 12 套；画廊卡片数 ≠ 单源风格数；参考图与当前风格集不符；PPTX 导出找不到某风格的 token。
 - **错误码**：`audit_styles.py`（双源逐字段 + 编码色板 9×2×5 + ui.js 色板）、`capture_theme_overview.js`（卡片数 ≠ 单源风格数即抛错）。
 - **根因**：风格集是**五张单源表 × 亮暗 + engine.css 块 + ui.js 色板 + 画廊 + 参考图**的多点结构，改一处忘一处。
 - **修复**：改风格**只改 `layout-constants.json`** → 跑 `sync_runtime.py` → `audit_styles.py` → `build_examples.py` → 需要时 `node scripts/capture_theme_overview.js` → `regression.py`。**新增风格先过 `styles.md` §10 的三条门槛**（新色族 + 新语汇 + 场景缺口）。

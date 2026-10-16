@@ -155,6 +155,8 @@ def main() -> int:
 
     # N11 待核实有标色无图例（改名不得包含原串——校验是子串判断）
     t11 = txt.replace('tbd-legend', 'tbd-leg').replace('flagbar', 'flag-bar')
+    # 基准示例不一定自带内联 .tbd（模型生成走 .flagbar 清单）：注入一处内联待核实标色，确保用例自足
+    t11 = re.sub(r'(<section\b[^>]*class="band[^"]*"[^>]*>[\s\S]*?</h2>)', r'\1<span class="tbd">待核实</span>', t11, count=1)
     cases.append(('N11 待核实无图例', t11, '待核实标注'))
 
     # N12 模型 theme 与页面 data-theme 矛盾

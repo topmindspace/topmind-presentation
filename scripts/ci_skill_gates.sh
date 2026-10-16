@@ -95,6 +95,8 @@ run_one() {
   node tests/solver/test_solver.js
   # M2：Python 端（HTML 渲染）与 JS 金样逐值一致——HTML/PPTX 拆页同源
   "$PY" tests/solver/test_solver_py.py
+  # M3：版式库节奏 / 家族覆盖 / 反模式（全部示例硬门禁）
+  for m in assets/examples/*.model.json; do "$PY" scripts/check_rhythm.py "$m" --strict || exit 1; done
 
   if [[ "$WITH_PPTX" == "1" && -f scripts/smoke_pptx.sh ]]; then
     ensure_python_pptx
@@ -131,6 +133,8 @@ run_one() {
       # M2：行式图表原生化探针（gantt / progress / funnel / vsbar → 原生可编辑 chart part）
       node scripts/build_pptx.js --out="dist/regression/native-rows.pptx" --strict \
         --model="tests/charts/native-rows.model.json" >/dev/null
+      # M3：版式库 golden（44 版式全覆盖 + PPTX 几何指纹）
+      "$PY" tests/layouts/test_layouts.py || { echo "ci_skill_gates: 版式 golden 失败" >&2; exit 1; }
       "$PY" scripts/validate_pptx.py "dist/regression/native-rows.pptx" --strict \
         --model="tests/charts/native-rows.model.json" >/dev/null || { echo "ci_skill_gates: 行式原生图表探针失败" >&2; exit 1; }
       "$PY" - "dist/regression/native-rows.pptx" <<'PYEOF'

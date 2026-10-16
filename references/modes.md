@@ -12,7 +12,7 @@
 <html data-mode="architecture"  data-style="graphite-dark" data-theme="dark">   <!-- assets/templates/architecture.html（石墨深灰深色优先，出厂 dark） -->
 ```
 
-- **风格与模式正交**：9 套风格是纯视觉皮肤（色彩/字体/圆角/阴影），header 下拉可生成后实时切换查看（交付前切回选定值，`data-style` 与 `REPORT_MODEL.style` 一致）。
+- **风格与模式正交**：12 套风格是纯视觉皮肤（色彩/字体/圆角/阴影），header 下拉可生成后实时切换查看（交付前切回选定值，`data-style` 与 `REPORT_MODEL.style` 一致）。
 - **模式决定**：独立模板骨架、密度 token、组件体系、页面预算、图表尺寸策略、PPTX 页型与排版比例尺。
 
 ## 模式速选
@@ -64,7 +64,7 @@
 
 ---
 
-> **六项问询**（一次问完、全部带意图推荐、不选即按推荐走）：①意图与模式推荐合并确认（本表）②篇幅（A 8–15 页 / B 12–25 页 / C 1–3 张图共 6–8 页）③风格 9 套（始终选择——风格是 HTML 皮肤，与交付格式无关）④**亮暗主题**（浅色默认 / 深色沉浸；石墨深灰默认深色；HTML 与 PPTX 同主题导出——`REPORT_MODEL.theme`）⑤交付格式（仅 HTML / HTML+PPTX）⑥参考图确认（Gate 0 已展示整体图，问用户是否看到、要不要换）。载体优先结构化选项卡，宿主工具不支持则对话文本一次列全；问询顺序与完整措辞以 `SKILL.md` 为准。
+> **六项问询**（一次问完、全部带意图推荐、不选即按推荐走）：①意图与模式推荐合并确认（本表）②篇幅（A 8–15 页 / B 12–25 页 / C 1–3 张图共 6–8 页）③风格 12 套（始终选择——风格是 HTML 皮肤，与交付格式无关）④**亮暗主题**（浅色默认 / 深色沉浸；石墨深灰默认深色；HTML 与 PPTX 同主题导出——`REPORT_MODEL.theme`）⑤交付格式（仅 HTML / HTML+PPTX）⑥参考图确认（Gate 0 已展示整体图，问用户是否看到、要不要换）。载体优先结构化选项卡，宿主工具不支持则对话文本一次列全；问询顺序与完整措辞以 `SKILL.md` 为准。
 >
 > 六项问询收**形式参数**；模式确定后，内容主线/大纲/逐页规划走 `outline-design.md` 内容架构七步法（含按需大纲确认），再进入生成。
 
@@ -242,7 +242,7 @@
 ## 模式 × 风格 × 导出的关系
 
 - 模式影响：独立模板骨架、密度 token、内容规则、页面预算、图表尺寸策略、PPTX 页型与**独立排版比例尺**（`layout-constants.json` `modeTypeScale`：research 咨询密排正文 10.5pt，非简单 ×0.8 缩放）
-- 风格影响：色彩/字体/圆角/阴影（9 套任选，research 推荐 mckinsey/warm-sand/deep-teal，architecture 推荐 graphite-dark/business-blue/spectrum）
+- 风格影响：色彩/字体/圆角/阴影（12 套任选，research 推荐 mckinsey/warm-sand/deep-teal，architecture 推荐 graphite-dark/business-blue/spectrum）
 - 导出：`REPORT_MODEL.mode` 随报告记录；PPTX 按模式分派页型（research：twocol/threecol/exhibit/table/metrics/split/halftable/matrix + 密排比例尺；architecture：diagram 全幅/lane，**无 agenda 时少一页大纲**）
 - 校验：`validate_report.py` 读 `data-mode` 自动切换预算阈值与版式断言；`validate_pptx.py --model` 按"有无 agenda"断言页数结构；模式未声明按 presentation 处理并 WARN
 

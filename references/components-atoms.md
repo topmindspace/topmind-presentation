@@ -6,7 +6,7 @@
 
 ## 1. 顶栏 + header 工具组（主题/风格/预览/帮助/全屏/折叠，无模式切换）
 
-三份模式模板共用此结构（公共脚本在 ui.js，注入于各模板）。右侧图标组：风格下拉（9 套实时切换，纯视觉皮肤）/ PPTX 预览（P）/ PPT 生成指引（H）/ 全屏（F）/ 亮暗主题（T）/ 收起工具栏（B）。快捷键 T/P/H/F/B/Esc。
+三份模式模板共用此结构（公共脚本在 ui.js，注入于各模板）。右侧图标组：风格下拉（12 套实时切换，纯视觉皮肤）/ PPTX 预览（P）/ PPT 生成指引（H）/ 全屏（F）/ 亮暗主题（T）/ 收起工具栏（B）。快捷键 T/P/H/F/B/Esc。
 
 ```html
 <header class="bar">
@@ -25,11 +25,11 @@
     </nav>
     <div class="toolsbar">
       <div class="seld" id="styleSel">
-        <button class="iconbtn" id="styleBtn" type="button" aria-label="切换风格" title="风格（9 套实时切换）">
+        <button class="iconbtn" id="styleBtn" type="button" aria-label="切换风格" title="风格（12 套实时切换）">
           <!-- palette 图标 -->
         </button>
         <div class="seld__pop" id="stylePop" role="menu" aria-label="风格选择">
-          <div class="seld__lab">风格 · 9 套</div>
+          <div class="seld__lab">风格 · 12 套</div>
           <div class="seld__list" id="styleList"></div><!-- JS 生成 18 个 .sitem -->
         </div>
       </div>

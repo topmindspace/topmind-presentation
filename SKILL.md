@@ -1,6 +1,6 @@
 ---
 name: topmind-presentation
-description: "把已有材料做成正式商务演示与多页可视化报告：零外链可翻页 HTML + 可编辑 16:9 PPTX 双交付；三模式（A 演示 / B 研究型版式 / C 架构）× 9 风格。Use when 用户要做演示、汇报、PPT、PPTX、slides、deck、路演、答辩、培训课件、项目汇报，或把调研、评测、对标、经营分析、咨询报告、白皮书等已有材料排成可翻页 HTML、网页报告或可编辑 PPTX，或做多页或要 PPTX 交付的架构图、拓扑图、流程图、泳道图、方案图，或优化报告的排版/版式/配色/图文布局；说快速模式/直接生成/一键出稿/少问一句走 Fast Mode。Do NOT use for 找资料、核事实、写研究结论（→ topmind-research）、整理工作区已存笔记或周复盘（→ topmind-organize）、工作区巡检与例行复盘（→ topmind-loop）、单张长图/信息图/榜单图（→ topmind-poster）、文章封面配图（→ topmind-cover）、改写已有 PPT/Word 源文件（→ 官方 pptx/docx 技能）、纯代码工程、非报告类网页或应用开发、视频/图片生成。"
+description: "把已有材料做成正式商务演示与多页可视化报告：零外链可翻页 HTML + 可编辑 16:9 PPTX 双交付；三模式（A 演示 / B 研究型版式 / C 架构）× 12 风格。Use when 用户要做演示、汇报、PPT、PPTX、slides、deck、路演、答辩、培训课件、项目汇报，或把调研、评测、对标、经营分析、咨询报告、白皮书等已有材料排成可翻页 HTML、网页报告或可编辑 PPTX，或做多页或要 PPTX 交付的架构图、拓扑图、流程图、泳道图、方案图，或优化报告的排版/版式/配色/图文布局；说快速模式/直接生成/一键出稿/少问一句走 Fast Mode。Do NOT use for 找资料、核事实、写研究结论（→ topmind-research）、整理工作区已存笔记或周复盘（→ topmind-organize）、工作区巡检与例行复盘（→ topmind-loop）、单张长图/信息图/榜单图（→ topmind-poster）、文章封面配图（→ topmind-cover）、改写已有 PPT/Word 源文件（→ 官方 pptx/docx 技能）、纯代码工程、非报告类网页或应用开发、视频/图片生成。"
 license: MIT
 compatibility: "Python 3 stdlib for HTML generation; Node >=18 + pptxgenjs for PPTX; optional playwright for browser regression / theme captures."
 metadata:
@@ -95,7 +95,7 @@ metadata:
 - A/Fast L1.5 → `default-surface.md` + `presentation-craft.md` · 骨架 `layout-grammar.md` · 插画规范 → `illustration-layout.md`
 - 组件/版式**代码** → `components.md` · 页型表 `page-type-matrix.md` · 图表门面 `charts.md` + 决策树 `chart-decision-tree.md` · 信息图 → `infographics.md`
 - 配色/主题/字阶 → `styles.md` + `design-system.md` · 写作 → `content-rules.md` · 图标语义 → `icons.md`（48 原创图标包 `assets/icons/`：HTML 内联 SVG / PPTX 用 PNG；`icon:<名>` 或 `data-icon`；按内容选图标，选不出用默认 7 个）
-- 风格包 → `references/style-pack.md`（`layout-constants.json` token 单源）· 布局变体 → `references/layout-variants.md`（`layoutVariants` 注册表：`bento-grid` / `timeline` / `2-col-feature`，section 字段 `variant` 指定）
+- 风格包 → `references/style-pack.md`（`layout-constants.json` token 单源）· 版式库 → `references/layout-library.md`（8 家族 44 版式 + 节奏门禁 `check_rhythm.py`）· 变体 → `layout-variants.md`
 - PPTX 精导 → `references/pptx-export.md` · 深度高保真 → `references/high-fidelity.md` · 修复顺序 → `references/failure-modes.md` · 技能维护 → `references/tech-design.md`
 
 **操作方式**：定模式/页型/组合/图 → 只读 `playbook.md`；取代码 → **必须** `extract_snippet.py`。整读 = FAIL：`layouts-combo` / `components-atoms` / `charts-basic` / `charts-extended` / `content-rules` 全文 / `pptx-export` / 模式模板 HTML（走 scaffold）。
@@ -119,7 +119,7 @@ metadata:
 
 ## 交付物与验收
 
-- **HTML**：零外链可翻页、每页一屏。Header 工具栏：**T** 亮暗（按文件记忆，同步 `REPORT_MODEL.theme`）/ 9 套风格（实时换肤，交付前写回 `REPORT_MODEL.style`）/ **P** 预览 PPTX（页序列+精导提示词）/ **H** 生成指引 / **F** 全屏 / **B** 折叠。改风格/主题后同步 `REPORT_MODEL` 并重跑校验（不重写）。
+- **HTML**：零外链可翻页、每页一屏。Header 工具栏：**T** 亮暗（按文件记忆，同步 `REPORT_MODEL.theme`）/ 12 套风格（实时换肤，交付前写回 `REPORT_MODEL.style`）/ **P** 预览 PPTX（页序列+精导提示词）/ **H** 生成指引 / **F** 全屏 / **B** 折叠。改风格/主题后同步 `REPORT_MODEL` 并重跑校验（不重写）。
 - **PPTX（B 通道）**：`extract_model` → `build_pptx.js` → `validate_pptx --strict`；16:9 可编辑。**A 不交付**（仅预览/`cross_verify`；playbook §九）。
 - **验收**：HTML strict 0/0；含 PPTX 再加 PPTX 0/0；失败给定向修复指引。
 - **交付说明**：`quality_gate.py --deliver`（PPTX 带 `--pptx/--model`）出七要素，缺一 FAIL。

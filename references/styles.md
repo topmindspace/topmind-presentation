@@ -1,4 +1,4 @@
-# 风格系统（9 套预设 · 覆盖 8 个色族 + 1 个彩色数据板）
+# 风格系统（12 套预设 · 默认清新蓝白 MD3 · 每套 = tokens + 版式语法 + 密度 + 图表皮肤）
 
 > **何时读**：改配色、换/新增风格、调亮暗 token、配编码色板、对齐风格语汇（字体/圆角/字阶/密度）时。**何时不读**：只想挑风格（Gate 0 参考图 + `--task style-theme` 速览即可）。
 > **取节**：`python scripts/extract_snippet.py --task style-theme`（快速选型 + 新增步骤）；单套风格细节 `--file styles.md --section <1-11>`（数字节号）。
@@ -15,17 +15,17 @@
 切换方式：`<html data-mode="X" data-style="business-blue" data-theme="light">`。
 
 - **模式（三选一，生成时锁定）与风格正交**：结构 / 类名 / 组件由模式模板决定（`assets/templates/`），风格覆盖上述两层 token。
-- 生成后 header 风格下拉可实时切换 9 套（纯视觉皮肤不动内容）；交付前切回选定值（`data-style` 与 `REPORT_MODEL.style` 一致，校验器检查）。
+- 生成后 header 风格下拉可实时切换 12 套（纯视觉皮肤不动内容）；交付前切回选定值（`data-style` 与 `REPORT_MODEL.style` 一致，校验器检查）。
 - 除 `spectrum` 外，每套风格**只有一个强调色**，层次仍靠表面明度差 + 1px 边框；`spectrum` 的彩色仅限数据系列（见第 9 节边界）。
 - 每套都同时给出 light 与 dark 两套**色**值；语汇层（字体/圆角/字阶）两主题共用。
-- 风格 × 模式矩阵预览见 `assets/style-gallery.html`（三模式 Tab 为一级维度、9 风格卡片为二级，每张卡按当前模式渲染迷你版式特征）。
+- 风格 × 模式矩阵预览见 `assets/style-gallery.html`（三模式 Tab 为一级维度、12 风格卡片为二级，每张卡按当前模式渲染迷你版式特征）。
 - **PPTX 导出侧的色 token 与本文件同源**：单一事实源在 `scripts/layout-constants.json` `styles`（light 变量），两导出通道自动消费（`sync_runtime.py` 注入/校验）；改风格值改 JSON，不要只改本文档。**PPTX 字体族一律 Microsoft YaHei**（投影可读性），不跟 HTML 换衬线/系统栈。
 
 ## 快速选型（含三模式推荐风格）
 
 | 风格 | data-style | 一句话定位 | 适用场景 |
 |------|-----------|-----------|---------|
-| 商务蓝（默认） | `business-blue` | 专业克制、信息密度高，最通用 | 技术/数据/通用商务；**架构模式推荐** |
+| 清新蓝白（默认） | `business-blue` | 白底 + 极浅蓝表面层 + Google Blue，MD3 tonal，最通用 | 技术/数据/通用商务；**架构模式推荐** |
 | 优雅黑白 | `apple-mono` | 极简、大留白、大字，高级产品感 | 产品发布、品牌、高管演示 |
 | 麦肯锡咨询 | `mckinsey` | 结构化、正式、咨询范 | 战略/咨询/立项；**研究模式首选** |
 | 品牌红 | `brand-red` | 以品牌主色红为强调，正式有辨识度 | 企业品牌材料、正式汇报 |
@@ -34,12 +34,15 @@
 | 石墨深灰 | `graphite-dark` | 深色优先的沉浸石墨风（近黑面板 + 亮蓝青；浅色石墨纸灰为辅助） | 发布会、大屏展示；**架构模式首选** |
 | 靛紫 | `indigo-violet` | 创新前沿 | AI、科技、研发 |
 | 光谱彩色 | `spectrum` | 中性结构 + 5 色数据色板，图表出彩不花哨 | 数据密集汇报、运营复盘、大屏看板；**架构模式推荐** |
+| 学术墨蓝 | `ink-academic` | 墨蓝 + 衬线标题、直角细线、紧凑密排 | 学术答辩、技术评审、白皮书 |
+| 活力珊瑚 | `coral-launch` | 珊瑚橙强调、大字舒展、圆角 18 | 产品发布、市场活动、融资路演 |
+| 晴空课件 | `sky-airy` | 天蓝 + 宽行距、圆角 20、舒展留白 | 培训课件、内部分享、新人手册 |
 
 > **三模式推荐组合速记**：演示 → 商务蓝（默认）/优雅黑白；研究 → 麦肯锡/墨绿/暖沙金；架构 → 石墨深灰/商务蓝/彩色。研究模式偏好衬线标题 + 细线框架的咨询质感，架构模式偏好深色沉浸或彩色数据面，演示模式全部可用、默认商务蓝。
 
 ---
 
-## 1. 商务蓝 `business-blue`（默认）
+## 1. 清新蓝白 `business-blue`（默认）
 
 **定位**：专业、克制、信息密度高。中性灰阶 + Google Blue。
 **适用**：绝大多数商务/技术/数据汇报。
@@ -283,11 +286,11 @@ html[data-style="indigo-violet"][data-theme="dark"] {
 **定位**：中性结构 + 彩色的 5 色数据色板。图表、图例、小段标签"出彩"，页面骨架依然安静。
 **适用**：数据密集汇报、运营复盘、大屏看板、多系列对比。
 
-**彩色边界（9 套风格同一条纪律）**：
+**彩色边界（12 套风格同一条纪律）**：
 - 彩色**只**出现在：图表数据系列（`.f-c1~c5` / `.s-c1~c5`）、图例 chip、小段标签、仪表盘/环形分段。
 - **不用**彩色的地方：标题、正文、边框、按钮、大面积底色、卡片背景——这些全部保持中性 + 单一 `--accent`。
 - 同屏彩色数据系列 ≤ 5；超过就合并为"其他"。
-- **9 套风格各有自己的 `c1–c5`**（单源 `styleDataColors`，见第 11 节与 `design-system.md` §9b）——本风格只是把彩色作为**定位**（`c1` = 强调色），并不是"唯一能出彩的风格"。
+- **12 套风格各有自己的 `c1–c5`**（单源 `styleDataColors`，见第 11 节与 `design-system.md` §9b）——本风格只是把彩色作为**定位**（`c1` = 强调色），并不是"唯一能出彩的风格"。
 
 **语汇**：数据看板 · Inter/SF 栈 · 圆角 14 · 密度 dense · 紧凑 gap · 行高略紧。
 
@@ -311,24 +314,35 @@ html[data-style="spectrum"][data-theme="dark"] {
 }
 ```
 
-> **编码色板（`--c1..--c5`）不在本节重复列出**：9 套风格各自的 5 色由单源 `styleDataColors` / `styleDataColorsDark` 注入 `engine.css` 覆盖块（第 11 节），避免两处维护。
+> **编码色板（`--c1..--c5`）不在本节重复列出**：12 套风格各自的 5 色由单源 `styleDataColors` / `styleDataColorsDark` 注入 `engine.css` 覆盖块（第 11 节），避免两处维护。
 
 ---
 
-## 10. 为什么是 9 套（风格集的准入门槛）
+## 10. 风格 = 换皮 + 换骨架（styleGrammar，M3）
 
-> **风格集刻意保持 9 套**：覆盖 8 个色族（蓝 / 藏青 / 蓝青深色 / 黑白 / 红 / 金棕 / 墨绿 / 紫）+ 1 个彩色数据板，任意组合已足够。
-> **每多一套风格的真实成本**：单源 5 张表（`styles` / `stylesDark` / `styleAccents` / `styleDataColors` / `styleDataColorsDark`）× 亮暗 + `engine.css` 4 个块 + `ui.js` 色板 + 画廊卡片 + 参考图重生成 + 审计与回归全跑一遍。**选项冗余不是免费的。**
+每套风格由四部分组成，单源 `scripts/layout-constants.json` → `styleGrammar`：
 
-**新增一套风格的门槛（三条全满足才加）**：
+1. **tokens**：色（`styles` / `stylesDark` / `styleDataColors*`）、字体栈、圆角、阴影（`engine.css` 覆盖块）；
+2. **版式语法**：偏好的版式家族与版式（`preferFamilies` / `preferLayouts`，版式 id 见 `layout-library.md`）——选型时优先用；
+3. **密度档**：`airy` 舒展 / `normal` 标准 / `dense` 紧凑。HTML 侧写入 `<html data-density>` 切换间距档；求解器按 `densityCapacity`（{'airy': 0.9, 'normal': 1.0, 'dense': 1.12}）放大或收紧单页承载，紧凑风格少拆页、舒展风格早拆页；
+4. **图表皮肤**（`chartSkin`）：网格线开关、柱圆角、数据标签策略（all / ends / extreme），HTML（`lib_chart_svg.py`）与 PPTX（`build_pptx.js`）共用。
 
-1. **新色族**——引入现有 8 族之外的色相族，而不是同族换明度 / 换名；
-2. **新语汇**——带来新的字体搭配（衬线 / 等宽）或新的圆角、阴影语汇；
-3. **场景缺口**——现有 9 套无法覆盖的真实场景，且能给出反例。
+| 风格 | 名称 | 偏好家族 | 偏好版式 | 密度 | 图表皮肤 |
+|---|---|---|---|---|---|
+| `business-blue` | 清新蓝白（默认） | 数据、框架、卡片和网格 | 主图 + 侧注、大数字墙（2–6 个 KPI）、Bento 拼贴（首卡跨列）、问题 → 方案 | normal | 网格开 · 圆角 6 · 标签 all |
+| `apple-mono` | 优雅黑白 | 观点、图文、数据 | 金句 + 证据数字、主 KPI + 支撑数字、满版图 + 图注、章节扉页（大号章节数字） | airy | 网格关 · 圆角 10 · 标签 ends |
+| `mckinsey` | 麦肯锡咨询 | 数据、表格、框架 | 主图 + 侧注、图 + 表、对比表（高亮列）、瀑布拆解 | dense | 网格开 · 圆角 2 · 标签 all |
+| `brand-red` | 品牌红 | 观点、数据、卡片和网格 | 大数字墙（2–6 个 KPI）、对比论点、特性卡、里程碑时间线 | normal | 网格关 · 圆角 6 · 标签 all |
+| `warm-sand` | 暖沙编辑 | 观点、图文、流程和时间 | 金句 + 证据数字、双栏论述、左图右文、里程碑时间线 | airy | 网格关 · 圆角 8 · 标签 extreme |
+| `deep-teal` | 墨绿稳健 | 数据、表格、框架 | 主 KPI + 支撑数字、对比表、矩阵（2×2 / 2×3）、排名条 | normal | 网格开 · 圆角 4 · 标签 all |
+| `graphite-dark` | 石墨架构 | 框架、流程和时间、卡片和网格 | 分层架构、泳道、中心辐射、横向步骤 | dense | 网格开 · 圆角 4 · 标签 ends |
+| `indigo-violet` | 靛紫前沿 | 框架、卡片和网格、数据 | Bento 拼贴（首卡跨列）、中心辐射、构成演变（河流图）、主 KPI + 支撑数字 | normal | 网格关 · 圆角 8 · 标签 ends |
+| `spectrum` | 彩色数据板 | 数据、表格 | 大数字墙（2–6 个 KPI）、双维占比（马赛克）、评分热力表、构成环图 + 图例卡 | dense | 网格开 · 圆角 4 · 标签 all |
+| `ink-academic` | 学术墨蓝 | 数据、表格、观点 | 图 + 表、分布箱线、对比表（高亮列）、大标题 + 论据三点 | dense | 网格开 · 圆角 0 · 标签 all |
+| `coral-launch` | 活力珊瑚 | 观点、图文、卡片和网格 | 章节扉页（大号章节数字）、大数字墙（2–6 个 KPI）、特性卡、满版图 + 图注 | airy | 网格关 · 圆角 12 · 标签 ends |
+| `sky-airy` | 晴空课件 | 流程和时间、卡片和网格、观点 | 横向步骤、三栏特性、问题 → 方案、图标里程碑 | airy | 网格关 · 圆角 10 · 标签 all |
 
-> **反面教材**：同色族换名的风格（曾扩到 18 套后删回 9 套）——选项冗余有真实成本。新增门槛见 §10。
-> 这 9 套与前 9 套**同色族换名**（蓝 / 红 / 绿青 / 金棕 / 无彩各多一份），既未引入新色族，也未引入新语汇 → 属于"看上去有用、实际低价值"的选项冗余。
-> 需要"政企庄重 / 东方雅致 / 环保自然"等气质时，用现有 9 套的**组合**近似：`brand-red`（宋体标题）→ 政企庄重；`mckinsey` / `warm-sand`（衬线标题）→ 东方雅致 / 编辑感；`deep-teal` → ESG / 可持续。
+**新增风格门槛（三条全满足才加）**：新色族或新语汇（衬线 / 圆角 / 留白档）、能写出不同的版式语法、存在现有 12 套覆盖不了的真实场景。每多一套都要补齐单源 6 张表 + `styleGrammar` + `engine.css` 4 个块 + `ui.js` 色板，并跑 `audit_styles.py`、`test_solver`（密度镜像）与回归。
 
 **配色纪律不变**：除 `spectrum` 外每套**只有一个强调色**，层次靠表面明度差 + 1px 边框；`styleAccents` 收录各套 light/dark 强调色（含派生 hover/active 色），供 `validate_report.py` 做「单一强调色」检查。
 
@@ -336,11 +350,11 @@ html[data-style="spectrum"][data-theme="dark"] {
 
 ## 11. 编码色板（每套风格各 5 色 · 数据专用）
 
-> **9 套 ≠ 9 种皮肤而已**：每套风格都带自己的**编码色板 `c1–c5`**，用于多系列图表（多段环形 / 分组柱 / 多折线 / 散点分组 / 桑基流带 / 马赛克段）。这样"数据密集报告"在任何风格下都能出彩色系列，而**结构色仍保持单一强调色**。
+> **12 套不只是皮肤**：每套风格都带自己的**编码色板 `c1–c5`**，用于多系列图表（多段环形 / 分组柱 / 多折线 / 散点分组 / 桑基流带 / 马赛克段）。这样"数据密集报告"在任何风格下都能出彩色系列，而**结构色仍保持单一强调色**。
 
 | 项 | 说明 |
 |----|------|
-| 单源 | `scripts/layout-constants.json` 的 `styleDataColors`（light）/ `styleDataColorsDark`（dark），各 9 套 × 5 色 |
+| 单源 | `scripts/layout-constants.json` 的 `styleDataColors`（light）/ `styleDataColorsDark`（dark），各 12 套 × 5 色 |
 | HTML 消费 | `engine.css` 的 `html[data-style="X"]{--c1..--c5}` 覆盖块 → 语义类 `.f-c1~c5` / `.s-c1~c5`（由 `sync_runtime.py` 注入模板） |
 | PPTX 消费 | `build_pptx.js` / `pptx-export.js` 的 `dataColors(style, theme)`（按 `model.theme` 选 light/dark 表） |
 | 生成规则 | `c1` = 该风格强调色；`c2`/`c3` = 近似色（±32°/±38°）；`c4`/`c5` = 降饱和补色（168°/205°，饱和度 ×0.6） |
@@ -366,5 +380,5 @@ html[data-style="spectrum"][data-theme="dark"] {
    - 本文件速查表 + 各节 CSS（语汇与 engine 逐字一致）+ 第 11 节编码色板表
    - `assets/style-gallery.html` 画廊 `STYLE_META` 描述行（`pfontBody`/`pfontDisplay`/`prad`/`pscale`/`peye`/`plh`/`pgap`/`pw`/`pletter`；配色由注入的 `PRESETS` 自动派生）
    - `references/design-system.md` 字体决策矩阵（若引入新字体语汇）
-5. 跑 `python scripts/sync_runtime.py`（注入到三模板与画廊）→ `python scripts/audit_styles.py`（**9 套** × light/dark × 8 组 WCAG + 双源色 token + 编码色板 + ui.js 色板 + **风格语汇 styleIdentity**，全过才通过）→ `python scripts/build_examples.py` → `python scripts/regression.py`。
+5. 跑 `python scripts/sync_runtime.py`（注入到三模板与画廊）→ `python scripts/audit_styles.py`（**12 套** × light/dark × 8 组 WCAG + 双源色 token + 编码色板 + ui.js 色板 + **风格语汇 styleIdentity**，全过才通过）→ `python scripts/build_examples.py` → `python scripts/regression.py`。
 6. 可选：`node scripts/capture_theme_overview.js`（需 playwright）重生成 `assets/theme-overview*.png` 参考图。

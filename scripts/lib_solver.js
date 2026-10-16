@@ -73,13 +73,22 @@ const LISTS = {
                 set: (s, a) => Object.assign({}, s, { table: Object.assign({}, s.table, { rows: a }) }) },
 };
 
-/** 容量比：条目数 / 上限（文字很长时按字数加权）。>1 = 超载。 */
-function capacity(sec, mode) {
+/** M3 密度档（风格库 styleGrammar 的镜像；test_solver 校验与 layout-constants 一致）：
+ *  紧凑风格一页多装、舒展风格少装——换风格同时换承载节奏。 */
+const DENSITY_K = {"airy": 0.9, "normal": 1.0, "dense": 1.12};
+const STYLE_DENSITY = {"business-blue": "normal", "apple-mono": "airy", "mckinsey": "dense", "brand-red": "normal", "warm-sand": "airy", "deep-teal": "normal", "graphite-dark": "dense", "indigo-violet": "normal", "spectrum": "dense", "ink-academic": "dense", "coral-launch": "airy", "sky-airy": "airy"};
+function densityK(model) {
+  const d = (model && (model.density || STYLE_DENSITY[model.style])) || 'normal';
+  return DENSITY_K[d] || 1;
+}
+
+/** 容量比：条目数 / 上限（文字很长时按字数加权）。>1 = 超载。k = 密度系数。 */
+function capacity(sec, mode, k) {
   const t = sec && sec.type;
   const acc = LISTS[t];
   if (!acc) return 0;
   const arr = acc.get(sec) || [];
-  const cap = (CAP[mode] || CAP.presentation)[t] || 99;
+  const cap = ((CAP[mode] || CAP.presentation)[t] || 99) * (k || 1);
   const chars = JSON.stringify(arr).length;
   const charCap = cap * (mode === 'research' ? 90 : 70);
   return round(Math.max(arr.length / cap, chars / charCap));
@@ -89,10 +98,11 @@ function capacity(sec, mode) {
 function splitModel(model, opts) {
   opts = opts || {};
   const mode = String(model.mode || 'presentation');
+  const k = densityK(model);
   const out = [];
   const log = [];
   for (const sec of model.sections || []) {
-    const ratio = capacity(sec, mode);
+    const ratio = capacity(sec, mode, k);
     const acc = LISTS[sec && sec.type];
     const arr = acc ? (acc.get(sec) || []) : [];
     if (!acc || ratio <= 1 || arr.length < 2) { out.push(sec); continue; }
@@ -125,4 +135,4 @@ function grid12(totalW, span, gutter) {
 
 function round(v) { return Math.round(v * 1000) / 1000; }
 
-module.exports = { rows, fitUp, estLines, estTextH, capacity, splitModel, grid12, CAP, LADDER };
+module.exports = { rows, fitUp, estLines, estTextH, capacity, splitModel, grid12, densityK, CAP, LADDER, DENSITY_K, STYLE_DENSITY };

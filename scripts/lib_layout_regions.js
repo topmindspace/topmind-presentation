@@ -2,7 +2,7 @@
  * topmind-presentation · 页型布局区域 IR（双通道几何收敛起点）
  *
  * 从 layout-constants.json（含 layoutSlots）派生「语义槽位 → 英寸矩形」。
- * B 通道（build_pptx.js）直接 require；A 通道消费同一 LC 常量（数字同源）。
+ * build_pptx.js 直接 require；HTML 端 pptx-export.js 消费同一 LC 常量（数字同源）。
  *
  * 纪律：改几何与槽位只改 layout-constants.json（layoutSlots 已并入）。
  * 新增页型先扩 LC.layoutSlots，再在此补 regionOf 分支，最后写双引擎。

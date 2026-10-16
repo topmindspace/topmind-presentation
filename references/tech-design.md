@@ -28,7 +28,7 @@
 
 | 单源 | 内容 | 消费方 |
 |------|------|--------|
-| `scripts/layout-constants.json` | 页面几何 `page` / **12 列网格 `grid`** / **语义字阶 `typography` C0–T14** / 三模式比例尺 `typeScale`+`modeTypeScale` / 页型几何 `pageTypes`+`pageTypeGeometry` / **9 风格 token `styles`+`stylesDark`+`styleAccents`** / **编码色板 `styleDataColors`+`styleDataColorsDark`（9 套 × 亮暗 × c1–c5）** / **图表登记四元组 `charts.registry`** / 图表最小尺寸 `charts.minSize` / **图表多样性预算 `charts.variety`** / **容器内边距 `containers`** / **锚点容差 `anchorTolerance`** / **图片准入门 `imageAdmission`** / **图片规格 `imageSpec`**（版式 `layouts` / 比例 `ratioDefault`+`ratioCssClass` / 建议尺寸 / 占位标签 / 体积上限） / **深度模式 `deepMode`** / 校验预算 `checkBudgets` / 强调带 `emphasis` / 待核实 `annotations` / 去AI味词 `aiFlavor` / **内容级质量 `contentQuality`**（版式节奏 / so-what 实质 / research 标题判断） | `build_pptx.js`（require）、`pptx-export.js`（注入常量块）、三模板、`style-gallery.html`、`validate_report.py`、`validate_pptx.py`、`audit_styles.py`、`audit_skill.py`、`prepare_images.py`、`evals/run_evals.py` |
+| `scripts/layout-constants.json` | 页面几何 `page` / **12 列网格 `grid`** / **语义字阶 `typography` C0–T14** / 三模式比例尺 `typeScale`+`modeTypeScale` / 页型几何 `pageTypes`+`pageTypeGeometry` / **12 风格 token `styles`+`stylesDark`+`styleAccents`** / **编码色板 `styleDataColors`+`styleDataColorsDark`（12 套 × 亮暗 × c1–c5）** / **图表登记四元组 `charts.registry`** / 图表最小尺寸 `charts.minSize` / **图表多样性预算 `charts.variety`** / **容器内边距 `containers`** / **锚点容差 `anchorTolerance`** / **图片准入门 `imageAdmission`** / **图片规格 `imageSpec`**（版式 `layouts` / 比例 `ratioDefault`+`ratioCssClass` / 建议尺寸 / 占位标签 / 体积上限） / **深度模式 `deepMode`** / 校验预算 `checkBudgets` / 强调带 `emphasis` / 待核实 `annotations` / 去AI味词 `aiFlavor` / **内容级质量 `contentQuality`**（版式节奏 / so-what 实质 / research 标题判断） | `build_pptx.js`（require）、`pptx-export.js`（注入常量块）、三模板、`style-gallery.html`、`validate_report.py`、`validate_pptx.py`、`audit_styles.py`、`audit_skill.py`、`prepare_images.py`、`evals/run_evals.py` |
 | `scripts/model-schema.json` | 29 种页型的字段与必填约束 / **图表类型白名单 `chartTypes`（30 类：20 原生 + 10 形状）** / **数据表策略 `chartDataTable`** / 通用可选字段 `commonSectionFields` | `extract_model.py`（本地校验）、`pptx-export.js`（浏览器端 `validateModel`） |
 | `layout-constants.json` → `layoutSlots` | **页型布局 IR（29 页型全量）**：语义槽位（head/primary/secondary/annotation + required）——双通道按同一槽位语义落位 | `sync_runtime.py`（完整性校验）；`lib_layout_regions.js`（槽位→英寸矩形）；`extract_snippet.py --page-type` |
 | `scripts/icon_lib.js` | **语义图标库单源**（20 名 → 24×24 stroke SVG；与 `icons.md` 高频取码 / `render_from_model.ICONS` 同键） | `build_icon_assets.js`（栅格化）、`build_pptx.js`（真导出 PNG）、`icon_raster.js` |
@@ -70,7 +70,7 @@
 | PPTX（深度模式） | 加 `--deep` | 再把**连续文本流**与**空间锚点**纳入 strict |
 | 双裁判 | `cross_verify.py`（python-pptx） | A/B 产物均可严格解析 + 逐页文本一致 + 溢出启发式 |
 | 素材图片 | `probe_image_export.py` | 真实位图 build→strict 0/0 且 `pictures == 声明数`（示例矩阵刻意零图片，真实素材路径/版式/门禁靠它覆盖） |
-| 风格与单源 | `audit_styles.py` | 9 风格 × light/dark × 8 组 WCAG 配对 + engine.css ↔ JSON 双源逐字段一致 + **编码色板 9×2×5（双源 + 对 bg 对比 ≥3.0 + 同套两两可区分）** + ui.js 色板一致 + 单源完整性 |
+| 风格与单源 | `audit_styles.py` | 12 风格 × light/dark × 8 组 WCAG 配对 + engine.css ↔ JSON 双源逐字段一致 + **编码色板 9×2×5（双源 + 对 bg 对比 ≥3.0 + 同套两两可区分）** + ui.js 色板一致 + 单源完整性 |
 | 技能工程 | `audit_skill.py` | 体积预算（SKILL.md ≤13KB / L1 playbook / 单份 reference / 模板）+ description 软硬上限 + **三档披露（L0/L1/L2）** + **Gate 0 位于六项问询之前** + 交互轮次与必读文件预算声明 + 引用完整性 + **内容重复（SKILL.md↔references 归一化滑窗 ≥20 字含 CJK）** |
 | 文档一致性 | `audit_docs.py` | § 引用可解析（含大写后缀）+ 文件前缀规范 + §46 覆盖 36 图表/29 页型 + 图表代码节齐备 + 元数据与必需文件 + **任务路由可解析（TASK_ROUTES 每条实际抽取）** |
 | CSS 覆盖率 | `audit_css.py` | engine.css 选择器类 ↔ 消费方语料（剔除注入镜像）；**报告制**（列出疑似死类，不设门禁） |
@@ -120,7 +120,7 @@
 | `references/outline-design.md` | 内容架构七步法 + 跨页叙事节奏 + 细节保全 |
 | `references/design-system.md` | MD3 对齐、设计原理（CRAP/7:2:1/字体矩阵）、页高模型、12 列网格、语义字阶、SVG 语义类（生成时主读） |
 | [writing-skills 归档 `refs/design-system-engine.md`](https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/refs/design-system-engine.md) | 顶栏/卡片/列表/表格/页脚/动效等 CSS 类实现目录（维护者；生成时勿读） |
-| `references/styles.md` | 9 套风格定义与选型 |
+| `references/styles.md` | 12 套风格定义与选型 |
 | `references/content-rules.md` | 页内写作规则、密度三档、表格语义字号、容器内边距、连续文本流 |
 | `references/components.md` | 结构组件与锁定版式（`components.md` §1–§15c、§32–§50）+ 版式选型表 + **组合版式矩阵（§46c）** |
 | `references/charts.md` | 图表全库（`charts.md` §16–§31、§29b、§35、§52–§70）+ **误用反例与多样性纪律（§66）** |

@@ -324,7 +324,8 @@ def _check_bands(txt, chk, mode="presentation"):
         is_deep = 'band--deep' in head_tag
         if is_fit and plain_len > B["fit"]:
             fit_overload.append(f"第{i}页 {plain_len}字")
-        if (not is_fit and not is_deep and units == 0 and plain_len < B["empty"]):
+        is_chapter = 'band--chapter' in head_tag   # M3 章节扉页：有意留白的结构锚点
+        if (not is_fit and not is_deep and not is_chapter and units == 0 and plain_len < B["empty"]):
             too_empty.append(f"第{i}页 {plain_len}字")
     chk(f"单页文字量 ≤ {B['char']} 字（{mode} 模式 · 防溢出）", not over_chars,
         "; ".join(over_chars) if over_chars else "", level="WARN")
@@ -1032,7 +1033,7 @@ def _check_v9_hard_gates(txt, chk, model):
         bid = bid_m.group(1) if bid_m else ''
         if bid in exempt or any(f'id="{e}"' in head for e in exempt):
             continue
-        if 'band--deep' in head or 'band--accent' in head:
+        if 'band--deep' in head or 'band--accent' in head or 'band--chapter' in head:
             continue
         b2 = re.sub(r'<script\b[\s\S]*?</script>', ' ', b)
         b2 = re.sub(r'<style\b[\s\S]*?</style>', ' ', b2)
@@ -1197,7 +1198,7 @@ def _check_layout_grammar(txt, chk, mode):
         # intentional whitespace：封面/章节幕/金句/收尾等休止页不参与 FILL 门禁
         if any(f'id="{x}' in head for x in (
                 'refs', 'appendix', 'cover', 'agenda', 'quote',
-                'closing', 'section', 'chapter', 'next')):
+                'closing', 'section', 'chapter', 'next')) or 'band--chapter' in head:
             continue
         if 'band--flow' in head:
             continue
@@ -1402,6 +1403,32 @@ def _check_media(txt, chk, model):
     if ph_blocks:
         chk("配图占位含可见标签（.media__ph）", 'media__ph' in txt,
             f"{len(ph_blocks)} 处 .media--ph 缺 .media__ph 标签（空占位 = 不合格）")
+    # 配图页 caption / so-what（廉价 WARN）；近邻主张/导语亦可
+    bands = re.split(r'(?=<section\b)', txt)
+    miss_cap = []
+    near_empty = []
+    for i, b in enumerate(bands):
+        if not re.search(r'class="[^"]*\bmedia\b|<img\b|class="[^"]*media--', b):
+            continue
+        if len(b) < 80:
+            continue
+        has_cap = bool(re.search(
+            r'class="[^"]*(?:fig__cap|media__cap|media__ph|caption|exhibit__src|footnote|so-what|lead)', b)
+            or re.search(r'<figcaption\b|class="[^"]*\bsoWhat\b', b))
+        if not has_cap:
+            miss_cap.append(f'band[{i}]')
+        # 近图过空：有 media 但正文文本极少且无要点/指标（WARN）
+        textish = re.sub(r'<script[\s\S]*?</script>|<style[\s\S]*?</style>|<[^>]+>', ' ', b)
+        textish = re.sub(r'\s+', ' ', textish).strip()
+        has_points = bool(re.search(r'class="[^"]*(?:points|bullets|kpi|metrics|card)', b))
+        if len(textish) < 40 and not has_points and not re.search(r'media--ph', b):
+            near_empty.append(f'band[{i}]')
+    chk("配图页含 caption/图注（IMAGE_CAPTION）", not miss_cap,
+        f"{len(miss_cap)} 处配图区缺 .fig__cap/.media__cap/.footnote/so-what 等图注" if miss_cap else "",
+        level="WARN")
+    chk("配图页近邻过空（IMAGE_NEAR_EMPTY）", not near_empty,
+        f"{len(near_empty)} 处配图页几乎无注解/要点（补 caption 或要点条）" if near_empty else "",
+        level="WARN")
     if not model:
         return
     holders = [(i, img) for i, s in enumerate(model.get('sections') or [])
@@ -1461,32 +1488,6 @@ def _check_media(txt, chk, model):
         chk("模型配图占位 ↔ 正文 .media--ph 对应", False,
             f"{n_ph} 页模型声明 image.placeholder 但正文无 .media--ph", level="WARN")
 
-    # 配图页 caption / so-what（廉价 WARN）；近邻主张/导语亦可
-    bands = re.split(r'(?=<section\b)', txt)
-    miss_cap = []
-    near_empty = []
-    for i, b in enumerate(bands):
-        if not re.search(r'class="[^"]*\bmedia\b|<img\b|class="[^"]*media--', b):
-            continue
-        if len(b) < 80:
-            continue
-        has_cap = bool(re.search(
-            r'class="[^"]*(?:fig__cap|media__cap|media__ph|caption|exhibit__src|footnote|so-what|lead)', b)
-            or re.search(r'<figcaption\b|class="[^"]*\bsoWhat\b', b))
-        if not has_cap:
-            miss_cap.append(f'band[{i}]')
-        # 近图过空：有 media 但正文文本极少且无要点/指标（WARN）
-        textish = re.sub(r'<script[\s\S]*?</script>|<style[\s\S]*?</style>|<[^>]+>', ' ', b)
-        textish = re.sub(r'\s+', ' ', textish).strip()
-        has_points = bool(re.search(r'class="[^"]*(?:points|bullets|kpi|metrics|card)', b))
-        if len(textish) < 40 and not has_points and not re.search(r'media--ph', b):
-            near_empty.append(f'band[{i}]')
-    chk("配图页含 caption/图注（IMAGE_CAPTION）", not miss_cap,
-        f"{len(miss_cap)} 处配图区缺 .fig__cap/.media__cap/.footnote/so-what 等图注" if miss_cap else "",
-        level="WARN")
-    chk("配图页近邻过空（IMAGE_NEAR_EMPTY）", not near_empty,
-        f"{len(near_empty)} 处配图页几乎无注解/要点（补 caption 或要点条）" if near_empty else "",
-        level="WARN")
 
 
 # 失败检查项 → 失败模式 / 处置动作 / 精确取码命令。

@@ -68,13 +68,23 @@ def rows(avail, n, pref=None, mn=0.22, mx=None, gap=0.0, center=True):
     return {'size': _r(size), 'gap': gap, 'offset': _r(off), 'used': _r(used)}
 
 
-def capacity(sec, mode):
+# M3 密度档（风格库 styleGrammar 镜像；test_solver_py 校验与 layout-constants 一致）
+DENSITY_K = {"airy": 0.9, "normal": 1.0, "dense": 1.12}
+STYLE_DENSITY = {"business-blue": "normal", "apple-mono": "airy", "mckinsey": "dense", "brand-red": "normal", "warm-sand": "airy", "deep-teal": "normal", "graphite-dark": "dense", "indigo-violet": "normal", "spectrum": "dense", "ink-academic": "dense", "coral-launch": "airy", "sky-airy": "airy"}
+
+
+def density_k(model):
+    d = (model or {}).get('density') or STYLE_DENSITY.get((model or {}).get('style') or '') or 'normal'
+    return DENSITY_K.get(d, 1)
+
+
+def capacity(sec, mode, k=1):
     t = (sec or {}).get('type')
     acc = LISTS.get(t)
     if not acc:
         return 0
     arr = acc[0](sec) or []
-    cap = CAP.get(mode, CAP['presentation']).get(t, 99)
+    cap = CAP.get(mode, CAP['presentation']).get(t, 99) * (k or 1)
     chars = _js_len(arr)
     char_cap = cap * (90 if mode == 'research' else 70)
     return _r(max(len(arr) / cap, chars / char_cap))
@@ -82,9 +92,10 @@ def capacity(sec, mode):
 
 def split_model(model):
     mode = str(model.get('mode') or 'presentation')
+    k = density_k(model)
     out, log = [], []
     for sec in model.get('sections') or []:
-        ratio = capacity(sec, mode)
+        ratio = capacity(sec, mode, k)
         acc = LISTS.get((sec or {}).get('type'))
         arr = (acc[0](sec) or []) if acc else []
         if not acc or ratio <= 1 or len(arr) < 2:

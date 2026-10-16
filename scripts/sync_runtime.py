@@ -7,7 +7,7 @@ topmind-presentation · 单源注入器（版式常量 + DSL schema · 三模板
 
 职责（消除"多处手动同步"债务）:
   1. 读 scripts/layout-constants.json（唯一事实源：页面几何 / 12 列网格 / 语义字阶 C0–T14 / 三模式独立比例尺
-     / 页型几何 / 9 风格 token / 图表登记四元组 / 容器内边距 / 锚点容差 / 图片准入门
+     / 页型几何 / 12 风格 token / 图表登记四元组 / 容器内边距 / 锚点容差 / 图片准入门
      / 校验预算 / 强调色表 / 去AI味词表 / 深度模式配置）
   2. 读 scripts/model-schema.json（DSL schema 单源：页型字段与必填约束 + 图表类型白名单 + 数据表策略）
      → 注入 assets/pptx-export.js 的 __TOPPPT_SCHEMA__ 标记块（浏览器端 validateModel 消费）
@@ -281,7 +281,7 @@ function regionOf(pageType, slotId, opts) {
         '/* PRESETS_DARK = 风格 dark token（REPORT_MODEL.theme="dark" 时导出深色版）*/',
         '/* GRID = 12 列网格；TYPO = 语义字阶 C0–T14；CONT = 容器内边距；REG = 图表登记四元组；DEEP = 深度模式配置 */',
         '/* IMG = 素材图片规格与配图占位约定（版式/裁切/建议尺寸/占位标签，双引擎同源） */',
-        '/* STYLE_DATA_COLORS(_DARK) = 9 套风格各自的编码色板 c1–c5（数据系列；结构色纪律不变） */',
+        '/* STYLE_DATA_COLORS(_DARK) = 12 套风格各自的编码色板 c1–c5（数据系列；结构色纪律不变） */',
         '/* LAYOUT_SLOTS + regionOf = 页型布局区域 IR（与 scripts/lib_layout_regions.js 同源） */',
         'var PW = %s, PH = %s, MX = %s, CW = PW - 2 * MX, EMU = %s;'
         % (page['pw'], page['ph'], page['mx'], page['emu']),

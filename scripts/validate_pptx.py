@@ -1253,6 +1253,11 @@ def _model_probe_strings(section: dict[str, Any], limit: int = 12) -> list[str]:
             if len(text) >= 6 and not text.startswith("#"):
                 probes.append(text)
 
+    if section.get("type") == "chapter" and isinstance(section.get("eyebrow"), str):
+        # 章节扉页把「NN ·」拆成超大章节号 + 章名，两段分别落版
+        sec2 = dict(section)
+        sec2["eyebrow"] = re.sub(r"^\s*\d{1,2}\s*[·・\-—]\s*", "", section["eyebrow"])
+        section = sec2
     walk(section)
     return probes
 

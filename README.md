@@ -32,10 +32,10 @@
 
 | 维度 | 能力 |
 |------|------|
-| 产出 | **双交付**：日常 HTML 可翻页演示 + 按需 16:9 可编辑 PPTX；亮暗双主题 · **Header 工具栏 T/P/H/F/B + 9 风格** |
+| 产出 | **双交付**：日常 HTML 可翻页演示 + 按需 16:9 可编辑 PPTX；亮暗双主题 · **Header 工具栏 T/P/H/F/B + 12 风格** |
 | 定位 | 正式商务演示 · MD3 密度克制 · 非 gadget |
 | 三模式 | A 演示 · B 研究 · C 架构（页型/字号/密度契约见 `playbook.md` §一） |
-| 风格 | 9 套（`styles.md`）；编码色板 c1–c5 随风格 |
+| 风格 | 12 套（`styles.md`）；编码色板 c1–c5 随风格 |
 | 图表 | 核图 8 默认 + registry 全量；多样性 / 反截断 / Mode A 工艺见 playbook + `presentation-craft.md` |
 | 质量 | `validate_report --strict`（A 隐含 layout-qa）· `validate_pptx --strict` · `quality_gate --deliver` |
 
@@ -46,7 +46,7 @@
 | 控件 | 快捷键 | 行为 |
 |------|--------|------|
 | 亮暗主题 | **T** | 浅色外发 / 深色大屏；**按文件记忆**；同步 `REPORT_MODEL.theme` |
-| 风格选择 | 9 套下拉 | 九风格实时切换（纯视觉，不动内容）；交付前 `data-style` = `REPORT_MODEL.style` |
+| 风格选择 | 12 套下拉 | 十二风格实时切换（纯视觉，不动内容）；交付前 `data-style` = `REPORT_MODEL.style` |
 | 预览 PPTX | **P** | 页序列所见即所得；可复制提示词回对话走精导 |
 | PPT 生成指引 | **H** | 双通道说明与环境依赖（与 `?` 同效） |
 | 全屏 | **F** | 沉浸演示 |

@@ -1,5 +1,36 @@
 # CHANGELOG
 
+## [Unreleased] — M3 版式库 · 风格库 · 图表系统（main，未发版）
+
+### 单源可再生（先修根因）
+- `regression.py` 不再回写示例 model.json（抽取结果写 `dist/regression/`）；新增两道检查：「model.json ≡ HTML 内嵌模型」「示例可由 model.json 完整再生」（`render_from_model --body-only` 与 HTML 内容区逐字一致）。
+- `render_from_model.py --inplace --model X.model.json`：参考资料、锚点、图标、Exhibit 编号、来源行全部从模型渲染，不再丢失；四份示例均由 model.json 完整再生。
+
+### 版式库（8 家族 44 版式）
+- `layout-constants.json` → `layoutLibrary`：结构 / 观点 / 数据 / 框架 / 流程 / 媒体 / 卡片 / 表格 8 家族 44 版式，每个版式有匹配规则与视觉重量（强调 / 轻 / 中 / 密）。
+- 节奏规则：同重量连续页上限、相邻不同版式、≥8 页至少 5 个家族、≥14 页建议章节扉页；反模式：单页图标 ≤6、系列色 ≤6、同形卡片 ≤8、引言须有佐证、禁用「So what」类标签。新增 `scripts/check_rhythm.py`，CI 对全部示例硬拦。
+- 新页型 `chapter`（章节扉页）；新变体：表格 `highlight`（推荐列高亮）、对比 `problem-solution`（问题 → 方案箭头）、架构图 `aside`（横切护栏列）；bento 卡片末行自动补齐。
+- 版式 golden：`tests/layouts/build_gallery.py` 从示例与合成样例生成每版式一页的画廊，`tests/layouts/test_layouts.py` 校验 44/44 覆盖 + PPTX 几何指纹。文档 `references/layout-library.md`。
+
+### 风格库（12 套）
+- 默认风格更名「清新蓝白（默认）」；新增学术墨蓝 `ink-academic`、活力珊瑚 `coral-launch`、晴空课件 `sky-airy`，补齐亮暗 token、编码色板、语汇与审计。
+- `styleGrammar`：每套风格绑定偏好家族 / 版式、密度档（airy / normal / dense，HTML `data-density` + 求解器承载系数）与图表皮肤（网格、圆角、标签策略）。
+
+### 图表
+- 新增 `scripts/lib_chart_svg.py`：HTML 端数据驱动 SVG（核心 15 类 + 6 类信息图），标注层 `annotations`（目标线 / 高亮 / 旁注）与 `dataLabels`；配色规则统一（单系列主色、高亮项主色其余浅主色、多系列 c1–c5、负值 f-neg、K 线不用红绿）。
+- PPTX：高亮逐点着色、柱图目标线为原生组合图虚线系列、图表皮肤随风格；修复横向条形图「彩虹柱」。
+- 桑基图 PPTX 重写：全局比例尺、三次贝塞尔流带（custGeom）、流失节点灰化、标签后绘不被遮挡。
+
+### 示例
+- 研究：分 6 章（章节扉页），新增引言、方案对比高亮表、标杆共同做法 bento 页（替换图片占位末页），Exhibit 连续编号并补图题与来源。
+- 架构：第 2 页改为 4 层 × 4 节点 + 横切护栏 + 图例；新增指标、选型高亮表、依赖拓扑、章节扉页、里程碑，共 12 页。
+- 演示 / showcase：补参考资料、目标线与高亮、bento 安装卡、问题 → 方案页。
+
+### 修复与清理
+- 架构图层高求解参数顺序错误（第 4 层越出版心）、排序面板底板压注释带、引言署名与背景叠印、章节号字号进入比例尺（`chapterNum`）。
+- 删除 `scripts/hydrate_charts.py`（被 lib_chart_svg 取代）、未引用的 `.btn--soft` / `.btn--onDark` / `.ul--flow`、「A/B 通道」旧注释；`docs/showcase.html` 与 `docs/style-gallery.html` 同步。
+- 负例自足：N11 注入内联 `.tbd`；IMAGE_CAPTION 检查不再依赖模型含图片页。
+
 ## [Unreleased] — M2 HTML ↔ PPTX 同源（main，未发版）
 
 ### 同源

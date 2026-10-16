@@ -642,7 +642,7 @@ function flagBar(s, items, yTop) {
 }
 /* 素材图片 / 配图占位（src 仅允许 data: 内联或相对路径；fit = cover 裁切填满 / contain 完整显示）。
    无图或显式 placeholder 时**不静默跳过**，改画原生占位框（圆角矩形 + 虚线 + 居中标签文本）——
-   占位符是原生形状而非图片，pictures 不增，且标签串与 A 通道逐字一致（cross_verify 逐页比对）。 */
+   占位符是原生形状而非图片，pictures 不增，且标签串与 HTML 端逐字一致（cross_verify 逐页比对）。 */
 function imgPlaceholderLabel(layout, multi) {
   const label = IMG.placeholderLabel || '配图占位';
   if (multi) return label;
@@ -939,6 +939,25 @@ function chartTry(s, ctype, data, opts, c) {
     throw e;
   }
 }
+function chartSkin() {
+  const G = (LC.styleGrammar && LC.styleGrammar.styles) || {};
+  return ((G[styleArg] || G[(LC.styleGrammar || {}).default] || {}).chartSkin) || {};
+}
+/* 标注层工具：高亮下标（显式 highlight 注记 / chart.highlight；未声明 = 不高亮，单系列统一主色） */
+function annHighlight(c, ann) {
+  const labels = (c.labels || []).map(String), n = labels.length, out = [];
+  ann.filter(a => a.type === 'highlight').forEach(a => {
+    if (Number.isInteger(a.index) && a.index >= 0 && a.index < n) out.push(a.index);
+    else if (a.label != null && labels.indexOf(String(a.label)) >= 0) out.push(labels.indexOf(String(a.label)));
+  });
+  if (!out.length && Number.isInteger(c.highlight)) out.push(c.highlight);
+  return out;
+}
+function mixHex(a, b, t) {
+  const pa = [0, 2, 4].map(i => parseInt(String(a).slice(i, i + 2), 16));
+  const pb = [0, 2, 4].map(i => parseInt(String(b).slice(i, i + 2), 16));
+  return pa.map((v, i) => Math.round(v * (1 - t) + pb[i] * t).toString(16).padStart(2, '0')).join('').toUpperCase();
+}
 /* 原生数据图表（pptxgenjs 原生 10 类 + 3 类原生技巧：waterfall / gauge / pareto） */
 function nativeChart(s, c, x, y, w, h, dcols) {
   const t = String(c.type || 'bar').toLowerCase();
@@ -954,7 +973,16 @@ function nativeChart(s, c, x, y, w, h, dcols) {
   /* M0：单系列图表（柱/条/线/面积）统一主色——按数据点轮换色板会出现「彩虹柱」，违反克制原则。
      多系列仍取风格编码色板；显式 chart.colors 尊重作者。饼/环按类目编码，不受此限。 */
   const singleSeriesMono = !multi && !(c.colors && c.colors.length) && kind !== 'doughnut' && kind !== 'pie';
-  const colorsEff = singleSeriesMono ? [STYLE.accent] : colors;
+  let colorsEff = singleSeriesMono ? [STYLE.accent] : colors;
+  /* M3 标注层（chart.annotations[] / chart.dataLabels）——与 HTML lib_chart_svg 同语义：
+     highlight：被强调项主色实底、其余主色色调（单系列不再按序号轮换颜色）；
+     target：原生组合图里的虚线目标系列（可编辑数据）；dataLabels:none 关闭数据标签。 */
+  const ann = Array.isArray(c.annotations) ? c.annotations.filter(a => a && typeof a === 'object') : [];
+  const hlIdx = annHighlight(c, ann);
+  if (singleSeriesMono && hlIdx.length && (kind === 'bar')) {
+    const tone = mixHex(STYLE.accent, STYLE.bg, 0.55);
+    colorsEff = vals.map((_, i) => (hlIdx.indexOf(i) >= 0 ? STYLE.accent : tone));
+  }
 
   /* ── 原生技巧 ── */
   if (trick.indexOf('stacked+hiddenBase') === 0) { waterfallChart(s, c, pos); return; }
@@ -988,7 +1016,9 @@ function nativeChart(s, c, x, y, w, h, dcols) {
   /* ── 柱族（bar / hbar / stack / stackline）与线 / 面积 ── */
   const opts = Object.assign(chartBaseOpts(c, colorsEff, multi, kind), pos);
   /* 浅色数值网格线：给读数参照，也避免量程留白显得「图浮在半空」 */
-  if (kind === 'bar' || kind === 'line' || kind === 'area')
+  /* M3 风格库 chartSkin：网格线开关 / 数据标签策略随风格（HTML lib_chart_svg 同一份皮肤） */
+  const skin = chartSkin();
+  if ((kind === 'bar' || kind === 'line' || kind === 'area') && skin.grid !== false)
     opts.valGridLine = { style: 'solid', color: STYLE.line, size: 0.5 };
   if (kind === 'bar') {
     opts.barDir = (t === 'hbar') ? 'bar' : 'col';
@@ -1002,16 +1032,33 @@ function nativeChart(s, c, x, y, w, h, dcols) {
   }
   const ctype = kind === 'line' ? pptx.ChartType.line
     : kind === 'area' ? pptx.ChartType.area : pptx.ChartType.bar;
+  if (String(c.dataLabels || skin.dataLabels || '').toLowerCase() === 'none') opts.showValue = false;
+  if (!multi && singleSeriesMono && hlIdx.length && kind === 'bar') opts.chartColors = colorsEff;
   let cdata = chartSeries(c);
+  const targets = ann.filter(a => a.type === 'target' && isFinite(Number(a.value)));
+  if (targets.length && t === 'bar' && !multi) {
+    const labels = (c.labels || []).map(String);
+    const tv = Number(targets[0].value);
+    if (!c.max) opts.valAxisMaxVal = undefined;
+    try {
+      s.addChart([
+        { type: pptx.ChartType.bar, data: cdata, options: Object.assign({}, opts, { barDir: 'col' }) },
+        { type: pptx.ChartType.line, data: [{ name: (/\d/.test(String(targets[0].label || '')) ? String(targets[0].label) : (targets[0].label || '目标') + ' ' + tv + (c.unit || '')),
+            labels: labels, values: labels.map(() => tv) }],
+          options: { lineSize: 1.75, lineDash: 'dash', lineDataSymbol: 'none', chartColors: [STYLE.accent], showValue: false } },
+      ], Object.assign({}, opts, pos, { showLegend: true, legendPos: 't', legendColor: STYLE.body }));
+    } catch (e) { chartTry(s, ctype, cdata, opts, c); }
+    return;
+  }
   if (t === 'hbar') {
     /* 条形图（barDir=bar）类目轴自下而上绘制：反转数据使首项居顶，
-       与 HTML svg-hbar 及 A 通道 hbarRows 同序（标签-数值配对不变） */
+       与 HTML svg-hbar 及 HTML 端 hbarRows 同序（标签-数值配对不变） */
     cdata = cdata.map(se => ({ name: se.name,
       labels: (se.labels || []).slice().reverse(), values: (se.values || []).slice().reverse() }));
-    /* 单系列时颜色按数据点分配：颜色跟随数据走，与 A 通道 dcols[j%5] 同归属 */
-    if (!multi && colors && colors.length) {
+    /* 单系列：颜色跟随数据点一起反转（高亮项仍落在原数据项上）；未高亮 = 统一主色 */
+    if (!multi && colorsEff && colorsEff.length > 1) {
       const _n = Math.max(1, (cdata[0].values || []).length);
-      opts.chartColors = (cdata[0].values || []).map((_, i) => colors[(_n - 1 - i) % colors.length]);
+      opts.chartColors = (cdata[0].values || []).map((_, i) => colorsEff[(_n - 1 - i) % colorsEff.length]);
     }
   }
   chartTry(s, ctype, cdata, opts, c);
@@ -1221,7 +1268,7 @@ function nativeDonutChart(s, dcn, dcols, bottomY, topY) {
   return r;
 }
 /* ═══ 形状通道图表（非原生类型的高保真形状还原）═══
- * 与 A 通道（assets/pptx-export.js 的 chartShapes）语义一致：类别标签与数值都落为文本，
+ * 与 HTML 端（assets/pptx-export.js 的 chartShapes）语义一致：类别标签与数值都落为文本，
  * 保证 cross_verify 逐页文本集合一致（数值 token 由 cross_verify 过滤）。
  * 复杂信息图（sankey/treemap/boxplot/network/marimekko/streamgraph）请用专属页型承载。 */
 function shapeChart(s, c, x, y, w, h, dcols) {
@@ -1268,10 +1315,11 @@ function shapeValue(s, c, v, x, y, w, h, hot) {
 }
 /* 玫瑰图（rose）：等角扇区、半径 ∝ 数值（南丁格尔玫瑰）。
  * 扇区用「多段旋转矩形」沿角向铺贴逼近（每扇区 ≥16 段，双边界分别取弧长），
- * 不使用 preset pie/arc 替代曲线语义；标签与数值走底部图例行（文本与 A 通道一致）。 */
+ * 不使用 preset pie/arc 替代曲线语义；标签与数值走底部图例行（文本与 HTML 端一致）。 */
 /* M1 组合规则「主图 + 排序面板」：方形图（玫瑰/网络）放在宽版心里会两侧大片留白，
    改为左图右表——右侧按数值排序的条目列表（色点 + 标签 + 数值 + 比例条），全部取自数据本身，不编造文案。 */
 function rankPanel(s, items, x, y, w, h, fmt) {
+  y += 0.12; h -= 0.24;   /* 底板外扩 0.12 留在给定区域内（不压注释带） */
   const list = items.slice().sort((a, b) => b.value - a.value);
   const vmax = Math.max(1e-9, ...list.map(i => Math.abs(i.value)));
   const sol = SOLVER.rows(h, list.length, { pref: 0.5, min: 0.3, max: 0.78, gap: 0.08 });
@@ -1554,7 +1602,7 @@ function chartBlock(s, c, x, y, w, h, dcols) {
 /* ═══ 复杂信息图页型（形状通道：高保真形状还原 + 数据表可追溯）═══
  * 复杂曲线 / 流带一律用「多段旋转矩形」沿采样路径逼近（采样点 ≥16，上下边界分别追踪），
  * 不使用 preset shape（pie / arc / blockArc / chord / moon / wave）替代；
- * 与 A 通道（assets/pptx-export.js）同规则、文本集合一致（cross_verify 逐页比对）。 */
+ * 与 HTML 端（assets/pptx-export.js）同规则、文本集合一致（cross_verify 逐页比对）。 */
 const INFO_MIN_SAMPLES = 16;
 function sstep(t) { return t * t * (3 - 2 * t); }
 /* 沿采样路径铺贴多段旋转矩形：pts[i] = [x, yTop, yBottom]（双边界分别追踪） */
@@ -1628,7 +1676,23 @@ function infoPlot(sec, y0, y1) {
   const tH = Math.min((y1 - y0) * 0.4, Math.max(0.44, rows.length * 0.22 + 0.06));
   return { y0: y0, y1: y1 - tH - 0.1, rows: rows, table: { y: y1 - tH, h: tH } };
 }
-/* 桑基图：分层节点 + 流带（流量线性编码；流带上下边界分别采样，采样点 ≥16） */
+/* 桑基图（M3 重写）：分层节点 + 三次贝塞尔流带（custGeom，一条流 = 一个可编辑形状）。
+ * 与 HTML 端 lib_chart_svg.sankey 同一算法：全局比例尺 = 各层 (可用高 / 层流量和) 的最小值，
+ * 节点高 = 流量 × 比例尺、整层垂直居中；流带厚 = 流量 × 比例尺，出入口各自累加偏移，
+ * 因此流带与节点严丝合缝（旧实现按全局总流量估厚度，流带与节点不对齐）。流向「流失」类节点用灰。 */
+function fmtNum(v) { const n = Number(v); if (!isFinite(n)) return String(v); return Math.abs(n - Math.round(n)) < 1e-9 ? Math.round(n).toLocaleString('en-US') : n.toFixed(1); }
+const SANKEY_LOSS = ['流失', '流出', '损耗', '退出'];
+function ribbonGeom(s, x0, ya, x1, yb, th, color, transp) {
+  const top = Math.min(ya, yb), h = Math.abs(yb - ya) + th, w = Math.max(0.02, x1 - x0);
+  const A = ya - top, B = yb - top, mx = w / 2;
+  s.addShape('custGeom', { x: x0, y: top, w: w, h: h, fill: { color: color, transparency: transp || 0 },
+    line: { type: 'none' }, points: [
+      { x: 0, y: A },
+      { x: w, y: B, curve: { type: 'cubic', x1: mx, y1: A, x2: mx, y2: B } },
+      { x: w, y: B + th },
+      { x: 0, y: A + th, curve: { type: 'cubic', x1: mx, y1: B + th, x2: mx, y2: A + th } },
+      { close: true }] });
+}
 function infoSankey(s, sec, y0, y1) {
   const G = PT.sankey;
   const P = infoPlot(sec, y0, y1);
@@ -1646,51 +1710,47 @@ function infoSankey(s, sec, y0, y1) {
   const maxLv = Math.max.apply(null, level.concat([0]));
   const outSum = {}, inSum = {};
   flows.forEach(f => { outSum[f[0]] = (outSum[f[0]] || 0) + Number(f[2]); inSum[f[1]] = (inSum[f[1]] || 0) + Number(f[2]); });
-  const thr = (n) => Math.max(inSum[n] || 0, outSum[n] || 0);
-  const totalFlow = flows.reduce((a, f) => a + Number(f[2]), 0) || 1;
+  const size = (n) => Math.max(inSum[n] || 0, outSum[n] || 0);
   const plotH = P.y1 - P.y0;
-  const colW = CW / (maxLv + 1);
+  const gap = G.nodeGap;
+  const cols = [];
+  for (let l = 0; l <= maxLv; l++) cols.push(nodes.filter((n, i) => level[i] === l));
+  const scale = Math.min.apply(null, cols.filter(c => c.length).map(c =>
+    (plotH - gap * (c.length - 1)) / (c.reduce((a, n) => a + size(n), 0) || 1)));
+  const labelW = Math.min(G.labelW, 1.5);
+  const xL = MX + labelW + 0.1, xR = MX + CW - labelW - 0.1 - G.nodeW;
   const geo = {};
-  for (let l = 0; l <= maxLv; l++) {
-    const lv = nodes.filter((n, i) => level[i] === l);
-    const sum = lv.reduce((a, n) => a + thr(n), 0) || 1;
-    const availH = plotH - G.nodeGap * Math.max(0, lv.length - 1);
-    let cy = P.y0;
-    lv.forEach(n => {
-      const h = Math.max(G.minBandH, thr(n) / sum * availH);
-      geo[n] = { x: MX + l * colW + colW * 0.5 - G.nodeW / 2, y: cy, h: h, lv: l };
-      cy += h + G.nodeGap;
+  cols.forEach((c, l) => {
+    const tot = c.reduce((a, n) => a + size(n) * scale, 0) + gap * (c.length - 1);
+    let cy = P.y0 + (plotH - tot) / 2;
+    c.forEach(n => {
+      const h = Math.max(0.04, size(n) * scale);
+      geo[n] = { x: xL + (xR - xL) * (maxLv ? l / maxLv : 0), y: cy, h: h, lv: l, oo: 0, oi: 0 };
+      cy += h + gap;
     });
-  }
-  const used = {};
+  });
+  const isLoss = (n) => SANKEY_LOSS.indexOf(String(n)) >= 0;
+  const labels = [];
   flows.forEach(f => {
     const a = geo[f[0]], b = geo[f[1]];
     if (!a || !b) return;
-    const v = Number(f[2]) || 0;
-    const w = Math.max(0.03, v / totalFlow * plotH * 0.55);
-    used[f[0]] = (used[f[0]] || 0) + w; used[f[1]] = (used[f[1]] || 0) + w;
-    const yA = a.y + used[f[0]] - w / 2, yB = b.y + used[f[1]] - w / 2;
+    const v = Number(f[2]) || 0, th = Math.max(0.02, v * scale);
+    const ya = a.y + a.oo, yb = b.y + b.oi;
+    a.oo += th; b.oi += th;
     const x0 = a.x + G.nodeW, x1 = b.x;
-    const n = Math.max(INFO_MIN_SAMPLES, Math.round((x1 - x0) / 0.1));
-    const pts = [];
-    for (let i = 0; i <= n; i++) {
-      const t = i / n, e = sstep(t);
-      const x = x0 + (x1 - x0) * t;
-      const cyy = yA + (yB - yA) * e;
-      pts.push([x, cyy - w / 2, cyy + w / 2]);
-    }
-    ribbonRects(s, pts, STYLE.soft);
-    s.addText(String(v) + (sec.unit || ''), { x: (x0 + x1) / 2 - 0.5, y: (yA + yB) / 2 - 0.14, w: 1.0, h: 0.28,
-      align: 'center', fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.faint });
+    ribbonGeom(s, x0, ya, x1, yb, th, isLoss(f[1]) ? STYLE.line : STYLE.soft, 0);
+    if (th >= 0.18) labels.push([v, x0, x1, ya, yb, th]);
   });
+  labels.forEach(([v, x0, x1, ya, yb, th]) => s.addText(fmtNum(v), {
+    x: (x0 + x1) / 2 - 0.5, y: (ya + yb) / 2 + th / 2 - 0.13, w: 1.0, h: 0.26,
+    align: 'center', valign: 'middle', fontFace: STYLE.font, fontSize: sz(10), bold: true, color: STYLE.ink }));
   nodes.forEach(n => {
     const g = geo[n];
-    s.addShape('rect', { x: g.x, y: g.y, w: G.nodeW, h: g.h, fill: { color: STYLE.accent }, line: { type: 'none' } });
-    const lw = Math.min(G.labelW, colW * 0.6);
-    const last = (g.lv === maxLv);
-    s.addText(n, { x: last ? (g.x - lw - 0.06) : (g.x + G.nodeW + 0.06), y: g.y, w: lw,
-      h: Math.max(0.24, g.h), align: last ? 'right' : 'left', valign: 'middle',
-      fontFace: STYLE.font, fontSize: sz(10.5), bold: true, color: STYLE.body });
+    s.addShape('rect', { x: g.x, y: g.y, w: G.nodeW, h: g.h, fill: { color: isLoss(n) ? STYLE.faint : STYLE.accent }, line: { type: 'none' } });
+    const first = g.lv === 0;
+    s.addText(String(n) + ' ' + fmtNum(size(n)), { x: first ? (g.x - labelW - 0.08) : (g.x + G.nodeW + 0.08), y: g.y + g.h / 2 - 0.16,
+      w: labelW, h: 0.32, align: first ? 'right' : 'left', valign: 'middle',
+      fontFace: STYLE.font, fontSize: sz(11), bold: true, color: STYLE.ink });
   });
 }
 /* 树图：按面积编码的矩形切分（递归二分，面积严格成比例） */
@@ -1995,8 +2055,13 @@ function addTable(s, tbl, x, y, w, availH, opts) {
       '内容超承载，建议拆页/精简文案（行高已锁定，防压脚注）');
   const rows = [head.map(h => ({ text: h, options: { bold: true, color: STYLE.onAccent,
       fill: { color: STYLE.accent }, fontSize: headSzF, fontFace: STYLE.font, valign: 'middle' } }))]
-    .concat(rowsIn.map(r => r.map(c => ({ text: String(c), options: { fontSize: bodySzF,
-      color: STYLE.body, fontFace: STYLE.font, valign: 'middle', fill: { color: STYLE.bg } } }))));
+    .concat(rowsIn.map((r, ri) => r.map((c, j) => {
+      /* M3 版式 compare-table-hl：高亮列（推荐方案）= 主题色调底 + 加粗；其余行斑马纹 */
+      const hl = opts.highlightCol != null && j === opts.highlightCol;
+      return { text: String(c), options: { fontSize: bodySzF, bold: hl || (j === 0 && opts.highlightCol != null),
+        color: hl ? STYLE.ink : STYLE.body, fontFace: STYLE.font, valign: 'middle',
+        fill: { color: hl ? STYLE.soft : (opts.highlightCol != null && ri % 2 ? STYLE.surface : STYLE.bg) } } };
+    })));
   /* rowH 数组：表头略高、正文均分剩余（pptxgenjs 支持逐行 rowH） */
   const rowHeights = [hRowH].concat(rowsIn.map(() => rowH));
   s.addTable(rows, { x, y, w, colW: tbl.colW, border: { pt: 0.75, color: STYLE.line },
@@ -2081,12 +2146,14 @@ CONTENT.sections.forEach((sec) => {
     const _p2p = (LC.layoutSystem && LC.layoutSystem.pageToPreset) || {};
     if (_p2p[type]) sec.layoutPreset = _p2p[type];
   }
+  /* M3：source（图表出处）与 cap（图题）同 HTML 一并落版——source 走来源行，cap 并入 Exhibit 帧头 */
+  if (sec.source && !sec.footnote) sec.footnote = String(sec.source);
   const s = base();
-  if (type !== 'quote') head(s, sec.eyebrow, sec.title, sec.lead);
+  if (type !== 'quote' && type !== 'chapter') head(s, sec.eyebrow, sec.title, sec.lead);
 
   /* 正文区起点 / 终点（含 lead 与 so-what / 来源行 / 待核实条占位） */
   /* 非 exhibit 页型也可带 Exhibit 编号（帧头徽标；正文区下移让位，避免与主图重叠） */
-  const exBadge = (type !== 'exhibit' && sec.exhibitNo) ? exhibitBadge(sec.exhibitNo) : null;
+  const exBadge = (type !== 'exhibit' && sec.exhibitNo) ? exhibitBadge(sec.exhibitNo) + (sec.cap ? '　' + sec.cap : '') : null;
   const bodyY0 = sec.lead ? PT.common.bodyYWithLead : CONTENT_TOP;
   const bodyY = exBadge ? bodyY0 + 0.42 : bodyY0;
   if (exBadge) {
@@ -2198,6 +2265,10 @@ CONTENT.sections.forEach((sec) => {
       { x: MX, y: C2.panelY, w: (CW - C2.panelGap) / 2, h: C2.panelH };
     const rreg = REGIONS.regionOf('comparison', 'right') ||
       { x: MX + (CW + C2.panelGap) / 2, y: C2.panelY, w: (CW - C2.panelGap) / 2, h: C2.panelH };
+    if (sec.variant === 'problem-solution') {   /* 箭头通道 0.9in */
+      const g = 0.9, pw = (lreg.w + rreg.w + (rreg.x - lreg.x - lreg.w) - g) / 2;
+      rreg.x = lreg.x + pw + g; lreg.w = pw; rreg.w = pw;
+    }
     const cw2 = lreg.w;
     const cpy = lreg.y, cph = lreg.h;
     const rx2 = rreg.x;
@@ -2225,6 +2296,12 @@ CONTENT.sections.forEach((sec) => {
         ], { x: sd.x + 0.5, y: py, w: cw2 - 0.75, h: rowH - 0.04, fontFace: STYLE.font, valign: 'top' });
       });
     });
+    /* M3 版式 problem-solution：两面板之间放方向箭头（原生 rightArrow，可编辑） */
+    if (sec.variant === 'problem-solution') {
+      const ax = lreg.x + cw2, aw = rx2 - ax;
+      s.addShape('rightArrow', { x: ax + aw * 0.12, y: cpy + cph / 2 - 0.22, w: aw * 0.76, h: 0.44,
+        fill: { color: STYLE.accent }, line: { type: 'none' } });
+    }
     /* R2：verdict 与 soWhat 共用 annotation 槽位——只画一个（verdict 优先，语义更具体）。
        两者同页必须互斥，否则结论条整条叠印。 */
     if (sec.verdict) {
@@ -2237,6 +2314,37 @@ CONTENT.sections.forEach((sec) => {
         { text: sec.verdict, options: { fontSize: sz(12.5), bold: true, color: STYLE.onAccent } },
       ], { x: vreg.x + 0.22, y: vreg.y + 0.06, w: vreg.w - 0.44, h: vreg.h - 0.12, fontFace: STYLE.font,
         valign: 'middle', objectName: trName('soWhat') });
+    }
+  } else if (type === 'chapter') {
+    /* M3 章节扉页（结构家族）：主题色调满铺 + 超大章节号 + 章标题 / 导语 + 本章看点清单。
+       无左侧竖条、无装饰引号；本章看点 = 本章各页的结论式标题（≤5 条），扫读即知本章要回答什么。 */
+    const num = String(sec.number || (String(sec.eyebrow || '').match(/^\s*(\d{1,2})/) || [])[1] || '').padStart(2, '0');
+    s.addShape('rect', { x: 0, y: 0, w: PW, h: PH, fill: { color: STYLE.soft }, line: { type: 'none' } });
+    const CH = PT.chapter, nW = CH.numW;
+    if (num !== '00' && num) s.addText(num, { x: MX - 0.08, y: CH.numY, w: nW, h: 2.6, fontFace: STYLE.fontDisplay,
+      fontSize: (MTS[MODE_NAME] || MTS.presentation).chapterNum || 96, bold: true, color: STYLE.accent, valign: 'top', margin: 0 });
+    const tx = MX + nW + 0.3, tw = CW - nW - 0.3;
+    const ebText = String(sec.eyebrow || '').replace(/^\s*\d{1,2}\s*[·・\-—]\s*/, '') || ('第 ' + num + ' 章');
+    s.addText(ebText, { x: tx, y: CH.titleY - 0.42, w: tw, h: 0.4, fontFace: STYLE.font, fontSize: sz(13), bold: true,
+      color: STYLE.accent, charSpacing: 2 });
+    s.addText(sec.title || '', { x: tx, y: CH.titleY, w: tw, h: 1.25, fontFace: STYLE.fontDisplay, fontSize: sz(32),
+      bold: true, color: STYLE.ink, valign: 'top', fit: 'shrink' });
+    let cy = 3.0;
+    if (sec.lead) {
+      s.addText(sec.lead, { x: tx, y: cy, w: tw, h: 0.8, fontFace: STYLE.font, fontSize: sz(15), color: STYLE.body, valign: 'top' });
+      cy += 0.9;
+    }
+    const items = (sec.items || []).slice(0, CH.maxItems);
+    if (items.length) {
+      const rowH = Math.min(CH.itemRowH, (CONTENT_BOTTOM - cy) / items.length);
+      items.forEach((it, k) => {
+        const y = cy + k * rowH;
+        s.addShape('rect', { x: tx, y: y, w: tw, h: 0.01, fill: { color: STYLE.line }, line: { type: 'none' } });
+        s.addText(String(k + 1).padStart(2, '0'), { x: tx, y: y, w: 0.6, h: rowH, fontFace: STYLE.font,
+          fontSize: sz(12), bold: true, color: STYLE.accent, valign: 'middle' });
+        s.addText(String(it), { x: tx + 0.6, y: y, w: tw - 0.6, h: rowH, fontFace: STYLE.font,
+          fontSize: sz(13.5), color: STYLE.ink, valign: 'middle' });
+      });
     }
   } else if (type === 'quote') {
     const Q = PT.quote;
@@ -2266,7 +2374,7 @@ CONTENT.sections.forEach((sec) => {
     const authY = qm.length ? qY + qTextH + 0.02 : Q.authorY;
     s.addText('—— ' + sec.author, { x: qm.length ? MX : qreg.x, y: authY, w: qm.length ? CW : qreg.w, h: 0.45, align: qm.length ? 'left' : 'right',
       fontFace: STYLE.font, fontSize: sz(13), bold: true, color: STYLE.accent });
-    if (sec.context) s.addText(sec.context, { x: qreg.x, y: qm.length ? authY + 0.42 : Q.contextY, w: qreg.w, h: 0.4, align: 'right',
+    if (sec.context) s.addText(sec.context, { x: qreg.x, y: qm.length ? authY + 0.47 : Q.contextY, w: qreg.w, h: 0.4, align: 'right',
       fontFace: STYLE.font, fontSize: sz(11), color: STYLE.faint });
     if (qm.length) {
       const g = cols(CW, qm.length, 0.25);
@@ -2548,7 +2656,8 @@ CONTENT.sections.forEach((sec) => {
   } else if (type === 'table') {
     const treg = REGIONS.regionOf('table', 'primary', { bottom: bodyBottom }) ||
       { x: MX, y: CONTENT_TOP, w: CW, h: bodyBottom - CONTENT_TOP };
-    addTable(s, sec.table, treg.x, treg.y, treg.w, treg.h);
+    const hlc = sec.variant === 'highlight' ? Number(sec.highlightCol != null ? sec.highlightCol : (sec.table || {}).highlightCol) : null;
+    addTable(s, sec.table, treg.x, treg.y, treg.w, treg.h, { highlightCol: isFinite(hlc) ? hlc : null });
   } else if (type === 'timeline') {
     const T = PT.timeline;
     const treg = REGIONS.regionOf('timeline', 'primary') ||
@@ -2799,6 +2908,8 @@ CONTENT.sections.forEach((sec) => {
         // 首卡跨 2 列：槽位 = i===0 ? [0,1] : i+1
         const slot = i === 0 ? 0 : i + 1;
         if (i === 0) span = 2;
+        /* 末行补齐：尾卡吃掉末行剩余槽位，不留空洞（与 HTML .card--fill2 同规则） */
+        if (i === cds.length - 1 && i > 0) span = Math.max(1, r * c - (cds.length + 1) + 1);
         col = slot % c; row = Math.floor(slot / c);
       }
       const cw = span * gw + (span - 1) * cdC.gap;
@@ -2891,11 +3002,22 @@ CONTENT.sections.forEach((sec) => {
             layerBarW: D.layerBarW, layerGap: D.layerGap, maxLayerH: D.maxLayerH };
     const lys = sec.layers || [];
     const dStart = dreg.y;
-    const dEnd = dreg.y + dreg.h;
+    /* 图例按注释带口径落在 contentBottomWithNote 之上，图层与横切列整体让位（不压注释带） */
+    const hasLeg = !!(sec.legend && sec.legend.length);
+    const legBot = Math.min(bodyBottom, CONTENT_BOTTOM_NOTE);
+    const dEnd = hasLeg ? Math.min(dreg.y + dreg.h, legBot - 0.4) : dreg.y + dreg.h;
     const n = Math.max(1, lys.length);
-    const lh = Math.max(0.5, Math.min(dreg.maxLayerH || D.maxLayerH, (dEnd - dStart) / n - D.layerGap));
+    /* M3：层高交给求解器（富余时拉伸到 1.6× 首选并整组居中，不再「挤在顶部」） */
+    const lr = SOLVER.rows(dEnd - dStart, n, { pref: dreg.maxLayerH || D.maxLayerH, min: 0.5,
+      max: (dreg.maxLayerH || D.maxLayerH) * 1.6, gap: D.layerGap });
+    const lh = lr.size;
+    /* 横切能力列（sec.aside：治理 / 安全 / 可观测）贯穿所有层，占右侧 asideW */
+    const aside = isRec(sec.aside) ? sec.aside : null;
+    const asideW = aside ? Math.min(2.4, CW * 0.2) : 0;
+    const asideGap = aside ? 0.2 : 0;
+    const dTop = dStart + lr.offset;
     lys.forEach((lay, li) => {
-      const y = dStart + li * (lh + D.layerGap);
+      const y = dTop + li * (lh + D.layerGap);
       const focus = lay[2] === 'focus';
       s.addShape('roundRect', { x: dreg.x, y, w: D.layerBarW, h: lh, rectRadius: 0.05,
         fill: { color: focus ? STYLE.accent : STYLE.surface }, line: focus ? { type: 'none' } : { color: STYLE.line, width: 0.75 } });
@@ -2903,8 +3025,8 @@ CONTENT.sections.forEach((sec) => {
         fontFace: STYLE.font, fontSize: sz(12), bold: true, color: focus ? STYLE.onAccent : STYLE.body });
       const nodes = lay[1] || [];
       const nn = Math.max(1, nodes.length);
-      const availW = CW - D.layerBarW - 0.2;
-      const nw = Math.min(D.nodeMaxW, (availW - (nn - 1) * D.nodeGap) / nn);
+      const availW = CW - D.layerBarW - 0.2 - asideW - asideGap;
+      const nw = (availW - (nn - 1) * D.nodeGap) / nn;   /* 节点铺满整行（旧 nodeMaxW 上限留出右侧空洞） */
       nodes.forEach((nd, ni) => {
         const x = MX + D.layerBarW + 0.2 + ni * (nw + D.nodeGap);
         /* 节点三形态：{t,d,accent} 字典 | [标题, 注解] 数组 | 纯字符串
@@ -2950,16 +3072,34 @@ CONTENT.sections.forEach((sec) => {
           fill: { color: focus ? STYLE.accent : STYLE.line }, line: { type: 'none' } });
       }
     });
+    if (aside) {
+      const ax = MX + CW - asideW, ay = dTop, ah = n * lh + (n - 1) * D.layerGap;
+      s.addShape('roundRect', { x: ax, y: ay, w: asideW, h: ah, rectRadius: 0.08,
+        fill: { color: STYLE.soft }, line: { type: 'none' } });
+      s.addText(String(aside.title || ''), { x: ax + 0.15, y: ay + 0.12, w: asideW - 0.3, h: 0.36,
+        fontFace: STYLE.font, fontSize: sz(12.5), bold: true, color: STYLE.accent, valign: 'middle' });
+      const its = (aside.items || []).slice(0, 6);
+      const ir = SOLVER.rows(ah - 0.6, Math.max(1, its.length), { pref: 0.42, min: 0.3, max: 0.7, gap: 0.1 });
+      its.forEach((it, k) => {
+        const iy = ay + 0.55 + ir.offset + k * (ir.size + 0.1);
+        s.addShape('roundRect', { x: ax + 0.12, y: iy, w: asideW - 0.24, h: ir.size, rectRadius: 0.05,
+          fill: { color: STYLE.bg }, line: { type: 'none' } });
+        s.addText(String(it), { x: ax + 0.2, y: iy, w: asideW - 0.4, h: ir.size, fontFace: STYLE.font,
+          fontSize: sz(11), color: STYLE.ink, valign: 'middle' });
+      });
+    }
     if (sec.legend) {
       /* R2：图例进图区底部（与 HTML .arch__legend 同源），禁用 PH-0.62 固定偏移——
          那会压到来源行(6.72)与页码(7.0)。图例条自适应行内均分，右对齐。 */
       const lgH = 0.28;
-      const lgY = Math.max(dStart, bodyBottom - lgH - 0.02);
+      const lgY = Math.max(dStart, legBot - lgH - 0.02);
       const nLg = Math.max(1, sec.legend.length);
       const step = Math.min(2.4, CW / nLg);
       sec.legend.forEach((lg, li) => {
-        s.addText('● ' + lg, { x: MX + CW - nLg * step + li * step, y: lgY, w: step - 0.05, h: lgH,
-          fontFace: STYLE.font, fontSize: sz(10), color: STYLE.faint, align: 'left' });
+        /* 图例色点与图中编码一致：首项 = 强调色节点（当前焦点），其余 = 常规节点描边色 */
+        s.addText([{ text: '● ', options: { color: li === 0 ? STYLE.accent : STYLE.line } },
+          { text: String(lg), options: { color: STYLE.faint } }], { x: MX + CW - nLg * step + li * step, y: lgY, w: step - 0.05, h: lgH,
+          fontFace: STYLE.font, fontSize: sz(10), align: 'left' });
       });
     }
   } else if (type === 'exhibit') {
@@ -2968,7 +3108,7 @@ CONTENT.sections.forEach((sec) => {
     const reg = REGIONS.regionOf('exhibit', 'primary', { withNote: !!(sec.soWhat || sec.footnote) })
       || { x: MX, y: PT.exhibit.chartY, w: CW, h: PT.exhibit.chartH };
     if (sec.exhibitNo) {
-      s.addText(exhibitBadge(sec.exhibitNo), { x: MX, y: PT.exhibit.badgeY, w: CW, h: 0.35,
+      s.addText(exhibitBadge(sec.exhibitNo) + (sec.cap ? '　' + sec.cap : ''), { x: MX, y: PT.exhibit.badgeY, w: CW, h: 0.35,
         fontFace: STYLE.font, fontSize: sz(11.5), bold: true, color: STYLE.accent, charSpacing: 2 });
     }
     if (ec.labels && ec.values) {

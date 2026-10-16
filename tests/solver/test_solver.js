@@ -65,6 +65,17 @@ const r = S.rows(6, 2, { pref: 0.7, max: 1.5, gap: 0.2 });
 assert(r.size === 1.5 && r.offset > 0, '富余空间：拉伸到上限后整组居中');
 assert(S.rows(1, 6, { pref: 0.7, min: 0.1 }).size < 0.7, '紧张空间：行高压缩到首选以下');
 
+// M3 密度档镜像必须与风格库单源一致（layout-constants.json → styleGrammar）
+{
+  const LC = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'scripts', 'layout-constants.json'), 'utf-8'));
+  const G = LC.styleGrammar;
+  assert.deepStrictEqual(S.DENSITY_K, G.densityCapacity, 'DENSITY_K 与 styleGrammar.densityCapacity 不一致');
+  const sd = {}; Object.keys(G.styles).forEach(k => { sd[k] = G.styles[k].density; });
+  assert.deepStrictEqual(S.STYLE_DENSITY, sd, 'STYLE_DENSITY 与 styleGrammar.styles[].density 不一致');
+  const dense = { mode: 'presentation', style: 'mckinsey', sections: [{ type: 'points', points: Array(9).fill('一条要点') }] };
+  const airy = Object.assign({}, dense, { style: 'apple-mono' });
+  assert(S.splitModel(airy).model.sections.length >= S.splitModel(dense).model.sections.length, '舒展风格承载不得多于紧凑风格');
+}
 if (process.argv.includes('--update')) {
   fs.writeFileSync(GOLDEN, JSON.stringify(a, null, 1) + '\n');
   console.log('[test_solver] 金样已更新：' + GOLDEN);

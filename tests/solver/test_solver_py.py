@@ -21,6 +21,9 @@ F = {
     'quote': lambda n: {'type': 'quote', 'title': 'Q', 'quote': '金句'},
 }
 bad = []
+LC = json.loads((ROOT / 'scripts' / 'layout-constants.json').read_text(encoding='utf-8'))['styleGrammar']
+if S.DENSITY_K != LC['densityCapacity'] or S.STYLE_DENSITY != {k: v['density'] for k, v in LC['styles'].items()}:
+    bad.append(('density', 'lib_solver.py 密度档镜像与 styleGrammar 不一致', '', ''))
 for mode in ('presentation', 'research', 'architecture'):
     for fam, mk in F.items():
         for n in (3, 6, 12, 20):

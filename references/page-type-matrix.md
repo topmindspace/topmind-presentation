@@ -26,6 +26,7 @@
 | 定位 / 优先级 / 象限 | `matrix` | `bar`（scatter） | ≤3×3 |
 | 层级递进 / 价值阶梯 | `pyramid` | `diagram` | 3–5 层；强调层 ≤1 |
 | 关键判断 / 金句休止 | `quote` | `points` | 全文 1–2 处，多了廉价 |
+| 长 deck 分章（≥14 页） | `chapter` | `agenda` | 每章 1 张，`items` 列本章 3–5 页标题 |
 | 完整论述（发现→证据→含义） | `twocol`（research R1） | `threecol` | 段 ≤200 字；标题必须结论句 |
 | 数据证据页（主力） | `exhibit`（R2） | `split` | 全篇 Exhibit 连续编号 |
 | 三栏并列论点 | `threecol`（R6） | `cards` | 每栏 ≤150 字；栏宽按版心全宽推导 |

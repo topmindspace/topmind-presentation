@@ -17,7 +17,7 @@ if (!inPath) { console.error('用法: node scripts/solve_model.js <in.model.json
 const outArg = (args.find(a => a.startsWith('--out=')) || '').slice(6);
 const model = JSON.parse(fs.readFileSync(inPath, 'utf-8'));
 const mode = String(model.mode || 'presentation');
-const rows = (model.sections || []).map((s, i) => ({ i, type: s.type, title: s.title, ratio: S.capacity(s, mode) }));
+const rows = (model.sections || []).map((s, i) => ({ i, type: s.type, title: s.title, ratio: S.capacity(s, mode, S.densityK(model)) }));
 const { model: solved, log } = S.splitModel(model);
 if (args.includes('--json')) {
   console.log(JSON.stringify({ mode, pages: rows, splits: log }, null, 2));

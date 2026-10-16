@@ -63,7 +63,7 @@
       "lead": 14,
       "body": 13,
       "caption": 11,
-      "micro": 10
+      "micro": 10, "chapterNum": 96
     },
     "research": {
       "coverTitle": 36,
@@ -73,7 +73,7 @@
       "lead": 11.5,
       "body": 10.5,
       "caption": 9,
-      "micro": 8.5
+      "micro": 8.5, "chapterNum": 80
     },
     "architecture": {
       "coverTitle": 44,
@@ -83,7 +83,7 @@
       "lead": 14,
       "body": 13,
       "caption": 11,
-      "micro": 10
+      "micro": 10, "chapterNum": 96
     }
   },
   "typography": {
@@ -510,6 +510,14 @@
       "labelW": 1.4,
       "bandMinH": 0.12,
       "maxSeries": 6
+    },
+    "chapter": {
+      "$comment": "M3 章节扉页：色调满铺 + 超大章节号（左 3.6in）+ 章标题 / 导语 / 本章看点（≤5 行）。",
+      "numW": 3.6,
+      "numY": 1.15,
+      "titleY": 1.72,
+      "itemRowH": 0.5,
+      "maxItems": 5
     }
   },
   "pageTypeGeometry": {
@@ -542,7 +550,8 @@
     "boxplot": "boxplot",
     "network": "network",
     "marimekko": "marimekko",
-    "streamgraph": "streamgraph"
+    "streamgraph": "streamgraph",
+    "chapter": "chapter"
   },
   "charts": {
     "$comment": "图表登记表（单源）：validate_report.py 按 data-chart 类型核对最小尺寸；charts.md 的实现清单与之一致。pxWidthMin = 内联 width:NNNpx 硬下限（FAIL）；vbHeightMin = 通宽图 viewBox 高度建议下限（WARN）。sizeByComplexity = 面积随信息复杂度（v9，治简单图放大）。",
@@ -1275,13 +1284,14 @@
       "bodyPx": 15
     },
     "architecture": {
-      "char": 600,
-      "unit": 3,
+      "char": 1400,
+      "unit": 6,
       "empty": 60,
-      "fit": 600,
+      "fit": 1200,
       "wrap": 1600,
       "trow": 6,
-      "bodyPx": 17
+      "bodyPx": 17,
+      "$comment": "M3「丰富 + 克制」：架构页允许四层 × 四节点 + 横切护栏列（旧 600 字 / 3 单元为极简锁死档）"
     }
   },
   "pageHeightEstimate": {
@@ -1775,7 +1785,8 @@
       "boxplot": "P9",
       "network": "P9",
       "marimekko": "P9",
-      "streamgraph": "P9"
+      "streamgraph": "P9",
+      "chapter": "P3"
     },
     "defaultCharts": [
       "bar",
@@ -2248,6 +2259,28 @@
       "8ba0f8",
       "3d5bef",
       "93a7f9"
+    ],
+    "ink-academic": [
+      "1F3A5F",
+      "9DB8DC",
+      "17304F",
+      "B3C9E6",
+      "1F3A5F",
+      "B3C9E6"
+    ],
+    "coral-launch": [
+      "C4402A",
+      "C8432C",
+      "FF8A73",
+      "FFA391"
+    ],
+    "sky-airy": [
+      "0B7BC4",
+      "7CC4F2",
+      "0969A8",
+      "9AD3F6",
+      "0A6DAE",
+      "9AD3F6"
     ]
   },
   "aiFlavor": {
@@ -2348,6 +2381,27 @@
       "typeBoost": false,
       "density": "dense",
       "mood": "data-board"
+    },
+    "ink-academic": {
+      "radius": "8px",
+      "serifDisplay": true,
+      "typeBoost": false,
+      "density": "dense",
+      "mood": "academic"
+    },
+    "coral-launch": {
+      "radius": "18px",
+      "serifDisplay": false,
+      "typeBoost": true,
+      "density": "airy",
+      "mood": "product-launch"
+    },
+    "sky-airy": {
+      "radius": "20px",
+      "serifDisplay": false,
+      "typeBoost": true,
+      "density": "airy",
+      "mood": "training"
     }
   },
   "styles": {
@@ -2464,6 +2518,45 @@
       "surface": "F4F6FA",
       "line": "D6DCE6",
       "soft": "ECEEFF",
+      "onAccent": "FFFFFF",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "ink-academic": {
+      "accent": "1F3A5F",
+      "ink": "14181F",
+      "body": "454D59",
+      "faint": "6B7380",
+      "bg": "FFFFFF",
+      "surface": "F4F6F9",
+      "line": "D5DAE1",
+      "soft": "E9EEF5",
+      "onAccent": "FFFFFF",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "coral-launch": {
+      "accent": "C4402A",
+      "ink": "1E1A19",
+      "body": "5A5250",
+      "faint": "857C79",
+      "bg": "FFFFFF",
+      "surface": "FBF6F5",
+      "line": "EADFDC",
+      "soft": "FDEDEA",
+      "onAccent": "FFFFFF",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "sky-airy": {
+      "accent": "0B7BC4",
+      "ink": "0F1D2A",
+      "body": "4A5968",
+      "faint": "73818F",
+      "bg": "FFFFFF",
+      "surface": "F3F8FC",
+      "line": "D6E4EF",
+      "soft": "E3F1FB",
       "onAccent": "FFFFFF",
       "font": "Microsoft YaHei",
       "fontDisplay": "Microsoft YaHei"
@@ -2586,6 +2679,45 @@
       "onAccent": "141A38",
       "font": "Microsoft YaHei",
       "fontDisplay": "Microsoft YaHei"
+    },
+    "ink-academic": {
+      "accent": "9DB8DC",
+      "ink": "E6E9EE",
+      "body": "B3BAC5",
+      "faint": "8A929E",
+      "bg": "0E1117",
+      "surface": "151A22",
+      "line": "2B323D",
+      "soft": "18243A",
+      "onAccent": "0E1626",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "coral-launch": {
+      "accent": "FF8A73",
+      "ink": "F3ECEA",
+      "body": "C9BCB8",
+      "faint": "9C908C",
+      "bg": "141010",
+      "surface": "1C1615",
+      "line": "3A2D2A",
+      "soft": "3A1E18",
+      "onAccent": "2A0F0A",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
+    },
+    "sky-airy": {
+      "accent": "7CC4F2",
+      "ink": "E6EEF5",
+      "body": "B0C0CE",
+      "faint": "8797A6",
+      "bg": "0C1218",
+      "surface": "121A22",
+      "line": "26343F",
+      "soft": "12293A",
+      "onAccent": "0A1E2C",
+      "font": "Microsoft YaHei",
+      "fontDisplay": "Microsoft YaHei"
     }
   },
   "styleDataColors": {
@@ -2652,6 +2784,27 @@
       "269ebb",
       "af8746",
       "83993d"
+    ],
+    "ink-academic": [
+      "1f3a5f",
+      "4f7cac",
+      "8a6d3b",
+      "6b8f71",
+      "9a5b6f"
+    ],
+    "coral-launch": [
+      "c4402a",
+      "2f6fde",
+      "c27a12",
+      "2aa39a",
+      "7b5bd6"
+    ],
+    "sky-airy": [
+      "0b7bc4",
+      "16a37f",
+      "c4720f",
+      "8d6ad9",
+      "d9577c"
     ]
   },
   "styleDataColorsDark": {
@@ -2718,6 +2871,27 @@
       "88d6e7",
       "d4ba91",
       "bdce83"
+    ],
+    "ink-academic": [
+      "9db8dc",
+      "7fc4b8",
+      "c9ad7d",
+      "9fc0a4",
+      "c995a6"
+    ],
+    "coral-launch": [
+      "ff8a73",
+      "86aaf0",
+      "e6d27a",
+      "6fd1c8",
+      "ab97ea"
+    ],
+    "sky-airy": [
+      "7cc4f2",
+      "6fd4b6",
+      "f7bf7f",
+      "b6a1ea",
+      "eb98b0"
     ]
   },
   "layoutSlots": {
@@ -3547,6 +3721,36 @@
             "pptx": "notes"
           }
         ]
+      },
+      "chapter": {
+        "mode": [
+          "presentation",
+          "research",
+          "architecture"
+        ],
+        "slots": [
+          {
+            "id": "head",
+            "role": "chrome",
+            "required": true,
+            "html": ".chap__body .t-eyebrow + h2",
+            "pptx": "chapter title"
+          },
+          {
+            "id": "primary",
+            "role": "primary",
+            "required": true,
+            "html": ".chap__no",
+            "pptx": "chapter number"
+          },
+          {
+            "id": "secondary",
+            "role": "secondary",
+            "required": false,
+            "html": ".chap__list",
+            "pptx": "chapter items"
+          }
+        ]
       }
     }
   },
@@ -3605,6 +3809,705 @@
           "featureMaxParas": 2
         },
         "pptx": "twocol 分支：首栏 MD3 tonal 底 + 标题放大（build_pptx.js variant 分支）"
+      }
+    }
+  },
+  "layoutLibrary": {
+    "$comment": "M3 版式库单源：8 家族约 40 版式（全部自研命名）。版式 = 页型 + 变体 + 图表/图片子型；check_rhythm.py 按 match 规则把每一页归入唯一版式（最具体者优先），据此做节奏、家族覆盖与反模式门禁；tests/layouts/ 为每个版式保留 golden。weight：accent 强调 / light 疏 / medium 中 / dense 密。新增版式：在此登记 + 两端实现 + golden。",
+    "version": "1.0",
+    "families": {
+      "structure": "结构",
+      "viewpoint": "观点",
+      "data": "数据",
+      "framework": "框架",
+      "process": "流程和时间",
+      "media": "图文",
+      "cards": "卡片和网格",
+      "table": "表格"
+    },
+    "rhythm": {
+      "maxSameWeightRun": {
+        "presentation": 2,
+        "architecture": 2,
+        "research": 3,
+        "default": 2
+      },
+      "forbidAdjacentSameLayout": true,
+      "minFamilies": 5,
+      "minFamiliesFromPages": 8,
+      "chapterAnchorFromPages": 14
+    },
+    "antiPatterns": {
+      "maxIconsPerPage": 6,
+      "maxSeriesColors": 6,
+      "maxCardsSameShape": 8,
+      "quoteNeedsEvidence": true,
+      "bannedText": [
+        "So what",
+        "So What",
+        "SO WHAT",
+        "So-what"
+      ]
+    },
+    "layouts": [
+      {
+        "id": "cover",
+        "family": "structure",
+        "name": "封面",
+        "match": {
+          "kind": "cover"
+        },
+        "weight": "accent"
+      },
+      {
+        "id": "agenda",
+        "family": "structure",
+        "name": "目录（单栏）",
+        "match": {
+          "kind": "agenda",
+          "maxItems": 8
+        },
+        "weight": "light"
+      },
+      {
+        "id": "agenda-2col",
+        "family": "structure",
+        "name": "目录（≥9 项双栏）",
+        "match": {
+          "kind": "agenda",
+          "minItems": 9
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "chapter",
+        "family": "structure",
+        "name": "章节扉页（大号章节数字）",
+        "match": {
+          "type": "chapter"
+        },
+        "weight": "accent"
+      },
+      {
+        "id": "closing",
+        "family": "structure",
+        "name": "结束页",
+        "match": {
+          "kind": "closing"
+        },
+        "weight": "accent"
+      },
+      {
+        "id": "argument-3",
+        "family": "viewpoint",
+        "name": "大标题 + 论据三点",
+        "match": {
+          "type": "points"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "quote-evidence",
+        "family": "viewpoint",
+        "name": "金句 + 证据数字",
+        "match": {
+          "type": "quote"
+        },
+        "weight": "accent"
+      },
+      {
+        "id": "contrast",
+        "family": "viewpoint",
+        "name": "对比论点",
+        "match": {
+          "type": "comparison"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "problem-solution",
+        "family": "viewpoint",
+        "name": "问题 → 方案",
+        "match": {
+          "type": "comparison",
+          "variant": "problem-solution"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "narrative-2col",
+        "family": "viewpoint",
+        "name": "双栏论述",
+        "match": {
+          "type": "twocol"
+        },
+        "weight": "dense"
+      },
+      {
+        "id": "kpi-wall",
+        "family": "data",
+        "name": "大数字墙（2–6 个 KPI）",
+        "match": {
+          "type": "metrics"
+        },
+        "weight": "light"
+      },
+      {
+        "id": "kpi-trend",
+        "family": "data",
+        "name": "主 KPI + 支撑数字",
+        "match": {
+          "type": "kpi"
+        },
+        "weight": "light"
+      },
+      {
+        "id": "chart-sidenote",
+        "family": "data",
+        "name": "主图 + 侧注",
+        "match": {
+          "type": "exhibit"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "chart-table",
+        "family": "data",
+        "name": "图 + 表",
+        "match": {
+          "type": "halftable"
+        },
+        "weight": "dense"
+      },
+      {
+        "id": "chart-full",
+        "family": "data",
+        "name": "通栏主图",
+        "match": {
+          "type": "bar"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "waterfall",
+        "family": "data",
+        "name": "瀑布拆解",
+        "match": {
+          "type": "bar",
+          "chart": "waterfall"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "rank-bar",
+        "family": "data",
+        "name": "排名条",
+        "match": {
+          "type": "bullet"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "composition",
+        "family": "data",
+        "name": "构成环图 + 图例卡",
+        "match": {
+          "type": "donut"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "distribution",
+        "family": "data",
+        "name": "分布箱线",
+        "match": {
+          "type": "boxplot"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "mekko",
+        "family": "data",
+        "name": "双维占比（马赛克）",
+        "match": {
+          "type": "marimekko"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "stream",
+        "family": "data",
+        "name": "构成演变（河流图）",
+        "match": {
+          "type": "streamgraph"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "matrix-2x2",
+        "family": "framework",
+        "name": "矩阵（2×2 / 2×3）",
+        "match": {
+          "type": "matrix"
+        },
+        "weight": "dense"
+      },
+      {
+        "id": "pyramid",
+        "family": "framework",
+        "name": "金字塔",
+        "match": {
+          "type": "pyramid"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "funnel",
+        "family": "framework",
+        "name": "漏斗",
+        "match": {
+          "type": "bar",
+          "chart": "funnel"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "hub-spoke",
+        "family": "framework",
+        "name": "中心辐射",
+        "match": {
+          "type": "network"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "layer-stack",
+        "family": "framework",
+        "name": "分层架构",
+        "match": {
+          "type": "diagram"
+        },
+        "weight": "dense"
+      },
+      {
+        "id": "area-tree",
+        "family": "framework",
+        "name": "面积树图",
+        "match": {
+          "type": "treemap"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "steps-h",
+        "family": "process",
+        "name": "横向步骤",
+        "match": {
+          "type": "steps"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "milestones",
+        "family": "process",
+        "name": "里程碑时间线",
+        "match": {
+          "type": "timeline"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "milestones-icon",
+        "family": "process",
+        "name": "图标里程碑",
+        "match": {
+          "type": "timeline",
+          "variant": "timeline"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "roadmap-gantt",
+        "family": "process",
+        "name": "甘特 / 路线图",
+        "match": {
+          "type": "bar",
+          "chart": "gantt"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "swimlane",
+        "family": "process",
+        "name": "泳道",
+        "match": {
+          "type": "lane"
+        },
+        "weight": "dense"
+      },
+      {
+        "id": "flow-sankey",
+        "family": "process",
+        "name": "流向（桑基）",
+        "match": {
+          "type": "sankey"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "text-media",
+        "family": "media",
+        "name": "图文主从（左文右图）",
+        "match": {
+          "type": "split"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "media-full",
+        "family": "media",
+        "name": "满版图 + 图注",
+        "match": {
+          "type": "image",
+          "image": "full"
+        },
+        "weight": "light"
+      },
+      {
+        "id": "media-grid",
+        "family": "media",
+        "name": "图片网格",
+        "match": {
+          "type": "image",
+          "image": "grid"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "media-half",
+        "family": "media",
+        "name": "左图右文",
+        "match": {
+          "type": "image",
+          "image": "half"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "feature-cards",
+        "family": "cards",
+        "name": "特性卡",
+        "match": {
+          "type": "cards"
+        },
+        "weight": "dense"
+      },
+      {
+        "id": "bento",
+        "family": "cards",
+        "name": "Bento 拼贴（首卡跨列）",
+        "match": {
+          "type": "cards",
+          "variant": "bento-grid"
+        },
+        "weight": "dense"
+      },
+      {
+        "id": "feature-2col",
+        "family": "cards",
+        "name": "主张 + 细节双栏",
+        "match": {
+          "type": "twocol",
+          "variant": "2-col-feature"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "triad",
+        "family": "cards",
+        "name": "三栏特性",
+        "match": {
+          "type": "threecol"
+        },
+        "weight": "dense"
+      },
+      {
+        "id": "compare-table",
+        "family": "table",
+        "name": "对比表",
+        "match": {
+          "type": "table"
+        },
+        "weight": "dense"
+      },
+      {
+        "id": "compare-table-hl",
+        "family": "table",
+        "name": "对比表（高亮列）",
+        "match": {
+          "type": "table",
+          "variant": "highlight"
+        },
+        "weight": "dense"
+      },
+      {
+        "id": "score-heat",
+        "family": "table",
+        "name": "评分热力表",
+        "match": {
+          "type": "heatmap"
+        },
+        "weight": "dense"
+      }
+    ]
+  },
+  "styleGrammar": {
+    "$comment": "M3 风格库：每套风格 = tokens（styles/stylesDark/styleDataColors + engine.css）+ layout grammar（偏好家族 / 偏好版式，recommend_layout 与脚手架按此选型）+ density（舒展 airy / 标准 normal / 紧凑 dense：HTML 间距档 + 求解器容量系数）+ chartSkin（图表皮肤：网格线、柱圆角、数据标签策略，HTML 与 PPTX 共用）。换风格同时换骨架，不只是换皮。默认风格 = business-blue（清新蓝白 · MD3）。",
+    "default": "business-blue",
+    "densityCapacity": {
+      "airy": 0.9,
+      "normal": 1.0,
+      "dense": 1.12
+    },
+    "styles": {
+      "business-blue": {
+        "name": "清新蓝白（默认）",
+        "preferFamilies": [
+          "data",
+          "framework",
+          "cards"
+        ],
+        "preferLayouts": [
+          "chart-sidenote",
+          "kpi-wall",
+          "bento",
+          "problem-solution"
+        ],
+        "density": "normal",
+        "chartSkin": {
+          "grid": true,
+          "radius": 6,
+          "dataLabels": "all"
+        }
+      },
+      "apple-mono": {
+        "name": "优雅黑白",
+        "preferFamilies": [
+          "viewpoint",
+          "media",
+          "data"
+        ],
+        "preferLayouts": [
+          "quote-evidence",
+          "kpi-trend",
+          "media-full",
+          "chapter"
+        ],
+        "density": "airy",
+        "chartSkin": {
+          "grid": false,
+          "radius": 10,
+          "dataLabels": "ends"
+        }
+      },
+      "mckinsey": {
+        "name": "麦肯锡咨询",
+        "preferFamilies": [
+          "data",
+          "table",
+          "framework"
+        ],
+        "preferLayouts": [
+          "chart-sidenote",
+          "chart-table",
+          "compare-table-hl",
+          "waterfall"
+        ],
+        "density": "dense",
+        "chartSkin": {
+          "grid": true,
+          "radius": 2,
+          "dataLabels": "all"
+        }
+      },
+      "brand-red": {
+        "name": "品牌红",
+        "preferFamilies": [
+          "viewpoint",
+          "data",
+          "cards"
+        ],
+        "preferLayouts": [
+          "kpi-wall",
+          "contrast",
+          "feature-cards",
+          "milestones"
+        ],
+        "density": "normal",
+        "chartSkin": {
+          "grid": false,
+          "radius": 6,
+          "dataLabels": "all"
+        }
+      },
+      "warm-sand": {
+        "name": "暖沙编辑",
+        "preferFamilies": [
+          "viewpoint",
+          "media",
+          "process"
+        ],
+        "preferLayouts": [
+          "quote-evidence",
+          "narrative-2col",
+          "media-half",
+          "milestones"
+        ],
+        "density": "airy",
+        "chartSkin": {
+          "grid": false,
+          "radius": 8,
+          "dataLabels": "extreme"
+        }
+      },
+      "deep-teal": {
+        "name": "墨绿稳健",
+        "preferFamilies": [
+          "data",
+          "table",
+          "framework"
+        ],
+        "preferLayouts": [
+          "kpi-trend",
+          "compare-table",
+          "matrix-2x2",
+          "rank-bar"
+        ],
+        "density": "normal",
+        "chartSkin": {
+          "grid": true,
+          "radius": 4,
+          "dataLabels": "all"
+        }
+      },
+      "graphite-dark": {
+        "name": "石墨架构",
+        "preferFamilies": [
+          "framework",
+          "process",
+          "cards"
+        ],
+        "preferLayouts": [
+          "layer-stack",
+          "swimlane",
+          "hub-spoke",
+          "steps-h"
+        ],
+        "density": "dense",
+        "chartSkin": {
+          "grid": true,
+          "radius": 4,
+          "dataLabels": "ends"
+        }
+      },
+      "indigo-violet": {
+        "name": "靛紫前沿",
+        "preferFamilies": [
+          "framework",
+          "cards",
+          "data"
+        ],
+        "preferLayouts": [
+          "bento",
+          "hub-spoke",
+          "stream",
+          "kpi-trend"
+        ],
+        "density": "normal",
+        "chartSkin": {
+          "grid": false,
+          "radius": 8,
+          "dataLabels": "ends"
+        }
+      },
+      "spectrum": {
+        "name": "彩色数据板",
+        "preferFamilies": [
+          "data",
+          "table"
+        ],
+        "preferLayouts": [
+          "kpi-wall",
+          "mekko",
+          "score-heat",
+          "composition"
+        ],
+        "density": "dense",
+        "chartSkin": {
+          "grid": true,
+          "radius": 4,
+          "dataLabels": "all"
+        }
+      },
+      "ink-academic": {
+        "name": "学术墨蓝",
+        "preferFamilies": [
+          "data",
+          "table",
+          "viewpoint"
+        ],
+        "preferLayouts": [
+          "chart-table",
+          "distribution",
+          "compare-table-hl",
+          "argument-3"
+        ],
+        "density": "dense",
+        "chartSkin": {
+          "grid": true,
+          "radius": 0,
+          "dataLabels": "all"
+        }
+      },
+      "coral-launch": {
+        "name": "活力珊瑚",
+        "preferFamilies": [
+          "viewpoint",
+          "media",
+          "cards"
+        ],
+        "preferLayouts": [
+          "chapter",
+          "kpi-wall",
+          "feature-cards",
+          "media-full"
+        ],
+        "density": "airy",
+        "chartSkin": {
+          "grid": false,
+          "radius": 12,
+          "dataLabels": "ends"
+        }
+      },
+      "sky-airy": {
+        "name": "晴空课件",
+        "preferFamilies": [
+          "process",
+          "cards",
+          "viewpoint"
+        ],
+        "preferLayouts": [
+          "steps-h",
+          "triad",
+          "problem-solution",
+          "milestones-icon"
+        ],
+        "density": "airy",
+        "chartSkin": {
+          "grid": false,
+          "radius": 10,
+          "dataLabels": "all"
+        }
       }
     }
   }

@@ -61,11 +61,14 @@ b.addEventListener('click',function(){a(r.getAttribute('data-theme')==='dark'?'l
 /* ── header 工具组：风格下拉 + 帮助模态 ── */
 (function(){
   var STYLES=[
-    ['business-blue','商务蓝','#1a73e8'],['apple-mono','优雅黑白','#1d1d1f'],
+    ['business-blue','清新蓝白','#1a73e8'],['apple-mono','优雅黑白','#1d1d1f'],
     ['mckinsey','麦肯锡','#003a70'],['brand-red','品牌红','#d0021b'],
     ['warm-sand','暖沙金','#96681f'],['deep-teal','墨绿','#0f6b5c'],
     ['graphite-dark','石墨','#0369a1'],['indigo-violet','靛紫','#5b5bd6'],
-    ['spectrum','彩色','#4563ef']];
+    ['spectrum','彩色','#4563ef'],['ink-academic','学术墨蓝','#1f3a5f'],
+    ['coral-launch','活力珊瑚','#c4402a'],['sky-airy','晴空课件','#0b7bc4']];
+  /* M3 风格库：换风格同时换密度档（styleGrammar.density；layout-constants 单源，sync_runtime 校验一致） */
+  var DENSITY={"business-blue":"normal","apple-mono":"airy","mckinsey":"dense","brand-red":"normal","warm-sand":"airy","deep-teal":"normal","graphite-dark":"dense","indigo-violet":"normal","spectrum":"dense","ink-academic":"dense","coral-launch":"airy","sky-airy":"airy"};
   var r=document.documentElement;
   function syncModel(){if(window.REPORT_MODEL){
     window.REPORT_MODEL.style=r.getAttribute('data-style')}}
@@ -78,7 +81,7 @@ b.addEventListener('click',function(){a(r.getAttribute('data-theme')==='dark'?'l
       b.innerHTML='<span class="swd" style="background:'+s[2]+'"></span>'+s[1];
       if(s[0]===r.getAttribute('data-style'))b.classList.add('on');
       b.addEventListener('click',function(){
-        r.setAttribute('data-style',s[0]);
+        r.setAttribute('data-style',s[0]);r.setAttribute('data-density',DENSITY[s[0]]||'normal');
         list.querySelectorAll('.sitem').forEach(function(x){x.classList.remove('on')});
         b.classList.add('on');syncModel();
         seld.classList.remove('open')});   /* MD3 menu 惯例：选中即收起 */

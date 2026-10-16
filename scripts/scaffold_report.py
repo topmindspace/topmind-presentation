@@ -891,7 +891,7 @@ def build_plan(mode: str, n: int, plan: list | None, preset: str | None = None) 
 def main() -> int:
     ap = argparse.ArgumentParser(description='topmind-presentation 报告骨架生成器')
     ap.add_argument('--mode', default='presentation', choices=['presentation', 'research', 'architecture'])
-    ap.add_argument('--style', default=None, help='9 套风格之一（默认取模板出厂风格）')
+    ap.add_argument('--style', default=None, help='12 套风格之一（默认取模板出厂风格）')
     ap.add_argument('--theme', default=None, choices=['light', 'dark'],
                     help='默认 light；石墨深灰（graphite-dark）默认 dark（深色优先风格）')
     ap.add_argument('--title', default='报告标题')

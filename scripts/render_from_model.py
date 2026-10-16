@@ -35,6 +35,9 @@ TPL = ROOT / 'assets' / 'templates'
 LC = json.loads((ROOT / 'scripts' / 'layout-constants.json').read_text(encoding='utf-8'))
 PAGE_TO_PRESET = ((LC.get('layoutSystem') or {}).get('pageToPreset') or {})
 IMAGE_SPEC = LC.get('imageSpec') or {}
+sys.path.insert(0, str(ROOT / 'scripts'))
+import lib_chart_svg as LCS  # noqa: E402
+SKIN: dict = {}
 
 CONTENT_RE = re.compile(
     r'(<!-- __TOPPPT_CONTENT_START__ -->)[\s\S]*?(<!-- __TOPPPT_CONTENT_END__ -->)')
@@ -217,16 +220,14 @@ def pts_list(points) -> str:
     return '<ul class="ul">' + ''.join(lis) + '</ul>'
 
 
-def chart_svg(chart: dict, idx: int, force_type: str | None = None) -> str:
-    ct = esc(force_type or (chart or {}).get('type') or 'bar')
-    return (f'      <svg class="chart" data-chart="{ct}" viewBox="0 0 560 220">\n'
-            f'        <!-- 数据以 REPORT_MODEL.chart 为准；复杂图形用 extract_snippet --chart {ct} -->\n'
-            f'        <text x="280" y="110" text-anchor="middle" class="f-txt3" font-size="12">'
-            f'{ct} · 见模型数据</text>\n'
-            f'      </svg>\n')
+def chart_svg(chart: dict, idx: int, force_type: str | None = None, w: int = 900, h: int = 340) -> str:
+    """HTML 图表 = lib_chart_svg（数据驱动，与 PPTX 同一份 chart 数据、同一配色与标注层语义）。"""
+    ch = dict(chart or {})
+    if force_type:
+        ch['type'] = force_type
+    return '      ' + LCS.chart(ch, SKIN, w, h) + '\n'
 
 
-# ── 页型渲染器（字段 → 锁定版式 HTML）──────────────────────────────────────────
 def r_points(i, sec):
     pts = sec.get('points') or []
     half = (len(pts) + 1) // 2 or 1
@@ -290,68 +291,74 @@ def r_table(i, sec):
     tbl = sec.get('table') or {}
     head = tbl.get('head') or []
     rows = tbl.get('rows') or []
-    th = ''.join(f'<th>{esc(h)}</th>' for h in head)
+    hl = sec.get('highlightCol') if sec.get('variant') == 'highlight' else None
+    hl = hl if isinstance(hl, int) else None
+    cls = lambda j: ' class="is-hl"' if j == hl else ''
+    th = ''.join(f'<th{cls(j)}>{esc(h)}</th>' for j, h in enumerate(head))
     trs = []
     for row in rows:
-        tds = ''.join(f'<td>{cite(c)}</td>' for c in row)
+        tds = ''.join(f'<td{cls(j)}>{cite(c)}</td>' for j, c in enumerate(row))
         trs.append(f'<tr>{tds}</tr>')
-    body = ('    <div class="tbl-wrap rv"><table><thead><tr>' + th +
+    tcls = ' tbl--hl' if hl is not None else ''
+    body = (f'    <div class="tbl-wrap{tcls} rv"><table><thead><tr>' + th +
             '</tr></thead><tbody>' + ''.join(trs) + '</tbody></table></div>\n')
-    extra = ' band--flow' if len(rows) > 10 else ''
+    extra = ' data-variant="highlight"' if hl is not None else ''
     return wrap(i, 'table', body, sec, extra)
+
+
+def _fig_with_side(i, sec, ptype, fig_html):
+    """图 + 侧注：有 points 时 g-side 两栏（主图 + 读图要点），否则主图满宽。"""
+    pts = sec.get('points')
+    if sec.get('exhibitNo') and not sec.get('source') and sec.get('footnote'):
+        sec = dict(sec)
+        sec.pop('footnote')  # 已进 Exhibit 来源行
+    if pts:
+        body = ('    <div class="grid g-side rv a-start">\n'
+                f'{fig_html}'
+                f'      <div class="stack gap-4">{pts_list(pts)}</div>\n'
+                '    </div>\n')
+    else:
+        body = fig_html
+    return wrap(i, ptype, body, sec)
+
+
+def _exhibit_box(sec, svg, i):
+    """带编号 → Exhibit 框（编号 + 标题 + 来源行，research 规范）；否则轻量 .fig（可选图注）。
+    来源行取 sec.source（缺省回退 footnote，由调用方从页脚移除避免重复）。"""
+    no = sec.get('exhibitNo')
+    cap = sec.get('cap') or (sec.get('chart') or {}).get('cap') or ''
+    if not no:
+        capd = f'<div class="fig__cap">{esc(cap)}</div>\n' if cap else ''
+        return f'      <div class="fig rv">{capd}{svg}      </div>\n'
+    no_s = str(no)
+    if not no_s.lower().startswith('exhibit'):
+        no_s = f'Exhibit {no_s}'
+    src = sec.get('source') or sec.get('footnote') or ''
+    return ('      <div class="exhibit rv">\n'
+            f'        <div class="exhibit__hd"><span class="exhibit__no">{esc(no_s)}</span>'
+            + (f'<span class="exhibit__t">{esc(cap)}</span>' if cap else '') + '</div>\n'
+            + svg
+            + (f'        <div class="exhibit__src">{cite(src)}</div>\n' if src else '')
+            + '      </div>\n')
 
 
 def r_bar(i, sec):
     ch = sec.get('chart') or {}
-    body = (
-        '    <div class="grid g-side rv a-start">\n'
-        f'      <div class="fig"><div class="fig__cap">{esc(sec.get("title") or "图表")}</div>\n'
-        f'{chart_svg(ch, i)}      </div>\n'
-        '      <div class="stack gap-4"><h3 class="t-h3">怎么读这张图</h3>\n'
-        f'        {pts_list(sec.get("points") or [["结论一", "一句话。"], ["结论二", "一句话。"]])}\n'
-        '      </div>\n'
-        '    </div>\n')
-    return wrap(i, 'bar', body, sec)
+    return _fig_with_side(i, sec, 'bar', _exhibit_box(sec, chart_svg(ch, i), i))
 
 
 def r_donut(i, sec):
     ch = dict(sec.get('chart') or {})
-    ch.setdefault('type', 'donut')
-    labels, values = ch.get('labels') or [], ch.get('values') or []
-    legend = []
-    total = sum(float(v or 0) for v in values) or 1
-    for lb, v in zip(labels, values):
-        pct = float(v or 0) / total * 100
-        legend.append(f'        <li><strong>{esc(lb)}。</strong>{esc(v)}（{pct:.0f}%）</li>')
-    body = (
-        '    <div class="grid g-side rv a-start">\n'
-        f'      <div class="fig" style="text-align:center"><div class="fig__cap">构成占比</div>\n'
-        f'{chart_svg(ch, i, "donut")}      </div>\n'
-        '      <div class="stack gap-4"><h3 class="t-h3">构成明细</h3>\n'
-        '        <ul class="ul">' + ''.join(legend) + '</ul>\n'
-        '      </div>\n    </div>\n')
-    return wrap(i, 'donut', body, sec)
+    ch['type'] = 'donut'
+    return _fig_with_side(i, sec, 'donut', _exhibit_box(sec, chart_svg(ch, i), i))
 
 
 def r_exhibit(i, sec):
     ch = dict(sec.get('chart') or {})
     st = (sec.get('type') or '').lower()
-    if st in ('donut', 'bar', 'halftable') and not ch.get('type'):
+    if not ch.get('type'):
         ch['type'] = 'donut' if st == 'donut' else 'bar'
-    no = sec.get('exhibitNo') or i
-    body = (
-        '    <div class="grid g-side rv a-start">\n'
-        '      <div class="exhibit rv">\n'
-        f'        <div class="exhibit__hd"><span class="exhibit__no">Exhibit {esc(no)}</span>'
-        f'<span class="exhibit__t">{esc(sec.get("title") or "")}</span></div>\n'
-        f'{chart_svg(ch, i)}'
-        f'        <div class="exhibit__src">{cite(sec.get("footnote") or "来源：待补")}</div>\n'
-        '      </div>\n'
-        f'      {pts_list(sec.get("points") or [["结论", "一句话。"]])}\n'
-        '    </div>\n')
-    sec = dict(sec)
-    sec.pop('footnote', None)  # 已进来源行
-    return wrap(i, 'exhibit', body, sec)
+    return _fig_with_side(i, sec, st or 'exhibit', _exhibit_box(sec, chart_svg(ch, i), i))
 
 
 def r_twocol(i, sec):
@@ -375,9 +382,9 @@ def r_twocol(i, sec):
 def r_threecol(i, sec):
     paras = sec.get('paragraphs') or []
     cols = []
-    for p in paras[:6]:
+    for pi, p in enumerate(paras[:6]):
         if isinstance(p, (list, tuple)) and len(p) >= 2:
-            cols.append(f'      <div class="card"><h3 class="t-h3">{esc(p[0])}</h3>'
+            cols.append(f'      <div class="card">{card_head(str(p[0]), pi, p[2] if len(p) > 2 else None)}'
                         f'<p class="t-body">{cite(p[1])}</p></div>')
         else:
             cols.append(f'      <div class="card"><p class="t-body">{cite(p)}</p></div>')
@@ -409,6 +416,11 @@ def r_cards(i, sec):
         else:
             title, points, icon_name = (cd or ''), [], None
         lead_cls = ' card--lead' if (variant == 'bento-grid' and ci == 0) else ''
+        if variant == 'bento-grid' and ci == len(cards) - 1 and ci > 0:
+            # 末行补齐：槽位 = 卡数 + 1（首卡跨 2），余数由尾卡吃掉，不留空洞
+            rest = -(len(cards) + 1) % 3
+            if rest:
+                lead_cls += f' card--fill{rest + 1}'
         blocks.append(
             f'      <div class="card{lead_cls}">{card_head(str(title), ci, icon_name)}\n'
             f'        {pts_list(points)}</div>')
@@ -439,8 +451,7 @@ def r_split(i, sec):
             return fig + (f'\n      <div class="media__cap--below">{esc(cap)}</div>' if cap else '')
         if t == 'points' or el.get('points') and t not in ('bar', 'line', 'donut', 'hbar'):
             return f'      <div class="stack gap-4">{pts_list(el.get("points"))}</div>'
-        return (f'      <div class="fig"><div class="fig__cap">{esc(el.get("cap") or "图表")}</div>\n'
-                f'{chart_svg(el, i)}      </div>')
+        return _exhibit_box({'cap': el.get('cap')}, chart_svg(el, i, w=560, h=360), i).rstrip('\n')
     body = ('    <div class="grid g-side rv a-start">\n'
             f'{zone(sec.get("left"), "L")}\n{zone(sec.get("right"), "R")}\n'
             '    </div>\n')
@@ -453,9 +464,18 @@ def r_comparison(i, sec):
         tcol = ' style="color:var(--accent)"' if accent else ''
         return (f'      <div class="card"{style}><h3 class="t-h3"{tcol}>{esc((d or {}).get("title") or "")}</h3>\n'
                 f'        {pts_list((d or {}).get("points"))}</div>')
-    body = ('    <div class="grid g-half g-2 rv a-start">\n'
-            + panel(sec.get('left')) + '\n' + panel(sec.get('right'), True) + '\n'
-            + '    </div>\n')
+    ps = sec.get('variant') == 'problem-solution'
+    if ps:
+        # 版式 problem-solution：问题（中性面板）→ 方案（主题色调面板），中间方向箭头
+        arrow = ('      <div class="cmp-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" '
+                 'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+                 '<path d="M5 12h14M13 6l6 6-6 6"/></svg></div>')
+        body = ('    <div class="grid g-ps g-half rv">\n' + panel(sec.get('left')) + '\n' + arrow + '\n'
+                + panel(sec.get('right'), True) + '\n    </div>\n')
+    else:
+        body = ('    <div class="grid g-half g-2 rv a-start">\n'
+                + panel(sec.get('left')) + '\n' + panel(sec.get('right'), True) + '\n'
+                + '    </div>\n')
     has_verdict = bool(sec.get('verdict'))
     if has_verdict:
         body += (f'    <div class="sowhat rv"><span class="sowhat__v">{cite(sec["verdict"])}</span></div>\n')
@@ -464,7 +484,7 @@ def r_comparison(i, sec):
     # R2：verdict 与 soWhat 共用 .sowhat 槽位——verdict 已渲染时移除 soWhat，禁止同槽双条
     if has_verdict:
         sec.pop('soWhat', None)
-    return wrap(i, 'comparison', body, sec)
+    return wrap(i, 'comparison', body, sec, ' data-variant="problem-solution"' if ps else '')
 
 
 def r_quote(i, sec):
@@ -586,7 +606,8 @@ def r_diagram(i, sec):
         nds = []
         for nd in nodes[:8]:
             if isinstance(nd, dict):
-                nds.append(f'          <div class="arch__node"><div class="arch__nt">{esc(nd.get("t") or "")}</div>'
+                acc = ' arch__node--accent' if nd.get('accent') else ''
+                nds.append(f'          <div class="arch__node{acc}"><div class="arch__nt">{esc(nd.get("t") or "")}</div>'
                            f'<div class="arch__nd">{esc(nd.get("d") or "")}</div></div>')
             elif isinstance(nd, (list, tuple)):
                 # [标题, 注解] 数组形态（scaffold_report 发射；不处理会原样打出 "['a', 'b']"）
@@ -605,7 +626,15 @@ def r_diagram(i, sec):
                         '<svg width="18" height="22" viewBox="0 0 18 22" fill="none" stroke="currentColor" '
                         'stroke-width="2"><path d="M9 2v14"/><path d="M4 12l5 6 5-6"/></svg></div>')
     legend = ''.join(f'<span class="chip">{esc(x)}</span>' for x in (sec.get('legend') or []))
-    body = ('    <div class="arch rv">\n' + '\n'.join(rows) + '\n    </div>\n'
+    arch = '    <div class="arch rv">\n' + '\n'.join(rows) + '\n    </div>\n'
+    aside = sec.get('aside') or {}
+    if aside:
+        # 横切能力列（治理 / 安全 / 可观测）：贯穿所有层，表达「护栏内嵌」而非某一层
+        lis = ''.join(f'<li>{cite(x)}</li>' for x in (aside.get('items') or [])[:6])
+        arch = ('    <div class="arch-wrap">\n' + arch +
+                f'      <aside class="arch__aside rv"><div class="arch__aname">{esc(aside.get("title") or "")}</div>'
+                f'<ul>{lis}</ul></aside>\n    </div>\n')
+    body = (arch
             + (f'    <div class="arch__legend">{legend}</div>\n' if legend else ''))
     return wrap(i, 'diagram', body, sec, ' band--fit')
 
@@ -737,21 +766,7 @@ def r_halftable(i, sec):
     rows = tbl.get('rows') or []
     th = ''.join(f'<th>{esc(h)}</th>' for h in head)
     trs = ''.join('<tr>' + ''.join(f'<td>{cite(c)}</td>' for c in row) + '</tr>' for row in rows)
-    no = sec.get('exhibitNo')
-    if no:
-        fig = (
-            '      <div class="fig"><div class="exhibit rv">\n'
-            f'        <div class="exhibit__hd"><span class="exhibit__no">Exhibit {esc(no)}</span>'
-            f'<span class="exhibit__t">{esc(sec.get("title") or "")}</span></div>\n'
-            f'{chart_svg(ch, i)}'
-            f'        <div class="exhibit__src">{cite(sec.get("footnote") or "来源：待补")}</div>\n'
-            '      </div></div>\n')
-        sec = dict(sec)
-        sec.pop('footnote', None)  # 已进来源行，避免 wrap 再渲染一次
-    else:
-        fig = (
-            f'      <div class="fig"><div class="fig__cap">{esc(ch.get("cap") or "互证图")}</div>\n'
-            f'{chart_svg(ch, i)}      </div>\n')
+    fig = _exhibit_box(sec, chart_svg(ch, i, w=560, h=340), i)
     body = (
         '    <div class="grid g-half g-2 rv a-start">\n'
         f'      <div class="tbl-wrap"><table><thead><tr>{th}</tr></thead><tbody>{trs}</tbody></table></div>\n'
@@ -778,15 +793,32 @@ def r_matrix(i, sec):
 
 
 def r_info(i, sec):
-    t = sec.get('type') or 'sankey'
-    body = (f'    <div class="fig rv"><div class="fig__cap">{esc(t)} 信息图</div>\n'
-            f'      <svg class="chart" data-chart="{esc(t)}" viewBox="0 0 900 400">\n'
-            f'        <text x="450" y="200" text-anchor="middle" class="f-txt3">{esc(t)} · 按 infographics 规格绘制</text>\n'
-            f'      </svg>\n    </div>\n')
-    return wrap(i, t, body, sec)
+    t = (sec.get('type') or 'sankey').lower()
+    svg = '      ' + LCS.INFO[t](sec, SKIN) + '\n'
+    return _fig_with_side(i, sec, t, _exhibit_box(sec, svg, i))
+
+
+def r_chapter(i, sec):
+    """章节扉页：大号章节号 + 章标题 + 导语 + 本章看点（结构家族，节奏锚点）。"""
+    m = re.match(r'^\s*(\d{1,2})', str(sec.get('eyebrow') or ''))
+    num = str(sec.get('number') or (m.group(1) if m else '')).zfill(2)
+    eb = re.sub(r'^\s*\d{1,2}\s*[·・\-—]\s*', '', str(sec.get('eyebrow') or '')) or f'第 {num} 章'
+    items = ''.join(f'<li><span class="chap__i">{k:02d}</span>{cite(t)}</li>'
+                    for k, t in enumerate((sec.get('items') or [])[:5], 1))
+    sid = sec_anchor(i, sec)
+    return (f'<section class="band band--chapter" id="{sid}" data-skel="P3" data-page-type="chapter">\n'
+            '  <div class="wrap chap rv">\n'
+            f'    <div class="chap__no" aria-hidden="true">{esc(num)}</div>\n'
+            '    <div class="chap__body">\n'
+            f'      <div class="t-eyebrow">{esc(eb)}</div>\n'
+            f'      <h2 class="t-display shead__title">{esc(sec.get("title") or "")}</h2>\n'
+            + (f'      <p class="t-lead">{cite(sec.get("lead"))}</p>\n' if sec.get('lead') else '')
+            + (f'      <ol class="chap__list">{items}</ol>\n' if items else '')
+            + '    </div>\n  </div>\n</section>')
 
 
 RENDERERS = {
+    'chapter': r_chapter,
     'points': r_points, 'metrics': r_metrics, 'kpi': r_kpi, 'table': r_table,
     'bar': r_bar, 'donut': r_donut, 'exhibit': r_exhibit, 'twocol': r_twocol,
     'threecol': r_threecol, 'cards': r_cards, 'split': r_split, 'comparison': r_comparison,
@@ -880,23 +912,18 @@ def render_body(model: dict) -> str:
   <div class="wrap">
     <div class="shead rv"><div class="t-eyebrow">目录</div>
       <h2 class="t-h1 shead__title">报告大纲</h2></div>
-    <ol class="agenda rv">{''.join(lis)}</ol>
+    <ol class="agenda{" agenda--2col" if len(lis) > 8 else ""} rv">{''.join(lis)}</ol>
   </div>
 </section>''')
     ex_n = 0
     for i, sec in enumerate(secs, 1):
         t = (sec.get('type') or 'points').lower()
-        is_research_exhibit = (model.get('mode') == 'research'
-                               and t in ('exhibit', 'bar', 'halftable', 'donut'))
-        if is_research_exhibit:
+        if model.get('mode') == 'research' and (t in ('exhibit', 'bar', 'halftable', 'donut') or t in LCS.INFO):
             ex_n += 1
-            sec = dict(sec)
-            sec['exhibitNo'] = ex_n
+            if not sec.get('exhibitNo'):
+                sec = dict(sec)
+                sec['exhibitNo'] = ex_n
         fn = RENDERERS.get(t, r_points)
-        if is_research_exhibit and t != 'halftable':
-            # halftable 在 research 下仍走 r_halftable（表+图），仅借 exhibitNo 加 Exhibit 徽标；
-            # 统一走 r_exhibit 会静默丢弃 table（内容覆盖率门禁捕获，0.2.0 修）。
-            fn = r_exhibit
         try:
             parts.append(fn(i, sec))
         except Exception as e:
@@ -934,18 +961,30 @@ def render_body(model: dict) -> str:
             time_ = ''
         real_refs.append((name, time_, caliber, url))
     if real_refs:
-        lis = []
+        ext = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+               'stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>'
+               '<path d="M15 3h6v6M10 14 21 3"/></svg>')
+        rows = []
         for n, (name, time_, caliber, url) in enumerate(real_refs, 1):
-            meta = '，'.join(x for x in (time_, caliber) if x)
             label = esc(name)
             if url and url.startswith(('http://', 'https://', './', '../')) and 'example.com' not in url:
-                label = f'<a class="ref-link" href="{esc(url)}" target="_blank" rel="noopener">{esc(name)}</a>'
-            lis.append(f'      <li id="ref-{n}">[{n}] {label}' + (f'，{esc(meta)}' if meta else '') + '。</li>')
-        parts.append(f'''<section class="band band--flow" id="refs">
+                label = (f'<a class="ref-link" href="{esc(url)}" target="_blank" rel="noopener">'
+                         f'{esc(name)}{ext}</a>')
+            rows.append(f'          <tr id="ref-{n}"><td class="k">[{n}]</td><td>{label}</td>'
+                        f'<td>{esc(time_)}</td><td>{esc(caliber)}</td></tr>')
+        parts.append(f'''<section class="band band--tint" id="refs">
   <div class="wrap">
-    <div class="shead rv"><div class="t-eyebrow">附录</div>
-      <h2 class="t-h1 shead__title">参考资料</h2></div>
-    <ol class="refs">{''.join(lis)}</ol>
+    <div class="shead rv"><div class="t-eyebrow">参考资料</div>
+      <h2 class="t-h1 shead__title">{esc(model.get("refsTitle") or "数据来源与口径说明")}</h2></div>
+    <div class="tbl-wrap rv">
+      <table>
+        <thead><tr><th style="width:6%">编号</th><th style="width:30%">来源</th>
+          <th style="width:14%">时间</th><th>口径说明</th></tr></thead>
+        <tbody>
+{chr(10).join(rows)}
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>''')
     # 无真实来源 → 不渲染 #refs 整节（也不写占位）
@@ -979,6 +1018,24 @@ def load_model(path: Path) -> dict:
     return span[2]
 
 
+def _sync_html_attrs(html: str, model: dict) -> str:
+    """<html> 的 data-style / data-theme / data-density 与模型同源（换风格 = 换 token + 密度档）。"""
+    st = model.get('style')
+    sg = ((LC.get('styleGrammar') or {}).get('styles') or {}).get(st or '') or {}
+    m = re.search(r'<html\b[^>]*>', html)
+    if not m:
+        return html
+    tag = m.group(0)
+    for k, v in (('data-style', st), ('data-theme', model.get('theme')), ('data-density', sg.get('density'))):
+        if not v:
+            continue
+        if re.search(rf'\s{k}="[^"]*"', tag):
+            tag = re.sub(rf'\s{k}="[^"]*"', f' {k}="{v}"', tag)
+        else:
+            tag = tag[:-1] + f' {k}="{v}">'
+    return html[:m.start()] + tag + html[m.end():]
+
+
 def _strip_refs_nav(html: str, body: str) -> str:
     """无真实来源（正文不含 #refs 节）时，摘掉导航/收尾的「参考资料」入口，避免悬空锚点。"""
     if 'id="refs"' in body:
@@ -994,10 +1051,11 @@ def main() -> int:
     ap.add_argument('--out', help='输出 HTML')
     ap.add_argument('--inplace', action='store_true', help='就地替换 src 的 CONTENT 区')
     ap.add_argument('--body-only', action='store_true', help='只打印正文片段')
+    ap.add_argument('--model', help='配合 --inplace：以该 model.json 为唯一事实源重渲染 src（示例再生用）')
     args = ap.parse_args()
 
     src = Path(args.src)
-    model = load_model(src)
+    model = load_model(Path(args.model) if args.model else src)
     # M2 同源求解：与 build_pptx.js 共用容量模型（lib_solver.py ≡ lib_solver.js，金样校验）。
     # 超载页先拆续页再渲染，HTML 与 PPTX 页序一致；拆页后的模型同时写回 REPORT_MODEL。
     sys.path.insert(0, str(ROOT / 'scripts'))
@@ -1006,6 +1064,9 @@ def main() -> int:
     for lg in split_log:
         print(f'[render_from_model] 超载拆页：「{lg["title"]}」({lg["type"]} 容量 {round(lg["ratio"] * 100)}% → {lg["parts"]} 页)',
               file=sys.stderr)
+    global SKIN
+    sg = ((LC.get('styleGrammar') or {}).get('styles') or {}).get(model.get('style') or '') or {}
+    SKIN = dict(sg.get('chartSkin') or {})
     body = render_body(model)
 
     if args.body_only:
@@ -1022,11 +1083,14 @@ def main() -> int:
         # 同步模型（确保与渲染源一致；span 精确定位，模型字符串含 `};` 也不写坏）
         t = replace_model_json(t, model)
         t = _strip_refs_nav(t, body)
+        t = _sync_html_attrs(t, model)
         try:
             src.write_text(t, encoding='utf-8')
         except OSError as e:
             print(f'错误：--inplace 写回失败 {src}（{e}）', file=sys.stderr)
             return 1
+        if args.model:
+            Path(args.model).write_text(json.dumps(model, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         print(f'已按模型重渲染正文：{src}（{len(body)} 字符）')
         print(f'  下一步: python scripts/validate_report.py "{src}" --strict')
         return 0
@@ -1044,6 +1108,7 @@ def main() -> int:
     t = CONTENT_RE.sub(r'\1\n' + body.replace('\\', '\\\\') + r'\n\2', t, count=1)
     t = replace_model_json(t, model)
     t = _strip_refs_nav(t, body)
+    t = _sync_html_attrs(t, model)
     out = Path(args.out or (src.with_suffix('.html')))
     try:
         out.write_text(t, encoding='utf-8')

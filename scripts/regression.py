@@ -27,6 +27,7 @@
 """
 from __future__ import annotations
 
+import re
 import argparse
 import json
 import subprocess
@@ -94,11 +95,30 @@ def main() -> int:
             fails.append(stem + ':report')
             print((r0.stdout or '')[-800:])
             continue
-        r1 = run([PY, str(ROOT / 'scripts' / 'extract_model.py'), str(html)])
+        # 示例的唯一事实源 = 仓库内 <stem>.model.json；抽取结果只写到输出目录，绝不回写示例。
+        src_model = model
+        model = B_OUT / (stem + '.model.json')
+        r1 = run([PY, str(ROOT / 'scripts' / 'extract_model.py'), str(html), str(model)])
         if r1.returncode != 0:
             fails.append(stem + ':extract')
             print((r1.stdout or '')[-500:])
             continue
+        # 模型漂移：HTML 内嵌模型必须与 model.json 逐值一致
+        try:
+            same = json.loads(model.read_text(encoding='utf-8')) == json.loads(src_model.read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            same = False
+        print('  [model.json ≡ HTML 内嵌模型]', 'OK' if same else 'FAIL')
+        if not same:
+            fails.append(stem + ':model-drift')
+        # 可再生：model.json → render_from_model 的正文必须与示例 HTML 正文逐字一致
+        rb = run([PY, str(ROOT / 'scripts' / 'render_from_model.py'), str(src_model), '--body-only'])
+        m_body = re.search(r'<!-- __TOPPPT_CONTENT_START__ -->\n([\s\S]*?)\n<!-- __TOPPPT_CONTENT_END__ -->',
+                           html.read_text(encoding='utf-8'))
+        regen_ok = rb.returncode == 0 and m_body is not None and rb.stdout == m_body.group(1)
+        print('  [示例可由 model.json 完整再生]', 'OK' if regen_ok else 'FAIL')
+        if not regen_ok:
+            fails.append(stem + ':regen')
         bp = B_OUT / (stem + '.pptx')
         r2 = run([node, str(ROOT / 'scripts' / 'build_pptx.js'), str(bp), '--model=' + str(model)], env=env)
         if r2.returncode != 0 or not bp.exists():

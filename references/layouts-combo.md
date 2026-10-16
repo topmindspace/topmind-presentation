@@ -281,6 +281,7 @@
 | 流程 / 职责协作 | A2 泳道（§38b） | A3 管线 | C | `lane` |
 | 端到端链路 | A3 管线（§38） | A2 泳道 | C | `lane` |
 | 关键判断 / 金句休止 | 金句页（§39） | 深色收尾章（§11） | A 为主 | `quote` |
+| 章节分段（14 页以上） | 章节扉页（`layout-library.md`） | 大纲回顾 | A 为主 | `chapter` |
 | 转化 / 筛选漏斗 | funnel（`charts.md` §26） | 版式 A | — | `exhibit`（bar 变体） |
 | 增减归因（A→B） | waterfall 瀑布（`charts.md` §24） | 版式 A | — | `exhibit`（bar 变体） |
 | 步骤 / 实施节奏（3–6 步） | steps 步骤条（§47） | E 时间线（§44） | — | `steps` |

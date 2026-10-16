@@ -45,12 +45,15 @@
     "exhibitNo",
     "layoutPreset",
     "variant",
-    "anchor"
+    "anchor",
+    "cap",
+    "source",
+    "highlightCol"
   ],
   "mutualExclusionHint": "verdict 与 soWhat 互斥：二者共用 annotation 结论条槽位，同页双填必叠印。comparison 页填 verdict 时不要再填 soWhat（渲染器已自动二选一，但模型侧应只给一个）。",
   "flagsHint": "flags = 待核实/待二次修改条目字符串数组（如 '2027 增速 xx%（口径未定）'）；渲染为 accent 强调色标注行，提示用户核对。",
   "imageHint": "image = 素材图片/配图占位对象。三选一必填：src（用户图，data: 内联或相对路径，零外链铁律禁 http(s)）｜items（多图版式：grid/compare/wall，元素 {src?, alt?, caption?, placeholder?}）｜placeholder:true（无图时出配图占位，原生形状渲染、pictures 不增）。其余可选：layout（full/half/bleed/grid/compare/wall，见 layout-constants.json imageSpec.layouts）、fit（cover 默认 / contain）、caption、alt、hint、ratio。",
-  "imageLayoutHint": "layout 与 HTML 版式对应：full=版心全宽图｜half=左图右注（points 为右栏注解）｜bleed=通栏出血｜grid=多图网格（items 2/3/4/6 张）｜compare=双图 A/B 对比（items 2 张）｜wall=Logo 墙（items 3–12 张小图）。占位符标签文本由双引擎按 imageSpec 拼同一串，保证 A/B 通道逐页文本一致。",
+  "imageLayoutHint": "layout 与 HTML 版式对应：full=版心全宽图｜half=左图右注（points 为右栏注解）｜bleed=通栏出血｜grid=多图网格（items 2/3/4/6 张）｜compare=双图 A/B 对比（items 2 张）｜wall=Logo 墙（items 3–12 张小图）。占位符标签文本由双引擎按 imageSpec 拼同一串，保证 HTML 与 PPTX 逐页文本一致。",
   "chartTypes": [
     "bar",
     "hbar",
@@ -114,7 +117,8 @@
       "label": "指标带页（4–6 个核心数字）",
       "modes": [
         "presentation",
-        "research"
+        "research",
+        "architecture"
       ],
       "required": [
         "metrics:array"
@@ -152,7 +156,8 @@
       "label": "时间线 / 路线页",
       "modes": [
         "presentation",
-        "research"
+        "research",
+        "architecture"
       ],
       "required": [
         "phases:array"
@@ -285,7 +290,8 @@
       "label": "卡片网格页（cards 元素须为 {title, points:[[k,v]…], icon?}，不接受元组）",
       "modes": [
         "presentation",
-        "research"
+        "research",
+        "architecture"
       ],
       "required": [
         "cards:array"
@@ -338,7 +344,8 @@
       "label": "对比页（左右双栏 + 可选结论条）",
       "modes": [
         "presentation",
-        "research"
+        "research",
+        "architecture"
       ],
       "required": [
         "left.title",
@@ -376,7 +383,8 @@
         "layers:array"
       ],
       "optional": [
-        "legend:array"
+        "legend:array",
+        "aside"
       ]
     },
     "exhibit": {
@@ -550,6 +558,21 @@
         "labels:array",
         "chart.dataTable",
         "note"
+      ]
+    },
+    "chapter": {
+      "label": "章节扉页（结构家族：大号章节号 + 章标题 + 本章看点 ≤5 条；每章第一页作视觉锚点）",
+      "modes": [
+        "presentation",
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "title"
+      ],
+      "optional": [
+        "number",
+        "items:array"
       ]
     }
   }

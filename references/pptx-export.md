@@ -20,7 +20,7 @@
 
 - **页序预览**：点 header「预览 PPTX」（快捷键 P）查看交付 PPTX 的页序计划——页序由运行时 `pagePlan()` 给出（与 `build_pptx.js` / `render_from_model.py` 同一布局求解器拆页），缩略图直接克隆页面上对应的 HTML 幻灯片。**M2 起浏览器端不再有第二套几何引擎**（原 2000 行 OOXML 序列化器与服务端长期漂移，已删除）。**页面不直接导出文件**：浏览器端跑不了 strict 质检硬门禁，达不到交付质量；预览模态常显**可复制 AI 提示词**，用户想获得 PPTX 时复制给 AI，由智能体走精导通道生成（`?` 帮助弹窗 / 快捷键 H 有同样说明）。
 - **智能体精导（唯一交付 · 唯一几何引擎）**：`extract_model.py` → `build_pptx.js` → `validate_pptx.py --strict` 0/0。用户选「HTML+PPTX」或事后要 PPT 时才跑。
-- **双单源**：页面几何/三模式独立比例尺（`typeScale` 基准 + `modeTypeScale` 模式取值）/页型几何/9 风格 token 全在 `scripts/layout-constants.json`；**页型 DSL schema（字段/必填/适用模式）在 `scripts/model-schema.json`**。通道 B 直接 `require`；页面运行时由 `sync_runtime.py` 注入（同时注入三模板的引擎/UI/运行时内联副本）。**改常量只改 JSON，改 schema 只改 schema JSON，然后跑 `python scripts/sync_runtime.py`**。
+- **双单源**：页面几何/三模式独立比例尺（`typeScale` 基准 + `modeTypeScale` 模式取值）/页型几何/12 风格 token 全在 `scripts/layout-constants.json`；**页型 DSL schema（字段/必填/适用模式）在 `scripts/model-schema.json`**。通道 B 直接 `require`；页面运行时由 `sync_runtime.py` 注入（同时注入三模板的引擎/UI/运行时内联副本）。**改常量只改 JSON，改 schema 只改 schema JSON，然后跑 `python scripts/sync_runtime.py`**。
 
 ### 会场与字号（venue · P1-4）
 
@@ -44,7 +44,7 @@ HTML 侧仍用 MD3 clamp；双端都以「最后一排可读」为准（`present
 | 字段 | 说明 |
 |------|------|
 | `mode` | `presentation` / `research` / `architecture`（与 `data-mode` 一致，生成时锁定；校验器检查） |
-| `style` | 9 套风格之一（不写则取页面 `data-style`） |
+| `style` | 12 套风格之一（不写则取页面 `data-style`） |
 | `theme` | `light` / `dark`（不写则取页面 `data-theme`，默认 light）——**PPTX 按此导出亮色版或深色版**（深色走 `stylesDark` token，与 HTML 深色主题同源；validate_report 检查与 `data-theme` 一致） |
 | `title` / `subtitle` / `meta` | 封面 |
 | `agenda` | `[[编号, 标题, 说明]…]`；>8 条自动双列、行高自适应；**architecture 极简形态可省略**（封面后直接进图，PPTX 相应少一页大纲） |
@@ -74,6 +74,7 @@ HTML 侧仍用 MD3 clamp；双端都以「最后一排可读」为准（`present
 | `cards` | 卡片网格（g-3/g-4） | `cards:[{title, points:[]}]`、`columns` |
 | `split` | **双区组合页**（g-side；左/右各可为要点｜图表｜表格｜图片，组合版式的通用解） | `left:{type?:'points'(默认)/'table'/'image'/图表类型名, points?/head?/rows?/labels?/values?/series?/image?/cap?}`、`right:{…同构，缺省 type='bar'}` |
 | `comparison` | 对比页（`components.md` §40：左右双面板） | `left/right:{title, points:[[k,v]…]}`、`verdict` |
+| `chapter` | 章节扉页（大号章节序号 + 标题 + 本章页目；不出页眉） | `title`、`eyebrow`（「01 · 章名」）、`items?`、`body?` |
 | `quote` | 金句页（`components.md` §39：主题一致强调带，accent-soft 底） | `quote`、`author`、`metrics`（2–4 个证据数字，必填）、`context?` |
 | `diagram` | 分层架构（.arch / A1，含层间连接；**architecture 模式自动走全幅图页型**） | `layers:[[层名,[节点…],'focus'?]]`、`legend:[]` |
 
@@ -128,7 +129,7 @@ HTML 侧仍用 MD3 clamp；双端都以「最后一排可读」为准（`present
 >
 > **自适应排版**：所有文本块按可用高度自适应字号/行距（`fitFont`），表格行高按可用高度计算，列表/泳道/矩阵/卡片行高随容器收敛——保证不越界、不重叠（`validate_pptx.py` 硬拦越界与文本溢出）。**几何铁律**：① 架构节点标题/注解按实际节点高度钳制（注解不得「浮回」标题上，空间不足降级单框混排）；② 图表类目标签含在图高 `h` 内（禁画到 `y+h` 外压 so-what）；③ 多栏均分用**版心全宽**推导（`(CW-(n-1)×gap)/n`，禁用单栏宽当总宽）；④ 图例落图区底部（`bodyBottom-0.28`），禁用页面底部固定偏移；⑤ KPI 支撑指标列在 `dividerX` 右侧（禁全宽默认返回压住 hero）；⑥ 有图注时图片下界收到 `contentBottomWithNote`。Agenda：>8 条自动双列、>12 条自动分页（Agenda I/II）、长标题截断全称沉 notes（`titleMaxChars=36`）、两通道列优先一致。
 
-> 保真机制：每种子页型对应 HTML 的一种锁定版式（`components.md` §36d/§37–38b/§39–42 ↔ 页型表），坐标/字号按同一套常量映射（`layout-constants.json` 的 `pageTypes` + `modeTypeScale`）。**三模式独立比例尺**：research 密排（正文 10.5pt、h1 22pt）；architecture 与 presentation 同基但 diagram 走全幅几何。图表颜色：**9 套风格各有自己的编码色板 c1–c5**（单源 `styleDataColors` / `styleDataColorsDark`，按 `model.theme` 选择），多系列图表自动取用（`dataColors(style, theme)`）；未登记风格时回落「accent / faint / body / line」四阶单色系。**页型字段与必填约束以 `model-schema.json` 为唯一事实源**（`:array` = 非空数组、`:str` = 非空字符串），浏览器端 `validateModel` 与 `extract_model.py` 校验同一份定义。
+> 保真机制：每种子页型对应 HTML 的一种锁定版式（`components.md` §36d/§37–38b/§39–42 ↔ 页型表），坐标/字号按同一套常量映射（`layout-constants.json` 的 `pageTypes` + `modeTypeScale`）。**三模式独立比例尺**：research 密排（正文 10.5pt、h1 22pt）；architecture 与 presentation 同基但 diagram 走全幅几何。图表颜色：**12 套风格各有自己的编码色板 c1–c5**（单源 `styleDataColors` / `styleDataColorsDark`，按 `model.theme` 选择），多系列图表自动取用（`dataColors(style, theme)`）；未登记风格时回落「accent / faint / body / line」四阶单色系。**页型字段与必填约束以 `model-schema.json` 为唯一事实源**（`:array` = 非空数组、`:str` = 非空字符串），浏览器端 `validateModel` 与 `extract_model.py` 校验同一份定义。
 
 ## 页序预览（已内置三模板）
 
@@ -174,7 +175,7 @@ python scripts/validate_pptx.py "报告.pptx" --strict --model="报告.model.jso
 ## 版式与质量如何保证
 
 1. **同源**：模型从报告抽取（含一致性抽查），PPTX 内容与页面不会走样；改报告就重新抽模型。
-2. **双单源**：两通道共用 `layout-constants.json`（页面几何 `pw/ph/mx`、**12 列网格 `grid`**、**语义字阶 `typography` C0–T14**、三模式排版比例尺、页型几何、**9 风格 token × 亮暗**、**图表登记四元组 `charts.registry`**、**容器内边距 `containers`**、**锚点容差 `anchorTolerance`**、**图片准入门 `imageAdmission`**、**图片规格 `imageSpec`（版式/比例/建议尺寸/占位标签/体积上限）**、**深度模式 `deepMode`**）与 `model-schema.json`（**29 页型 DSL + chartTypes + chartDataTable 策略**）；`sync_runtime.py` 注入并校验（含页型四件套、图表登记四元组、语义字阶 role、**图片版式↔比例锁定类↔双引擎实现**四项完整性），杜绝漂移。
+2. **双单源**：两通道共用 `layout-constants.json`（页面几何 `pw/ph/mx`、**12 列网格 `grid`**、**语义字阶 `typography` C0–T14**、三模式排版比例尺、页型几何、**12 风格 token × 亮暗**、**图表登记四元组 `charts.registry`**、**容器内边距 `containers`**、**锚点容差 `anchorTolerance`**、**图片准入门 `imageAdmission`**、**图片规格 `imageSpec`（版式/比例/建议尺寸/占位标签/体积上限）**、**深度模式 `deepMode`**）与 `model-schema.json`（**29 页型 DSL + chartTypes + chartDataTable 策略**）；`sync_runtime.py` 注入并校验（含页型四件套、图表登记四元组、语义字阶 role、**图片版式↔比例锁定类↔双引擎实现**四项完整性），杜绝漂移。
 3. **同版式**：锁定版式库——HTML 组件与 PPTX 页型成对出现（`components.md` §36d/§37–38b/§39–42/§47–50 ↔ 页型表）；不允许临场发明结构（锁定版式纪律）。**新增页型四件套**：schema 条目 + 几何常量 + 渲染实现（`build_pptx.js`，唯一几何引擎）+ 样例与校验断言，缺一不可。
 4. **双硬门槛**：信息结构可编辑（原生文本框/形状/表格；图片默认 0、声明式放行）+ 视觉语义保真（页型几何同源映射）；结构重排优先于缩字号，缩字号仅限 `fontShrink` 有限下探。
 5. **硬门禁**：`validate_pptx.py --strict` 检查非法尺寸、越界元素、字体下限、未声明图片数、覆盖率、信息密度、**按类型的原生图表断言（`MODEL_CHART_COUNT`）**、**数据表落位（`MODEL_CHART_DATATABLE`）**，0/0 才交付。
@@ -199,7 +200,7 @@ python scripts/validate_pptx.py "报告.pptx" --strict --model="报告.model.jso
 | 素材图片（真实位图） | `scripts/probe_image_export.py` | build→strict 0/0 且 `pictures == 声明数`（示例矩阵零图片，真实素材路径/版式靠本探针覆盖） |
 | 素材准备（用户图片） | `scripts/prepare_images.py <图片\|目录>` | 产出 `.media` HTML 片段 + `image` 模型对象；超体积自动转相对路径；低于建议分辨率给出提示 |
 | HTML ↔ PPTX 同源 | `scripts/cross_verify.py`（python-pptx 第三方裁判） | PPTX 页数 = 页序计划、章节标题在两端按序对齐、原生图表数值与模型一致 |
-| 风格与单源（改色/改常量后） | `scripts/audit_styles.py` | 9 风格 × light/dark × WCAG 配对全达标 + engine.css ↔ layout-constants.json 双源一致 + **单源完整性**（styleAccents 覆盖 / charts 登记表自洽 / 校验预算键齐全） |
+| 风格与单源（改色/改常量后） | `scripts/audit_styles.py` | 12 风格 × light/dark × WCAG 配对全达标 + engine.css ↔ layout-constants.json 双源一致 + **单源完整性**（styleAccents 覆盖 / charts 登记表自洽 / 校验预算键齐全） |
 | 常量 / schema / 页型四件套 / 图表四元组 | `scripts/sync_runtime.py` | 注入成功 + 双端引用校验 PASS + **每个 schema 页型都有几何映射** + **charts.types ↔ registry 双向一致** + **非原生图表 dataTable 不为 off** + 语义字阶 role 存在 + 哈希摘要一致 |
 | 交付说明 | `scripts/quality_gate.py 报告.html --deliver` | 文件与体积、模式、风格、篇幅、交付格式、校验结论与引用条数**七要素齐备即过**，缺一即 FAIL——**不要手拼** |
 

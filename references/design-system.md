@@ -12,7 +12,7 @@
 配合方式（三模式独立模板）：
 1. 从 `assets/templates/{presentation|research|architecture}.html` 复制对应模式模板起步（模板自带模式密度层与专属组件）。
 2. 模板内 `__TOPPPT_ENGINE__` 标记块是公共引擎内联副本（源自 `assets/templates/engine.css`，`sync_runtime.py` 注入，禁止手改）——本文件描述的引擎 CSS 即其内容。
-3. 再从 `styles.md` 确认所选风格的 light + dark 覆盖块（模板已内嵌 9 套全量 token，换默认风格只需改 `data-style`）。
+3. 再从 `styles.md` 确认所选风格的 light + dark 覆盖块（模板已内嵌 12 套全量 token，换默认风格只需改 `data-style`）。
 4. `<html data-mode="X" data-style="Y" data-theme="light">`——模式生成时锁定，风格可实时切换。
 
 ## 1. 设计哲学（所有风格通用）
@@ -103,7 +103,7 @@
 
 **采用 MD3 的原则，但做两处克制调整**：
 1. **阴影降到 Level 1–2**——MD3 允许到 Level 5，但商务演示靠边框 + 表面色差分块更耐看。
-2. **强调色不启用动态取色（Dynamic Color）**——改用 9 套固定风格，保证品牌与场合可控。
+2. **强调色不启用动态取色（Dynamic Color）**——改用 12 套固定风格，保证品牌与场合可控。
 
 ## 1c. 页面高度模型（page-fit · 16:9 优先 · 每页高度稳定）
 
@@ -378,11 +378,11 @@ section.band{scroll-snap-align:start}   /* 配合 html 的 scroll-snap，整屏�
 
 > 强调色实底块上的文字用 `.t-on-inv`，不要写死 `#fff`。
 
-## 9b. 编码色板语义类（多系列图表 · 9 套风格各自可辨）
+## 9b. 编码色板语义类（多系列图表 · 12 套风格各自可辨）
 
 > **两套颜色，两种纪律**：
 > · **结构色**（标题 / 正文 / 边框 / 按钮 / 大面积底色）——**永远中性 + 单一强调色**，层次靠表面明度差 + 1px 边框。这是"焦点不被稀释"的保证。
-> · **编码色**（数据系列 / 图例色点 / 小段标签）——**必须可区分**，否则图读不懂。9 套风格**各有自己的 `c1–c5`**（单源 `layout-constants.json` 的 `styleDataColors` / `styleDataColorsDark`）。
+> · **编码色**（数据系列 / 图例色点 / 小段标签）——**必须可区分**，否则图读不懂。12 套风格**各有自己的 `c1–c5`**（单源 `layout-constants.json` 的 `styleDataColors` / `styleDataColorsDark`）。
 
 ```css
 /* 无 data-style 时的兜底（回落中性，不串色） */
@@ -390,7 +390,7 @@ section.band{scroll-snap-align:start}   /* 配合 html 的 scroll-snap，整屏�
   --c1:var(--accent); --c2:var(--surface-3); --c3:var(--border);
   --c4:var(--accent-soft-2); --c5:var(--text-3);
 }
-/* 9 套风格各自的编码色板（由 sync_runtime.py 与 layout-constants.json 保持同源；audit_styles.py 逐值校验） */
+/* 12 套风格各自的编码色板（由 sync_runtime.py 与 layout-constants.json 保持同源；audit_styles.py 逐值校验） */
 html[data-style="mckinsey"]{--c1:#003a70;--c2:#2826bb;--c3:#21a18e;--c4:#b76848;--c5:#99903d}
 html[data-style="mckinsey"][data-theme="dark"]{--c1:#7fb2e5;--c2:#6f6bdb;--c3:#8ce3d8;--c4:#d1a694;--c5:#cbc586}
 /* …其余 8 套同构，见 assets/templates/engine.css… */

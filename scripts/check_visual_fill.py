@@ -6,7 +6,7 @@
 本门禁看渲染后的像素：PPTX → LibreOffice → PDF → PNG，在版心正文区（标题带以下、页脚以上）
 划 24×12 栅格，统计有墨水的格子。
 
-判定（内容页；封面 / 大纲 / 收尾页豁免）：
+判定（内容页；封面 / 大纲 / 章节扉页 / 收尾页豁免）：
   - VISUAL_FILL        有墨格占比 < fillMin（默认 0.20）
   - VISUAL_EMPTY_BLOCK 最大连续空白矩形 ≥ emptyMax（默认 0.30 正文区）
   - VISUAL_OFF_CENTER  墨水重心偏离正文区中心 > centerMax（默认 0.20，按宽/高归一）
@@ -101,6 +101,11 @@ def structural_pages(model: dict | None, n: int) -> set[int]:
     expected = 1 + (1 if model.get("agenda") else 0) + len(model.get("sections") or []) + 1
     for k in range(expected, n):  # 多出来的尾页（refs 等）
         s.add(k)
+    # 章节扉页（chapter）是结构页：大号章节号 + 留白是设计本意，与封面同口径豁免
+    off = 1 + (1 if model.get("agenda") else 0)
+    for i, sec in enumerate(model.get("sections") or []):
+        if isinstance(sec, dict) and sec.get("type") == "chapter":
+            s.add(off + i + 1)
     return s
 
 

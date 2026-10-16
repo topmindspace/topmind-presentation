@@ -147,7 +147,7 @@ REQUIRED = [
     'scripts/lib_layout_regions.js', 'scripts/extract_snippet.py', 'scripts/quality_gate.py',
     'scripts/icon_lib.js', 'scripts/icon_raster.js', 'scripts/build_icon_assets.js',
     'scripts/checks_html.py', 'scripts/section-file-map.json',
-    'scripts/measure_height.py', 'scripts/audit_css.py', 'scripts/negative_tests.py',
+    'scripts/measure_height.py', 'scripts/lib_chart_svg.py', 'scripts/check_rhythm.py', 'scripts/audit_css.py', 'scripts/negative_tests.py',
     'references/components-atoms.md', 'references/layouts-research.md',
     'references/layouts-architecture.md', 'references/layouts-combo.md',
     'references/charts-basic.md', 'references/charts-extended.md', 'references/charts-discipline.md',

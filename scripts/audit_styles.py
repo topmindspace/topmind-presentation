@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """topmind-presentation · 风格与单源质量审计工具：
-① WCAG 对比度：9 风格 × light/dark 的关键 token 配对（MD3/WCAG 阈值）
+① WCAG 对比度：12 风格 × light/dark 的关键 token 配对（MD3/WCAG 阈值）
 ② 双源一致性：engine.css（HTML 侧 token）vs layout-constants.json（PPTX 侧 token）
 ③ 单源完整性：styleAccents 覆盖各风格 light/dark 强调色；charts.minSize ⊆ charts.types；
    图表最小尺寸键名合法（pxWidthMin / vbHeightMin）
@@ -27,7 +27,7 @@ def parse_block(block):
 
 def parse_css():
     """返回 {style: {'light': toks, 'dark': toks}}。
-    9 套风格均有显式 html[data-style="X"]{...}（light）与
+    12 套风格均有显式 html[data-style="X"]{...}（light）与
     html[data-style="X"][data-theme="dark"]{...}（dark）两块；:root 仅作无 data-style 时的默认值。"""
     styles = {}
     pat = re.compile(r'html\[data-style="([\w-]+)"\](?:\[data-theme="dark"\])?\{([\s\S]*?)\}')
@@ -137,7 +137,7 @@ def audit_consistency(styles, lc_styles, side='light', lc_key='styles'):
 
 
 def audit_data_palette(styles):
-    """编码色板审计：9 套风格 × light/dark，各 5 色。
+    """编码色板审计：12 套风格 × light/dark，各 5 色。
     ① 覆盖完整（styleDataColors / styleDataColorsDark 与 styles / stylesDark 键集一致）
     ② 每套 5 色、与 engine.css 覆盖块逐值一致（双源）
     ③ 每个色对所在主题 bg 的对比度 ≥ 3.0（图形元素可辨下限）
@@ -324,7 +324,7 @@ else:
     print(f'  全部一致（强调色表 {n_acc} 套 · 图表登记 {n_charts} 种 · 校验预算 {len([k for k in (LC.get("checkBudgets") or {}) if not k.startswith("$")])} 模式）')
 
 dp_fails = audit_data_palette(css_styles)
-print('\n── 编码色板（9 风格 × light/dark × c1–c5 · 双源 + 对比度 + 可区分性）──')
+print('\n── 编码色板（12 风格 × light/dark × c1–c5 · 双源 + 对比度 + 可区分性）──')
 if dp_fails:
     for f in dp_fails:
         print('  [DIFF]', f)

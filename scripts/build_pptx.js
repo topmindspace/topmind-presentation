@@ -287,6 +287,8 @@ const FS_POLICY = (function () {
   }
 })();
 const FONT_LADDER = FS_POLICY.ladder;
+/* 大字档（原文锁定的短清单 / 陈述卡）：在常规阶梯上方加 24–16pt，供字号向上求解 */
+const BIG_LADDER = [24, 22, 20, 18, 17, 16].concat(FS_POLICY.ladder);
 /* 弹性文本单源（containers.adaptiveText · 0.2.0）：长标题/长列表/长表格单元格的降级规则。
    调用处只读 AT_* 与下列 helper，禁止手写字号/行距/阈值 magic number。 */
 const AT = (LC.containers && LC.containers.adaptiveText) || {};
@@ -328,6 +330,12 @@ function snapFont(pt, ladder, floor) {
     if (d < bd) { bd = d; best = lad[i]; }
   }
   return best;
+}
+/* 演讲者备注：模型自带的 speakerNotes 优先；原文锁定（美化路由）时只写原稿备注，不追加生成的口径说明 */
+function mergeNotes(own, generated) {
+  const g = (generated || '').trim();
+  if (own == null || String(own).trim() === '') return g;
+  return CONTENT.contentLocked || !g ? String(own) : String(own) + '\n' + g;
 }
 function fitFont(items, widthIn, availIn, opts) {
   opts = opts || {};
@@ -677,8 +685,18 @@ function addImageEl(s, src, x, y, w, h, radius, opts) {
       return;
     }
     o.path = resolved;
+    /* contain：pptxgenjs 的 sizing.contain 实际会裁切——按图片真实宽高自行等比缩放并居中，不裁一像素 */
+    if (fit === 'contain') {
+      const dim = imagePixelSize(resolved);
+      if (dim) {
+        const k = Math.min(w / dim[0], h / dim[1]);
+        o.w = dim[0] * k; o.h = dim[1] * k; o.x = x + (w - o.w) / 2; o.y = y + (h - o.h) / 2;
+        delete o.sizing;
+      }
+    }
   }
-  if (radius) o.rounding = true;
+  /* pptxgenjs 的 rounding 是椭圆遮罩，会切掉图片四角内容——等比放入（contain）时不加 */
+  if (radius && fit !== 'contain') o.rounding = true;
   try { s.addImage(o); }
   catch (e) {
     delete o.rounding;
@@ -689,6 +707,23 @@ function addImageEl(s, src, x, y, w, h, radius, opts) {
       addImageEl(s, '', x, y, w, h, radius, { placeholder: true, layout: opts.layout, multi: opts.multi });
     }
   }
+}
+/* 读 PNG / JPEG 像素尺寸（只读文件头，不引入依赖）；读不出返回 null */
+function imagePixelSize(file) {
+  try {
+    const b = fs.readFileSync(file);
+    if (b.length > 24 && b.readUInt32BE(0) === 0x89504e47) return [b.readUInt32BE(16), b.readUInt32BE(20)];
+    if (b[0] === 0xff && b[1] === 0xd8) {
+      let i = 2;
+      while (i < b.length - 9) {
+        if (b[i] !== 0xff) { i++; continue; }
+        const m = b[i + 1], len = b.readUInt16BE(i + 2);
+        if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) return [b.readUInt16BE(i + 7), b.readUInt16BE(i + 5)];
+        i += 2 + len;
+      }
+    }
+  } catch (e) { /* ignore */ }
+  return null;
 }
 /* 相对路径解析：pptxgenjs 的 image.path 按 process.cwd() 解析，跨目录调用会失败。
    这里以**模型文件所在目录**为锚（模型与报告同目录，报告里的相对路径即相对该目录），
@@ -2004,7 +2039,9 @@ function addTable(s, tbl, x, y, w, availH, opts) {
   const rowsIn = tbl.rows || [];
   const head = tbl.head || [];
   const n = rowsIn.length + 1;
-  const maxRowH = opts.maxRowH != null ? opts.maxRowH : PT.table.rowH;
+  /* 美化路由短表（≤6 行正文）：行高与字号放大，表格撑满主体区而不是缩在页面上沿 */
+  const roomy = (!!CONTENT.contentLocked || !!opts.roomy) && rowsIn.length <= 6 && opts.maxRowH == null;
+  const maxRowH = opts.maxRowH != null ? opts.maxRowH : (roomy ? 0.72 : PT.table.rowH);
   const minRowH = opts.minRowH != null ? opts.minRowH : PT.table.rowHMin;
   const headRowH = opts.headRowH != null ? opts.headRowH : (PT.table.headRowH || minRowH);
   /* 行数超过容量时优先压行高到 hardFloor，仍放不下则整体缩放到 availH（禁溢出） */
@@ -2019,9 +2056,9 @@ function addTable(s, tbl, x, y, w, availH, opts) {
   }
   /* 行多则同步收字号（research 密排允许更小；句子单元格仍走语义字号门禁） */
   const dense = rowH < 0.42;
-  const headSz = sz(dense ? 11 : Math.min(13, AT_TABLE.headMax || 12));
-  const bodySz = sz(dense ? 10 : Math.min(12.5, AT_TABLE.cellMax || 13));
-  const hRowH = Math.min(headRowH, Math.max(hardFloor, rowH * 1.15));
+  const headSz = sz(roomy ? 15 : dense ? 11 : Math.min(13, AT_TABLE.headMax || 12));
+  const bodySz = sz(roomy ? 15 : dense ? 10 : Math.min(12.5, AT_TABLE.cellMax || 13));
+  const hRowH = roomy ? Math.min(0.62, rowH) : Math.min(headRowH, Math.max(hardFloor, rowH * 1.15));
   /* 内容高度预估：逐格用 estTextH 估算，超出行高则全表收字号 ——
      禁依赖 fit:'shrink' 或渲染引擎自动撑高（PowerPoint/LibreOffice 会按内容增高行，压住脚注） */
   const ncolsT = Math.max(head.length, 1, ...rowsIn.map(r => r.length));
@@ -2086,7 +2123,8 @@ function addTable(s, tbl, x, y, w, availH, opts) {
     fontSize: tSize, bold: true, color: STYLE.onAccent });
   s.addText(CONTENT.subtitle || '', { x: MX, y: C.subtitleY, w: CW - 1, h: C.subtitleH,
     fontFace: STYLE.font, fontSize: sz(18), color: STYLE.soft });
-  s.addNotes([CONTENT.subtitle, CONTENT.meta].filter(Boolean).join('\n'));
+  const _cn = mergeNotes(CONTENT.coverNotes, [CONTENT.subtitle, CONTENT.meta].filter(Boolean).join('\n'));
+  if (_cn) s.addNotes(_cn);
 })();
 
 /* Agenda（architecture 极简形态可省略 agenda → 不产出大纲页；
@@ -2137,7 +2175,8 @@ function addTable(s, tbl, x, y, w, availH, opts) {
       ], { x: x + 1.0, y: y + 0.03, w: titleBoxW, h: rowH - 0.08, fontFace: STYLE.font,
         valign: 'top', lineSpacing: tSize + 5 });
     });
-    if (notes.length) s.addNotes(notes.join('\n'));
+    const _an = mergeNotes(pi === 0 ? CONTENT.agendaNotes : null, notes.join('\n'));
+    if (_an) s.addNotes(_an);
   });
 })();
 
@@ -2425,10 +2464,16 @@ CONTENT.sections.forEach((sec) => {
       const hb = holeR * 2;
       let total = 0; dcn.values.forEach(v => { total += Math.max(0, v); });
       const totalStr = (Math.round(total * 10) / 10) + (dcn.unit || '');
-      if (dcn.centerTotal !== false) s.addText(totalStr, { x: d.centerX - holeR, y: dcy - 0.42, w: hb, h: 0.5, align: 'center',
+      /* 单位是 % 且合计≈100：中心写「100%」没有信息量 → 中心标签升为主文字；图例不再重复一列占比 */
+      const pctIsUnit = (dcn.unit || '') === '%' && Math.abs(total - 100) < 0.5 && dcn.centerTotal !== true;
+      if (pctIsUnit && dcn.centerLabel) {
+        s.addText(String(dcn.centerLabel), { x: d.centerX - holeR, y: dcy - 0.3, w: hb, h: 0.6, align: 'center',
+          fontFace: STYLE.fontDisplay, fontSize: sz(15), bold: true, color: STYLE.ink, valign: 'middle', fit: 'shrink' });
+      }
+      if (dcn.centerTotal !== false && !pctIsUnit) s.addText(totalStr, { x: d.centerX - holeR, y: dcy - 0.42, w: hb, h: 0.5, align: 'center',
         fontFace: STYLE.fontDisplay, fontSize: sz(20), bold: true, color: STYLE.ink, valign: 'middle' });
       const _cl = dcn.centerLabel != null ? dcn.centerLabel : '合计';
-      if (_cl) s.addText(_cl, { x: d.centerX - holeR, y: dcy + 0.08, w: hb, h: 0.35, align: 'center',
+      if (_cl && !pctIsUnit) s.addText(_cl, { x: d.centerX - holeR, y: dcy + 0.08, w: hb, h: 0.35, align: 'center',
         fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.faint, valign: 'middle' });
       const n = Math.max(1, dcn.labels.length);
       const maxLegH = Math.max(1.2, bodyBottom - (d.centerY - 1.7));
@@ -2458,11 +2503,19 @@ CONTENT.sections.forEach((sec) => {
         const y = legY0 + i * (legRowH + legGap);
         s.addShape('ellipse', { x: d.legendX, y: y + legRowH / 2 - 0.08, w: 0.16, h: 0.16,
           fill: { color: dcols[i % dcols.length] }, line: { type: 'none' } });
-        s.addText(lb, { x: d.legendX + 0.3, y, w: d.legendLabelW, h: legRowH, valign: 'middle',
+        s.addText(lb, { x: d.legendX + 0.3, y, w: pctIsUnit ? 3.2 : d.legendLabelW, h: legRowH, valign: 'middle',
           fontFace: STYLE.font, fontSize: sz(12), bold: true, color: STYLE.ink });
-        s.addText(String(v) + (dcn.unit || ''), { x: d.legendX + 3.8, y, w: d.legendValW, h: legRowH, align: 'right',
+        s.addText(String(v) + (dcn.unit || ''), { x: pctIsUnit ? d.legendPctX : d.legendX + 3.8, y,
+          w: pctIsUnit ? d.legendPctW : d.legendValW, h: legRowH, align: 'right',
           valign: 'middle', fontFace: STYLE.font, fontSize: sz(12), bold: true, color: STYLE.body });
-        s.addText((Math.round(v / sum2 * 1000) / 10) + '%', { x: d.legendPctX, y, w: d.legendPctW, h: legRowH,
+        if (pctIsUnit) {
+          /* 占比本身就是数值：中间放一条细占比条代替重复的百分比列 */
+          const bx = d.legendX + 3.6, bw = d.legendPctX - bx - 0.1, bh = 0.1, by = y + legRowH / 2 - bh / 2;
+          s.addShape('rect', { x: bx, y: by, w: bw, h: bh, fill: { color: STYLE.line }, line: { type: 'none' } });
+          s.addShape('rect', { x: bx, y: by, w: Math.max(0.02, bw * Math.max(0, v) / 100), h: bh,
+            fill: { color: dcols[i % dcols.length] }, line: { type: 'none' } });
+        }
+        if (!pctIsUnit) s.addText((Math.round(v / sum2 * 1000) / 10) + '%', { x: d.legendPctX, y, w: d.legendPctW, h: legRowH,
           align: 'right', valign: 'middle', fontFace: STYLE.font, fontSize: sz(10.5), color: STYLE.faint });
       });
       const dpY0 = legY0 + n * (legRowH + legGap) + 0.1;
@@ -2661,7 +2714,11 @@ CONTENT.sections.forEach((sec) => {
     const treg = REGIONS.regionOf('table', 'primary', { bottom: bodyBottom }) ||
       { x: MX, y: CONTENT_TOP, w: CW, h: bodyBottom - CONTENT_TOP };
     const hlc = sec.variant === 'highlight' ? Number(sec.highlightCol != null ? sec.highlightCol : (sec.table || {}).highlightCol) : null;
-    addTable(s, sec.table, treg.x, treg.y, treg.w, treg.h, { highlightCol: isFinite(hlc) ? hlc : null });
+    /* 美化路由：表格可用高度放到主体区底部（短表行高放大，见 addTable roomy） */
+    /* 演示模式整页短表同样放大（M5 评审：5 行表只占上半页） */
+    const tRoomy = MODE_NAME === 'presentation' && (sec.table.rows || []).length <= 6;
+    const tAvail = (CONTENT.contentLocked || tRoomy) ? Math.max(treg.h, bodyBottom - treg.y - 0.2) : treg.h;
+    addTable(s, sec.table, treg.x, treg.y, treg.w, tAvail, { highlightCol: isFinite(hlc) ? hlc : null, roomy: tRoomy });
   } else if (type === 'timeline') {
     const T = PT.timeline;
     const treg = REGIONS.regionOf('timeline', 'primary') ||
@@ -2904,9 +2961,15 @@ CONTENT.sections.forEach((sec) => {
     const ptsBoxH = Math.max(0.4, gh - cdC.titleH - 0.34);
     /* 陈述卡（全部卡无标题，正文即原稿整句——美化路由常见）：字号向上求解到 h2 档、去掉项目符号、垂直居中 */
     const statement = !!CONTENT.contentLocked && cds.length > 0 && cds.every(cd => !String(cd.title || '').trim());
-    const ptsFzB = cds.length ? Math.min(...cds.map(cd =>
-      fitFont((cd.points || []).map(cardPtText), gw - 0.36, ptsBoxH,
-        { max: statement ? (MTS[MODE_NAME] || MTS.presentation).h2 : 14, lineFactor: 1.5, gapFactor: 0 }))) : 12;
+    /* 陈述卡用整张卡作文本区（不留标题行、不放图标），字号上限放到 22pt，全卡统一取最小可容纳档 */
+    const STMT_PAD = 0.28;
+    /* 美化路由的有标题卡：标题与正文都上调一档，短内容不再缩在卡片左上角 */
+    const lockedCards = !statement && !!CONTENT.contentLocked;
+    const ptsFzB = cds.length ? Math.min(...cds.map((cd, i) => statement
+      ? fitFont((cd.points || []).map(String), (isBento && i === 0 ? 2 * gw + cdC.gap : gw) - 2 * STMT_PAD, gh - 2 * STMT_PAD,
+        { max: 22, lineFactor: 1.45, gapFactor: 0.3, ladder: BIG_LADDER })
+      : fitFont((cd.points || []).map(cardPtText), gw - 0.36, ptsBoxH - (lockedCards ? 0.2 : 0),
+        lockedCards ? { max: 18, lineFactor: 1.5, gapFactor: 0, ladder: BIG_LADDER } : { max: 14, lineFactor: 1.5, gapFactor: 0 }))) : 12;
     const ptsFz = sz(ptsFzB);
     cds.forEach((cd, i) => {
       let col = i % c, row = Math.floor(i / c), span = 1;
@@ -2922,18 +2985,27 @@ CONTENT.sections.forEach((sec) => {
       const x = creg.x + col * (gw + cdC.gap), y = creg.y + row * (gh + cdC.gap);
       s.addShape('roundRect', { x, y, w: cw, h: gh, rectRadius: 0.08,
         fill: { color: STYLE.surface }, line: { color: STYLE.line, width: 0.75 } });
+      if (statement) {
+        const lines = (cd.points || []).map(t => String(cardPtText(t)).replace(/^· /, ''));
+        s.addText(lines.map((t, li) => ({ text: t + (li < lines.length - 1 ? '\n' : ''),
+            options: { fontSize: li === 0 ? ptsFz : sz(Math.max(12, ptsFzB - 4)), color: li === 0 ? STYLE.ink : STYLE.body,
+              bold: li === 0, fontFace: STYLE.font, breakLine: li < lines.length - 1 } })),
+          { x: x + STMT_PAD, y: y + STMT_PAD, w: cw - 2 * STMT_PAD, h: gh - 2 * STMT_PAD,
+            fontFace: STYLE.font, valign: 'middle', lineSpacing: ptsFz * 1.45 });
+        return;
+      }
       /* 卡片头路标：真导出语义图标（SVG→PNG），与 HTML .card__ico 同源；无资产时回落 accent 方块 */
       const ico = 0.18;
       const icoName = cd.icon || ICON_LIB.pickIconName(cd.title || '', i);
       addIcon(s, icoName, x + 0.18, y + 0.2, ico, STYLE.accent);
       s.addText(cd.title || '', { x: x + 0.18 + ico + 0.1, y: y + 0.14, w: cw - 0.36 - ico - 0.1, h: cdC.titleH, fontFace: STYLE.font,
-        fontSize: sz(15), bold: true, color: STYLE.ink, fit: 'shrink' });
+        fontSize: sz(lockedCards ? 18 : 15), bold: true, color: STYLE.ink, fit: 'shrink' });
       /* points 兼容：[[k,v]…] | [str…] | [{t,d}…]（scaffold v9 契约 {title, points:[[k,v]]}） */
       const ptLines = (cd.points || []).map(cardPtText).map(t => statement ? t.replace(/^· /, '') : t);
       s.addText(ptLines.map((t, li) => ({ text: t + '\n',
           options: { fontSize: ptsFz, color: statement && li === 0 ? STYLE.ink : STYLE.body, bold: statement && li === 0,
             fontFace: STYLE.font, breakLine: true } })),
-        { x: x + 0.18, y: y + 0.14 + cdC.titleH + 0.06, w: cw - 0.36, h: ptsBoxH,
+        { x: x + 0.18, y: y + 0.14 + cdC.titleH + (lockedCards ? 0.2 : 0.06), w: cw - 0.36, h: ptsBoxH - (lockedCards ? 0.14 : 0),
           fontFace: STYLE.font, valign: statement ? 'middle' : 'top', lineSpacing: ptsFz * 1.5 });
     });
   } else if (type === 'split') {
@@ -2952,15 +3024,17 @@ CONTENT.sections.forEach((sec) => {
       const pts = ((el && el.points) || []).map(pointKV);
       const ly0 = bodyY, availP = bodyBottom - ly0;
       const rowH = fitRowH(availP, pts.length, SP.rowH, 0.3);
-      const fzB = fitFont(pts.map(p => (p[0] || '') + (p[1] || '')), w - 0.4, availP, { max: 14, gapFactor: 0.6 });
+      const big = !!CONTENT.contentLocked && pts.length <= 4;
+      const fzB = fitFont(pts.map(p => (p[0] || '') + (p[1] || '')), w - 0.4, availP,
+        { max: big ? 18 : 14, gapFactor: 0.6, ladder: big ? BIG_LADDER : undefined });
       const fz = sz(fzB), fzSm = sz(snapFont(fzB - 1));
       pts.forEach((pt, i) => {
         const ly = ly0 + i * rowH;
         s.addShape('rect', { x, y: ly + rowH / 2 - 0.06, w: 0.12, h: 0.12, fill: { color: STYLE.accent }, line: { type: 'none' } });
         s.addText([
-          { text: pt[0] + '　', options: { fontSize: fz, bold: true, color: STYLE.ink } },
-          { text: pt[1], options: { fontSize: fzSm, color: STYLE.body } },
-        ], { x: x + 0.28, y: ly, w: w - 0.4, h: rowH - 0.04, fontFace: STYLE.font, valign: 'top' });
+          { text: pt[0] ? pt[0] + (pt[1] ? '　' : '') : '', options: { fontSize: fz, bold: true, color: STYLE.ink } },
+          { text: pt[1], options: { fontSize: pt[0] ? fzSm : fz, color: pt[0] ? STYLE.body : STYLE.ink } },
+        ], { x: x + 0.28, y: ly, w: w - 0.4, h: rowH - 0.04, fontFace: STYLE.font, valign: big ? 'middle' : 'top' });
       });
     };
     if (lt === 'table') {
@@ -3154,17 +3228,20 @@ CONTENT.sections.forEach((sec) => {
     /* 行高按可用高度均分（上限 1.25in），条目之间用细分隔线——少条目时不再挤在顶部 */
     const rowH = Math.max(0.3, Math.min(1.25, avail / Math.max(1, pts.length)));
     const _lo = listFitOpts(pts.length);
+    /* 原文锁定的短清单（≤4 条）：字号放到 22pt 上限，行内垂直居中，撑满版心而不是缩在顶部 */
+    const bigList = !!CONTENT.contentLocked && pts.length <= 4 && !hasMetrics;
     const fzB = fitFont(pts.map(p => (p[0] || '') + (p[1] || '')), textW - 0.32, avail,
-      { max: Math.min(15, _lo.max), gapFactor: _lo.gapFactor, lineFactor: _lo.lineFactor });
+      { max: bigList ? 22 : Math.min(15, _lo.max), gapFactor: _lo.gapFactor, lineFactor: _lo.lineFactor, ladder: bigList ? BIG_LADDER : undefined });
     const fz = sz(fzB), fzSm = sz(snapFont(fzB - 1));
     pts.forEach((p, i) => {
       const y = bodyY + i * rowH;
-      s.addShape('rect', { x: MX, y: y + 0.16, w: P.markSize, h: P.markSize,
+      s.addShape('rect', { x: MX, y: bigList ? y + (rowH - 0.1) / 2 - P.markSize / 2 : y + 0.16, w: P.markSize, h: P.markSize,
         fill: { color: STYLE.accent }, line: { type: 'none' } });
       s.addText([
-        { text: p[0] + '　', options: { fontSize: fz, bold: true, color: STYLE.ink } },
-        { text: p[1], options: { fontSize: fzSm, color: STYLE.body } },
-      ], { x: MX + 0.32, y, w: textW, h: rowH - 0.1, fontFace: STYLE.font, valign: 'top' });
+        /* 纯字符串要点（pointKV 落在 p[1]）按主句排：主字号 + 墨色，不再前缀全角空格 */
+        { text: p[0] ? p[0] + (p[1] ? '　' : '') : '', options: { fontSize: fz, bold: true, color: STYLE.ink } },
+        { text: p[1], options: { fontSize: p[0] ? fzSm : fz, color: p[0] ? STYLE.body : STYLE.ink, bold: !p[0] && bigList } },
+      ], { x: MX + 0.32, y, w: textW, h: rowH - 0.1, fontFace: STYLE.font, valign: bigList ? 'middle' : 'top' });
       if (i < pts.length - 1 && rowH >= 0.6)
         s.addShape('rect', { x: MX, y: y + rowH - 0.06, w: textW + 0.32, h: 0.01,
           fill: { color: STYLE.line }, line: { type: 'none' } });
@@ -3232,7 +3309,8 @@ CONTENT.sections.forEach((sec) => {
   if (sec.image && Array.isArray(sec.image.items) && sec.image.items.length) {
     _notes.push('图片清单：' + sec.image.items.map((it, i) => (i + 1) + '.' + ((it && (it.caption || it.alt)) || '（待补说明）')).join('；'));
   }
-  if (_notes.length) s.addNotes(_notes.join('\n'));
+  const _sn = mergeNotes(/（续）$/.test(String(sec.title || '')) ? null : sec.speakerNotes, _notes.join('\n'));
+  if (_sn) s.addNotes(_sn);
 });
 
 /* 收尾 */
@@ -3253,6 +3331,15 @@ CONTENT.sections.forEach((sec) => {
   const cw3 = (CW - (n - 1) * 0.3) / n;
   pts.forEach((p, i) => {
     const x = MX + i * (cw3 + 0.3);
+    if (!p[1]) {
+      /* 只有主句（美化原文常见「欢迎批评指正」）：卡片贴合文字高度，主句放大居中，不留半张空卡 */
+      const hh = 1.05;
+      s.addShape('roundRect', { x, y: C.pointsY - 0.2, w: cw3, h: hh, rectRadius: 0.09,
+        fill: { color: STYLE.surface }, line: { color: STYLE.line, width: 0.75 } });
+      s.addText(p[0], { x: x + 0.28, y: C.pointsY - 0.2, w: cw3 - 0.56, h: hh, fontFace: STYLE.font,
+        fontSize: sz(String(p[0]).length > 28 ? 17 : 20), bold: true, color: STYLE.accent, valign: 'middle' });
+      return;
+    }
     s.addShape('roundRect', { x, y: C.pointsY - 0.2, w: cw3, h: C.pointTitleH + C.pointBodyH + 0.32,
       rectRadius: 0.09, fill: { color: STYLE.surface }, line: { color: STYLE.line, width: 0.75 } });
     s.addText(p[0], { x: x + 0.18, y: C.pointsY, w: cw3 - 0.36, h: C.pointTitleH, fontFace: STYLE.font,
@@ -3260,7 +3347,8 @@ CONTENT.sections.forEach((sec) => {
     s.addText(p[1], { x: x + 0.18, y: C.pointsY + C.pointTitleH, w: cw3 - 0.36, h: C.pointBodyH, fontFace: STYLE.font,
       fontSize: sz(12.5), color: STYLE.body });
   });
-  if (pts.length) s.addNotes(pts.map(p => '· ' + p[0] + (p[1] ? '：' + p[1] : '')).join('\n'));
+  const _cln = mergeNotes(CONTENT.closing.speakerNotes, pts.map(p => '· ' + p[0] + (p[1] ? '：' + p[1] : '')).join('\n'));
+  if (_cln) s.addNotes(_cln);
 })();
 
 /* 页码 */

@@ -43,3 +43,10 @@ jobs:
           python3 -m pip install --quiet pillow numpy
       - name: Skill gates (validator + audits + negatives + PPTX smoke)
         run: bash scripts/ci_skill_gates.sh --with-pptx
+      - name: Upload pixel diffs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel-diff
+          path: tests/pixel/_diff/
+          if-no-files-found: ignore

@@ -1816,7 +1816,8 @@ def validate_pptx(
 
     # 美化路由（model.contentLocked）：原稿文字锁定，「信息量偏少」是原稿属性而非排版缺陷——降为说明，不计入 strict
     if model and model.get("contentLocked"):
-        locked = {"LOW_TEXT_DENSITY", "LOW_CONTENT_DENSITY"}
+        # 备注只写原稿原文（不追加生成的数据表）；往返保真由 beautify.verify 逐字核对，比本探针更严
+        locked = {"LOW_TEXT_DENSITY", "LOW_CONTENT_DENSITY", "MODEL_CHART_NOTES_MISSING", "MODEL_ROUNDTRIP_CONTENT_MISSING"}
         report.setdefault("info", []).extend(w for w in report["warnings"] if w.get("code") in locked)
         report["warnings"] = [w for w in report["warnings"] if w.get("code") not in locked]
 

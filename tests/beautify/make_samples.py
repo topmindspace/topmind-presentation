@@ -108,6 +108,12 @@ def _sketch_png():
     return buf
 
 
+def notes(p, by_index):
+    """给指定页写演讲者备注（页号从 1 起），用来验证「备注原样写回新稿」。"""
+    for i, t in by_index.items():
+        p.slides[i - 1].notes_slide.notes_text_frame.text = t
+
+
 def lecture():
     p = deck()
     cover(p, '数据可视化入门', '第 3 讲：选对图表，讲清一个结论', '主讲：信息设计教研组　2026 年秋季')
@@ -132,6 +138,7 @@ def lecture():
         '饼图切成十几块，谁也看不清', '纵轴不从 0 开始，夸大差异', '一张图塞五种颜色',
         '用 3D 效果装饰数据'], size=26, color=RED)
     bullets(p, '谢谢！', ['课后作业：用柱状图重画一张你见过的糟糕图表'], size=20)
+    notes(p, {3: '先请同学们猜：表格和柱状图，哪个读得更快？', 6: '问卷于第 2 讲课后发放，回收 125 份。'})
     p.save(os.path.join(OUT, 'lecture-dataviz.pptx'))
 
 
@@ -152,6 +159,7 @@ def business():
     bullets(p, '下一步工作', ['十月底前完成安徽区域渠道复盘', '回款周期压回 45 天以内', '线上客服增配 6 人'],
             size=22, color=GREEN)
     bullets(p, '谢谢', ['欢迎批评指正'], size=24)
+    notes(p, {1: '开场 30 秒，先报总数。', 4: '9 月含国庆前备货，环比偏高。', 9: '会后发送完整数据表。'})
     p.save(os.path.join(OUT, 'business-q3.pptx'))
 
 
@@ -174,6 +182,7 @@ def proposal():
     chart(p, '投入预算（万元）', XL_CHART_TYPE.BAR_CLUSTERED, ['软件平台', '硬件设备', '实施服务', '培训运营'],
           [('预算', (380, 120, 210, 90))], ['合计 800 万元', '软件平台占比最高'])
     bullets(p, '谢谢', ['请各位领导审议'], size=24)
+    notes(p, {5: '三层之间通过统一接口对接，现有工单系统不替换。'})
     p.save(os.path.join(OUT, 'proposal-callcenter.pptx'))
 
 

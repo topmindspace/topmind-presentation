@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write   # npm provenance（由 GitHub OIDC 签发来源证明）
 
 concurrency:
   group: release-${{ github.ref }}
@@ -102,7 +103,7 @@ jobs:
           echo "Publishing ${PKG}@${VERSION} ..."
           set +e
           PUBLISH_LOG="$(mktemp)"
-          npm publish --access public >"$PUBLISH_LOG" 2>&1
+          npm publish --access public --provenance >"$PUBLISH_LOG" 2>&1
           rc=$?
           set -e
           cat "$PUBLISH_LOG"

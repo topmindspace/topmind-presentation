@@ -361,12 +361,18 @@ def donut(ch, skin=None, w=W, h=H, pie=False):
         body.append(f'<path d="{d}" class="f-c{i % 5 + 1}" stroke="var(--surface)" stroke-width="2">'
                     f'<title>{esc(labels[i] if i < len(labels) else "")} {num(v)}</title></path>')
         a0 = a1
+    # 单位是 % 且合计≈100：中心「100」没有信息量 → 中心标签升为主文字，图例不重复占比
+    pct_unit = (ch.get('unit') or '') == '%' and abs(total - 100) < 0.5 and ch.get('centerTotal') is not True
     if ri:
-        if ch.get('centerTotal', True) is not False:   # 美化路由：合计是派生数，原稿没有就不显示
-            body.append(_txt(cx, cy + 4, num(total), 'f-txt', 34, weight=700))
-        _cl = ch.get('centerLabel', '合计')   # 显式给空串 = 不加中心标签（美化路由不补字）
-        if _cl:
-            body.append(_txt(cx, cy + 30, _cl, 'f-txt3', 13))
+        if pct_unit:
+            if ch.get('centerLabel'):
+                body.append(_txt(cx, cy + 6, ch['centerLabel'], 'f-txt', 18, weight=700))
+        else:
+            if ch.get('centerTotal', True) is not False:   # 美化路由：合计是派生数，原稿没有就不显示
+                body.append(_txt(cx, cy + 4, num(total), 'f-txt', 34, weight=700))
+            _cl = ch.get('centerLabel', '合计')   # 显式给空串 = 不加中心标签（美化路由不补字）
+            if _cl:
+                body.append(_txt(cx, cy + 30, _cl, 'f-txt3', 13))
     lx = cx + r + 60
     gap = min(52, (h - 40) / max(1, len(values)))
     y = cy - gap * (len(values) - 1) / 2
@@ -374,7 +380,7 @@ def donut(ch, skin=None, w=W, h=H, pie=False):
         yy = y + i * gap
         body.append(f'<rect x="{_f(lx)}" y="{_f(yy - 11)}" width="14" height="14" rx="4" class="f-c{i % 5 + 1}"/>')
         body.append(_txt(lx + 24, yy + 2, lb, 'f-txt', 15, 'start', 600))
-        body.append(_txt(w - 30, yy + 2, f'{num(v)}{ch.get("unit") or ""} · {v / total * 100:.0f}%', 'f-txt2', 14, 'end'))
+        body.append(_txt(w - 30, yy + 2, (f'{num(v)}%' if pct_unit else f'{num(v)}{ch.get("unit") or ""} · {v / total * 100:.0f}%'), 'f-txt2', 14, 'end'))
         body.append(f'<line x1="{_f(lx)}" y1="{_f(yy + gap / 2 - 2)}" x2="{w - 30}" y2="{_f(yy + gap / 2 - 2)}" class="s-bds"/>')
     return _svg('pie' if pie else 'donut', body, w, h)
 

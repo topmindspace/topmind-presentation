@@ -19,7 +19,7 @@
       "theme",
       "subtitle",
       "meta",
-      "agenda:array", "agendaTitle", "agendaEyebrow", "contentLocked"
+      "agenda:array", "agendaTitle", "agendaEyebrow", "contentLocked", "coverNotes", "agendaNotes"
     ],
     "agendaMin": {
       "presentation": 3,
@@ -48,7 +48,7 @@
     "anchor",
     "cap",
     "source",
-    "highlightCol", "sourceSlide"
+    "highlightCol", "sourceSlide", "speakerNotes"
   ],
   "mutualExclusionHint": "verdict 与 soWhat 互斥：二者共用 annotation 结论条槽位，同页双填必叠印。comparison 页填 verdict 时不要再填 soWhat（渲染器已自动二选一，但模型侧应只给一个）。",
   "flagsHint": "flags = 待核实/待二次修改条目字符串数组（如 '2027 增速 xx%（口径未定）'）；渲染为 accent 强调色标注行，提示用户核对。",

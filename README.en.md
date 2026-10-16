@@ -1,99 +1,109 @@
 # topmind-presentation
 
-**[中文](./README.md)** | English
+English | [中文](./README.md)
 
 [![Release](https://img.shields.io/github/v/release/topmindspace/topmind-presentation?style=flat-square&color=blue)](https://github.com/topmindspace/topmind-presentation/releases)
 [![npm](https://img.shields.io/npm/v/@topmindspace/topmind-presentation?style=flat-square)](https://www.npmjs.com/package/@topmindspace/topmind-presentation)
 [![CI](https://img.shields.io/github/actions/workflow/status/topmindspace/topmind-presentation/ci.yml?style=flat-square&label=CI)](https://github.com/topmindspace/topmind-presentation/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 
-**Let ideas fly — make good thinking visible.** A high-craft skill for **demo reports / formal business presentations**: **HTML + PPT dual delivery** — day-to-day, present with paginated HTML like slides; export **layout-faithful editable PPTX** when needed. **MD3-inspired**: fitting information density, restrained type / shapes / color. Core craft is layout, typography, color, and content structure — not gadget soup.
+An agent skill for presentations. It turns your material into a **single-file, page-turning HTML deck** and, when needed, an **editable 16:9 PPTX**. Both come from one content model, so colours, layouts and numbers match. It can also re-lay-out an existing PPTX without changing a word.
 
-- Skill id and brand: `topmind-presentation`
-- Version: **v0.2.7** (standalone repo, independently versioned)
-- **Agent entry**: `SKILL.md` → `references/playbook.md` (L1) → L2 on demand
-- **Human maintainers**: this README (install / commands / layout); do not treat it as the generation spec
-- The repo is the skill: the repo root is the skill body (SKILL.md + assets + references + scripts)
-
-### Theme overview (Gate 0)
+- Version: **v0.2.7** (1.0.0 pending release)
+- Agents start at `SKILL.md`; this README is for people installing and maintaining the skill
+- The generated content and the skill's own docs are in Chinese
 
 <p align="center">
-  <img src="assets/theme-overview.png" alt="Presentation · business-blue" width="860" /><br/>
-  <sub>Presentation · business-blue (default) · other styles in <a href="./assets/style-gallery.html">style-gallery</a></sub>
+  <img src="assets/theme-overview.png" alt="Overview of the 12 styles" width="860" /><br/>
+  <sub>12 styles, each with light and dark themes · interactive version: <a href="./assets/style-gallery.html">style gallery</a></sub>
 </p>
 
-**Online** · [Landing](https://topmindspace.github.io/presentation/) (the showcase deck and style gallery are the in-repo files below)
+## What it does
 
-- In-repo gallery: [`assets/style-gallery.html`](./assets/style-gallery.html)
-- Product showcase: [`assets/examples/2026-10-11-topmind-presentation-showcase.html`](./assets/examples/2026-10-11-topmind-presentation-showcase.html) (Mode A · dual-delivery narrative · **5 chart types** · toolbar page · install and distribution)
-- Repo shot pack: [`docs/showcase/`](./docs/showcase/)
+| | |
+|---|---|
+| Deliverables | Single-file HTML (no external links, arrow-key paging, light/dark and style switcher) + editable PPTX (native charts you can double-click to edit) |
+| Three modes | Presentation · Research report (dense, sourced) · Architecture (layers / swimlanes / flows / topology) |
+| 12 styles | business-blue (default), apple-mono, mckinsey, brand-red, warm-sand, deep-teal, graphite-dark, indigo-violet, spectrum, ink-academic, coral-launch, sky-airy |
+| Layouts & charts | 44 layouts in 8 families; 36 chart types, 20 exported as native PowerPoint charts |
+| Quality gates | HTML and PPTX must each pass strict with 0 errors and 0 warnings; rendered pages are checked for fill, balance and pixel regressions |
 
-## Skill snapshot
+## Five routes
 
-| Dimension | Capability |
-|-----------|------------|
-| Output | Single-file HTML (paginated, light/dark, **header toolbar T/P/H/F/B + 9 styles**) + 16:9 editable PPTX |
-| Positioning | Formal business · dual delivery · MD3-inspired density |
-| Modes | A Presentation · B Research · C Architecture |
-| Styles | 9 packs (`styles.md`) |
-| Charts | Core 8 by default + full registry; variety / anti-truncation / Mode A craft |
-| Quality | `validate_report --strict` · `validate_pptx --strict` · `quality_gate --deliver` |
+The agent first decides the route, then reads only that route's recipe (`recipes/`).
 
-## HTML header toolbar
-
-| Control | Shortcut | Behavior |
-|---------|----------|----------|
-| Theme toggle | **T** | Light / dark; per-file memory; syncs `REPORT_MODEL.theme` |
-| Style picker | 9 styles | Live visual skins; write back `REPORT_MODEL.style` before deliver |
-| PPTX preview | **P** | WYSIWYG sequence + copyable agent prompt |
-| Generation guide | **H** | Dual-channel + environment notes |
-| Fullscreen | **F** | Immersive present |
-| Collapse toolbar | **B** | Mini bar; remembers per file |
-
-Also: arrow-key paging; **Esc** closes modals. After style/theme change, re-run `validate_report --strict` (do not rewrite content).
+| You say / give | Route | You get |
+|---|---|---|
+| "Turn this research into a briefing" | Generate | A titles-only draft to confirm, then HTML (optionally PPTX) |
+| "Fast mode, just make it" | Fast | No questions; HTML with sensible defaults |
+| An old .pptx + "make it look better" | Beautify | A new deck in a new folder; every word, number, image and speaker note is checked against the original |
+| A company template + "use these colours" | Template | Theme colours and fonts extracted; the closest built-in style is used |
+| "Draw our system architecture as slides" | Architecture | A 1–8 page, diagram-first deck |
 
 ## Install
 
-The repo is the skill: your host must see `topmind-presentation/SKILL.md` inside its skills directory. Pick one:
+Your agent's skills folder must contain `topmind-presentation/SKILL.md`. Pick one:
 
 ```bash
-# 1. pinned (recommended): unzip topmind-presentation.zip from a GitHub Release
+# Release zip (recommended, pinned version)
 unzip topmind-presentation.zip -d ~/.claude/skills/
 
-# 2. track HEAD
+# Track the repository
 git clone --depth 1 https://github.com/topmindspace/topmind-presentation.git ~/.claude/skills/topmind-presentation
 
-# 3. skills CLI (vercel-labs/skills, Node.js 22+; copies the whole repo including docs/)
-npx skills add topmindspace/topmind-presentation --agent claude-code -g
-
-# 4. npm: the package lands in node_modules only, so sync or copy it afterwards
+# npm (about 1.1 MB, published with provenance), then copy it into the skills folder
 npm i @topmindspace/topmind-presentation
-npx skills experimental_sync -a claude-code -y     # experimental; or copy by hand:
-cp -r node_modules/@topmindspace/topmind-presentation ~/.claude/skills/topmind-presentation
+cp -r "$(npx topmind-presentation path)" ~/.claude/skills/topmind-presentation
 ```
 
-The npm package [`@topmindspace/topmind-presentation`](https://www.npmjs.com/package/@topmindspace/topmind-presentation) is published automatically for each GitHub tag. Like the Release zip it ships only runtime files (the `files` whitelist in `package.json`); the `docs/` site, screenshots and evals stay out. There is no unscoped `topmind-presentation` package on npm.
-
-PPTX needs `npm install` in this folder (pptxgenjs). HTML generation: Python stdlib only.
-
-### Minimal example (~3 min)
+Then run the self-check:
 
 ```bash
-cd topmind-presentation
-python3 scripts/scaffold_report.py --mode research --style mckinsey \
-  --title "Sample report" --sections 8 --out report.html
-# Open report.html, fill in window.REPORT_MODEL only (single source of truth), then:
-python3 scripts/render_from_model.py report.html --inplace
-python3 scripts/validate_report.py report.html --strict   # ship only at 0 errors / 0 warnings
-# For PPTX (after npm install):
-python3 scripts/extract_model.py report.html report.model.json
-node scripts/build_pptx.js report.pptx --model=report.model.json
-python3 scripts/validate_pptx.py report.pptx --strict --model=report.model.json
+cd ~/.claude/skills/topmind-presentation
+npm install                 # only needed for PPTX export (pptxgenjs)
+python3 scripts/doctor.py   # or: npx topmind-presentation doctor; add --full to render a sample
 ```
 
-Swap modes: `--mode presentation --style business-blue` (A) / `--mode architecture --style graphite-dark` (C).
+Requirements: HTML generation and all validators use only the Python 3.8+ standard library. PPTX needs Node 18+ and pptxgenjs; the beautify route needs python-pptx; comparison images and pixel regression need LibreOffice and poppler. `doctor` tells you exactly what is missing.
 
-Full Chinese maintainer docs (directory map, command cookbook): see [`README.md`](./README.md). Agent rules live in `SKILL.md` / `playbook.md`.
+## Try it by hand
+
+```bash
+python3 scripts/render_from_model.py assets/examples/2026-09-09-presentation-business-blue.model.json \
+  --template presentation --out demo.html
+python3 scripts/validate_report.py demo.html --strict
+node scripts/build_pptx.js demo.pptx --model=assets/examples/2026-09-09-presentation-business-blue.model.json
+python3 scripts/validate_pptx.py demo.pptx --strict --model=assets/examples/2026-09-09-presentation-business-blue.model.json
+
+# Beautify an existing PPTX (the original is read-only)
+python3 scripts/beautify.py old.pptx --out beautified --style business-blue --compare
+```
+
+## Layout
+
+```
+SKILL.md            agent entry: route table, gates, rules (≤300 lines)
+recipes/            one recipe per route; only the chosen one is read
+references/         in-depth specs, read only when needed
+assets/templates/   HTML templates for the three modes (engine, styles, runtime inlined)
+assets/examples/    model.json for three golden samples (npm ships models only; HTML renders in one command)
+assets/icons/       48 original line icons
+scripts/            render, export, validate, beautify, doctor, regression
+tests/              beautify samples, layout goldens, pixel baselines
+evals/  docs/       eval set and landing page (not packaged)
+```
+
+## Maintenance
+
+```bash
+bash scripts/ci_skill_gates.sh --with-pptx   # every gate CI runs
+python3 scripts/pixel_regression.py          # pixel regression; add --update after intentional layout changes
+bash scripts/smoke_pack.sh                   # pack → install → doctor --full
+python3 scripts/sync_runtime.py              # required after editing layout-constants.json / model-schema.json
+npm run capture-themes                       # re-capture the style overview above (needs playwright)
+```
+
+Changes from 0.x to 1.0: [`docs/MIGRATION-1.0.md`](./docs/MIGRATION-1.0.md). Release notes: [`CHANGELOG.md`](./CHANGELOG.md).
 
 ## License
 

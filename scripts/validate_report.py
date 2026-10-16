@@ -414,6 +414,7 @@ _COV_SKIP_KEYS = {
     "align", "width", "height", "placeholder", "alt", "target", "rel", "dir",
     "lang", "charset", "defer", "async", "media",
     "hint",  # 搭建期给智能体的指令（如 image.hint），不是读者正文
+    "speakernotes", "covernotes", "agendanotes",  # 演讲者备注只进 PPTX notes，不是页面正文
 }
 _COV_URL_RE = re.compile(r'^(https?://|www\.|data:|#)', re.I)
 _COV_COLOR_RE = re.compile(r'^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$')
@@ -1426,6 +1427,8 @@ def _check_media(txt, chk, model):
         has_points = bool(re.search(r'class="[^"]*(?:points|bullets|kpi|metrics|card)', b))
         if len(textish) < 40 and not has_points and not re.search(r'media--ph', b):
             near_empty.append(f'band[{i}]')
+    if re.search(r'"contentLocked"\s*:\s*true', txt):
+        miss_cap = []  # 原文锁定：原稿没有图注就不能补字
     chk("配图页含 caption/图注（IMAGE_CAPTION）", not miss_cap,
         f"{len(miss_cap)} 处配图区缺 .fig__cap/.media__cap/.footnote/so-what 等图注" if miss_cap else "",
         level="WARN")

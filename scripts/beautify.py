@@ -316,6 +316,12 @@ def map_slide(sl, led: Ledger, style, history, n_slides):
             sec['variant'] = 'bento-grid'
         return lid, sec, 'cards'
 
+    if pics and paras and not charts and not tables:
+        # 图文页：文字进左区要点，第一张图进右区（等比放入，不裁切）；其余图片仍列入报告
+        return 'text-media', {'type': 'split', 'title': T,
+                              'left': {'type': 'points', 'points': side_points()},
+                              'right': {'type': 'image', 'image': {'src': 'media/' + pics[0]['file'], 'fit': 'contain',
+                                                                    'alt': pics[0].get('alt') or ''}}}, 'media'
     if pics and not paras:
         return 'media-full', {'type': 'image', 'title': T, 'image': {'src': 'media/' + pics[0]['file'], 'layout': 'full'}}, 'media'
 
@@ -357,6 +363,8 @@ def build_model(src, style, theme):
         model['subtitle'] = led.whole(1, rest[0]['text'])
     if len(rest) > 1:
         model['meta'] = '　'.join(led.whole(1, p['text']) for p in rest[1:])
+    if cov.get('notes', '').strip():
+        model['coverNotes'] = cov['notes']
     plan.append({'src': 1, 'role': 'cover', 'layout': 'cover'})
     history.append('cover')
     agenda_items = []
@@ -367,16 +375,22 @@ def build_model(src, style, theme):
         if AGENDA_RE.match(t) and not agenda_items:
             agenda_title = led.whole(sl['no'], sl['title'])
             agenda_items = [led.whole(sl['no'], p['text']) for p in _paras(sl)]
+            if sl.get('notes', '').strip():
+                model['agendaNotes'] = sl['notes']
             plan.append({'src': sl['no'], 'role': 'agenda', 'layout': 'agenda'})
             history.append('agenda')
             continue
         if sl['no'] == len(slides) and CLOSING_RE.match(t):
             closing = {'title': led.whole(sl['no'], sl['title']), 'eyebrow': '',
                        'points': [led.whole(sl['no'], p['text']) for p in _paras(sl)]}
+            if sl.get('notes', '').strip():
+                closing['speakerNotes'] = sl['notes']
             plan.append({'src': sl['no'], 'role': 'closing', 'layout': 'closing'})
             continue
         lid, sec, intent = map_slide(sl, led, style, history, len(slides))
         sec['sourceSlide'] = sl['no']
+        if sl.get('notes', '').strip():
+            sec['speakerNotes'] = sl['notes']   # 原稿备注原样写回新稿（核对器逐页比对）
         sections.append(sec)
         history.append(lid)
         plan.append({'src': sl['no'], 'role': 'section', 'layout': lid, 'intent': intent})
@@ -624,6 +638,21 @@ def verify(src, frz, model, plan, led, pptx_path, html_path):
             rest = re.sub(r'\d{2}|[·•　\s（续）/]', '', rest)
             if rest:
                 report['residual'].append({'chan': chan, 'page': k + 1, 'text': x, 'extra': rest})
+    # (f) 演讲者备注：原稿有备注的页，新稿对应首页的备注必须逐字一致
+    from pptx import Presentation as _P
+    new_notes = [(sl.notes_slide.notes_text_frame.text if sl.has_notes_slide and sl.notes_slide.notes_text_frame else '')
+                 for sl in _P(str(pptx_path)).slides]
+    report['notes'] = []
+    for sl in src['slides']:
+        want = (sl.get('notes') or '').strip()
+        if not want:
+            continue
+        ks = bysourceSlide.get(sl['no'], [])
+        got = new_notes[ks[0]].strip() if ks and ks[0] < len(new_notes) else None
+        if norm(got or '') != norm(want):
+            report['missing'].append(f"原第 {sl['no']} 页备注未原样写回（新稿：{(got or '无')[:30]}）")
+        else:
+            report['notes'].append(sl['no'])
     report['ok'] = not report['missing'] and not report['numbers'] and not report['residual']
     return report
 

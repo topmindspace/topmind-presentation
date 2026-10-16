@@ -48,9 +48,7 @@ def main() -> int:
     assets = ROOT / 'assets'
     picks = [Path(a) for a in sys.argv[1:]]
     if not picks:
-        picks = [assets / 'theme-overview.png',
-                 assets / 'theme-overview-research.png',
-                 assets / 'theme-overview-architecture.png']
+        picks = [assets / 'theme-overview.png']
     missing = [str(p) for p in picks if not p.exists()]
     if missing:
         print(f'错误：素材缺失 {missing}')

@@ -10,21 +10,23 @@
     "CHANGELOG.md",
     "agents/",
     "references/",
+    "recipes/",
     "scripts/",
     "!scripts/_*",
     "!**/__pycache__/",
     "!**/*.pyc",
     "assets/templates/",
     "assets/icons/",
-    "assets/examples/",
+    "assets/examples/*.model.json",
     "!assets/examples/*showcase*",
     "assets/pptx-export.js",
     "assets/style-gallery.html",
-    "assets/theme-overview*.png"
+    "assets/theme-overview.png"
   ],
   "license": "MIT",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "repository": {
     "type": "git",
@@ -46,12 +48,17 @@
     "negative": "python3 scripts/negative_tests.py",
     "package": "python3 scripts/package_skill.py",
     "check": "python3 scripts/package_skill.py --check",
-    "triggers": "python3 scripts/check_triggers.py"
+    "triggers": "python3 scripts/check_triggers.py",
+    "doctor": "python3 scripts/doctor.py",
+    "smoke-pack": "bash scripts/smoke_pack.sh"
   },
   "dependencies": {
     "pptxgenjs": "^4.0.0"
   },
   "devDependencies": {
     "playwright": "^1.63.0"
+  },
+  "bin": {
+    "topmind-presentation": "scripts/cli.js"
   }
 }

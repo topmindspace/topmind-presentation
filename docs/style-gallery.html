@@ -109,7 +109,7 @@
   .pv__nd{font-size:8.5px;color:var(--ptxt2);margin-top:1px}
   .pv__legend{display:flex;gap:7px;justify-content:flex-end;margin-top:9px}
 
-  /* 编码色板展示条（9 套风格各有 c1–c5；彩色只属于数据系列） */
+  /* 编码色板展示条（12 套风格各有 c1–c5；彩色只属于数据系列） */
   .pv__pal{display:flex;align-items:center;gap:6px;margin-top:13px;flex-wrap:wrap}
   .pv__pd{width:14px;height:14px;border-radius:5px;flex:none;border:1px solid rgba(0,0,0,.08)}
   .pv__palt{font-size:9.5px;font-weight:600;color:var(--ptxt2);margin-left:3px}
@@ -148,13 +148,13 @@
 
 <div class="head">
   <h1>风格 × 模式矩阵 · topmind-presentation</h1>
-  <p>三种报告模式 × 9 套风格 × 亮/暗双主题，正交组合任意选用。<strong>模式</strong>（演示汇报 / 研究报告 / 信息架构图）是内容呈现形态与信息密度——生成时确定，切模式即换一套独立模板；<strong>风格</strong>是纯视觉皮肤——header 下拉可实时切换；<strong>主题</strong>（浅色 / 深色）在问询时一并确认——<strong>HTML 与 PPTX 导出同主题</strong>。切换上方模式 Tab，查看每种风格在该模式下的迷你版式特征；点击卡片标记，把 <code>data-mode + data-style + data-theme</code> 交给生成流程。</p>
+  <p>三种报告模式 × 12 套风格 × 亮/暗双主题，正交组合任意选用。<strong>模式</strong>（演示汇报 / 研究报告 / 信息架构图）是内容呈现形态与信息密度——生成时确定，切模式即换一套独立模板；<strong>风格</strong>是纯视觉皮肤——header 下拉可实时切换；<strong>主题</strong>（浅色 / 深色）在问询时一并确认——<strong>HTML 与 PPTX 导出同主题</strong>。切换上方模式 Tab，查看每种风格在该模式下的迷你版式特征；点击卡片标记，把 <code>data-mode + data-style + data-theme</code> 交给生成流程。</p>
   <p style="margin-top:10px">三模式完整样例见 <code>assets/examples/</code>（presentation×2、research×3、architecture×2，AI 智能体发展研究主题）；三份模式模板见 <code>assets/templates/</code>。本页每张卡片已同时展示浅色（主预览）与深色（底部辅助条）两个变体，可一并挑选主题。</p>
 </div>
 
 <div class="caps">
-  <span class="b">三模式 × 9 风格 × 亮暗主题</span><span class="b">模式独立模板</span><span class="b">PPTX 三模式高保真</span><span class="b">PPTX 同主题导出</span>
-  <span>9 套风格</span><span>亮暗双主题</span><span>header 工具栏</span><span>宽屏 16:9</span><span>MD3 对齐</span>
+  <span class="b">三模式 × 12 风格 × 亮暗主题</span><span class="b">模式独立模板</span><span class="b">PPTX 三模式高保真</span><span class="b">PPTX 同主题导出</span>
+  <span>12 套风格</span><span>亮暗双主题</span><span>header 工具栏</span><span>宽屏 16:9</span><span>MD3 对齐</span>
   <span>引用闭环</span><span>去AI味</span><span>质量校验闭环</span><span>常量单源</span>
 </div>
 
@@ -162,7 +162,7 @@
 <div class="grid" id="grid"></div>
 
 <div class="foot">
-  结构与风格分离：三份模式模板见 <code>assets/templates/</code>，9 套 token 见 <code>references/styles.md</code>（PPTX 侧与 <code>scripts/layout-constants.json</code> 同源）。
+  结构与风格分离：三份模式模板见 <code>assets/templates/</code>，12 套 token 见 <code>references/styles.md</code>（PPTX 侧与 <code>scripts/layout-constants.json</code> 同源）。
   模式规则见 <code>references/modes.md</code>：演示汇报（3 秒一主张，台上宣讲）/ 研究报告（咨询密排：行动标题 + Exhibit 编号 + so-what + 双/三栏论证 + 密表 + 矩阵）/ 信息架构图（图为王，1–3 张全幅主图）。
   每张卡底部辅助条：石墨深灰为「深色优先」——主预览即 dark 变体、辅助条展示浅色辅助变体；其余 8 套主预览为 light、辅助条为 dark。每套风格的 5 色数据色板（c1–c5，单源 <code>STYLE_DATA_COLORS</code>）在主预览中随模式展示（彩色只属于数据系列）。
   新增风格：styles.md 加两个覆盖块 → 本页 <code>STYLE_META</code> 加一项（卡片列表与配色由单源派生，不必手改）→ 完。
@@ -179,7 +179,7 @@
 /* LAYOUT_SLOTS + regionOf = 页型布局区域 IR（与 scripts/lib_layout_regions.js 同源） */
 var PW = 13.333, PH = 7.5, MX = 0.6, CW = PW - 2 * MX, EMU = 914400;
 var TS_BASE = {"coverTitle":44,"coverSub":18,"h1":30,"h2":17,"lead":14,"body":13,"caption":11,"micro":10};
-var MTS = {"presentation":{"coverTitle":44,"coverSub":18,"h1":30,"h2":17,"lead":14,"body":13,"caption":11,"micro":10},"research":{"coverTitle":36,"coverSub":14,"h1":22,"h2":13.5,"lead":11.5,"body":10.5,"caption":9,"micro":8.5},"architecture":{"coverTitle":44,"coverSub":19,"h1":30,"h2":17,"lead":14,"body":13,"caption":11,"micro":10}};
+var MTS = {"presentation":{"coverTitle":44,"coverSub":18,"h1":30,"h2":17,"lead":14,"body":13,"caption":11,"micro":10,"chapterNum":96},"research":{"coverTitle":36,"coverSub":14,"h1":22,"h2":13.5,"lead":11.5,"body":10.5,"caption":9,"micro":8.5,"chapterNum":80},"architecture":{"coverTitle":44,"coverSub":19,"h1":30,"h2":17,"lead":14,"body":13,"caption":11,"micro":10,"chapterNum":96}};
 var PT = {"layout":{"contentTop":2.35,"contentBottom":6.9,"contentBottomWithNote":6.4,"pageNumY":7.0},"common":{"headEyebrowY":0.48,"headTitleY":0.82,"headRuleY":1.72,"leadY":1.88,"bodyY":2.35,"bodyYWithLead":2.55,"pagerY":7.0},"cover":{"metaY":0.7,"titleY":2.4,"titleH":2.0,"subtitleY":4.5,"subtitleH":0.8},"closing":{"eyebrowY":0.7,"titleY":1.2,"titleH":1.2,"pointsY":3.0,"pointTitleH":0.6,"pointBodyH":1.2},"points":{"listY":2.5,"rowH":0.72,"rowHMin":0.5,"markSize":0.14,"metricY":4.7,"metricW":2.6,"metricValH":0.9,"metricCapY":5.6},"metrics":{"bandY":3.1,"cardH":2.3,"valY":3.45,"valH":1.1,"capY":4.55,"capH":0.7,"gap":0.3,"maxW":2.9},"table":{"y":2.5,"rowH":0.55,"rowHMin":0.32,"headRowH":0.5},"bar":{"hbarY0":2.6,"hbarY1":6.25,"chartX":0.6,"chartY":2.95,"chartW":1.2,"chartH":3.35,"noteY":6.55},"note":{"y":6.55,"h":0.4},"exhibit":{"badgeY":2.35,"chartY":2.75,"chartH":3.25,"soWhatY":6.05,"footnoteY":6.72},"twocol":{"colGap":0.5,"bodyH":3.6,"rowHMin":0.5},"hbar":{"labelW":1.9,"valW":1.0,"rowH":0.55,"barRatio":0.5},"diagram":{"layerBarW":1.35,"layerGap":0.15,"nodeGap":0.15,"bodyStartY":2.9,"maxLayerH":1.15,"nodeMaxW":2.2},"split":{"leftW":0.55,"rightW":0.415,"rightX":0.585,"pointsY":2.7,"rowH":0.78,"capY":2.55,"chartY":3.0,"chartH":3.7,"tableY":2.7,"tableRowH":0.5},"cards":{"startY":3.0,"gap":0.25,"maxH":2.0,"titleH":0.4},"timeline":{"labelY":2.95,"axisY":3.58,"dotY":3.51,"dotR":0.18,"nameY":3.9,"descY":4.45,"descH":1.2},"research":{"col3Gap":0.38,"matrixLabelW":1.5,"matrixCellH":0.85,"matrixY":2.2,"denseTableY":2.2,"denseRowH":0.42,"halfTableW":0.52,"halfChartX":0.57,"halfChartW":0.43},"arch":{"fullStartY":2.1,"fullEndY":6.9,"laneH":0.72,"laneHMin":0.5,"laneGap":0.14,"laneHeadW":1.3,"stepGap":0.12,"stepMaxW":1.9},"kpi":{"heroY":2.9,"heroW":0.52,"heroH":1.6,"dividerX":0.56,"metricY0":2.95,"metricRowH":0.85},"comparison":{"panelGap":0.4,"panelY":2.55,"panelH":3.4,"titleH":0.45,"rowH":0.62},"quote":{"markY":1.75,"textY":2.7,"textH":2.3,"authorY":5.25,"contextY":5.8},"donut":{"centerX":3.05,"centerY":4.6,"r":1.6,"holeR":0.95,"legendX":5.6,"legendRowH":0.55,"legendLabelW":3.4,"legendValW":1.3,"legendPctX":10.8,"legendPctW":1.3},"steps":{"y":3.05,"barH":1.35,"gap":0.12,"arrowW":0.3,"numH":0.3,"titleH":0.34,"pad":0.08,"maxPerRow":6},"heatmap":{"y":2.6,"labelW":1.7,"headH":0.42,"cellH":0.6,"cellGap":0.06,"legendW":1.6},"pyramid":{"y":2.35,"rowH":0.72,"gap":0.08,"minW":0.34,"labelW":3.2},"bullet":{"y":2.6,"rowH":0.8,"labelW":2.4,"valW":1.7,"barH":0.26},"image":{"y":2.3,"h":4.2,"halfW":0.56,"halfGap":0.06,"capY":6.6,"capH":0.3,"radius":0.09,"noteRowH":0.62,"gridGap":0.16,"gridCols":{"2":2,"3":3,"4":4,"6":3},"gridCapH":0.28,"compareGap":0.3,"compareTagH":0.26,"wallCellH":0.92,"wallGap":0.18,"wallMaxRows":2},"flagbar":{"hdH":0.26,"rowH":0.24,"maxRows":3,"gap":0.12},"sankey":{"y":2.45,"h":4.1,"nodeW":0.32,"nodeGap":0.14,"labelW":1.55,"minBandH":0.22,"maxNodes":12,"maxFlows":24},"treemap":{"y":2.45,"h":4.1,"gap":0.05,"labelMinH":0.34,"maxLeaves":16,"maxDepth":3},"boxplot":{"y":2.7,"h":3.7,"labelW":1.5,"groupGap":0.3,"boxMaxW":0.9,"whiskerCapW":0.34,"maxGroups":8},"network":{"y":2.4,"h":4.2,"nodeR":0.28,"nodeRMin":0.18,"labelMaxW":1.4,"maxNodes":18,"maxEdges":30},"marimekko":{"y":2.6,"h":3.75,"labelW":1.55,"colGap":0.06,"legendH":0.42,"maxCols":6,"maxSegs":4},"streamgraph":{"y":2.6,"h":3.75,"labelW":1.4,"bandMinH":0.12,"maxSeries":6},"chapter":{"numW":3.6,"numY":1.15,"titleY":1.72,"itemRowH":0.5,"maxItems":5}};
 var PRESETS = {
   'business-blue': { accent:'1A73E8', ink:'202124', body:'5F6368', faint:'80868B', bg:'FFFFFF', surface:'F8F9FA', line:'DADCE0', soft:'E8F0FE', onAccent:'FFFFFF', font:'Microsoft YaHei', fontDisplay:'Microsoft YaHei' },
@@ -379,7 +379,7 @@ var MODES=[
      （PRESETS / PRESETS_DARK / STYLE_DATA_COLORS，由 sync_runtime.py 注入）
      语汇字段与 engine.css + layout-constants.styleIdentity 同口径，预览能看出性格差。 ── */
 var STYLE_META=[
-{id:'business-blue',name:'商务蓝',en:'business-blue',d:'专业克制、信息密度高。中性灰阶 + 单一蓝，最通用的商务选择。',s:'技术 / 数据 / 通用商务汇报',
+{id:'business-blue',name:'清新蓝白（默认）',en:'business-blue',d:'清爽、克制、信息清楚。白底 + 单一亮蓝，MD3 层次，最通用的默认选择。',s:'经营汇报 / 方案提案 / 通用商务',
  pfontBody:"'Google Sans','Roboto','PingFang SC','Microsoft YaHei',sans-serif",
  pfontDisplay:"'Google Sans','Roboto','PingFang SC','Microsoft YaHei',sans-serif",
  prad:'16px',pscale:1,peye:'.11em',plh:1.6,pgap:1,pw:700,pletter:'-.03em'},
@@ -418,7 +418,19 @@ var STYLE_META=[
  pfontBody:"'Inter','SF Pro Text','PingFang SC','Microsoft YaHei',sans-serif",
  pfontDisplay:"'Inter','SF Pro Text','PingFang SC','Microsoft YaHei',sans-serif",
  prad:'14px',pscale:.95,peye:'.1em',plh:1.48,pgap:.8,pw:700,pletter:'-.03em'},
-/* ── 新增风格族 ── */
+/* ── 新增风格族（M3） ── */
+{id:'ink-academic',name:'学术墨蓝',en:'ink-academic',d:'严谨、克制，像期刊插图。白底 + 墨蓝强调，衬线标题，图表网格常开。',s:'学术汇报 / 课题答辩 / 研究综述',
+ pfontBody:"'Inter','Source Han Sans','PingFang SC','Microsoft YaHei',sans-serif",
+ pfontDisplay:"Georgia,'Songti SC','STSong','SimSun',serif",
+ prad:'8px',pscale:.95,peye:'.14em',plh:1.6,pgap:.9,pw:600,pletter:'-.01em'},
+{id:'coral-launch',name:'活力珊瑚',en:'coral-launch',d:'热情、外向，有发布会气质。白底 + 珊瑚红强调，大圆角，大留白。',s:'产品发布 / 品牌活动 / 招商路演',
+ pfontBody:"'HarmonyOS Sans','Inter','PingFang SC','Microsoft YaHei',sans-serif",
+ pfontDisplay:"'HarmonyOS Sans','Inter','PingFang SC','Microsoft YaHei',sans-serif",
+ prad:'18px',pscale:1.08,peye:'.12em',plh:1.72,pgap:1.3,pw:700,pletter:'-.035em'},
+{id:'sky-airy',name:'晴空课件',en:'sky-airy',d:'轻快、友好、易读。浅天蓝表面 + 天蓝强调，流程版式优先。',s:'培训课件 / 入职手册 / 教学课堂',
+ pfontBody:"'Inter','Source Han Sans','PingFang SC','Microsoft YaHei',sans-serif",
+ pfontDisplay:"'Inter','Source Han Sans','PingFang SC','Microsoft YaHei',sans-serif",
+ prad:'20px',pscale:1.04,peye:'.12em',plh:1.8,pgap:1.3,pw:700,pletter:'-.02em'},
 
 ];
 
@@ -440,7 +452,7 @@ var STYLES=(function(){
     o.pbg=hx(L.bg); o.ps3=hx(L.line); o.ptxt=hx(L.ink); o.ptxt2=hx(L.body); o.pbd=hx(L.line);
     o.dbg=hx(D.bg); o.dtxt=hx(D.ink); o.dtxt2=hx(D.faint); o.da=hx(D.accent);
     o.das=hx(D.soft); o.ds2=hx(D.surface); o.ds3=hx(D.line); o.dbd=hx(D.line); o.daon=hx(D.onAccent);
-    /* 编码色板：9 套风格各有 c1–c5（单源 STYLE_DATA_COLORS / _DARK；单源存裸 hex，CSS 侧补 #） */
+    /* 编码色板：12 套风格各有 c1–c5（单源 STYLE_DATA_COLORS / _DARK；单源存裸 hex，CSS 侧补 #） */
     var C=(typeof STYLE_DATA_COLORS!=='undefined'&&STYLE_DATA_COLORS[id])||null;
     if(C)o.colors=C.map(hx);
     return o;
@@ -466,7 +478,7 @@ function hbarRow(label,v,max,fill){
     '<div class="pv__hval">'+v+'%</div></div>';
 }
 
-/* 编码色板展示行：9 套风格各有 c1–c5（彩色只属于数据系列） */
+/* 编码色板展示行：12 套风格各有 c1–c5（彩色只属于数据系列） */
 function palRow(s){
   if(!s.colors)return '';
   return '<div class="pv__pal">'+s.colors.map(function(c){
@@ -486,9 +498,8 @@ function pvBody(s,mode){
   var pal=s.colors;
 
   if(mode==='presentation'){
-    var bars=pal
-      ?'<div class="pv__bars">'+pal.map(function(c,i){return '<i style="background:'+c+';height:'+(42+i*14)+'%"></i>';}).join('')+'</div>'
-      :'<div class="pv__bars"><i style="height:38%"></i><i style="height:55%"></i>'+
+    /* 单系列柱图用单一强调色（彩色只属于多系列数据，色板见下方 c1–c5 条） */
+    var bars='<div class="pv__bars"><i style="height:38%"></i><i style="height:55%"></i>'+
         '<i class="a" style="height:78%"></i><i class="a" style="height:100%"></i></div>';
     return bar+eyebrow+h+
       '<div class="pv__metric"><div><b>61%</b><span>企业试点率</span></div>'+

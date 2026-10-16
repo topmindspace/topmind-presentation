@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## [Unreleased] — M5 收尾（main，未发版）
+
+### M4 遗留
+- 美化路由：短清单与陈述卡字号向上求解（上限 22pt），陈述卡去掉装饰图标；有标题卡片、≤6 行短表、只有一句话的收尾卡片同步放大或贴合内容高度。
+- 图片与其他内容同页时迁入「左要点 + 右图片」版式（等比缩放，不裁切）。
+- 演讲者备注逐字写回新稿（封面、目录、各页、收尾），核对器新增备注检查。
+
+### 五条路线
+- 新增 `recipes/`：generate / fast / beautify / template / architecture，每份写明什么时候用、输入、保留什么、产出；SKILL.md 顶部加路线表（122 行）。
+- 新增 `scripts/extract_template.py`：从参考 PPTX 读取主题色与字体，按色差给出最接近的 3 套内置风格。
+- 新增 `scripts/render_pptx_png.py`：PPTX 逐页渲染成 PNG，供看图复核与像素回归共用。
+
+### 工程
+- `scripts/doctor.py` 自检（环境、关键文件、运行时戳、BOM、`--full` 实际渲染）；`scripts/cli.js` 提供 `npx topmind-presentation doctor|path`。
+- `scripts/pixel_regression.py`：三份黄金样张 PPTX → 48×27 灰度缩略图对比基线（`tests/pixel/baselines/`），接入 CI；失败时上传对照图。
+- `scripts/smoke_pack.sh`：npm pack → 临时目录安装 → `doctor --full`，并限制包体 ≤1.4 MB，接入 CI。
+- npm 包 2.58 MB → 约 1.1 MB：图标 PNG 改为 160px 调色板图，包内示例只留 model.json，删掉两张按模式的总览图。
+- release.yml 开启 `npm publish --provenance`（`id-token: write`），`publishConfig.provenance: true`。
+
+### 文档与素材
+- README 中英两版重写；只保留一张 12 套风格总览图（重新拍摄）。风格画廊文案改为 12 套，补齐三套新风格的中文名、描述与适用场景，单系列柱图改用单一强调色。
+- 新增 `docs/MIGRATION-1.0.md`。
+- 清理：`assets/showcase/`、`docs/showcase/`、`scripts/capture_showcase_pages.js`、两张按模式的总览图及其引用。
+
+### 修复（整体复核中发现）
+- HTML 大数指标页在模型没有要点时会补出「支撑。一句话。」占位；支撑指标在窄列里横排导致数字折行。改为不补字、支撑指标竖排、大数放进色调面板。
+- 环图单位为 % 且合计 100 时中心显示「100%」、图例重复占比列（HTML 与 PPTX 两端）。
+
 ## [Unreleased] — M4 已有 PPT 美化（main，未发版）
 
 ### 美化路由（新）

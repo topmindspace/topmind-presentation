@@ -105,6 +105,12 @@ run_one() {
     "$PY" tests/beautify/test_beautify.py || { echo "ci_skill_gates: 美化核对失败" >&2; exit 1; }
   fi
 
+  # M5：doctor 自检 + 打包后安装冒烟
+  if [[ "$WITH_PPTX" == "1" ]]; then
+    "$PY" scripts/doctor.py || { echo "ci_skill_gates: doctor 自检失败" >&2; exit 1; }
+    bash scripts/smoke_pack.sh || { echo "ci_skill_gates: 打包安装冒烟失败" >&2; exit 1; }
+  fi
+
   if [[ "$WITH_PPTX" == "1" && -f scripts/smoke_pptx.sh ]]; then
     ensure_python_pptx
     # D13: business-blue (default) + research-mckinsey (soWhat+footnote; catches D8)
@@ -142,6 +148,8 @@ run_one() {
         --model="tests/charts/native-rows.model.json" >/dev/null
       # M3：版式库 golden（44 版式全覆盖 + PPTX 几何指纹）
       "$PY" tests/layouts/test_layouts.py || { echo "ci_skill_gates: 版式 golden 失败" >&2; exit 1; }
+      # M5：PPTX 像素回归（三份黄金样张 → 48×27 灰度缩略图对比基线）
+      "$PY" scripts/pixel_regression.py || { echo "ci_skill_gates: 像素回归失败" >&2; exit 1; }
       "$PY" scripts/validate_pptx.py "dist/regression/native-rows.pptx" --strict \
         --model="tests/charts/native-rows.model.json" >/dev/null || { echo "ci_skill_gates: 行式原生图表探针失败" >&2; exit 1; }
       "$PY" - "dist/regression/native-rows.pptx" <<'PYEOF'

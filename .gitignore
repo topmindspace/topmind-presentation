@@ -61,3 +61,4 @@ desktop.ini
 # Release / pack outputs
 release-assets/
 *.tgz
+tests/pixel/_diff/

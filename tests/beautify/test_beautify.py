@@ -4,7 +4,7 @@
 断言：
   1. 三份样例（课件 / 经营汇报 / 方案）verify 全 PASS：文本差异 0、数字全部找回、图表数据与原生 chart XML 一致；
   2. 原文件字节不变；输出落在新目录；
-  3. 未迁入的对象（样例里的自绘图片）必须列入报告；
+  3. 图文页的图片迁入新稿；原稿演讲者备注逐字写回（verify 第 f 项）；
   4. 产物过 validate_pptx / validate_report / check_rhythm 三道 strict；
   5. 负例：改模型里一个字 / 一个图表数值后重新渲染，verify 必须 FAIL。
 """
@@ -77,8 +77,13 @@ def main():
                 if not (out / f).exists():
                     fails.append(f'{n}: 缺输出 {f}')
             stem = out / f'{n}.beautified'
-            if n == 'lecture-dataviz' and 'PICTURE' not in (out / 'report.md').read_text(encoding='utf-8'):
-                fails.append(f'{n}: 未迁入的图片没有列入报告')
+            if n == 'lecture-dataviz':
+                import zipfile
+                pics = [x for x in zipfile.ZipFile(out / f'{n}.beautified.pptx').namelist() if x.startswith('ppt/media/') and 'image' in x]
+                if not pics:
+                    fails.append(f'{n}: 图文页的图片没有迁入新稿')
+            if not ver.get('notes'):
+                fails.append(f'{n}: 原稿备注没有写回新稿')
             for cmd in ([sys.executable, 'scripts/validate_pptx.py', f'{stem}.pptx', '--strict', f'--model={stem}.model.json'],
                         [sys.executable, 'scripts/validate_report.py', f'{stem}.html', '--strict'],
                         [sys.executable, 'scripts/check_rhythm.py', f'{stem}.model.json', '--strict']):

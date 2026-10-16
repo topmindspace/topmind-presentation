@@ -275,13 +275,25 @@ def r_kpi(i, sec):
             f'<div class="t-h3">{esc(lab)}</div>'
             + (f'<div class="t-sm" style="color:var(--accent);font-weight:600">{esc(delta)}</div>' if delta else '')
             + '</div>\n')
-    mets = metrics_row(sec.get('metrics')) if sec.get('metrics') else ''
+    if left:
+        # hero 放进 tonal 面板，与 PPTX 大数面板同构
+        left = ('      <div class="kpi-hero" style="background:var(--accent-soft);border-radius:var(--radius-lg,20px);'
+                'padding:clamp(24px,3vw,44px)">\n' + left + '      </div>\n')
+    mets = ''
+    if sec.get('metrics'):
+        # 支撑指标竖排（右列窄，4 列横排会把「5.8 年」挤成两行）
+        cells = []
+        for m in sec['metrics'][:4]:
+            val, key = (m[0], m[1] if len(m) > 1 else '') if isinstance(m, (list, tuple)) else (m.get('v') or '', m.get('k') or '')
+            cells.append(f'        <div class="metric">'
+                         f'<div class="metric__v t-h2">{esc(val)}</div><div class="metric__k">{esc(key)}</div></div>')
+        mets = '      <div class="stack gap-2">\n' + '\n'.join(cells) + '\n      </div>\n'
+    pts = sec.get('points') or []   # 不补占位要点：没有就不渲染这一块
     body = (
         '    <div class="grid g-hero rv a-c">\n'
         + left + mets
-        + '      <div class="grid g-2">\n'
-        + pts_list(sec.get('points') or [['支撑', '一句话。']])
-        + '\n      </div>\n    </div>\n')
+        + '    </div>\n'
+        + ('    <div class="grid g-2">\n' + pts_list(pts) + '\n    </div>\n' if pts else ''))
     return wrap(i, 'kpi', body, sec)
 
 
@@ -424,8 +436,7 @@ def r_cards(i, sec):
             first = points[0] if isinstance(points[0], str) else ' '.join(str(x) for x in points[0])
             rest = pts_list(points[1:]) if len(points) > 1 else ''
             blocks.append(
-                f'      <div class="card card--stmt{lead_cls}"><div class="card__ico" data-icon="{esc(icon_name or pick_icon_name(first, ci))}">'
-                f'{pick_icon(first, ci)}</div>\n        <p class="t-lead card__stmt">{cite(first)}</p>{rest}</div>')
+                f'      <div class="card card--stmt{lead_cls}">\n        <p class="t-lead card__stmt">{cite(first)}</p>{rest}</div>')
             continue
         blocks.append(
             f'      <div class="card{lead_cls}">{card_head(str(title), ci, icon_name)}\n'

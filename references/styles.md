@@ -480,4 +480,4 @@ html[data-style="sky-airy"][data-theme="dark"]{
    - `assets/style-gallery.html` 画廊 `STYLE_META` 描述行（`pfontBody`/`pfontDisplay`/`prad`/`pscale`/`peye`/`plh`/`pgap`/`pw`/`pletter`；配色由注入的 `PRESETS` 自动派生）
    - `references/design-system.md` 字体决策矩阵（若引入新字体语汇）
 5. 跑 `python scripts/sync_runtime.py`（注入到三模板与画廊）→ `python scripts/audit_styles.py`（**12 套** × light/dark × 8 组 WCAG + 双源色 token + 编码色板 + ui.js 色板 + **风格语汇 styleIdentity**，全过才通过）→ `python scripts/build_examples.py` → `python scripts/regression.py`。
-6. 可选：`node scripts/capture_theme_overview.js`（需 playwright）重生成 `assets/theme-overview*.png` 参考图。
+6. 可选：`node scripts/capture_theme_overview.js`（需 playwright）重生成 `assets/theme-overview.png` 参考图。

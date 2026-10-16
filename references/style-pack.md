@@ -28,7 +28,7 @@ npm run audit   # audit_styles（对比度/色板一致性/单源）+ docs/skill
 ### 3. 可视确认（推荐）
 
 ```bash
-npm run capture-themes   # 重拍 assets/theme-overview*.png（含新风格）
+npm run capture-themes   # 重拍 assets/theme-overview.png（含新风格）
 ```
 
 并在 `assets/style-gallery.html` 的风格选择器里加一项（纯展示用）。

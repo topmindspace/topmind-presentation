@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""topmind-presentation · 双通道交叉验证（可选依赖 python-pptx）：
-① A 通道（手写 OOXML）与 B 通道（pptxgenjs）产物均可被 python-pptx 严格解析
-② 两通道逐页文本集合一致（同一模型 → 同一内容；段落换行表示差异已归一）
-   归一化：B 通道带数据的图表为原生 chart part（可编辑数据）——图表类别标签并入
-   文本集合、纯数值 token（含百分数）两端过滤（A 通道形状版的数值标签 vs B 通道 chart 数据值）
-③ 文本溢出启发式：文本估算宽 vs shape 宽 × 可容行数
-④ B 通道原生图表数值 ↔ 模型数值（类别标签一致不代表数值一致；数值错乱只能这里拓）
-⑤ 字号比例尺同源：B 的字号必须是 A 字号集的子集（防 modeSize()/sz() 后处理漂移）
-默认 SKIP；加 --full-ab 才执行。用法：先 node scripts/gen_channel_a.js 生成 A 通道产物，再 python scripts/cross_verify.py
-改 pptx-export.js 序列化骨架后必跑（见 references/pptx-export.md 双裁判教训）。
+"""topmind-presentation · HTML ↔ PPTX 同源核对（可选依赖 python-pptx）
+
+M2 起浏览器端几何引擎（原 旧浏览器通道（已删除））已删除，版式几何只在 build_pptx.js 实现一次；本脚本改为核对
+「同一模型 → HTML 与 PPTX 同源」：页序计划（lib_solver 拆页）、章节标题顺序、原生图表数值、
+形状图表数据标签、文本溢出启发式。用法：先 python scripts/regression.py 生成 PPTX，再
+python scripts/cross_verify.py。函数 chart_data_verify 等被 negative_tests.py 复用。
 """
 import json
 import re
@@ -24,8 +20,7 @@ except ImportError:
     Presentation = None
 
 ROOT = Path(__file__).resolve().parent.parent
-A_DIR = ROOT / 'dist' / 'regression-a'    # A 通道（页面直导引擎）
-B_DIR = ROOT / 'dist' / 'regression'      # B 通道（pptxgenjs）
+B_DIR = ROOT / 'dist' / 'regression'      # 精导通道产物（pptxgenjs）
 MODEL_DIR = ROOT / 'assets' / 'examples'
 
 # 文本度量单源（与 build_pptx.js / validate_pptx.py 同值）——三侧各自硬编码会让
@@ -41,7 +36,7 @@ EM_ASCII_RATIO = float(_TM.get('emAsciiRatio') or 0.52)
 # 形态变换类图表：模型里的负值在图上是「向下的正高度条」，按绝对值比对
 SIGNLESS_CHARTS = {'waterfall', 'gauge', 'funnel', 'bullet'}
 
-# 纯数值 token（含千分位/小数/百分号/常见单位后缀）——图表数据标签在 A 通道是
+# 纯数值 token（含千分位/小数/百分号/常见单位后缀）——图表数据标签在 旧浏览器通道（已删除）是
 # 文本（值+unit，如 "9pt"），B 通道进 chart part；比对前两端过滤。类别标签（如 "2026Q3"）
 # 不匹配此模式，仍参与一致性检查。
 NUMERIC_TOKEN = re.compile(
@@ -50,7 +45,7 @@ NUMERIC_TOKEN = re.compile(
 
 
 def slide_texts(prs):
-    """每页文本集合（逐行拆分——A 通道段落 \\n 与 B 通道 breakLine \\n\\n 表示差异归一；
+    """每页文本集合（逐行拆分——旧浏览器通道（已删除）段落 \\n 与 B 通道 breakLine \\n\\n 表示差异归一；
     忽略空白、页码与纯数值 token；B 通道原生图表的类别标签并入集合）。"""
     pages = []
     for slide in prs.slides:
@@ -71,7 +66,7 @@ def slide_texts(prs):
                                 texts.append(t)
             elif getattr(shape, 'has_chart', False):
                 # B 通道原生数据图表——类别标签（实质内容）并入；数据值已按纯数值过滤。
-                # 类别标签同样过 NUMERIC_TOKEN——A 通道文本统一过滤，两端语义对称
+                # 类别标签同样过 NUMERIC_TOKEN——旧浏览器通道（已删除）文本统一过滤，两端语义对称
                 # （否则 gauge 的 '76%'、stack 的年份 '2023' 这类数值型类别会造成单边误报）。
                 try:
                     cats = list(shape.chart.plots[0].categories)
@@ -246,136 +241,98 @@ def chart_label_presence(prs) -> list[int]:
     return flagged
 
 
+def _plan(model) -> list[tuple[str, str]]:
+    """页序计划（与 assets/pptx-export.js pagePlan / build_pptx.js 同规则，经 lib_solver 拆页）。"""
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    import lib_solver  # noqa: PLC0415
+    solved, _ = lib_solver.split_model(model)
+    plan = [('cover', model.get('title') or '')]
+    ag = model.get('agenda') or []
+    plan += [('agenda', '')] * ((len(ag) + 11) // 12)
+    plan += [('section', s.get('title') or '') for s in solved.get('sections') or []]
+    if model.get('closing'):
+        plan.append(('closing', (model.get('closing') or {}).get('title') or ''))
+    return plan
+
+
+def _norm(t: str) -> str:
+    return re.sub(r'\s+', '', str(t or ''))
+
+
+def _html_titles(html: str) -> list[str]:
+    """HTML 正文内各幻灯片标题（h1/h2 文本，去标签）。"""
+    body = re.sub(r'<(script|style)\b[\s\S]*?</\1>', '', html)
+    return [_norm(re.sub(r'<[^>]+>', '', m)) for m in re.findall(r'<h[12]\b[^>]*>([\s\S]*?)</h[12]>', body)]
+
+
 def main() -> int:
+    """HTML ↔ PPTX 同源核对（M2 起替代 A/B 双通道比对：浏览器端几何引擎已删除）。
+    对每个示例：① PPTX 可被 python-pptx 解析 ② PPTX 页数 = 求解器页序计划页数
+    ③ 每个章节页标题按序出现在 PPTX 对应页 ④ 同一标题按序出现在 HTML 正文
+    ⑤ 原生图表数值 = 模型数值 ⑥ 形状图表须附数据标签 ⑦ 文本溢出启发式（WARN）。"""
     if Presentation is None:
         print('python-pptx 未安装')
         return 2
-    fails = []
-    a_files = sorted(A_DIR.glob('*.pptx'))
-    print(f'A 通道产物 {len(a_files)} 个 · B 通道产物 {len(sorted(B_DIR.glob("*.pptx")))} 个\n')
-    all_overflow = []
-
-    for ap in a_files:
-        bp = B_DIR / ap.name
-        name = ap.stem
-        # ① 可解析性
-        try:
-            prs_a = Presentation(str(ap))
-        except Exception as e:
-            fails.append(f'{name}: A 通道 python-pptx 解析失败 {e}')
-            continue
+    fails, all_overflow = [], []
+    models = sorted(MODEL_DIR.glob('*.model.json'))
+    for mp in models:
+        name = mp.name[:-len('.model.json')]
+        bp = B_DIR / f'{name}.pptx'
+        hp = MODEL_DIR / f'{name}.html'
         if not bp.exists():
-            fails.append(f'{name}: B 通道产物缺失')
+            fails.append(f'{name}: PPTX 产物缺失（先跑 regression.py 生成 {bp.relative_to(ROOT)}）')
             continue
         try:
-            prs_b = Presentation(str(bp))
-        except Exception as e:
-            fails.append(f'{name}: B 通道 python-pptx 解析失败 {e}')
+            prs = Presentation(str(bp))
+        except Exception as e:  # noqa: BLE001
+            fails.append(f'{name}: python-pptx 解析失败 {e}')
             continue
-        # ② 逐页文本一致性（v9：A/B 不必逐字全等——A 预览为形状近似；
-        #    要求「标题+主文本 ≥80% 交集覆盖」，杜绝截断/串页，又不因图表标签形态差误杀）
-        ta, tb = slide_texts(prs_a), slide_texts(prs_b)
-        if len(ta) != len(tb):
-            fails.append(f'{name}: 页数不一致 A={len(ta)} B={len(tb)}')
-            continue
-        min_cov = 0.80
-        try:
-            min_cov = float((json.loads((ROOT / 'scripts' / 'layout-constants.json')
-                                       .read_text(encoding='utf-8'))
-                             .get('qualityGates') or {}).get('roundtripMin') or 0.8)
-        except Exception:
-            pass
-        diff_pages = []
-        for i, (x, y) in enumerate(zip(ta, tb), 1):
-            sx, sy = set(x), set(y)
-            if not sx and not sy:
-                continue
-            inter = sx & sy
-            cov = len(inter) / max(1, max(len(sx), len(sy)))
-            if cov < min_cov:
-                diff_pages.append((i, cov, sorted(sx - sy)[:3], sorted(sy - sx)[:3]))
-        if diff_pages:
-            for i, cov, only_a, only_b in diff_pages[:3]:
-                fails.append(f'{name}: 第{i}页文本覆盖 {cov:.0%} <{min_cov:.0%} '
-                             f'A独有{only_a} B独有{only_b}')
-        # ③ 溢出启发式（对两通道都跑）
-        all_overflow += overflow_estimate(prs_a, name + '/A')
-        all_overflow += overflow_estimate(prs_b, name + '/B')
-        # ④ B 通道原生图表数值 ↔ 模型（A 通道是形状还原，不产 chart part）
-        chart_note = ''
-        mp = MODEL_DIR / f'{name}.model.json'
-        if mp.exists():
-            try:
-                model = json.loads(mp.read_text(encoding='utf-8'))
-            except json.JSONDecodeError as e:
-                fails.append(f'{name}: 模型不可解析 {e}')
-                model = None
-            if model:
-                data_issues = chart_data_verify(prs_b, model, name)
-                fails += data_issues
-                chart_note = ' 图表数值=' + ('PASS' if not data_issues else f'DIFF({len(data_issues)})')
-        status = 'PASS' if not diff_pages else f'LOWCOV p{[d[0] for d in diff_pages]}'
-        # ⑤ 字号比例尺同源：B 的字号必须都来自 A 同一张表。
-        #    反向不成立——A 把图表渲染成形状，标签字号会多出来（B 的在 chart part 内）。
-        fa, fb = font_sizes(prs_a), font_sizes(prs_b)
-        alien = sorted(fb - fa)
-        if alien:
-            fails.append(f'{name}: B 通道出现 A 没有的字号 {alien}'
-                         f'（两通道应同走 modeTypeScale；modeSize() 与 sz() 的钳制/取整须一致）')
-        sz_note = ' 字号比例尺=' + ('PASS' if not alien else 'DRIFT')
-        # ⑥ 跨通道一致性：Agenda 阅读顺序 / 元素数量 / 图表数据标签
-        ao_a, ao_b = agenda_order(prs_a), agenda_order(prs_b)
-        ag_note = ''
-        if ao_a and ao_b and ao_a != ao_b:
-            fails.append(f'{name}: Agenda 阅读顺序不一致 A={ao_a[:4]}… B={ao_b[:4]}…')
-            ag_note = ' Agenda序=DRIFT'
-        elif ao_a and ao_b:
-            ag_note = ' Agenda序=PASS'
-        ec_a, ec_b = element_counts(prs_a), element_counts(prs_b)
-        # A/B 图表实现路径不同（形状近似 vs 原生/形状），形状总数不可比。
-        # 只对图片数（应精确一致）做硬比对——图片是同一份素材，数量错=内容丢失。
-        cnt_diff = []
-        for i, ((sa, pa, ca), (sb, pb, cb)) in enumerate(zip(ec_a, ec_b), 1):
-            if pa != pb:
-                cnt_diff.append((i, f'pics A={pa} B={pb}'))
-        cnt_note = ''
-        if cnt_diff:
-            fails.append(f'{name}: 图片数量不一致 {cnt_diff[:3]}（同一模型应同数）')
-            cnt_note = ' 图片数=DRIFT'
-        else:
-            cnt_note = ' 图片数=PASS'
-        lab_a = chart_label_presence(prs_a)
-        lab_b = chart_label_presence(prs_b)
-        lab_note = ''
-        if lab_a or lab_b:
-            fails.append(f'{name}: 图表缺数据标签 A页{lab_a} B页{lab_b}（形状通道须附数值）')
-            lab_note = ' 图表标签=MISS'
-        else:
-            lab_note = ' 图表标签=PASS'
-        print(f'{name}: A可解析✓ B可解析✓ 页数={len(ta)} 逐页文本={status}{chart_note}{sz_note}'
-              f'{ag_note}{cnt_note}{lab_note}')
-
-    print('\n── 溢出启发式（check-overflow · 18% 容差）──')
-    if all_overflow:
-        for i in all_overflow[:20]:
-            print('  [WARN]', i)
-    else:
-        print('  两通道全部通过（无文本超容 shape）')
-
+        model = json.loads(mp.read_text(encoding='utf-8'))
+        plan = _plan(model)
+        n = len(prs.slides)
+        if n != len(plan):
+            fails.append(f'{name}: PPTX {n} 页 ≠ 页序计划 {len(plan)} 页（HTML/PPTX 拆页不同源）')
+        texts = [''.join(_norm(x) for x in pg) for pg in slide_texts(prs)]
+        miss_p = [i + 1 for i, (k, t) in enumerate(plan)
+                  if k == 'section' and t and i < len(texts) and _norm(t)[:12] not in texts[i]]
+        if miss_p:
+            fails.append(f'{name}: PPTX 第 {miss_p[:5]} 页标题与页序计划不符')
+        miss_h = []
+        if hp.exists():
+            ht, pos = _html_titles(hp.read_text(encoding='utf-8')), 0
+            for k, t in plan:
+                if k != 'section' or not t:
+                    continue
+                key = _norm(t).replace('（续）', '')[:12]
+                j = next((x for x in range(pos, len(ht)) if key in ht[x]), None)
+                if j is None:
+                    miss_h.append(t[:16])
+                else:
+                    pos = j
+            if miss_h:
+                fails.append(f'{name}: HTML 正文缺少/乱序章节标题 {miss_h[:3]}')
+        data_issues = chart_data_verify(prs, model, name)
+        fails += data_issues
+        lab = chart_label_presence(prs)
+        if lab:
+            fails.append(f'{name}: 图表缺数据标签 页{lab}（形状图表须附数值）')
+        all_overflow += overflow_estimate(prs, name)
+        print(f'{name}: 可解析✓ 页数={n}/{len(plan)} 标题序={"PASS" if not miss_p else "DIFF"} '
+              f'HTML序={"PASS" if not miss_h else "DIFF"} 图表数值={"PASS" if not data_issues else "DIFF"}')
+    print('\n── 溢出启发式（check-overflow · 18% 容差，仅提示）──')
+    for i in all_overflow[:20]:
+        print('  [WARN]', i)
+    if not all_overflow:
+        print('  全部通过（无文本超容 shape）')
     print('\n' + '=' * 50)
     if fails:
-        print('交叉验证失败:')
+        print('同源核对失败:')
         for f in fails:
             print('  [FAIL]', f)
         return 1
-    print('双通道交叉验证通过：python-pptx 第三方裁判确认 A/B 产物均可解析、'
-          '逐页文本一致、原生图表数值与模型一致')
+    print('HTML ↔ PPTX 同源核对通过：页序计划一致、标题按序对齐、原生图表数值与模型一致')
     return 0
 
 
 if __name__ == '__main__':
-    # Batch 2: A/B 全文对等默认关闭；显式 --full-ab 才跑（Fast/标准交付不依赖）
-    if '--full-ab' not in sys.argv:
-        print('cross_verify: SKIP（默认关闭；需要 A/B 全文对等时加 --full-ab）')
-        sys.exit(0)
     sys.exit(main())

@@ -4,7 +4,6 @@
 
 用法:
     python validate_pptx.py <报告.pptx> [--strict] [--model=报告.model.json] [--json-out=报告.json]
-                            [--allow-shape-charts]
                             [--deep --emit-manifest=报告.manifest.json]   # 深度模式（高保真/1:1）
 输出约定:
     **stdout 恒为完整 JSON 报告**（供 probe_image_export.py / 流水线直接 json.loads 消费）；
@@ -1414,7 +1413,6 @@ def validate_model_roundtrip(
     slide_texts: list[str],
     slide_count: int,
     chart_count: int = -1,
-    allow_shape_charts: bool = False,
     slide_table_counts: list[int] | None = None,
     slide_notes: list[str] | None = None,
     slide_chart_texts: list[str] | None = None,
@@ -1477,10 +1475,9 @@ def validate_model_roundtrip(
         warnings.append(issue("MODEL_ROUNDTRIP_COVER_TITLE", "模型封面标题未出现在第 1 页。"))
     # 原生数据图表硬门禁（按类型断言）：charts.registry 中 pptx=native 的图表必须落成
     # chart part（可编辑数据）；pptx=shape 的图表走高保真形状还原 + 数据表，不要求 chart part。
-    # （allow_shape_charts=True 仅供 A 通道预览引擎回归豁免——交付通道一律要求原生图表）
     specs = _model_chart_specs(model)
     expected_native = sum(1 for s in specs if s["channel"] == "native")
-    if not allow_shape_charts and chart_count >= 0 and expected_native > chart_count:
+    if chart_count >= 0 and expected_native > chart_count:
         warnings.append(
             issue(
                 "MODEL_CHART_COUNT",
@@ -1526,9 +1523,7 @@ def validate_model_roundtrip(
                 )
     # notes 策略声称「数据写入演讲者备注」——不核对就只是一句承诺：
     # 备注丢了，用户打开 PPTX 无从得知，图表数据就此不可追溯。
-    # 仅对交付通道生效：A 预览引擎不产 notesSlide（预览也看不到备注），与
-    # allow_shape_charts 同一道通道能力边界。
-    if slide_notes is not None and not allow_shape_charts:
+    if slide_notes is not None:
         for i, sec in enumerate(sections):
             slide_no = first_sec + i
             if slide_no - 1 >= len(slide_notes):
@@ -1644,7 +1639,6 @@ def validate_pptx(
     model_path: str | Path | None = None,
     *,
     strict: bool = False,
-    allow_shape_charts: bool = False,
     deep: bool = False,
 ) -> dict[str, Any]:
     source = Path(path)
@@ -1803,7 +1797,6 @@ def validate_pptx(
                     validate_model_roundtrip(
                         model, slide_texts, report["summary"]["slide_count"],
                         chart_count=report["summary"]["charts"],
-                        allow_shape_charts=allow_shape_charts,
                         slide_table_counts=[s.get("tables", 0) for s in report["slides"]],
                         slide_notes=slide_notes,
                         slide_chart_texts=slide_chart_texts,
@@ -2004,9 +1997,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("pptx", help="PPTX 文件路径")
     parser.add_argument("--model", help="topmind-presentation model.json（extract_model.py 产物）：往返保真检查")
-    parser.add_argument("--allow-shape-charts", action="store_true",
-                        help="豁免 MODEL_CHART_COUNT 与 MODEL_CHART_NOTES_MISSING（仅 A 通道预览引擎回归；"
-                             "交付通道要求原生图表与备注数据表）")
     parser.add_argument("--strict", action="store_true", help="0 errors / 0 warnings 才通过")
     parser.add_argument("--deep", action="store_true",
                         help="深度模式（高保真/1:1 诉求）：额外跑连续文本流与空间锚点检查，并纳入 strict 门禁")
@@ -2022,7 +2012,6 @@ def main(argv: list[str] | None = None) -> int:
         args.pptx,
         model_path=args.model,
         strict=args.strict,
-        allow_shape_charts=args.allow_shape_charts,
         deep=args.deep,
     )
     if args.emit_manifest:

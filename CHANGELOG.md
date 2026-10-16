@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## [Unreleased] — M2 HTML ↔ PPTX 同源（main，未发版）
+
+### 同源
+- 新增 `scripts/lib_solver.py`（与 lib_solver.js 逐值对齐同一 golden，120 例），`render_from_model.py` 渲染前同样拆页，HTML 与 PPTX 页序一致。
+- 浏览器运行时 `assets/pptx-export.js` 删除整套 OOXML 几何引擎（与服务端不一致、仅用于预览），只保留 schema 校验、内联求解器（`__TOPPPT_SOLVER__` 注入）与 `pagePlan()`；每份 HTML 约减 90KB。
+- 预览模态改为按 pagePlan 克隆真实 HTML 版块作缩略图，标注页型与续页；修复缩略图网格行被压扁。
+- `cross_verify.py` 改为默认运行的同源核对：页数 = 求解页计划、PPTX/HTML 标题顺序、图表数据与标签、溢出；当即发现 business-blue 引用页顺序漂移并修正。
+
+### 原生图表
+- 甘特 / 进度 / 漏斗 / 对比条改为 PPTX 原生可编辑条形图（隐藏基底、剩余轨道、对称占位技巧），删除 shapeGantt / shapeFunnel / shapeVsbar 形状绘制；新增 `tests/charts/native-rows.model.json` 探针（CI 断言 ≥4 个 chart part）。
+
+### 清理
+- 删除 `scripts/gen_channel_a.js`、`dist/regression-a`、`validate_pptx --allow-shape-charts`、sync_runtime 中针对旧几何的检查与误报；文档同步改写（pptx-export.md 等）；feedback 门禁改为断言浏览器端不再含几何引擎。
+
 ## [Unreleased] — M1 布局求解器（main，未发版）
 
 ### 求解器与容量

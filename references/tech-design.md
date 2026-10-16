@@ -29,7 +29,7 @@
 | 单源 | 内容 | 消费方 |
 |------|------|--------|
 | `scripts/layout-constants.json` | 页面几何 `page` / **12 列网格 `grid`** / **语义字阶 `typography` C0–T14** / 三模式比例尺 `typeScale`+`modeTypeScale` / 页型几何 `pageTypes`+`pageTypeGeometry` / **9 风格 token `styles`+`stylesDark`+`styleAccents`** / **编码色板 `styleDataColors`+`styleDataColorsDark`（9 套 × 亮暗 × c1–c5）** / **图表登记四元组 `charts.registry`** / 图表最小尺寸 `charts.minSize` / **图表多样性预算 `charts.variety`** / **容器内边距 `containers`** / **锚点容差 `anchorTolerance`** / **图片准入门 `imageAdmission`** / **图片规格 `imageSpec`**（版式 `layouts` / 比例 `ratioDefault`+`ratioCssClass` / 建议尺寸 / 占位标签 / 体积上限） / **深度模式 `deepMode`** / 校验预算 `checkBudgets` / 强调带 `emphasis` / 待核实 `annotations` / 去AI味词 `aiFlavor` / **内容级质量 `contentQuality`**（版式节奏 / so-what 实质 / research 标题判断） | `build_pptx.js`（require）、`pptx-export.js`（注入常量块）、三模板、`style-gallery.html`、`validate_report.py`、`validate_pptx.py`、`audit_styles.py`、`audit_skill.py`、`prepare_images.py`、`evals/run_evals.py` |
-| `scripts/model-schema.json` | 29 种页型的字段与必填约束 / **图表类型白名单 `chartTypes`（30 类：16 原生 + 14 形状）** / **数据表策略 `chartDataTable`** / 通用可选字段 `commonSectionFields` | `extract_model.py`（本地校验）、`pptx-export.js`（浏览器端 `validateModel`） |
+| `scripts/model-schema.json` | 29 种页型的字段与必填约束 / **图表类型白名单 `chartTypes`（30 类：20 原生 + 10 形状）** / **数据表策略 `chartDataTable`** / 通用可选字段 `commonSectionFields` | `extract_model.py`（本地校验）、`pptx-export.js`（浏览器端 `validateModel`） |
 | `layout-constants.json` → `layoutSlots` | **页型布局 IR（29 页型全量）**：语义槽位（head/primary/secondary/annotation + required）——双通道按同一槽位语义落位 | `sync_runtime.py`（完整性校验）；`lib_layout_regions.js`（槽位→英寸矩形）；`extract_snippet.py --page-type` |
 | `scripts/icon_lib.js` | **语义图标库单源**（20 名 → 24×24 stroke SVG；与 `icons.md` 高频取码 / `render_from_model.ICONS` 同键） | `build_icon_assets.js`（栅格化）、`build_pptx.js`（真导出 PNG）、`icon_raster.js` |
 | `scripts/icon-assets.json` | **图标 PNG 资产缓存**（`build_icon_assets.js` 生成 · sharp 栅格化 · 20 图标 × 各风格 accent 色；gitignore，可再生成） | `build_pptx.js`（同步读取；缺失时 execFileSync 自动补齐） |
@@ -47,23 +47,19 @@
 7. **语义字阶**：每个 level 的 `role` 在 `modeTypeScale` 中存在
 8. **页型布局 IR**：`layoutSlots（LC）` 每个页型在 schema 中存在，且含 head + primary 槽位
 
-> **图表计数的两种口径**（同一事实的两种切法，勿混用）：`registry` 视角 **36 = 16 原生 + 20 形状**（SKILL.md 铁律 9 用此口径）；`chartTypes` 视角 **30 = 16 原生 + 14 形状**（可作 `chart.type` 的形状类，`pptx-export.md` 页型表用此口径）——差额 6 类是信息图专属页型（sankey/treemap/boxplot/network/marimekko/streamgraph），它们只作 `sections[].type`，不作 `chart.type`。
+> **图表计数的两种口径**（同一事实的两种切法，勿混用）：`registry` 视角 **36 = 20 原生 + 16 形状**（SKILL.md 铁律 9 用此口径）；`chartTypes` 视角 **30 = 20 原生 + 10 形状**（可作 `chart.type` 的形状类，`pptx-export.md` 页型表用此口径）——差额 6 类是信息图专属页型（sankey/treemap/boxplot/network/marimekko/streamgraph），它们只作 `sections[].type`，不作 `chart.type`。
 
-## 三、双通道（A 预览 / B 交付）
+## 三、单引擎 + 同源页序（M2）
 
-| | A 通道（`assets/pptx-export.js`） | B 通道（`scripts/build_pptx.js`） |
+| | 浏览器运行时（`assets/pptx-export.js`） | 精导引擎（`scripts/build_pptx.js`） |
 |---|---|---|
-| 角色 | 页面「预览 PPTX」WYSIWYG + 回归双裁判 | **唯一交付通道** |
-| 输出 | 手写 OOXML 形状/文本框/表格（零依赖，约 120KB） | pptxgenjs → 原生形状 + **原生数据图表**（chart part + 内嵌 Excel） |
-| 图表 | 全部类型做**形状近似**（类别标签与数值都落为文本） | 原生通道走 `addChart`；形状通道走高保真形状还原 + 数据表；**已登记类型禁止静默回落**（`SHAPE_RENDERER_MISSING` / 原生调用失败即非 0） |
-| 一致性 | 与 B 通道**逐页文本集合一致**（`cross_verify.py` 用 python-pptx 第三方裁判核对） | 同左 |
+| 角色 | schema 自检 + 页序计划（`pagePlan`）+ 预览模态 | **唯一交付通道、唯一几何引擎** |
+| 输出 | 不产 OOXML；预览缩略图直接克隆页面 HTML 幻灯片 | pptxgenjs → 原生形状 + **原生数据图表**（chart part + 内嵌 Excel） |
+| 同源 | 求解器由 `sync_runtime.py` 从 `scripts/lib_solver.js` 注入 | `require('./lib_solver.js')`；HTML 渲染端 `lib_solver.py` 用同一份金样逐值校验 |
 
-**为什么手写序列化而不内嵌 pptxgenjs**：pptxgenjs 浏览器版约 700KB，内嵌进每份单文件报告不可接受；手写运行时约 120KB 且与 B 通道消费同一份常量单源。**复用的是引擎与规范，自研的只是轻量序列化轮毂**。
+**为什么删掉浏览器端几何引擎**：M2 之前浏览器内有一套约 2000 行的手写 OOXML 序列化器，与 `build_pptx.js` 各算各的坐标，同一页两端版式长期不一致，而且它只用于预览与回归，从不交付。现在几何只实现一次；浏览器端保留真正同源的部分（schema、求解器、页序），HTML 单文件因此每份缩小约 90KB。
 
-**`cross_verify.py` 归一化三件事**（新增图表类型时必须同步扩展，否则误报）：
-1. B 端 chart part 的 `plots[0].categories` 并入文本集
-2. `NUMERIC_TOKEN` 纯数值 token（含枚举单位）两端对称过滤
-3. `sorted(set(...))` 集合语义去重
+**`cross_verify.py`（HTML ↔ PPTX 同源核对）**：PPTX 页数 = 页序计划；章节标题在 PPTX 与 HTML 中按序对齐；原生图表数值 = 模型数值；形状图表须附数据标签。
 
 ## 四、门禁体系（分层）
 

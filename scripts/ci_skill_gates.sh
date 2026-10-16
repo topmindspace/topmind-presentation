@@ -93,6 +93,8 @@ run_one() {
 
   # M1：布局求解器金样（10 页型族 × 3 模式；确定性 + 超载拆页不变量）
   node tests/solver/test_solver.js
+  # M2：Python 端（HTML 渲染）与 JS 金样逐值一致——HTML/PPTX 拆页同源
+  "$PY" tests/solver/test_solver_py.py
 
   if [[ "$WITH_PPTX" == "1" && -f scripts/smoke_pptx.sh ]]; then
     ensure_python_pptx
@@ -126,6 +128,18 @@ run_one() {
           --model="assets/examples/${RSTEM}.model.json" --strict | tail -1 | sed "s/^/  [${RSTEM}] /"
         [[ ${PIPESTATUS[0]} -eq 0 ]] || { echo "ci_skill_gates: 视觉填充门禁失败 ${RSTEM}" >&2; exit 1; }
       done
+      # M2：行式图表原生化探针（gantt / progress / funnel / vsbar → 原生可编辑 chart part）
+      node scripts/build_pptx.js --out="dist/regression/native-rows.pptx" --strict \
+        --model="tests/charts/native-rows.model.json" >/dev/null
+      "$PY" scripts/validate_pptx.py "dist/regression/native-rows.pptx" --strict \
+        --model="tests/charts/native-rows.model.json" >/dev/null || { echo "ci_skill_gates: 行式原生图表探针失败" >&2; exit 1; }
+      "$PY" - "dist/regression/native-rows.pptx" <<'PYEOF'
+import sys, zipfile
+n = len([x for x in zipfile.ZipFile(sys.argv[1]).namelist() if x.startswith('ppt/charts/chart') and x.endswith('.xml')])
+if n < 4:
+    print(f'ci_skill_gates: 行式图表应有 4 个原生 chart part，实际 {n}'); sys.exit(1)
+print(f'  [native-rows] {n} 个原生 chart part（gantt/progress/funnel/vsbar）')
+PYEOF
       # M1：同一模型两次构建，幻灯片 XML 必须逐字节一致（求解器确定性）
       node scripts/build_pptx.js --out="dist/regression/${VSTEM}.det.pptx" --strict \
         --model="assets/examples/${VSTEM}.model.json" >/dev/null

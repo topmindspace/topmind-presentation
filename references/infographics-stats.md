@@ -91,10 +91,9 @@
 | 几何常量 | `layout-constants.json` → `pageTypes.{sankey,treemap,boxplot,network,marimekko,streamgraph}` | 上限、间距、采样下限的唯一来源 |
 | 页型 schema | `model-schema.json` → `pageTypes.*` | 字段与必填约束（`extract_model.py` 与浏览器端 `validateModel` 同源消费） |
 | B 通道（交付） | `build_pptx.js` → `infoSankey` / `infoTreemap` / `infoBoxplot` / `infoNetwork` / `infoMarimekko` / `infoStreamgraph` | 全原生形状（`pictures=0`）+ 数据表 |
-| A 通道（预览/回归） | `assets/pptx-export.js` → `infoApprox` | 形状近似，**文本集合与 B 严格一致** |
 | HTML 侧写法 | 本文 §71–§77 | 内联 SVG 写法 + `data-chart` 登记 |
 | 正文对应断言 | `validate_report.py` `TYPE_FEATURE` | `data-chart="sankey"` 等必须出现在正文 |
-| 双通道一致 | `cross_verify.py` | 逐页文本集合比对（chart categories 并入 + 数值 token 对称过滤） |
+| HTML ↔ PPTX 同源 | `cross_verify.py` | 页序计划 / 标题顺序 / 原生图表数值一致 |
 
 **回归要求**：改动任一信息图页型的几何/渲染后，必跑 `python scripts/regression.py`（含 A/B 双通道 strict 与 `cross_verify`）；新增页型必须补齐**四件套**（schema 条目 + 几何常量 + 双引擎渲染 + 样例与校验断言）。
 

@@ -641,7 +641,7 @@ def _check_pptx_export(txt, chk):
     另：内联运行时必须带 __TOPPPT_RUNTIME_SHA__ 且与当前 pptx-export.js 同源。"""
     has_btn = 'id="pptPreviewBtn"' in txt
     has_model = 'REPORT_MODEL' in txt
-    has_runtime = ('g.TopPptHtml = api' in txt) and ('function slidesXml' in txt)
+    has_runtime = ('g.TopPptHtml = api' in txt) and ('function pagePlan' in txt)
     if has_btn:
         chk("PPTX 预览按钮配套（REPORT_MODEL + 预览运行时）",
             has_model and has_runtime,

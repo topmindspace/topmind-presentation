@@ -188,9 +188,9 @@ python scripts/validate_pptx.py 2026-09-15-主题.pptx --strict --model=….mode
 ```
 
 **交付前必过**：`validate_report.py --strict` 0/0（**Mode A / presentation 隐含 `--layout-qa`**；research/architecture 不强制）；含 PPTX 时 `validate_pptx.py --strict --model=` 0/0。
-**PPTX 通道**：默认交付只跑 **B 通道**（`build_pptx.js`）；**A 通道**（`pptx-export.js` / `gen_channel_a.js`）仅预览与 `cross_verify` / 回归——**勿把 A 产物当交付**。
+**PPTX 通道**：交付只跑 `build_pptx.js`（唯一几何引擎）；浏览器运行时 `pptx-export.js` 只做 schema 自检与页序计划，不产 PPTX。
 **推荐一键门禁**：`python scripts/quality_gate.py 报告.html [--pptx x.pptx --model x.model.json]`（HTML/PPTX/evals **并行**；presentation 附 layout-qa；`--deliver` 出七要素，勿手拼）。
-**A/B 全文对等**：`cross_verify.py` 默认 SKIP，仅 `--full-ab` / `regression.py --full-ab` 启用。
+**HTML ↔ PPTX 同源**：`cross_verify.py` 核对页序计划、标题顺序与原生图表数值（`regression.py` 自动纳入）。
 **PPTX 冒烟**：`bash scripts/smoke_pptx.sh`（extract_model → build_pptx → validate_pptx --strict）。
 **失败自修复**：按输出逐条修 → 重跑至 0/0；顺序见 `failure-modes.md`。
 

@@ -251,5 +251,5 @@
 | 图标 PNG 进了内容图门禁 | `PICTURES_NOT_DECLARED` 误报 | 图标 `objectName` 必须以 `icon:` 开头；`validate_pptx` 按前缀分流到 `icon_pictures` |
 | 图片占位标签 A/B 不同串 | `图片数=DRIFT` / 文本覆盖不足 | 占位标签由 `imageSpec` 同源拼接；`render_from_model` 与 PPTX `imgPlaceholderLabel` 必须同串 |
 
-**根因**：页型容量契约缺失 + 图表双通道无还原度约定 + 图标/占位文本两处手写。**门禁**：`contentQuality.agenda`（singleMax/splitMax/titleMaxChars/chapterMax）、`charts.fidelityMap`、`cross_verify --full-ab`、`icon_pictures` 分流计数。
+**根因**：页型容量契约缺失 + 图表双通道无还原度约定 + 图标/占位文本两处手写。**门禁**：`contentQuality.agenda`（singleMax/splitMax/titleMaxChars/chapterMax）、`charts.fidelityMap`、`cross_verify`（HTML↔PPTX 同源核对）、`icon_pictures` 分流计数。
 

@@ -1085,7 +1085,7 @@ def main() -> int:
     assert MODEL_RE.search(t), f'{tpl_path.name} 缺少 REPORT_MODEL 块'
     t = MODEL_RE.sub('window.REPORT_MODEL = ' + json.dumps(model, ensure_ascii=False, indent=2) + ';', t, count=1)
     assert f'"mode": "{mode}"' in t and f'data-mode="{mode}"' in t, 'mode 注入不一致'
-    assert 'g.TopPptHtml = api' in t and 'function slidesXml' in t, '预览运行时缺失（标记块被破坏）'
+    assert 'g.TopPptHtml = api' in t and 'function pagePlan' in t, '页序运行时缺失（标记块被破坏）'
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)

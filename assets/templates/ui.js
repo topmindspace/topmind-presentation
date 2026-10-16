@@ -248,11 +248,10 @@ if(e.isIntersecting){e.target.classList.add('in');o.unobserve(e.target)}})},
   measure();paint();
 })();
 
-/* ══ PPTX 预览 / 提示词复制 / 快捷键（预览通道 UI 层；与智能体精导同一序列化引擎）
-   版式/文本所见即所得；带数据的原生图表在交付 PPTX 中为真 chart part（双击可编辑数据），
-   预览侧为形状近似——形态以精导产物为准。 ══ */
+/* ══ PPTX 页序预览 / 提示词复制 / 快捷键
+   M2：页序由运行时 pagePlan()（与 build_pptx.js 同一求解器）给出，缩略图克隆页面幻灯片；
+   版式几何只在精导通道 build_pptx.js 实现一次。 ══ */
 (function(){
-  var PW=13.333,PH=7.5,EMU=914400;
   var modal=document.getElementById('pptModal');
   var body=document.getElementById('pptBody'),meta=document.getElementById('pptMeta'),
       issues=document.getElementById('pptIssues'),
@@ -272,159 +271,51 @@ if(e.isIntersecting){e.target.classList.add('in');o.unobserve(e.target)}})},
 
   function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
-  /* ── slide XML → DOM 缩略（与导出同一序列化输出，所见即所得） ── */
-  function renderSlide(xml,i,model){
-    var doc=new DOMParser().parseFromString(xml,'application/xml');
-    var slide=document.createElement('div');slide.className='pslide';
-    var no=document.createElement('span');no.className='pslide__no';no.textContent=(i+1);
-    slide.appendChild(no);
-    var tree=doc.getElementsByTagName('p:spTree')[0];
-    if(tree){[].forEach.call(tree.children||tree.childNodes,function(n){
-      if(n.nodeType!==1)return;
-      if(n.tagName==='p:sp')renderSp(slide,n);
-      else if(n.tagName==='p:graphicFrame')renderTable(slide,n);});}
-    paintImages(slide,i,model);
-    return slide;
+  /* ── 页序预览（M2 同源）：页序来自运行时 pagePlan()（与 build_pptx.js 同一求解器拆页），
+     缩略图直接克隆页面上对应的 HTML 幻灯片——不再有第二套浏览器端几何引擎。 ── */
+  function pageSections(){
+    return [].slice.call(document.querySelectorAll('main section, body > section')).filter(function(x){
+      return !x.closest('.pmodal')&&x.offsetHeight>0});
   }
-  /* 把模型里的素材图片填进图位块（预览保真）。
-     页序 = 封面 + 大纲(可选) + sections + 收尾 —— 与 slidesOf 同规则。 */
-  function imageSrcsFor(model,idx){
-    try{
-      var secs=(model&&model.sections)||[];
-      var off=1+((model&&model.agenda&&model.agenda.length)?1:0);
-      var si=idx-off;
-      if(si<0||si>=secs.length)return null;
-      var sec=secs[si]||{},srcs=[],ph=false;
-      var holders=[sec.image,sec.right&&sec.right.image];
-      holders.forEach(function(img){
-        if(!img||typeof img!=='object')return;
-        if(img.placeholder){ph=true;return}
-        if(typeof img.src==='string'&&img.src)srcs.push(img.src);
-        (img.items||[]).forEach(function(it){
-          if(typeof it==='string'&&it)srcs.push(it);
-          else if(it&&typeof it.src==='string'&&it.src)srcs.push(it.src);});
-      });
-      return {ph:ph,srcs:srcs};
-    }catch(e){return null}
-  }
-  function paintImages(slide,idx,model){
-    var info=imageSrcsFor(model,idx);if(!info)return;
-    var slots=[].slice.call(slide.querySelectorAll('[data-el="img"],[data-el="imgph"]'));
-    if(info.ph&&!info.srcs.length)return;      /* 纯占位：保留虚线占位块与标签 */
-    slots.forEach(function(el,k){
-      var src=info.srcs[k]||info.srcs[0];if(!src)return;
-      el.style.backgroundImage='url("'+String(src).replace(/"/g,'%22')+'")';
-      el.style.backgroundSize='cover';el.style.backgroundPosition='center';
-      el.style.border='none';el.style.borderRadius='0.14em';
-    });
-  }
-  function geomOf(scope){
-    var xf=scope.getElementsByTagName('a:xfrm')[0];if(!xf)return null;
-    var off=xf.getElementsByTagName('a:off')[0],ext=xf.getElementsByTagName('a:ext')[0];
-    if(!off||!ext)return null;
-    return{x:+off.getAttribute('x')/EMU,y:+off.getAttribute('y')/EMU,
-           w:+ext.getAttribute('cx')/EMU,h:+ext.getAttribute('cy')/EMU};
-  }
-  function place(el,g){
-    el.style.left=(g.x/PW*100)+'%';el.style.top=(g.y/PH*100)+'%';
-    el.style.width=(g.w/PW*100)+'%';el.style.height=(g.h/PH*100)+'%';
-  }
-  function fillOf(node){
-    if(!node)return null;
-    var f=node.getElementsByTagName('a:solidFill')[0];if(!f)return null;
-    var c=f.getElementsByTagName('a:srgbClr')[0];
-    return c?'#'+c.getAttribute('val'):null;
-  }
-  function renderSp(slide,sp){
-    var spPr=sp.getElementsByTagName('p:spPr')[0];if(!spPr)return;
-    var g=geomOf(spPr);if(!g)return;
-    var el=document.createElement('div');
-    /* 图位块标记（img 真实图片 / imgph 配图占位）——预览时用真实图片填充图位，
-       让"有配图的页面"在预览里就是交付所见（占位块保持虚线 + 标签）。 */
-    var nv=sp.getElementsByTagName('p:cNvPr')[0];
-    var nm=nv?nv.getAttribute('name'):'';
-    el.setAttribute('data-el',(nm==='img'||nm==='imgph')?nm:'');
-    place(el,g);
-    var fill=fillOf(spPr);
-    if(fill)el.style.background=fill;
-    var prst=spPr.getElementsByTagName('a:prstGeom')[0];
-    if(prst){var t=prst.getAttribute('prst');
-      if(t==='roundRect')el.style.borderRadius='0.14em';
-      else if(t==='ellipse')el.style.borderRadius='50%';}
-    var ln=spPr.getElementsByTagName('a:ln')[0];
-    if(ln&&!fill){var lc=fillOf(ln);if(lc)el.style.border='1px solid '+lc;}
-    var tx=sp.getElementsByTagName('p:txBody')[0];
-    if(tx){
-      var bodyPr=tx.getElementsByTagName('a:bodyPr')[0];
-      var anchor=(bodyPr&&bodyPr.getAttribute('anchor'))||'t';
-      el.style.display='flex';el.style.flexDirection='column';
-      el.style.justifyContent=anchor==='ctr'?'center':(anchor==='b'?'flex-end':'flex-start');
-      el.style.padding='0.06em 0.08em';el.style.boxSizing='border-box';
-      [].forEach.call(tx.getElementsByTagName('a:p'),function(p){
-        var pe=document.createElement('p');
-        var pPr=p.getElementsByTagName('a:pPr')[0];
-        var algn=pPr?pPr.getAttribute('algn'):null;
-        if(algn==='ctr')pe.style.textAlign='center';
-        else if(algn==='r'||algn==='just')pe.style.textAlign='right';
-        [].forEach.call(p.getElementsByTagName('a:r'),function(r){
-          var rPr=r.getElementsByTagName('a:rPr')[0];
-          var run=document.createElement('span');
-          run.style.fontSize=(((rPr&&rPr.getAttribute('sz'))||1000)/100)+'em';
-          if(rPr&&rPr.getAttribute('b'))run.style.fontWeight='700';
-          var col=rPr?fillOf(rPr):null;if(col)run.style.color=col;
-          var lat=r.getElementsByTagName('a:latin')[0];
-          if(lat)run.style.fontFamily=lat.getAttribute('typeface');
-          var tNode=r.getElementsByTagName('a:t')[0];
-          run.textContent=tNode?tNode.textContent:'';
-          pe.appendChild(run);
-        });
-        el.appendChild(pe);
-      });
+  function norm(t){return String(t||'').replace(/\s+/g,'').replace(/（续）$/,'')}
+  function findSection(pg,i,n,secs){
+    if(pg.kind==='cover')return secs[0]||null;
+    if(pg.kind==='closing')return secs[secs.length-1]||null;
+    if(pg.kind==='agenda')return secs.filter(function(x){return x.querySelector('.agenda')})[0]||null;
+    var key=norm(pg.title).slice(0,14);
+    if(!key)return null;
+    for(var k=0;k<secs.length;k++){
+      var h=secs[k].querySelector('h1,h2,.slide__title,.sec__title');
+      if(h&&norm(h.textContent).indexOf(key)>=0)return secs[k];
     }
-    slide.appendChild(el);
+    return null;
   }
-  function renderTable(slide,gf){
-    var g=geomOf(gf);if(!g)return;
-    var el=document.createElement('div');el.setAttribute('data-el','');
-    place(el,g);
-    var tbl=gf.getElementsByTagName('a:tbl')[0];
-    if(tbl){
-      var cols=[].map.call(tbl.getElementsByTagName('a:gridCol'),function(c){return +c.getAttribute('w')});
-      var tot=cols.reduce(function(a,b){return a+b},0)||1;
-      var t=document.createElement('table');
-      t.style.width='100%';t.style.height='100%';t.style.borderCollapse='collapse';
-      [].forEach.call(tbl.getElementsByTagName('a:tr'),function(tr){
-        var re=document.createElement('tr');
-        var tcs=tr.getElementsByTagName('a:tc');
-        for(var ci=0;ci<cols.length;ci++){
-          var td=document.createElement('td');
-          td.style.width=(cols[ci]/tot*100)+'%';td.style.padding='0.08em 0.1em';
-          var tc=tcs[ci];
-          if(tc){
-            var f=fillOf(tc);if(f)td.style.background=f;
-            var r=tc.getElementsByTagName('a:r')[0];
-            if(r){
-              var rPr=r.getElementsByTagName('a:rPr')[0];
-              var run=document.createElement('span');
-              run.style.fontSize=(((rPr&&rPr.getAttribute('sz'))||1000)/100)+'em';
-              if(rPr&&rPr.getAttribute('b'))run.style.fontWeight='700';
-              var col=rPr?fillOf(rPr):null;if(col)run.style.color=col;
-              var tNode=r.getElementsByTagName('a:t')[0];
-              run.textContent=tNode?tNode.textContent:'';
-              td.appendChild(run);
-            }
-          }
-          re.appendChild(td);
-        }
-        t.appendChild(re);
-      });
-      el.appendChild(t);
+  var TYPE_CN={cover:'封面',agenda:'大纲',closing:'收尾'};
+  function renderPage(pg,i,secs){
+    var card=document.createElement('div');card.className='pslide';
+    var src=findSection(pg,i,0,secs);
+    if(src){
+      var stage=document.createElement('div');stage.className='pslide__stage';
+      var clone=src.cloneNode(true);
+      clone.removeAttribute('id');[].forEach.call(clone.querySelectorAll('[id]'),function(e){e.removeAttribute('id')});
+      clone.classList.add('pslide__clone');
+      clone.style.width=src.offsetWidth+'px';clone.style.height=src.offsetHeight+'px';
+      clone.setAttribute('data-w',src.offsetWidth);
+      stage.appendChild(clone);card.appendChild(stage);
+    }else{
+      var ph=document.createElement('div');ph.className='pslide__ph';
+      ph.textContent=pg.title||'（无标题）';card.appendChild(ph);
     }
-    slide.appendChild(el);
+    var cap=document.createElement('div');cap.className='pslide__cap';
+    cap.innerHTML='<b>'+(i+1)+'</b> · '+escHtml(TYPE_CN[pg.kind]||pg.type)+(pg.cont?' · 续页':'')
+      +'<span>'+escHtml(pg.title||'')+'</span>';
+    card.appendChild(cap);
+    return card;
   }
   function fitSlides(){
-    [].forEach.call(body.querySelectorAll('.pslide'),function(s){
-      s.style.fontSize=(s.clientWidth/PW/72)+'px';   /* 1em = 1pt（按当前缩略宽度） */
+    [].forEach.call(body.querySelectorAll('.pslide__clone'),function(c){
+      var st=c.parentNode,w=+c.getAttribute('data-w')||1;
+      var k=st.clientWidth/w;c.style.transform='scale('+k+')';
     });
   }
   function currentModel(){
@@ -448,14 +339,15 @@ if(e.isIntersecting){e.target.classList.add('in');o.unobserve(e.target)}})},
     body.innerHTML='';
     if(window.TopPptHtml&&m&&m.sections){
       try{
-        window.TopPptHtml.slidesXml(m).forEach(function(x,i){body.appendChild(renderSlide(x,i,m))});
+        var secs=pageSections();
+        window.TopPptHtml.pagePlan(m).forEach(function(pg,i){body.appendChild(renderPage(pg,i,secs))});
       }catch(e){body.innerHTML='<div class="t-sm">预览渲染失败：'+escHtml(e.message)+'</div>'}
     }else if(!m){
       body.innerHTML='<div class="t-sm">报告未内嵌 window.REPORT_MODEL 内容模型，无法预览。请按下方提示词回到 AI 对话补全。</div>';
     }
     if(chk.ok){
-      issues.innerHTML='<b>模型自检通过</b>：内容完整（'+chk.pages+' 页）。版式与文本与精导一致；'
-        +'带数据的原生图表在交付 PPTX 中为可编辑数据图表（chart part），预览为形状近似。'
+      issues.innerHTML='<b>模型自检通过</b>：内容完整（'+chk.pages+' 页）。页序与精导 PPTX 一致（同一布局求解器拆页）；'
+        +'缩略图为本页面对应幻灯片，交付 PPTX 中核心图表为原生可编辑图表（双击即可改数据）。'
         +(chk.warnings.length?'<br>· '+chk.warnings.map(escHtml).join('<br>· '):'')
         +'<br>本页面不直接导出 PPTX——复制下方提示词交给 AI，由智能体精导通道生成并过 strict 校验（0/0）后交付。'
         +'<div class="pmodal__prompt">'+escHtml(PROMPT)+'</div>';

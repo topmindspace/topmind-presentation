@@ -960,6 +960,7 @@ function nativeChart(s, c, x, y, w, h, dcols) {
   if (trick.indexOf('stacked+hiddenBase') === 0) { waterfallChart(s, c, pos); return; }
   if (trick.indexOf('doughnut+firstSliceAng') === 0) { gaugeChart(s, c, pos); return; }
   if (trick.indexOf('multiType') === 0) { paretoChart(s, c, pos); return; }
+  if (trick.indexOf('rows:') === 0) { rowsNativeChart(s, c, pos, trick.slice(5)); return; }
 
   /* ── 饼 / 环 ── */
   if (kind === 'doughnut' || kind === 'pie') {
@@ -1044,6 +1045,57 @@ function xyChart(s, c, pos, kind, colors) {
   }
 }
 /* 瀑布图（原生技巧）：隐藏基底 + 增减堆叠柱，叠加累计折线作连接线 */
+/* M2：行式图表改原生可编辑（横向条形图 + 隐形基底技巧），替代原形状拼图。
+ *   gantt    ：基底 = 起点（隐形）+ 时长；数值轴 = 时间刻度
+ *   progress ：完成值 + 剩余轨道（surface 色）堆叠到 max（默认 100）
+ *   funnel   ：两侧对称隐形基底 + 值，居中成漏斗
+ *   vsbar    ：簇状条形，负值向左、正值向右（0 轴居中）
+ * 数值并入类目标签（「标签 · 值」），PowerPoint/WPS 里双击即可改数据。 */
+function rowsNativeChart(s, c, pos, kind) {
+  const labels = (c.labels || []).map(String);
+  const vals = (c.values || []).map(v => Number(v) || 0);
+  const u = c.unit || '';
+  const fmt = (v) => (Math.round(v * 10) / 10) + u;
+  let series, colors, extra = {};
+  if (kind === 'gantt') {
+    const st = labels.map((_, i) => (c.start && Number(c.start[i])) || 0);
+    const span = Number(c.max) || Math.max(1, ...st.map((v, i) => v + vals[i]));
+    const cats = labels.map((lb, i) => lb + ' · ' + fmt(vals[i]));
+    series = [{ name: '起点', labels: cats, values: st }, { name: '时长', labels: cats, values: vals }];
+    colors = [STYLE.bg, STYLE.accent];
+    extra = { valAxisHidden: false, valAxisMaxVal: span, valAxisMinVal: 0,
+      valGridLine: { style: 'solid', color: STYLE.line, size: 0.5 },
+      valAxisLabelColor: STYLE.faint, valAxisLabelFontSize: sz(9.5) };
+  } else if (kind === 'progress') {
+    const mx = Number(c.max) || 100;
+    const cats = labels.map((lb, i) => lb + ' · ' + fmt(vals[i]));
+    series = [{ name: '完成', labels: cats, values: vals }, { name: '剩余', labels: cats, values: vals.map(v => Math.max(0, mx - v)) }];
+    colors = [STYLE.accent, STYLE.surface];
+    extra = { valAxisMaxVal: mx, valAxisMinVal: 0 };
+  } else if (kind === 'funnel') {
+    const vmax = Math.max(1, ...vals);
+    const cats = labels.map((lb, i) => lb + ' · ' + fmt(vals[i]));
+    const pad = vals.map(v => (vmax - v) / 2);
+    series = [{ name: '左', labels: cats, values: pad }, { name: '值', labels: cats, values: vals }, { name: '右', labels: cats, values: pad }];
+    colors = [STYLE.bg, STYLE.accent, STYLE.bg];
+    extra = { valAxisMaxVal: vmax, valAxisMinVal: 0 };
+  } else {
+    const cats = labels.map((lb, i) => lb + ' · ' + fmt(vals[i]));
+    series = [{ name: c.name || '差值', labels: cats, values: vals }];
+    colors = [STYLE.accent];
+    extra = { barGrouping: 'clustered', invertIfNegative: false, catAxisLabelPos: 'low',
+      valGridLine: { style: 'solid', color: STYLE.line, size: 0.5 } };
+  }
+  const opts = Object.assign({
+    barDir: 'bar', barGrouping: 'stacked', barGapWidthPct: kind === 'funnel' ? 12 : 55,
+    showValue: false, showLegend: false, showTitle: false,
+    chartColors: colors, catAxisOrientation: 'maxMin',
+    catAxisLabelColor: STYLE.body, catAxisLabelFontSize: sz(11), catAxisLabelFontFace: STYLE.font,
+    catAxisLineShow: false, valAxisHidden: true, valAxisLineShow: false,
+    catGridLine: { style: 'none' }, valGridLine: { style: 'none' },
+  }, extra, pos);
+  chartTry(s, pptx.ChartType.bar, series, opts, c);
+}
 function waterfallChart(s, c, pos) {
   const labels = (c.labels || []).map(String);
   const deltas = (c.values || []).map(Number);
@@ -1174,15 +1226,11 @@ function nativeDonutChart(s, dcn, dcols, bottomY, topY) {
  * 复杂信息图（sankey/treemap/boxplot/network/marimekko/streamgraph）请用专属页型承载。 */
 function shapeChart(s, c, x, y, w, h, dcols) {
   const t = String(c.type || 'bar').toLowerCase();
-  if (t === 'funnel') { shapeFunnel(s, c, x, y, w, h, dcols); return; }
-  if (t === 'progress') { shapeRows(s, c, x, y, w, h, dcols, 'progress'); return; }
   if (t === 'radialbar') { shapeRows(s, c, x, y, w, h, dcols, 'radialbar'); return; }
   if (t === 'dumbbell') { shapeRows(s, c, x, y, w, h, dcols, 'dumbbell'); return; }
   if (t === 'lollipop') { shapeRows(s, c, x, y, w, h, dcols, 'lollipop'); return; }
   if (t === 'dotplot') { shapeRows(s, c, x, y, w, h, dcols, 'dotplot'); return; }
   if (t === 'bulletchart') { shapeRows(s, c, x, y, w, h, dcols, 'bullet'); return; }
-  if (t === 'gantt') { shapeGantt(s, c, x, y, w, h, dcols); return; }
-  if (t === 'vsbar') { shapeVsbar(s, c, x, y, w, h, dcols); return; }
   if (t === 'sparkline') { shapeSpark(s, c, x, y, w, h, dcols); return; }
   if (t === 'slope') { shapeSlope(s, c, x, y, w, h, dcols); return; }
   if (t === 'waffle') { shapeWaffle(s, c, x, y, w, h, dcols); return; }
@@ -1399,79 +1447,6 @@ function shapeRows(s, c, x, y, w, h, dcols, variant) {
         fill: { color: STYLE.ink }, line: { type: 'none' } });
     }
     shapeValue(s, c, v, trackX + trackW + 0.06, ry, M.valW, rowH, hot);
-  });
-}
-/* 漏斗：逐层收窄的梯形行（用宽度递减的矩形近似，保留标签与数值） */
-function shapeFunnel(s, c, x, y, w, h, dcols) {
-  const M = shapeMetrics(c, w, h);
-  const rowH = Math.max(0.26, Math.min(0.72, h / M.n));
-  M.labels.forEach((lb, i) => {
-    const v = M.values[i] || 0;
-    const ry = y + i * rowH;
-    const hot = v === M.top;
-    const dc = dcols ? dcols[i % dcols.length] : null;
-    const frac = Math.max(0.06, v / M.vmax);
-    const bw = Math.max(0.4, (w - M.valW - 0.2) * frac);
-    const bx = x + (w - M.valW - 0.2 - bw) / 2;
-    s.addShape('rect', { x: bx, y: ry + 0.02, w: bw, h: rowH - 0.06,
-      fill: { color: dc || (hot ? STYLE.accent : STYLE.faint) }, line: { type: 'none' } });
-    s.addText(lb, { x: bx, y: ry + 0.02, w: bw, h: rowH - 0.06,
-      fontFace: STYLE.font, fontSize: sz(11.5), bold: true, color: STYLE.onAccent, align: 'center', valign: 'middle' });
-    shapeValue(s, c, v, x + w - M.valW, ry, M.valW, rowH, hot);
-  });
-}
-/* 甘特 / 路线：行 = 标签 + 偏移起点 + 时长条 */
-function shapeGantt(s, c, x, y, w, h, dcols) {
-  const M = shapeMetrics(c, w, h);
-  const rowH = Math.max(0.24, Math.min(0.6, h / M.n));
-  const trackX = x + M.labelW + 0.08;
-  const trackW = w - M.labelW - M.valW - 0.2;
-  /* 时间轴跨度 = 显式 max，或所有条目的「起点 + 时长」最大值（原按「时长最大值」
-   * 导致 start 偏移超出轨道、形状越界的缺陷） */
-  let span = Number(c.max) || 0;
-  if (!span) {
-    M.values.forEach((dur, i) => {
-      const st = (c.start && Number(c.start[i])) || 0;
-      span = Math.max(span, st + (Number(dur) || 0));
-    });
-  }
-  span = span || 1;
-  M.labels.forEach((lb, i) => {
-    const start = (c.start && Number(c.start[i])) || 0;
-    const dur = M.values[i] || 0;
-    const ry = y + i * rowH;
-    const hot = dur === M.top;
-    const dc = dcols ? dcols[i % dcols.length] : null;
-    shapeLabel(s, lb, x, ry, M.labelW - 0.06, rowH, STYLE.body);
-    s.addShape('rect', { x: trackX, y: ry + rowH * 0.3, w: trackW, h: rowH * 0.36,
-      fill: { color: STYLE.surface }, line: { type: 'none' } });
-    s.addShape('rect', { x: trackX + (start / span) * trackW, y: ry + rowH * 0.3,
-      w: Math.max(0.05, (dur / span) * trackW), h: rowH * 0.36,
-      fill: { color: dc || (hot ? STYLE.accent : STYLE.faint) }, line: { type: 'none' } });
-    shapeValue(s, c, dur, trackX + trackW + 0.06, ry, M.valW, rowH, hot);
-  });
-}
-/* 双向对比条（vsbar）：以中线为轴向左/右展开（正值向右、负值向左） */
-function shapeVsbar(s, c, x, y, w, h, dcols) {
-  const M = shapeMetrics(c, w, h);
-  const rowH = Math.max(0.24, Math.min(0.6, h / M.n));
-  const labelW = M.labelW;
-  const halfW = (w - labelW - M.valW - 0.2) / 2;
-  const midX = x + labelW + 0.08 + halfW;
-  const barH = Math.max(0.14, rowH * 0.5);
-  M.labels.forEach((lb, i) => {
-    const v = M.values[i] || 0;
-    const ry = y + i * rowH;
-    const cy = ry + rowH / 2;
-    const hot = v === M.top;
-    shapeLabel(s, lb, x, ry, labelW - 0.06, rowH, STYLE.body);
-    const bw = Math.max(0.03, Math.abs(v) / M.vmax * halfW);
-    const bx = v >= 0 ? midX : midX - bw;
-    s.addShape('rect', { x: bx, y: cy - barH / 2, w: bw, h: barH,
-      fill: { color: hot ? STYLE.accent : STYLE.faint }, line: { type: 'none' } });
-    s.addShape('rect', { x: midX - 0.008, y: ry + 0.04, w: 0.016, h: rowH - 0.08,
-      fill: { color: STYLE.line }, line: { type: 'none' } });
-    shapeValue(s, c, v, midX + halfW + 0.06, ry, M.valW, rowH, hot);
   });
 }
 /* 迷你折线（sparkline）：无轴，仅趋势线 + 端点 */

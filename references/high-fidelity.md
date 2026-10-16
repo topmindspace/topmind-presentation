@@ -121,7 +121,7 @@ python scripts/render_compare.py "报告.pptx" --html "报告.html" --out "rende
 | 业界做法 | 不采纳原因 |
 |---------|-----------|
 | ImageGen 逐页蓝图（生成 16:9 位图再逐页还原） | 环境依赖重；且与「单文件零外链 + pictures=0 默认」冲突。本技能以「锁定版式 + 常量单源 + 形状还原规则」达成同等的版式可复现性。 |
-| PowerPoint COM 渲染回归作为**硬门禁** | 需本机 PowerPoint；降级为可选路径（本文 §六），日常由 A 通道预览 + python-pptx 双裁判覆盖。 |
+| PowerPoint COM 渲染回归作为**硬门禁** | 需本机 PowerPoint；降级为可选路径（本文 §六），日常由 `check_visual_fill.py` 渲染门禁 + `cross_verify.py` 同源核对覆盖。 |
 | SHA-256 冻结签名 + 逐页人工验收确认 | 交互轮次与耗时显著增加，与「一次问询 + 自动生成 + 校验闭环」定位冲突；改为 manifest 登记（可复现、无需冻结）。 |
 | 禁止 `python-pptx`（必须只用 pptxgenjs） | 本技能用 pptxgenjs 做**生成**，用 python-pptx 做**第三方裁判**（`cross_verify.py`）——职责分离比"单一引擎"更能暴露问题（实测抓出两处 OOXML 规范缺陷）。 |
 | 联网检索素材（web_search 脚本） | 越出"报告生成"边界；外部数据由用户提供或由 AI 在对话中检索，来源须可追溯（`[n]` + 参考资料）。 |

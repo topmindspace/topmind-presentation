@@ -12,7 +12,7 @@ metadata:
 ---
 # topmind-presentation · 商务演示与可视化报告
 
-为**演示报告 / 正式商务演示**而生：**HTML + PPT 双交付**（日常可翻页 HTML；需要时导出可编辑 PPTX）。MD3 密度克制，一屏一重心。内容唯一源 `REPORT_MODEL`；**B 通道** `build_pptx.js` 交付，**A 通道**仅预览/`cross_verify`。
+为**演示报告 / 正式商务演示**而生：**HTML + PPT 双交付**（日常可翻页 HTML；需要时导出可编辑 PPTX）。MD3 密度克制，一屏一重心。内容唯一源 `REPORT_MODEL`；`build_pptx.js` 唯一交付；两端共用求解器 `lib_solver`。
 
 **分工**：只管版式与交付，不找资料、不核事实；材料来自 topmind-research 时沿用其数字与来源（铁律 10）。
 

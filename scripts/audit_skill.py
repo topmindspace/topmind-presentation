@@ -216,11 +216,10 @@ def main() -> int:
     chk('⑤ extract_snippet 整读=FAIL', ok_snip,
         'SKILL.md 须同时声明 extract_snippet 与「整读…FAIL/不合格」',
         '已声明 FAIL 口径')
-    ok_b = bool(re.search(r'B\s*通道|build_pptx', sk)) and bool(
-        re.search(r'A\s*通道|pptx-export|cross_verify', sk))
-    chk('⑤ B 通道交付 / A 预览', ok_b,
-        'SKILL.md 须区分 B 通道交付与 A 通道预览/cross_verify',
-        '已区分')
+    ok_b = bool(re.search(r'build_pptx', sk)) and bool(re.search(r'lib_solver|求解器', sk))
+    chk('⑤ 单引擎交付 + 同源求解', ok_b,
+        'SKILL.md 须声明 build_pptx.js 为唯一交付引擎，且 HTML/PPTX 共用布局求解器',
+        '已声明')
 
     # ⑥ 引用完整性
     missing: list[str] = []

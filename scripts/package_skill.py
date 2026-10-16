@@ -19,7 +19,7 @@
     assets/templates/              三份模式模板 + engine.css / ui.js（公共片段注入源）
     assets/icons/                  48 原创图标（SVG + PNG）+ index.json（render_from_model / icon_lib / validate_report 运行时读取）
     assets/examples/               ≥3 黄金样张（每模式 1）+ 可选产品 showcase HTML/model
-    assets/pptx-export.js          PPTX 预览运行时（注入源）
+    assets/pptx-export.js          PPTX 页序运行时（schema 自检 + 布局求解器，注入源）
     assets/style-gallery.html      风格 × 模式 × 亮暗主题交互画廊
     assets/theme-overview*.png     3 张主题参考图（整体 + research + architecture；演示态与整体图相同）
     references/*.md                规范全文（Batch3 起 ≥20 篇；playbook.md = L1；其余 L2 按需）
@@ -140,7 +140,7 @@ REQUIRED = [
     'scripts/recommend_layout.py',
     'scripts/sync_runtime.py', 'scripts/audit_styles.py', 'scripts/build_examples.py',
     'scripts/regression.py', 'scripts/validate_report.py', 'scripts/validate_pptx.py',
-    'scripts/extract_model.py', 'scripts/build_pptx.js', 'scripts/gen_channel_a.js',
+    'scripts/extract_model.py', 'scripts/build_pptx.js', 'scripts/lib_solver.js', 'scripts/lib_solver.py', 'scripts/solve_model.js',
     'scripts/cross_verify.py', 'scripts/prepare_images.py', 'scripts/probe_image_export.py',
     'scripts/render_compare.py', 'scripts/capture_theme_overview.js', 'scripts/package_skill.py',
     'scripts/layout-constants.json', 'scripts/model-schema.json',

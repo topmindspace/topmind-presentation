@@ -1031,36 +1031,33 @@
       },
       "gantt": {
         "html": "svg-gantt",
-        "pptx": "shape",
+        "pptx": "native",
         "dataTable": "notes",
         "min": {
           "vbHeightMin": 130
         },
-        "path": {
-          "forbidPresetShapes": true
-        }
+        "nativeType": "bar",
+        "nativeTrick": "rows:gantt"
       },
       "vsbar": {
         "html": "svg-vsbar",
-        "pptx": "shape",
+        "pptx": "native",
         "dataTable": "notes",
         "min": {
           "vbHeightMin": 100
         },
-        "path": {
-          "forbidPresetShapes": true
-        }
+        "nativeType": "bar",
+        "nativeTrick": "rows:vsbar"
       },
       "progress": {
         "html": "svg-progress",
-        "pptx": "shape",
+        "pptx": "native",
         "dataTable": "notes",
         "min": {
           "vbHeightMin": 100
         },
-        "path": {
-          "forbidPresetShapes": true
-        }
+        "nativeType": "bar",
+        "nativeTrick": "rows:progress"
       },
       "sparkline": {
         "html": "svg-spark",
@@ -1075,15 +1072,13 @@
       },
       "funnel": {
         "html": "svg-funnel",
-        "pptx": "shape",
+        "pptx": "native",
         "dataTable": "notes",
         "min": {
           "vbHeightMin": 160
         },
-        "path": {
-          "minSamplePoints": 8,
-          "forbidPresetShapes": true
-        }
+        "nativeType": "bar",
+        "nativeTrick": "rows:funnel"
       },
       "treemap": {
         "html": "svg-treemap",

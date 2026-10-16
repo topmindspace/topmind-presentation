@@ -33,7 +33,7 @@
 ```
 validate_report.py --strict   # presentation 自动隐含 --layout-qa
 quality_gate.py … --deliver   # HTML/PPTX/evals 并行；同口径
-# PPTX 交付仅 B 通道 build_pptx.js（A 通道不交付）
+# PPTX 交付仅 build_pptx.js（唯一几何引擎）
 ```
 
 检查：V 契约 · 简单全幅 · 骨架连用 · 截断/溢出未拆页 · 半空卡 · 对齐节奏 · 主张标题 WARN · 核图多样性 · WCAG。

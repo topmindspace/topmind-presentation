@@ -5,10 +5,10 @@
 链路：
   ① validate_report.py --strict          每份示例 HTML（三模式预算 + 模型一致性 + 版式断言）
   ② extract_model.py → build_pptx.js → validate_pptx.py --strict --model   B 通道（交付通道）
-  ③ gen_channel_a.js（页面预览同引擎产物）→ validate_pptx.py --strict --model --allow-shape-charts
+  ③ （M2 删除）浏览器端几何引擎 A 通道——版式几何只在 build_pptx.js 实现一次
   ④ probe_image_export.py（素材图片探针：示例矩阵零图片，真实素材路径/版式/门禁靠它覆盖）
-  ⑤ 双区组合页探针（split 左区 = 图表）：scaffold → extract → B 通道 + A 通道，两通道都过 strict
-  ⑥ cross_verify.py（python-pptx 第三方裁判，可选：未安装则 SKIP）——覆盖示例矩阵与 ⑤ 探针
+  ⑤ 双区组合页探针（split 左区 = 图表）：scaffold → extract → build_pptx → strict
+  ⑥ cross_verify.py（HTML ↔ PPTX 同源核对：页序计划 / 标题顺序 / 原生图表数值；python-pptx 未装则 SKIP）
   ⑦ negative_tests.py（故障注入：往合格产物里埋已知缺陷，断言门禁必须报错）
   ⑦-b 任务路由全量遍历（extract_snippet TASK_ROUTES 每条路由可实际抽取，防修复链路静默断裂）
   ⑧ 深色主题探针（research / presentation × dark：示例矩阵只有 architecture 是 dark，
@@ -46,7 +46,6 @@ from env_probe import (NODE_HINT, NODE_MODULES_HINT, find_node,  # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 EX = ROOT / 'assets' / 'examples'
 B_OUT = ROOT / 'dist' / 'regression'
-A_OUT = ROOT / 'dist' / 'regression-a'
 PY = sys.executable
 
 
@@ -113,38 +112,6 @@ def main() -> int:
             for line in (r3.stdout or '').splitlines()[-14:]:
                 print('   ', line)
 
-    print('\n=== A 通道（页面预览序列化引擎产物 · gen_channel_a 组装）')
-    rA = run([node, str(ROOT / 'scripts' / 'gen_channel_a.js')], env=env)
-    if rA.returncode != 0:
-        fails.append('A:generate')
-        print((rA.stderr or rA.stdout or '')[-800:])
-    else:
-        ppx_ok = has_python_pptx()
-        for ap in sorted(A_OUT.glob('*.pptx')):
-            model = EX / (ap.stem + '.model.json')
-            if not model.exists():
-                # 非示例产物（如 ⑤ 探针的 probe-split.pptx）由探针段单独校验，跳过避免误判
-                continue
-            # A 通道（预览引擎）图表为形状近似渲染，豁免 MODEL_CHART_COUNT（交付通道 B 不豁免）
-            r = run([PY, str(ROOT / 'scripts' / 'validate_pptx.py'), str(ap), '--strict',
-                     '--model=' + str(model), '--allow-shape-charts'])
-            ok = r.returncode == 0
-            ppx = 'SKIP'
-            if ppx_ok:
-                p = run([PY, '-c',
-                         'import sys;from pptx import Presentation;'
-                         'print(len(list(Presentation(sys.argv[1]).slides)))', str(ap)])
-                ppx = 'OK' if p.returncode == 0 else 'FAIL'
-            print(f'  {ap.name}: strict={"OK" if ok else "FAIL"} python-pptx={ppx}')
-            if not ok:
-                fails.append(ap.stem + ':pptx-a')
-                for line in (r.stdout or '').splitlines()[-10:]:
-                    print('   ', line)
-            if ppx == 'FAIL':
-                fails.append(ap.stem + ':ppx-a')
-            if ppx == 'SKIP':
-                skipped.append(ap.stem + ':ppx-a')
-
     # ④ 素材图片导出探针：示例矩阵刻意零图片，真实素材路径/版式/门禁靠探针覆盖
     r5 = run([PY, str(ROOT / 'scripts' / 'probe_image_export.py')], env=env)
     print('  [probe_image_export]', 'OK' if r5.returncode == 0 else 'FAIL')
@@ -155,7 +122,6 @@ def main() -> int:
 
     # ⑤ 双区组合页探针（split 左区 = 图表）：示例矩阵只覆盖"左文右图"缺省路径，
     #    左区图表/表格/图片三个变体靠脚手架生成一次走完整交付链路（v8 新增能力）；
-    #    B 通道 + A 通道（同一模型）都跑，产物同名落两目录 → ⑥ 交叉裁判可逐页比对。
     print('\n=== 双区组合页探针（split 左区 = 图表）')
     probe_plan = B_OUT / 'probe-split.plan.json'
     probe_html = B_OUT / 'probe-split.html'
@@ -187,26 +153,7 @@ def main() -> int:
                     why6 = 'validate_pptx_b'
                     for line in (r9.stdout or '').splitlines()[-10:]:
                         print('   ', line)
-                else:
-                    # A 通道同模型（预览序列化引擎）：产物同名落 dist/regression-a/
-                    probe_pptx_a = A_OUT / 'probe-split.pptx'
-                    if probe_pptx_a.exists():
-                        probe_pptx_a.unlink()
-                    r10 = run([node, str(ROOT / 'scripts' / 'gen_channel_a.js'),
-                               '--model=' + str(probe_model), '--out=' + str(A_OUT)], env=env)
-                    if r10.returncode != 0 or not probe_pptx_a.exists():
-                        ok6, why6 = False, 'channel_a'
-                        print((r10.stderr or r10.stdout or '')[-400:])
-                    else:
-                        # 预览引擎图表为形状近似 → 豁免 MODEL_CHART_COUNT（同示例矩阵口径）
-                        r11 = run([PY, str(ROOT / 'scripts' / 'validate_pptx.py'), str(probe_pptx_a),
-                                   '--strict', '--model=' + str(probe_model),
-                                   '--allow-shape-charts'])
-                        if r11.returncode != 0:
-                            ok6, why6 = False, 'validate_pptx_a'
-                            for line in (r11.stdout or '').splitlines()[-10:]:
-                                print('   ', line)
-    print('  [split 左区图表 B/A 双通道]', 'OK' if ok6 else f'FAIL({why6})')
+    print('  [split 左区图表]', 'OK' if ok6 else f'FAIL({why6})')
     if not ok6:
         fails.append('probe-split')
 
@@ -240,7 +187,7 @@ def main() -> int:
         fails.append('dark-theme')
 
     # ⑥ 双通道交叉裁判（python-pptx）：放在探针之后，A/B 产物齐全时才逐页比对
-    r4 = run([PY, str(ROOT / 'scripts' / 'cross_verify.py')] + (['--full-ab'] if '--full-ab' in sys.argv else []))
+    r4 = run([PY, str(ROOT / 'scripts' / 'cross_verify.py')] )
     if r4.returncode == 2:
         print('  [cross_verify] SKIP（python-pptx 未安装，可选第三方裁判）')
         skipped.append('cross-verify')
@@ -297,10 +244,10 @@ def main() -> int:
     if fails:
         print('回归失败:', fails)
         return 1
-    print('全链路回归通过：HTML strict + B 通道精导 strict 0/0 + A 通道（预览同引擎产物）strict 0/0'
-          + ' + 双区组合页双通道探针 + 深色主题探针 + 门禁反向验证 + 任务路由全量遍历'
+    print('全链路回归通过：HTML strict + 精导 PPTX strict 0/0 + HTML↔PPTX 同源核对'
+          + ' + 双区组合页探针 + 深色主题探针 + 门禁反向验证 + 任务路由全量遍历'
           + ('' if 'measure-height' in skipped else ' + 浏览器页高/裁切真值')
-          + (' + python-pptx 双裁判 + 双通道交叉一致' if 'cross-verify' not in skipped else ''))
+          + (' + python-pptx 双裁判' if 'cross-verify' not in skipped else ''))
     return 0
 
 

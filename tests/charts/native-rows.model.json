@@ -1,0 +1,19 @@
+{
+  "mode": "presentation", "style": "business-blue", "theme": "light",
+  "title": "行式图表原生化探针", "subtitle": "甘特 / 进度 / 漏斗 / 双向条", "meta": "测试夹具",
+  "sections": [
+    { "type": "bar", "eyebrow": "01 · 排期", "title": "四阶段串行推进，总工期 18 周",
+      "chart": { "type": "gantt", "labels": ["调研", "试点", "推广", "运营"], "values": [3, 5, 6, 4], "start": [0, 3, 8, 14], "unit": "周" },
+      "soWhat": "推广阶段最长，资源需提前锁定。", "footnote": "来源：测试夹具" },
+    { "type": "bar", "eyebrow": "02 · 进度", "title": "三条工作流完成度分化明显",
+      "chart": { "type": "progress", "labels": ["平台建设", "流程改造", "组织配套"], "values": [82, 55, 30], "unit": "%" },
+      "soWhat": "组织配套滞后，是下一阶段的主要瓶颈。" },
+    { "type": "bar", "eyebrow": "03 · 转化", "title": "线索到签约逐级收敛，初筛流失最大",
+      "chart": { "type": "funnel", "labels": ["线索", "初筛", "商机", "报价", "签约"], "values": [1000, 420, 260, 160, 120], "unit": "条" },
+      "soWhat": "初筛环节流失过半，先修判定规则。" },
+    { "type": "bar", "eyebrow": "04 · 对比", "title": "四个业务域同比变化有升有降",
+      "chart": { "type": "vsbar", "labels": ["金融", "制造", "零售", "政务"], "values": [12, 6, -4, -9], "unit": "pt" },
+      "soWhat": "金融与制造拉动增长，零售与政务需专项排查。" }
+  ],
+  "closing": { "title": "原生图表可直接编辑数据", "points": [["双击图表", "在 PowerPoint / WPS 中编辑数据表"], ["同源模型", "HTML 与 PPTX 同一份数据"], ["门禁", "strict 0/0"]] }
+}

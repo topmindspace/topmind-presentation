@@ -998,6 +998,14 @@ def main() -> int:
 
     src = Path(args.src)
     model = load_model(src)
+    # M2 同源求解：与 build_pptx.js 共用容量模型（lib_solver.py ≡ lib_solver.js，金样校验）。
+    # 超载页先拆续页再渲染，HTML 与 PPTX 页序一致；拆页后的模型同时写回 REPORT_MODEL。
+    sys.path.insert(0, str(ROOT / 'scripts'))
+    import lib_solver  # noqa: E402
+    model, split_log = lib_solver.split_model(model)
+    for lg in split_log:
+        print(f'[render_from_model] 超载拆页：「{lg["title"]}」({lg["type"]} 容量 {round(lg["ratio"] * 100)}% → {lg["parts"]} 页)',
+              file=sys.stderr)
     body = render_body(model)
 
     if args.body_only:

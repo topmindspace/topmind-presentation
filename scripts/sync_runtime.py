@@ -16,7 +16,7 @@ topmind-presentation · 单源注入器（版式常量 + DSL schema · 三模板
   4. 对 assets/templates/ 三份模式模板注入公共片段（避免三份漂移）:
        __TOPPPT_ENGINE__  ← assets/templates/engine.css（公共样式引擎）
        __TOPPPT_UI__      ← assets/templates/ui.js（公共 UI 脚本：主题/工具组/翻页/动效/预览模态）
-       __TOPPPT_RUNTIME__ ← assets/pptx-export.js（PPTX 预览运行时内联副本）
+       __TOPPPT_RUNTIME__ ← assets/pptx-export.js（页序运行时：schema 自检 + 布局求解器，不含几何）
   5. 校验双端单源引用：scripts/build_pptx.js 引用 layout-constants.json（Node require）；
      scripts/extract_model.py 引用 model-schema.json（本地校验同一份 schema）
   6. 校验「页型四件套」完整性：schema 每个页型都要在 layout-constants.json 的 pageTypeGeometry 有几何映射
@@ -24,7 +24,7 @@ topmind-presentation · 单源注入器（版式常量 + DSL schema · 三模板
      非原生图表 dataTable 不得为 off、schema.chartTypes 必须是 registry 子集
   7b. 校验「图表类型可达性」不变量：每个 registry 类型必须可作 chart.type（schema.chartTypes）
       或可作 sections[].type（信息图专属页型）——否则模型无法表达、双引擎实现沦为死代码
-  7c. 校验「页型实现可达性」冒烟：schema 每个页型都应出现在 build_pptx.js 与 pptx-export.js 中
+  7c. 校验「页型实现可达性」冒烟：schema 每个页型都应出现在 build_pptx.js 中（M2 起几何只有这一个引擎）
       （子串级检查，拦「schema 加了页型、引擎没实现」的静默退化）
   7d. 校验「骨架尺寸单源」不变量：charts.scaffold 键 ⊆ registry，且默认值 ≥ charts.minSize
       同口径阈值（拦「scaffold 硬编码第二源漂移」；信息图页型清单亦单源于此）
@@ -67,6 +67,8 @@ CONST_PAT = re.compile(r'/\* __TOPPPT_CONSTANTS_START__ \*/[\s\S]*?/\* __TOPPPT_
 SCHEMA_PAT = re.compile(r'/\* __TOPPPT_SCHEMA_START__ \*/[\s\S]*?/\* __TOPPPT_SCHEMA_END__ \*/')
 ENGINE_PAT = re.compile(r'/\* __TOPPPT_ENGINE_START__ \*/[\s\S]*?/\* __TOPPPT_ENGINE_END__ \*/')
 UI_PAT = re.compile(r'/\* __TOPPPT_UI_START__ \*/[\s\S]*?/\* __TOPPPT_UI_END__ \*/')
+SOLVER_PAT = re.compile(r'/\* __TOPPPT_SOLVER_START__ \*/[\s\S]*?/\* __TOPPPT_SOLVER_END__ \*/')
+SOLVER_SRC = ROOT / 'scripts' / 'lib_solver.js'
 RUNTIME_PAT = re.compile(r'/\* __TOPPPT_RUNTIME_START__ \*/[\s\S]*?/\* __TOPPPT_RUNTIME_END__ \*/')
 
 
@@ -115,7 +117,7 @@ def build_const_block(lc: dict) -> str:
     # 图片规格与配图占位约定（双引擎拼同一占位文本，cross_verify 逐页文本一致）
     img_js = 'var IMG = ' + json.dumps(_strip_comments(lc.get('imageSpec') or {}), ensure_ascii=False,
                                        separators=(',', ':')) + ';'
-    # 页型布局区域 IR（与 scripts/lib_layout_regions.js 同源公式；浏览器端 A 通道消费）
+    # 页型布局区域 IR（与 scripts/lib_layout_regions.js 同源公式）
     # Batch 3: layoutSlots 单源 = layout-constants.json（不再读独立 layout_slots.json）
     slots = lc.get('layoutSlots') or {}
     if not slots:
@@ -358,6 +360,18 @@ def main() -> int:
     src = PE.read_text(encoding='utf-8')
     schema_block = build_schema_block(ms)
     PE.write_text(SCHEMA_PAT.sub(lambda m: schema_block, src), encoding='utf-8')
+    # ①-a 布局求解器单源注入（M2）：scripts/lib_solver.js → 浏览器运行时 __TOPPPT_SOLVER__ 块，
+    #      与 build_pptx.js（require）/ render_from_model.py（lib_solver.py 金样对齐）同一份算法
+    src = PE.read_text(encoding='utf-8')
+    if not SOLVER_PAT.search(src):
+        print('错误： assets/pptx-export.js 缺少 __TOPPPT_SOLVER__ 标记块')
+        return 1
+    solver_js = SOLVER_SRC.read_text(encoding='utf-8').rstrip('\n')
+    solver_block = ('/* __TOPPPT_SOLVER_START__ */\n'
+                    '/* 由 scripts/sync_runtime.py 从 scripts/lib_solver.js 注入，禁止手改 */\n'
+                    'var SOLVER = (function () { var module = { exports: {} };\n'
+                    + solver_js + '\nreturn module.exports; })();\n/* __TOPPPT_SOLVER_END__ */')
+    PE.write_text(SOLVER_PAT.sub(lambda m: solver_block, src), encoding='utf-8')
 
     # ①-b 风格画廊：同一份常量块注入（画廊配色改为从 PRESETS/PRESETS_DARK 派生，消除第四处手抄色值）
     if GALLERY.exists():
@@ -386,7 +400,7 @@ def main() -> int:
     # 写入模板内联块，供 validate_report 比对防「模板未 sync」漂移。
     runtime_sha = hashlib.sha256(runtime.encode('utf-8')).hexdigest()[:16]
     runtime_repl = ('/* __TOPPPT_RUNTIME_START__ */\n'
-                    '/* ══ PPTX 导出运行时（assets/pptx-export.js 的内联副本 · 由 scripts/sync_runtime.py 注入，禁止手改） ══ */\n'
+                    '/* ══ PPTX 页序运行时（assets/pptx-export.js 的内联副本 · 由 scripts/sync_runtime.py 注入，禁止手改） ══ */\n'
                     f'/* __TOPPPT_RUNTIME_SHA__:{runtime_sha} */\n'
                     + runtime + '\n/* __TOPPPT_RUNTIME_END__ */')
 
@@ -513,8 +527,7 @@ def main() -> int:
     # ⑦-c 页型实现可达性（冒烟）：schema 的每个页型都应在双引擎源码中出现，
     #   否则「schema 加了页型、引擎没实现」会静默退化为默认版式。
     #   注：这是子串级冒烟检查（不解析 AST），只能拦住「完全没提」的漏实现。
-    for eng_name, eng_path in (('scripts/build_pptx.js', ROOT / 'scripts' / 'build_pptx.js'),
-                               ('assets/pptx-export.js', ROOT / 'assets' / 'pptx-export.js')):
+    for eng_name, eng_path in (('scripts/build_pptx.js', ROOT / 'scripts' / 'build_pptx.js'),):
         try:
             eng_txt = eng_path.read_text(encoding='utf-8')
         except OSError:
@@ -569,8 +582,7 @@ def main() -> int:
     if not any(str(s).startswith('anyof:') for s in (img_def.get('required') or [])):
         print('警告: model-schema.json 的 image 页型未用 anyof 三选一（src/items/placeholder）')
         ok = False
-    for eng_name, eng_path in (('scripts/build_pptx.js', ROOT / 'scripts' / 'build_pptx.js'),
-                               ('assets/pptx-export.js', ROOT / 'assets' / 'pptx-export.js')):
+    for eng_name, eng_path in (('scripts/build_pptx.js', ROOT / 'scripts' / 'build_pptx.js'),):
         try:
             eng_txt = eng_path.read_text(encoding='utf-8')
         except OSError:
@@ -660,7 +672,7 @@ process.exit(bad ? 1 : 0);
             n_slots = 0
 
     # ⑪ 版本单源一致性：layout-constants.json `version` 是唯一事实源；
-    #     model-schema / layout_slots / package.json（npm 语义化 x.y.z）漂移即 WARN
+    #     model-schema / layout_slots 漂移即 WARN
     #     （v8.3 教训：SKILL.md frontmatter 移除 version 后，五处版本一度只有一处升级）
     ver = lc.get('version')
     if not ver:
@@ -674,13 +686,8 @@ process.exit(bad ? 1 : 0);
         if slots_ver and slots_ver != ver:
             print(f'警告: layoutSlots.version={slots_ver!r} ≠ layout-constants {ver!r}')
             ok = False
-        try:
-            pj_ver = json.loads((ROOT / 'package.json').read_text(encoding='utf-8')).get('version')
-            if not str(pj_ver or '').startswith(f'{ver}.'):
-                print(f'警告: package.json version={pj_ver!r} 未对齐 {ver}.x（npm 语义化）')
-                ok = False
-        except (OSError, json.JSONDecodeError):
-            pass
+        # package.json 是发行版本（x.y.z），layout-constants.version 是数据格式版本，两者独立演进，
+        # 不再强行要求前缀一致（M2 清理：该检查自 0.2.x 起恒报误警）。
 
     # ⑤ 摘要哈希（各方核对用）
     raw = LC.read_text(encoding='utf-8')
@@ -700,7 +707,7 @@ process.exit(bad ? 1 : 0);
     print(f'  model-schema.json      sha256[:16] = {ms_digest}  · 页型 {n_schema_pt} 种')
     print(f'  风格 token {n_styles} 套 · 三模式独立比例尺 {len([k for k in lc["modeTypeScale"] if not k.startswith("$")])} 套 · 页型几何 {n_pt} 组')
     print(f'  图表登记 {n_charts} 种（原生 {n_native} / 形状 {n_shape}） · 语义字阶 {n_typo} 级 · 12 列网格 {lc["grid"]["columns"]} 列 · 布局 IR {n_slots} 页型')
-    print('  已刷新: assets/pptx-export.js（常量块 + schema 块） · assets/style-gallery.html（常量块） · templates/{presentation,research,architecture}.html + assets/examples/*.html（引擎/UI/运行时内联副本，含 __TOPPPT_RUNTIME_SHA__）')
+    print('  已刷新: assets/pptx-export.js（常量块 + schema 块 + 求解器块） · assets/style-gallery.html（常量块） · templates/{presentation,research,architecture}.html + assets/examples/*.html（引擎/UI/运行时内联副本，含 __TOPPPT_RUNTIME_SHA__）')
     print(f'  双端单源引用校验: {"PASS" if ok else "WARN（build_pptx 应 require layout-constants.json；extract_model 应读 model-schema.json；页型四件套与图表登记须完整）"}')
     print(f'  说明: 页型几何 {n_pt} 组（多页型共享几何组） · schema 页型 {n_schema_pt} 种')
     return 0

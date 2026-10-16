@@ -325,47 +325,22 @@ def test_chart_bottom_no_short_circuit() -> None:
 
 
 def test_engine_static() -> None:
+    """M2：浏览器端几何引擎已删除——静态断言只针对唯一几何引擎 build_pptx.js，
+    并断言浏览器运行时不再含 OOXML 序列化（防第二引擎回潮）。"""
     export = (ROOT.parent / "assets" / "pptx-export.js").read_text(encoding="utf-8")
     build = (ROOT.parent / "scripts" / "build_pptx.js").read_text(encoding="utf-8")
-
-    m = re.search(r"function vbarShapes\([\s\S]*?\n\}", export)
-    body = m.group(0) if m else ""
-    ok("B vbarShapes handles ec.series", "ec.series" in body and "series.forEach" in body)
-
     ok(
-        "C A-channel streamgraph reserves legend inside plot",
-        "Reserve legend INSIDE" in export and "plotBottom" in export,
-    )
-    ok(
-        "C B-channel infoStreamgraph reserves legend inside plot",
+        "C infoStreamgraph reserves legend inside plot",
         "Reserve legend INSIDE" in build and "plotBottom" in build,
     )
-
     ok(
-        "D A-channel caption uses capYImg from imageLayoutShapes",
-        "capYImg" in export
-        and re.search(r"capYImg\s*=\s*imageLayoutShapes", export) is not None,
-    )
-    ok(
-        "D B-channel caption uses capYImg from imageLayoutShapes",
+        "D caption uses capYImg from imageLayoutShapes",
         "capYImg" in build
         and re.search(r"capYImg\s*=\s*imageLayoutShapes", build) is not None,
     )
-
-    cards = re.search(
-        r"else if \(type === 'cards'\) \{[\s\S]*?else if \(type === 'split'\)",
-        export,
-    )
-    cards_body = cards.group(0) if cards else ""
-    ok(
-        "A A-channel cards uses sz: N object props (not bare sz())",
-        "sz: 12" in cards_body
-        and not re.search(r"(?<![\w.])sz\s*\(\s*12\s*\)", cards_body),
-    )
-    ok(
-        "A modeSize applied in txSp serialization",
-        "function modeSize" in export and "modeSize(" in export,
-    )
+    ok("M2 runtime has no OOXML geometry engine",
+       "function slideXml" not in export and "p:spTree" not in export and "function pagePlan" in export)
+    ok("M2 runtime embeds shared solver", "__TOPPPT_SOLVER_START__" in export and "splitModel" in export)
 
 
 def _sp(x: float, y: float, w: float, h: float, text: str = "T") -> ET.Element:

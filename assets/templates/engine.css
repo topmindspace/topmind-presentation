@@ -840,13 +840,19 @@ padding:var(--sp-4) var(--sp-5);border-bottom:1px solid var(--border-soft)}
 .pmodal__t{font-size:var(--fs-h3);font-weight:600;color:var(--text)}
 .pmodal__meta{font-size:var(--fs-xs);color:var(--text-3);margin-top:2px}
 .pmodal__body{overflow:auto;padding:var(--sp-5);display:grid;
-grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--sp-4)}
-.pslide{position:relative;width:100%;aspect-ratio:16/9;border:1px solid var(--border-soft);
-border-radius:var(--r-sm);background:var(--bg);overflow:hidden;font-size:7px; /* JS 按宽度重设：1em=1pt；底色随主题（与导出的亮/暗版一致） */ }
-.pslide__no{position:absolute;left:8px;bottom:5px;z-index:5;font-size:1.4em;font-weight:600;
-color:var(--text-3);letter-spacing:.04em}
-.pslide [data-el]{position:absolute;overflow:hidden}
-.pslide [data-el] p{margin:0}
+grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--sp-4);grid-auto-rows:max-content;align-content:start;flex:1 1 auto;min-height:0}
+.pslide{position:relative;display:flex;flex-direction:column;border:1px solid var(--border-soft);
+  border-radius:var(--r-md);overflow:hidden;background:var(--surface)}
+.pslide__stage{flex:0 0 auto;position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:var(--bg)}
+.pslide__clone{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none;margin:0!important}
+.pslide__clone,.pslide__clone *{animation:none!important;transition:none!important}
+.pslide__clone .rv,.pslide__clone [data-anim]{opacity:1!important;transform:none!important}
+.pslide__ph{flex:0 0 auto;width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;
+  padding:var(--sp-4);text-align:center;font-weight:600;color:var(--text-2);background:var(--surface-2)}
+.pslide__cap{flex:0 0 auto;display:flex;gap:6px;align-items:baseline;padding:6px 10px;font-size:var(--fs-xs);color:var(--text-3);
+  border-top:1px solid var(--border-soft);white-space:nowrap;overflow:hidden}
+.pslide__cap b{color:var(--accent-text)}
+.pslide__cap span{overflow:hidden;text-overflow:ellipsis;color:var(--text-2)}
 .pmodal__ft{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-4);
 padding:var(--sp-4) var(--sp-5);border-top:1px solid var(--border-soft);flex-wrap:wrap}
 .pmodal__ft .row{flex:none}

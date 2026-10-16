@@ -6,7 +6,7 @@
 缩略图只看版面结构（块的位置、明暗分布），对不同机器的字体细节不敏感。
     python3 scripts/pixel_regression.py            # 比较（CI 使用）
     python3 scripts/pixel_regression.py --update   # 版式有意改动后重建基线
-判定：单页平均灰度差 > 阈值（默认 6/255）或页数变化即失败；失败页的对照图写到 tests/pixel/_diff/。
+判定：单页平均灰度差 > 阈值（默认 2.5/255）或页数变化即失败；失败页的对照图写到 tests/pixel/_diff/。
 无 PIL / soffice / pdftoppm / Node 时 SKIP（退出 0），CI 环境里都装了。
 """
 from __future__ import annotations
@@ -28,7 +28,7 @@ BASE = ROOT / 'tests' / 'pixel' / 'baselines'
 DIFF = ROOT / 'tests' / 'pixel' / '_diff'
 STEMS = ['2026-09-09-presentation-business-blue', '2026-09-09-research-mckinsey', '2026-09-09-architecture-graphite-dark']
 W, H = 48, 27
-THRESH = 6.0
+THRESH = 2.5  # CI 实测跨机噪声 ≤1.2；一次表格行高调整约 3.4
 
 
 def thumbs(pngs):

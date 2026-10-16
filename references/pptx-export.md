@@ -216,3 +216,7 @@ python scripts/validate_pptx.py "报告.pptx" --strict --model="报告.model.jso
 
 跨页页眉/页脚/页码（chrome）应**锁死同一几何**：同 y、同字号角色、同边距（`layoutSystem.zones.chromePct`）。禁止逐页漂移页码位置或交替有无页脚。HTML 用模板页脚；PPTX 由 `pageTypes` chrome 槽位同源落位。便宜门禁：`validate_pptx` 对页脚/页码 y 漂移做 WARN（见 `qualityGates.chromeDriftIn`）。
 
+## 双端保真门禁（M9）
+
+`python3 scripts/check_fidelity.py 报告.html 稿件.pptx --strict`（示例全集：`--examples`）。HTML 端用 Chrome 量每个文字块的位置、字号、颜色、行数；PPTX 端逐段落读字号 / 颜色 / 字体声明，LibreOffice 转 PDF 量行数。两端尺寸本来不同，字号按「相对整稿中位比值」比层级（落在 0.8–1.25 算一致）。阈值：配对 ≥80%、字级偏差 ≤15%、颜色 ΔE>12 ≤8%、换行差 ≥2 行 ≤20%、位置 p90 ≤0.12（research 0.16，网页图卡更高）、缺字体声明 0。新增字号角色写进 `modeTypeScale` 后经 `roleSz()` 取用，不要硬编码。
+

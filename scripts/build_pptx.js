@@ -249,6 +249,11 @@ const sz = (pt) => {
   }
   return Math.max(8.5, Math.round((best == null ? pt : best) * 2) / 2);
 };
+/* M9：风格圆角——卡片 rectRadius 按 styleIdentity.radius / 16px 等比缩放（单源，已由 audit_styles 与 engine.css 对齐），
+   让 12 套风格在 PPTX 里也有各自的「手感」：mckinsey 6px 方正克制、apple-mono / sky-airy 20px 圆润 */
+const rr = (v) => { const id = (LC.styleIdentity || {})[styleArg] || {}; const px = parseFloat(id.radius); return +(v * (px ? px / 16 : 1)).toFixed(3); };
+/* M9：按角色名取字号（chapterTitle / kpiCard 等），值仍出自 modeTypeScale，validate 比例尺照常生效 */
+const roleSz = (role, base) => { const m = (MTS && (MTS[MODE_NAME] || MTS.presentation)) || {}; return m[role] != null ? m[role] : sz(base); };
 /* 编码色板：9 套风格**各有自己的** c1–c5（单源 styleDataColors / styleDataColorsDark）。
    与 HTML 侧的 .f-c1~c5 语义类同源；结构色纪律不受影响——本表只用于数据系列。 */
 const _dcWarned = new Set();
@@ -408,6 +413,13 @@ function fitRowH(avail, n, pref, floor) {
 
 /* Exhibit 徽标文本：纯编号补 "Exhibit " 前缀（HTML 为 `Exhibit {no}` + CSS uppercase，视觉同 "EXHIBIT 1"）；
    调用方已带前缀的不重复 */
+/* M9：Exhibit 行 = 品牌色编号 + 墨色图题（与 HTML .exhibit__no / 图题同构），不再整行品牌色 */
+function exhibitRuns(no, cap, size) {
+  const base = { fontFace: STYLE.font, fontSize: size, bold: true };
+  const r = [{ text: exhibitBadge(no), options: Object.assign({}, base, { color: STYLE.accent, charSpacing: 2 }) }];
+  if (cap) r.push({ text: '　' + cap, options: Object.assign({}, base, { color: STYLE.ink }) });
+  return r;
+}
 function exhibitBadge(no) {
   const t = String(no == null ? '' : no).trim();
   if (!t) return t;
@@ -553,7 +565,7 @@ function head(s, eyebrow, title, lead) {
     titleY: PT.common.headTitleY, ruleY: PT.common.headRuleY, leadY: PT.common.leadY,
   };
   if (eyebrow) s.addText(eyebrow, { x: H.x, y: H.y, w: H.w, h: 0.4, fontFace: STYLE.font,
-    fontSize: sz(13), bold: true, color: STYLE.accent, charSpacing: 2 });
+    fontSize: sz(11), bold: true, color: STYLE.accent, charSpacing: 2 });
   /* 主标题自适应（adaptiveText.title 单源）：先按字符数分档定上限，再按高度验算降一档，避免压到分隔线 */
   const titleH = eyebrow ? (H.ruleY - H.titleY - 0.06) : 1.6 - 0.6;
   const tMax = titleMaxFor(title);
@@ -646,7 +658,7 @@ function footnoteLine(s, text) {
   const R = REGIONS.regionOf('exhibit', 'footnote') ||
     { x: MX, y: PT.exhibit.footnoteY, w: CW - 1.2, h: 0.32 };
   s.addText(text, { x: R.x, y: R.y, w: R.w, h: R.h,
-    fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.faint, objectName: trName('footnote'), fit: 'shrink' });
+    fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.body, objectName: trName('footnote'), fit: 'shrink' });
 }
 /* R2：sec.note 与 sec.footnote 共用注释带末行（footnoteY=6.72）。
    note.y=6.55 会压进 so-what 带——同页二者合并为一行。 */
@@ -1395,7 +1407,7 @@ function rankPanel(s, items, x, y, w, h, fmt) {
   const list = items.slice().sort((a, b) => b.value - a.value);
   const vmax = Math.max(1e-9, ...list.map(i => Math.abs(i.value)));
   const sol = SOLVER.rows(h, list.length, { pref: 0.5, min: 0.3, max: 0.78, gap: 0.08 });
-  s.addShape('roundRect', { x: x, y: y + sol.offset - 0.12, w: w, h: sol.used + 0.24, rectRadius: 0.1,
+  s.addShape('roundRect', { x: x, y: y + sol.offset - 0.12, w: w, h: sol.used + 0.24, rectRadius: rr(0.1),
     fill: { color: STYLE.surface }, line: { type: 'none' }, objectName: 'rank:bg' });
   list.forEach((it, i) => {
     const ry = y + sol.offset + i * (sol.size + sol.gap);
@@ -1486,7 +1498,7 @@ function shapeCandlestick(s, c, x, y, w, h, dcols) {
     const [o, hiP, loP, cl] = r;
     const cxp = x + step * i + step / 2;
     const up = cl >= o;
-    const bodyCol = up ? STYLE.accent : STYLE.line;
+    const bodyCol = up ? STYLE.accent : mixHex(STYLE.soft, STYLE.accent, 0.12);  // M9：下跌实体与 HTML f-accs2 同色系，不用灰线色
     s.addShape('rect', { x: cxp - 0.011, y: yFor(hiP), w: 0.022, h: Math.max(0.02, yFor(loP) - yFor(hiP)),
       fill: { color: STYLE.faint }, line: { type: 'none' } });
     s.addShape('rect', { x: cxp - bw / 2, y: yFor(Math.max(o, cl)), w: bw,
@@ -1658,8 +1670,8 @@ function chartBlock(s, c, x, y, w, h, dcols) {
       text: String(cell),
       options: {
         fontSize: fs, fontFace: STYLE.font, valign: 'middle',
-        bold: ri === 0, color: ri === 0 ? STYLE.onAccent : STYLE.body,
-        fill: { color: ri === 0 ? STYLE.accent : STYLE.bg },
+        bold: ri === 0, color: ri === 0 ? STYLE.ink : STYLE.body,
+        fill: { color: ri === 0 ? STYLE.soft : STYLE.bg },
       },
     })));
     const tblBox = { x: x, y: y + chH + 0.1, w: w, h: tH };
@@ -1735,8 +1747,8 @@ function infoTable(s, rows, x, y, w, h) {
   const fs = sz(dense ? 9 : 10.5);
   const tbl = rows.map((r, ri) => r.map(cell => ({ text: String(cell), options: {
     fontSize: fs, fontFace: STYLE.font, valign: 'middle', bold: ri === 0,
-    color: ri === 0 ? STYLE.onAccent : STYLE.body,
-    fill: { color: ri === 0 ? STYLE.accent : STYLE.bg } } })));
+    color: ri === 0 ? STYLE.ink : STYLE.body,
+    fill: { color: ri === 0 ? STYLE.soft : STYLE.bg } } })));
   s.addTable(tbl, { x: x, y: y, w: w, rowH: rowH, autoPage: false,
     border: { pt: 0.5, color: STYLE.line }, margin: dense ? 1 : 3 });
 }
@@ -1815,7 +1827,7 @@ function infoSankey(s, sec, y0, y1) {
   });
   labels.forEach(([v, x0, x1, ya, yb, th]) => s.addText(fmtNum(v), {
     x: (x0 + x1) / 2 - 0.5, y: (ya + yb) / 2 + th / 2 - 0.13, w: 1.0, h: 0.26,
-    align: 'center', valign: 'middle', fontFace: STYLE.font, fontSize: sz(10), bold: true, color: STYLE.ink }));
+    align: 'center', valign: 'middle', fontFace: STYLE.font, fontSize: sz(11.5), bold: true, color: STYLE.ink }));
   nodes.forEach(n => {
     const g = geo[n];
     s.addShape('rect', { x: g.x, y: g.y, w: G.nodeW, h: g.h, fill: { color: isLoss(n) ? STYLE.faint : STYLE.accent }, line: { type: 'none' } });
@@ -1852,61 +1864,66 @@ function infoTreemap(s, sec, y0, y1) {
   const out = [];
   tmSplit(items, MX, P.y0, CW, P.y1 - P.y0, out);
   const maxV = items[0].v || 1;
+  const total = items.reduce((a, i) => a + i.v, 0) || 1;
+  /* M9：灰阶与 HTML 一致——三级都在品牌色系内（主色 / 中间调 / 浅调），不再出现灰色 STYLE.line 块；
+     标签带占比，字号与 HTML 同比例 */
+  const bg = STYLE.bg || 'FFFFFF';
+  const tone = [null, mixHex(STYLE.soft, bg, 0.35), mixHex(STYLE.soft, STYLE.accent, 0.1), STYLE.accent];  // 浅调从 soft 出发，避免深品牌色与白混出灰
   out.forEach(o => {
     const p = o.it.v / maxV;
-    const lvl = p >= 0.66 ? 3 : (p >= 0.33 ? 2 : 1);
-    const fill = [STYLE.surface, STYLE.soft, STYLE.line, STYLE.accent][lvl];
+    const lvl = o.it === items[0] ? 3 : (p >= 0.5 ? 2 : 1);  // 只有最大块用主色，与 HTML 一致
+    const fill = tone[lvl];
     const onAcc = lvl >= 3;
     s.addShape('rect', { x: o.x + G.gap / 2, y: o.y + G.gap / 2,
       w: Math.max(0.05, o.w - G.gap), h: Math.max(0.05, o.h - G.gap),
-      fill: { color: fill }, line: { color: STYLE.bg, width: 0.75 } });
+      fill: { color: fill }, line: { color: bg, width: 0.75 }, objectName: 'treemap:leaf' });
     if (o.h >= G.labelMinH) {
-      s.addText(o.it.label, { x: o.x + 0.1, y: o.y + 0.06, w: Math.max(0.2, o.w - 0.2), h: 0.3,
-        fontFace: STYLE.font, fontSize: sz(10.5), bold: true, color: onAcc ? STYLE.onAccent : STYLE.ink });
-      s.addText(String(o.it.v) + (sec.unit || ''), { x: o.x + 0.1, y: o.y + 0.34, w: Math.max(0.2, o.w - 0.2), h: 0.28,
-        fontFace: STYLE.font, fontSize: sz(10), color: onAcc ? STYLE.onAccent : STYLE.body });
+      s.addText(o.it.label, { x: o.x + 0.12, y: o.y + 0.08, w: Math.max(0.2, o.w - 0.24), h: 0.34,
+        fontFace: STYLE.font, fontSize: sz(13), bold: true, color: onAcc ? STYLE.onAccent : STYLE.ink });
+      const share = Math.round(o.it.v / total * 100);
+      s.addText(String(o.it.v) + (sec.unit || '') + ' · ' + share + '%', { x: o.x + 0.12, y: o.y + 0.42, w: Math.max(0.2, o.w - 0.24), h: 0.3,
+        fontFace: STYLE.font, fontSize: sz(11), color: onAcc ? STYLE.onAccent : STYLE.body });
     }
   });
 }
-/* 箱线图：分组箱体（min/q1/median/q3/max）+ 须线端帽 */
+/* 箱线图（M9 重写为横向，与 HTML lib_chart_svg.boxplot 同构）：每组一行，左侧组名、
+ * 横轴取整到 10 的刻度网格；须线 + 端帽 + 品牌浅调箱体 + 主色中位线，右侧「中位 N」标注。
+ * 全部是原生线/矩形/文本框，可编辑。 */
 function infoBoxplot(s, sec, y0, y1) {
   const G = PT.boxplot;
   const P = infoPlot(sec, y0, y1);
   if (P.table) infoTable(s, P.rows, MX, P.table.y, CW, P.table.h);
   const groups = (sec.groups || []).filter(g => g && g.length >= 6).slice(0, G.maxGroups);
   if (!groups.length) return;
-  const nums = groups.map(g => g.slice(1, 6).map(Number));
-  const lo = Math.min.apply(null, nums.map(n => n[0]));
-  const hi = Math.max.apply(null, nums.map(n => n[4]));
+  const unit = sec.unit || '';
+  const lo = Math.floor(Math.min.apply(null, groups.map(g => Number(g[1]))) / 10) * 10;
+  const hi = Math.ceil(Math.max.apply(null, groups.map(g => Number(g[5]))) / 10) * 10;
   const span = (hi - lo) || 1;
-  const plotH = P.y1 - P.y0 - 0.5;
-  const yFor = (v) => P.y0 + (1 - (v - lo) / span) * plotH;
-  const step = CW / groups.length;
-  const bw = Math.min(Math.max(G.boxMaxW, 1.6), step * 0.42); /* M1：箱体按组距放宽，避免细条悬空 */
-  s.addShape('rect', { x: MX, y: P.y0 + plotH, w: CW, h: 0.015, fill: { color: STYLE.line }, line: { type: 'none' } });
+  const labW = Math.min(G.labelW, CW * 0.16), medW = 1.2;
+  const ax0 = MX + labW + 0.15, ax1 = MX + CW - medW - 0.1;
+  const top = P.y0 + 0.05, axisY = P.y1 - 0.32;
+  const X = v => ax0 + (Number(v) - lo) / span * (ax1 - ax0);
+  for (let k = 0; k <= 5; k++) {
+    const v = lo + span * k / 5, x = X(v);
+    s.addShape('line', { x, y: top, w: 0.005, h: axisY - top, line: { color: STYLE.line, width: 0.5 } });
+    s.addText(fmtNum(v), { x: x - 0.4, y: axisY + 0.04, w: 0.8, h: 0.24, align: 'center', margin: 0,
+      fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.faint });
+  }
+  const step = (axisY - top) / groups.length;
+  const bh = Math.min(0.42, step * 0.5);
+  const boxFill = mixHex(STYLE.soft, STYLE.accent, 0.12);
   groups.forEach((g, i) => {
     const mn = Number(g[1]), q1 = Number(g[2]), md = Number(g[3]), q3 = Number(g[4]), mx = Number(g[5]);
-    const cx = MX + step * i + step / 2;
-    s.addShape('rect', { x: cx - 0.012, y: yFor(mx), w: 0.024, h: Math.max(0.02, yFor(mn) - yFor(mx)),
-      fill: { color: STYLE.faint }, line: { type: 'none' } });
-    s.addShape('rect', { x: cx - G.whiskerCapW / 2, y: yFor(mx), w: G.whiskerCapW, h: 0.022, fill: { color: STYLE.faint }, line: { type: 'none' } });
-    s.addShape('rect', { x: cx - G.whiskerCapW / 2, y: yFor(mn) - 0.022, w: G.whiskerCapW, h: 0.022, fill: { color: STYLE.faint }, line: { type: 'none' } });
-    s.addShape('rect', { x: cx - bw / 2, y: yFor(q3), w: bw, h: Math.max(0.05, yFor(q1) - yFor(q3)),
-      fill: { color: STYLE.soft }, line: { color: STYLE.accent, width: 1 } });
-    s.addShape('rect', { x: cx - bw / 2, y: yFor(md) - 0.015, w: bw, h: 0.03, fill: { color: STYLE.accent }, line: { type: 'none' } });
-    s.addText(String(g[0]), { x: cx - step / 2, y: P.y1 - 0.42, w: step, h: 0.3, align: 'center',
-      fontFace: STYLE.font, fontSize: sz(10.5), color: STYLE.body });
-    /* M1：数值标签统一放在箱体/端帽右侧，不再压在箱线或箱体内（几何铁律②：禁叠印） */
-    const lx = cx + bw / 2 + 0.08;
-    s.addText(String(md) + (sec.unit || ''), { x: lx, y: yFor(md) - 0.13, w: 1.0, h: 0.26, align: 'left', valign: 'middle',
-      fontFace: STYLE.font, fontSize: sz(10.5), bold: true, color: STYLE.accent });
-    const capX = cx + G.whiskerCapW / 2 + 0.06;
-    const mxY = Math.min(yFor(mx) - 0.12, yFor(md) - 0.4);
-    const mnY = Math.max(yFor(mn) - 0.12, yFor(md) + 0.16);
-    s.addText(String(mx) + (sec.unit || ''), { x: capX, y: mxY, w: 0.9, h: 0.24, align: 'left', valign: 'middle',
-      fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.faint });
-    s.addText(String(mn) + (sec.unit || ''), { x: capX, y: Math.min(mnY, P.y1 - 0.7), w: 0.9, h: 0.24, align: 'left', valign: 'middle',
-      fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.faint });
+    const cy = top + step * i + step / 2;
+    s.addShape('line', { x: X(mn), y: cy, w: Math.max(0.01, X(mx) - X(mn)), h: 0.005, line: { color: STYLE.faint, width: 1.25 } });
+    [mn, mx].forEach(v => s.addShape('line', { x: X(v), y: cy - bh / 3, w: 0.005, h: bh * 2 / 3, line: { color: STYLE.faint, width: 1.25 } }));
+    s.addShape('roundRect', { x: X(q1), y: cy - bh / 2, w: Math.max(0.05, X(q3) - X(q1)), h: bh, rectRadius: rr(0.06),
+      fill: { color: boxFill }, line: { type: 'none' }, objectName: 'boxplot:box' });
+    s.addShape('line', { x: X(md), y: cy - bh / 2, w: 0.005, h: bh, line: { color: STYLE.accent, width: 2.5 } });
+    s.addText(String(g[0]), { x: MX, y: cy - 0.17, w: labW, h: 0.34, align: 'right', valign: 'middle', margin: 0,
+      fontFace: STYLE.font, fontSize: sz(11.5), bold: true, color: STYLE.ink });
+    s.addText('中位 ' + fmtNum(md) + unit, { x: ax1 + 0.12, y: cy - 0.16, w: medW, h: 0.32, valign: 'middle', margin: 0,
+      fontFace: STYLE.font, fontSize: sz(11), bold: true, color: STYLE.body });
   });
 }
 /* 关系网络：确定性环形布局（同环按输入顺序）+ 直连边 */
@@ -1917,43 +1934,36 @@ function infoNetwork(s, sec, y0, y1) {
   const nodes = (sec.nodes || []).slice(0, G.maxNodes);
   if (!nodes.length) return;
   const edges = (sec.edges || []).slice(0, G.maxEdges);
-  const n = nodes.length;
-  /* M1：宽版心 → 左侧网络图 + 右侧「连接度排序」面板（数据派生） */
-  const side = n <= 10 && CW / Math.max(0.1, P.y1 - P.y0) > 1.6;
-  const plotW = side ? CW * 0.56 : CW;
-  const cx = MX + plotW / 2, cy = (P.y0 + P.y1) / 2;
-  const r = Math.min(plotW / 2, (P.y1 - P.y0) / 2) - G.labelMaxW * 0.55;
-  if (side) {
-    const degOf = (id) => edges.filter(e => String(e[0]) === id || String(e[1]) === id).length;
-    rankPanel(s, nodes.map(nd => { const d = degOf(String(nd[0])); return {
-      label: String(nd[1] != null ? nd[1] : nd[0]), value: d, color: d ? STYLE.accent : STYLE.faint, hl: false }; })
-      .map((it, i, arr) => Object.assign(it, { hl: it.value === Math.max(...arr.map(a => a.value)) })),
-      MX + CW * 0.6, P.y0, CW * 0.4, P.y1 - P.y0, v => v + ' 条连接');
-  }
+  /* M9：与 HTML（lib_chart_svg.network）同一画法——连接度最高的节点居中，其余按椭圆环绕；
+     节点是胶囊（文字在内，可编辑），下方标「N 条连接」；连线用原生直线。不再另画右侧排序面板。 */
+  const degOf = (id) => edges.filter(e => String(e[0]) === id || String(e[1]) === id).length;
+  const order = nodes.slice().sort((p1, p2) => degOf(String(p2[0])) - degOf(String(p1[0])));
+  const hub = order[0], rest = order.slice(1);
+  const plotH = P.y1 - P.y0;
+  const cx = MX + CW / 2, cy = P.y0 + plotH / 2;
   const pos = {};
-  nodes.forEach((nd, i) => {
-    const a = -Math.PI / 2 + i * 2 * Math.PI / n;
-    pos[String(nd[0])] = { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+  pos[String(hub[0])] = { x: cx, y: cy };
+  rest.forEach((nd, i) => {
+    const a = -Math.PI / 2 + i * 2 * Math.PI / Math.max(1, rest.length);
+    pos[String(nd[0])] = { x: cx + CW * 0.36 * Math.cos(a), y: cy + plotH * 0.36 * Math.sin(a) };
   });
   edges.forEach(e => {
     const a = pos[String(e[0])], b = pos[String(e[1])];
     if (!a || !b) return;
-    const dx = b.x - a.x, dy = b.y - a.y;
-    const len = Math.sqrt(dx * dx + dy * dy);
-    const ang = Math.atan2(dy, dx) * 180 / Math.PI;
-    s.addShape('rect', { x: (a.x + b.x) / 2 - len / 2, y: (a.y + b.y) / 2 - 0.008, w: len, h: 0.016,
-      rotate: Math.round(ang * 10) / 10, fill: { color: STYLE.line }, line: { type: 'none' } });
+    s.addShape('line', { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.max(0.01, Math.abs(b.x - a.x)), h: Math.max(0.01, Math.abs(b.y - a.y)),
+      flipH: (b.x < a.x) !== (b.y < a.y), line: { color: STYLE.line, width: 1.5 }, objectName: 'network:edge' });
   });
-  nodes.forEach((nd, i) => {
-    const p = pos[String(nd[0])];
-    const deg = edges.filter(e => String(e[0]) === String(nd[0]) || String(e[1]) === String(nd[0])).length;
-    const rr = Math.max(G.nodeRMin, Math.min(G.nodeR, G.nodeRMin + deg * 0.03));
-    s.addShape('ellipse', { x: p.x - rr, y: p.y - rr, w: rr * 2, h: rr * 2,
-      fill: { color: deg ? STYLE.accent : STYLE.faint }, line: { color: STYLE.bg, width: 1 } });
-    const outward = p.x >= cx;
-    s.addText(String(nd[1] != null ? nd[1] : nd[0]),
-      { x: outward ? p.x + rr + 0.05 : p.x - rr - 0.05 - G.labelMaxW, y: p.y - 0.14, w: G.labelMaxW, h: 0.28,
-        align: outward ? 'left' : 'right', valign: 'middle', fontFace: STYLE.font, fontSize: sz(10), color: STYLE.body });
+  const pillH = Math.min(0.54, plotH * 0.15);
+  nodes.forEach((nd) => {
+    const id = String(nd[0]), p = pos[id], main = id === String(hub[0]);
+    const label = String(nd[1] != null ? nd[1] : nd[0]);
+    const pw = Math.min(G.labelMaxW + 0.8, 0.5 + 0.22 * label.length);
+    s.addText(label, { x: p.x - pw / 2, y: p.y - pillH / 2, w: pw, h: pillH, shape: 'roundRect', rectRadius: pillH / 2,
+      fill: { color: main ? STYLE.accent : STYLE.soft }, line: { type: 'none' }, align: 'center', valign: 'middle', margin: 0,
+      fontFace: STYLE.font, fontSize: sz(15), bold: true, color: main ? (STYLE.onAccent || 'FFFFFF') : STYLE.ink,
+      objectName: 'network:node' });
+    s.addText(degOf(id) + ' 条连接', { x: p.x - 0.8, y: p.y + pillH / 2 + 0.03, w: 1.6, h: 0.3, align: 'center', valign: 'top',
+      margin: 0, fontFace: STYLE.font, fontSize: sz(12), color: STYLE.faint });
   });
 }
 /* marimekko 单元格归一化：裸数值 [70,25,5] 或 [标签,数值] 对 [["<50ms",70],…]
@@ -1981,7 +1991,8 @@ function infoMarimekko(s, sec, y0, y1) {
   const labelY = P.y0 + plotH + 0.04;
   const legendY = P.y1 - 0.22;
   const availW = CW - G.colGap * Math.max(0, cols.length - 1);
-  const palette = [STYLE.accent, STYLE.faint, STYLE.body, STYLE.line];
+  /* M9：与 HTML f-acc / f-accs2 同色系——主色 + 品牌浅调梯度，不用灰 */
+  const palette = [STYLE.accent, mixHex(STYLE.soft, STYLE.accent, 0.12), mixHex(STYLE.soft, STYLE.accent, 0.45), STYLE.soft];
   let cx0 = MX;
   cols.forEach((c, i) => {
     const cw = Math.max(0.2, (Number(c[1]) || 0) / total * availW);
@@ -1996,12 +2007,12 @@ function infoMarimekko(s, sec, y0, y1) {
       /* 有标签用标签（"<50ms"），裸数值沿用旧行为（值 + 单位） */
       const segLabel = sg.label != null ? sg.label : (String(v) + (sec.unit || ''));
       s.addText(segLabel, { x: cx0, y: cy0 + sh / 2 - 0.13, w: cw, h: 0.26, align: 'center',
-        fontFace: STYLE.font, fontSize: sz(10), bold: true, fit: 'shrink',
+        fontFace: STYLE.font, fontSize: sz(11.5), bold: true, fit: 'shrink',
         color: k === 0 ? STYLE.onAccent : STYLE.ink });
       cy0 += sh;
     });
     s.addText(String(c[0]), { x: cx0, y: labelY, w: cw, h: 0.28, align: 'center',
-      fontFace: STYLE.font, fontSize: sz(10.5), bold: true, color: STYLE.body, fit: 'shrink' });
+      fontFace: STYLE.font, fontSize: sz(12), bold: true, color: STYLE.body, fit: 'shrink' });
     cx0 += cw + G.colGap;
   });
   let lx = MX;
@@ -2009,7 +2020,7 @@ function infoMarimekko(s, sec, y0, y1) {
     s.addShape('rect', { x: lx, y: legendY + 0.06, w: 0.12, h: 0.12,
       fill: { color: palette[k % palette.length] }, line: { type: 'none' } });
     s.addText(lg, { x: lx + 0.16, y: legendY, w: 1.5, h: 0.24,
-      fontFace: STYLE.font, fontSize: sz(10), color: STYLE.body, valign: 'middle', fit: 'shrink' });
+      fontFace: STYLE.font, fontSize: sz(11.5), color: STYLE.body, valign: 'middle', fit: 'shrink' });
     lx += 1.75;
   });
 }
@@ -2040,7 +2051,8 @@ function infoStreamgraph(s, sec, y0, y1) {
   const cyMid = P.y0 + plotH / 2;
   const xAt = (i) => MX + (nPts > 1 ? i / (nPts - 1) : 0.5) * CW;
   const yAt = (i) => cyMid - (totals[i] / maxTot) * plotH / 2;
-  const palette = [STYLE.accent, STYLE.faint, STYLE.body, STYLE.line, STYLE.soft, STYLE.surface];
+  /* M9：与 HTML f-c1…c5 同源（风格编码色板），不再用灰阶 */
+  const palette = (dataColors(styleArg) || [STYLE.accent, mixHex(STYLE.soft, STYLE.accent, 0.45), mixHex(STYLE.soft, STYLE.accent, 0.12)]).slice(0, 5);
   const n = Math.max(24, Math.round(CW / 0.1));
   let base = [];
   for (let i = 0; i < nPts; i++) base.push(yAt(i));
@@ -2063,14 +2075,14 @@ function infoStreamgraph(s, sec, y0, y1) {
     s.addShape('rect', { x: lx, y: plotBottom + axisH + 0.09, w: 0.12, h: 0.12,
       fill: { color: palette[si % palette.length] }, line: { type: 'none' } });
     s.addText(name, { x: lx + 0.16, y: plotBottom + axisH + 0.05, w: lw, h: 0.2,
-      fontFace: STYLE.font, fontSize: sz(10), color: STYLE.body, valign: 'middle' });
+      fontFace: STYLE.font, fontSize: sz(11.5), color: STYLE.body, valign: 'middle' });
     lx += lw + 0.35;
     base = upper;
   });
   labels.forEach((lb, i) => {
     const w0 = 0.8, x0 = Math.max(MX, Math.min(MX + CW - w0, xAt(i) - w0 / 2));
     s.addText(String(lb), { x: x0, y: plotBottom + 0.03, w: w0, h: 0.2, align: i === 0 ? 'left' : (i === labels.length - 1 ? 'right' : 'center'),
-      fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.faint });
+      fontFace: STYLE.font, fontSize: sz(11), color: STYLE.faint });
   });
 }
 /* 表格：行高按可用高度自适应；行数×minRowH 超高时压到 hardFloor 并告警，禁止溢出注释带 */
@@ -2133,8 +2145,9 @@ function addTable(s, tbl, x, y, w, availH, opts) {
   if (overCells > 0 && typeof console !== 'undefined')
     console.warn(`addTable: ${overCells} 个单元格在字号下限（正文 ${bodySzF}pt/表头 ${headSzF}pt）仍超出分配行高 —— ` +
       '内容超承载，建议拆页/精简文案（行高已锁定，防压脚注）');
-  const rows = [head.map(h => ({ text: h, options: { bold: true, color: STYLE.onAccent,
-      fill: { color: STYLE.accent }, fontSize: headSzF, fontFace: STYLE.font, valign: 'middle' } }))]
+  /* M9：表头改 tonal（品牌浅底 + 墨色粗体），与 HTML 表头同一层级；整条实色表头在密表里过重 */
+  const rows = [head.map(h => ({ text: h, options: { bold: true, color: STYLE.ink,
+      fill: { color: STYLE.soft }, fontSize: headSzF, fontFace: STYLE.font, valign: 'middle' } }))]
     .concat(rowsIn.map((r, ri) => r.map((c, j) => {
       /* M3 版式 compare-table-hl：高亮列（推荐方案）= 主题色调底 + 加粗；其余行斑马纹 */
       const hl = opts.highlightCol != null && j === opts.highlightCol;
@@ -2164,8 +2177,9 @@ function addTable(s, tbl, x, y, w, availH, opts) {
   const cvSub = darkCover ? STYLE.body : STYLE.soft;
   s.addShape('rect', { x: 0, y: 0, w: PW, h: PH, fill: { color: cvFill }, line: { type: 'none' } });
   s.addText(CONTENT.meta || '', { x: MX, y: C.metaY, w: CW, h: 0.4, fontFace: STYLE.font,
-    fontSize: sz(12), color: darkCover ? STYLE.accent : STYLE.soft });
-  const tSize = estTextH(CONTENT.title, CW - 1, sz(44), 1.25) > C.titleH ? sz(36) : sz(44);
+    fontSize: sz(11), color: darkCover ? STYLE.accent : STYLE.soft });
+  const _ct = roleSz('coverHero', 44);  /* M9：封面主标题与 HTML 主视觉同比例（短标题用 coverHero 档，长标题回落 44 / 36） */
+  const tSize = estTextH(CONTENT.title, CW - 1, _ct, 1.2) <= C.titleH ? _ct : (estTextH(CONTENT.title, CW - 1, sz(44), 1.25) > C.titleH ? sz(36) : sz(44));
   s.addText(CONTENT.title, { x: MX, y: C.titleY, w: CW - 1, h: C.titleH, fontFace: STYLE.fontDisplay,
     fontSize: tSize, bold: true, color: cvTitle });
   s.addText(CONTENT.subtitle || '', { x: MX, y: C.subtitleY, w: CW - 1, h: C.subtitleH,
@@ -2288,7 +2302,7 @@ function kmStrip(s, km, x, y, w, h) {
   const n = km.length, gap = 0.2, cw = (w - gap * (n - 1)) / n;
   km.forEach((m, i) => {
     const cx = x + i * (cw + gap);
-    s.addShape('roundRect', { x: cx, y, w: cw, h, rectRadius: 0.1, fill: { color: STYLE.surface },
+    s.addShape('roundRect', { x: cx, y, w: cw, h, rectRadius: rr(0.1), fill: { color: STYLE.surface },
       line: { type: 'none' }, objectName: 'km:card' });
     s.addText([
       { text: m[0], options: { fontFace: STYLE.fontDisplay, fontSize: sz(26), bold: true, color: STYLE.accent, breakLine: true } },
@@ -2302,7 +2316,7 @@ function readoutPanel(s, pts, x, y, w, h, opts) {
   s.addShape('roundRect', { x, y, w, h, rectRadius: 0.12, fill: { color: STYLE.soft }, line: { type: 'none' }, objectName: 'readout:bg' });
   const n = Math.max(1, pts.length), pad = 0.22, iw = w - pad * 2 - 0.42;
   const need = f => pts.reduce((a, p) => a + SOLVER.estTextH(p[0], iw, f + 1, 1.3) + SOLVER.estTextH(p[1], iw, f, 1.45) + 0.16, 0);
-  const fz = snapFont(SOLVER.fitUp(need, (h - pad * 2) * 0.92, { max: opts.max || (MODE_NAME === 'presentation' ? 17 : 14), min: 10.5 }));
+  const fz = snapFont(SOLVER.fitUp(need, (h - pad * 2) * 0.92, { max: opts.max || (MODE_NAME === 'presentation' ? 14 : 12), min: 10.5 }));
   /* 按每条估高排布，余量均分为条间距（整栏铺满、不顶部堆叠） */
   const hs = pts.map(p => estTextH(p[0], iw, sz(fz + 1), 1.35) + estTextH(p[1], iw, sz(fz), 1.5) + 0.16);
   const spare = Math.max(0, h - pad * 2 - hs.reduce((a2, b2) => a2 + b2, 0));
@@ -2332,11 +2346,11 @@ function readoutRow(s, km, pts, x, y, w, h) {
     SOLVER.estTextH(p[1], ptW - 0.4, f, 1.4))) + 0.2, h, { max: 13.5, min: 10 }));
   cells.forEach(c => {
     const cw = c.km ? kmW : ptW;
-    s.addShape('roundRect', { x: cx, y, w: cw, h, rectRadius: 0.1, fill: { color: c.km ? STYLE.surface : STYLE.soft },
+    s.addShape('roundRect', { x: cx, y, w: cw, h, rectRadius: rr(0.1), fill: { color: c.km ? STYLE.surface : STYLE.soft },
       line: { type: 'none' }, objectName: c.km ? 'km:card' : 'readout:card' });
     if (c.km) {
       s.addText([
-        { text: c.km[0], options: { fontFace: STYLE.fontDisplay, fontSize: sz(estTextH(c.km[0], cw - 0.28, sz(24), 1.1) > 0.45 ? 18 : 24), bold: true, color: STYLE.accent, breakLine: true } },
+        { text: c.km[0], options: { fontFace: STYLE.fontDisplay, fontSize: (estTextH(c.km[0], cw - 0.28, roleSz('kpiCard', 24), 1.1) > 0.5 ? sz(18) : roleSz('kpiCard', 24)),  /* M9：卡内大数不随研究模式缩到正文级 */ bold: true, color: STYLE.accent, breakLine: true } },
         { text: c.km[1], options: { fontFace: STYLE.font, fontSize: sz(10), color: STYLE.body } },
       ], { x: cx + 0.14, y: y + 0.04, w: cw - 0.28, h: h - 0.08, valign: 'middle' });
     } else {
@@ -2385,7 +2399,7 @@ function composeSide(s, sec, type, C, y0, y1) {
     const each = (H - 0.16 * (minis.length - 1)) / minis.length;
     minis.forEach((m, i) => {
       const my = y + i * (each + 0.16), mx = MX + mainW + 0.3;
-      s.addShape('roundRect', { x: mx, y: my, w: sideW, h: each, rectRadius: 0.1, fill: { color: STYLE.surface }, line: { type: 'none' }, objectName: 'mini:bg' });
+      s.addShape('roundRect', { x: mx, y: my, w: sideW, h: each, rectRadius: rr(0.1), fill: { color: STYLE.surface }, line: { type: 'none' }, objectName: 'mini:bg' });
       capText(s, (m.cap || '') + (m.unit ? '（' + m.unit + '）' : ''), mx + 0.15, my + 0.04, sideW - 0.3);
       compChart(s, Object.assign({}, m, { _mini: true }), m.type === 'donut' ? 'donut' : 'bar', mx + 0.1, my + 0.32, sideW - 0.2, Math.max(0.6, each - 0.38));
     });
@@ -2416,8 +2430,7 @@ CONTENT.sections.forEach((sec) => {
   const bodyY0 = sec.lead ? PT.common.bodyYWithLead : (_C ? COMPOSE_TOP : CONTENT_TOP);
   const bodyY = exBadge ? bodyY0 + 0.42 : bodyY0;
   if (exBadge) {
-    s.addText(exBadge, { x: MX, y: bodyY0 - 0.06, w: CW, h: 0.3, fontFace: STYLE.font,
-      fontSize: sz(11.5), bold: true, color: STYLE.accent, charSpacing: 2 });
+    s.addText(exhibitRuns(sec.exhibitNo, sec.cap, sz(11.5)), { x: MX, y: bodyY0 - 0.06, w: CW, h: 0.3 });
   }
   const flagItems = Array.isArray(sec.flags) ? sec.flags.filter(Boolean) : [];
   const _F = PT.flagbar || { hdH: 0.26, rowH: 0.24, maxRows: 3, gap: 0.12 };
@@ -2437,7 +2450,7 @@ CONTENT.sections.forEach((sec) => {
 
   /* M7：复合版式（信息密度）——side 形态整页接管；band 形态先画底部解读带、收窄正文区再交给原页型 */
   if (_C && _C.form === 'band') {
-    const bandH = Math.min(1.15, Math.max(0.9, (bodyBottom - bodyY) * 0.3));
+    const bandH = Math.min(1.05, Math.max(0.85, (bodyBottom - bodyY) * 0.26));  // M9：解读带收一点，把高度还给图
     readoutRow(s, _C.km.slice(0, 2), _C.pts.slice(0, 3), MX, bodyBottom - bandH, CW, bandH);
     bodyBottom -= bandH + 0.2;
   }
@@ -2461,7 +2474,7 @@ CONTENT.sections.forEach((sec) => {
       const x = gx + i * (mw + M.gap);
       s.addShape('roundRect', { x, y: reg.y, w: mw, h: cardH, rectRadius: 0.09,
         fill: { color: STYLE.surface }, line: { color: STYLE.line, width: 0.75 } });
-      const vSize = estTextH(m[0], mw - 0.2, sz(40), 1.1) > cardH * 0.5 ? sz(30) : sz(40);
+      const vSize = estTextH(m[0], mw - 0.2, roleSz('kpiHero', 36), 1.1) > cardH * 0.5 ? sz(28) : roleSz('kpiHero', 36);  // M9：与 HTML --fs-metric 同比例
       s.addText(m[0], { x, y: vY, w: mw, h: M.valH, align: 'center', fontFace: STYLE.fontDisplay,
         fontSize: vSize, bold: true, color: STYLE.accent });
       s.addText(m[1], { x: x + 0.15, y: cY, w: mw - 0.3, h: _C ? Math.min(M.capH, reg.y + cardH - cY - 0.06) : M.capH, align: 'center',
@@ -2578,11 +2591,11 @@ CONTENT.sections.forEach((sec) => {
     if (sec.verdict) {
       const vreg = REGIONS.regionOf('exhibit', 'annotation') ||
         { x: MX, y: PT.exhibit.soWhatY, w: CW, h: 0.62 };
+      /* M9：与 HTML .sowhat 同为 tonal 满铺（soft 底 + ink 字），不加「结论」标签 */
       s.addShape('rect', { x: vreg.x, y: vreg.y, w: vreg.w, h: vreg.h,
-        fill: { color: STYLE.accent }, line: { type: 'none' }, objectName: trName('soWhat') });
+        fill: { color: STYLE.soft }, line: { type: 'none' }, objectName: trName('soWhat') });
       s.addText([
-        { text: '结论　', options: { fontSize: sz(11), bold: true, color: STYLE.onAccent, charSpacing: 1.5 } },
-        { text: sec.verdict, options: { fontSize: sz(12.5), bold: true, color: STYLE.onAccent } },
+        { text: sec.verdict, options: { fontSize: sz(12.5), bold: true, color: STYLE.ink } },
       ], { x: vreg.x + 0.22, y: vreg.y + 0.06, w: vreg.w - 0.44, h: vreg.h - 0.12, fontFace: STYLE.font,
         valign: 'middle', objectName: trName('soWhat') });
     }
@@ -2596,9 +2609,9 @@ CONTENT.sections.forEach((sec) => {
       fontSize: (MTS[MODE_NAME] || MTS.presentation).chapterNum || 96, bold: true, color: STYLE.accent, valign: 'top', margin: 0 });
     const tx = MX + nW + 0.3, tw = CW - nW - 0.3;
     const ebText = String(sec.eyebrow || '').replace(/^\s*\d{1,2}\s*[·・\-—]\s*/, '') || ('第 ' + num + ' 章');
-    s.addText(ebText, { x: tx, y: CH.titleY - 0.42, w: tw, h: 0.4, fontFace: STYLE.font, fontSize: sz(13), bold: true,
+    s.addText(ebText, { x: tx, y: CH.titleY - 0.42, w: tw, h: 0.4, fontFace: STYLE.font, fontSize: sz(11), bold: true,
       color: STYLE.accent, charSpacing: 2 });
-    s.addText(sec.title || '', { x: tx, y: CH.titleY, w: tw, h: 1.25, fontFace: STYLE.fontDisplay, fontSize: sz(32),
+    s.addText(sec.title || '', { x: tx, y: CH.titleY, w: tw, h: 1.25, fontFace: STYLE.fontDisplay, fontSize: roleSz('chapterTitle', 32),
       bold: true, color: STYLE.ink, valign: 'top', fit: 'shrink' });
     let cy = 3.0;
     if (sec.lead) {
@@ -2624,7 +2637,7 @@ CONTENT.sections.forEach((sec) => {
     /* 金句页用主题一致强调带（accent-soft 底）——浅色主题下不再出现深色页 */
     s.addShape('rect', { x: 0, y: 0, w: PW, h: PH, fill: { color: STYLE.soft }, line: { type: 'none' } });
     if (sec.eyebrow) s.addText(sec.eyebrow, { x: MX, y: PT.common.headEyebrowY, w: CW, h: 0.4,
-      fontFace: STYLE.font, fontSize: sz(13), bold: true, color: STYLE.accent, charSpacing: 2 });
+      fontFace: STYLE.font, fontSize: sz(11), bold: true, color: STYLE.accent, charSpacing: 2 });
     s.addText(sec.title, { x: MX, y: PT.common.headTitleY, w: CW, h: 1.0,
       fontFace: STYLE.fontDisplay, fontSize: sz(30), bold: true, color: STYLE.ink });
     s.addShape('rect', { x: MX, y: PT.common.headRuleY, w: 0.9, h: 0.045, fill: { color: STYLE.accent }, line: { type: 'none' } });
@@ -2723,7 +2736,7 @@ CONTENT.sections.forEach((sec) => {
         const lsol = SOLVER.rows(Math.min(bodyBottom, CONTENT_BOTTOM_NOTE + 0.3) - bodyY, n, { pref: d.legendRowH, min: 0.3, max: 1.1, gap: 0.16 });
         legRowH = lsol.size; legGap = lsol.gap; legY0 = bodyY + lsol.offset;
         dcn.labels.forEach((lb, i) => s.addShape('roundRect', { x: d.legendX - 0.2, y: legY0 + i * (legRowH + legGap),
-          w: d.legendPctX + d.legendPctW - d.legendX + 0.4, h: legRowH, rectRadius: 0.1,
+          w: d.legendPctX + d.legendPctW - d.legendX + 0.4, h: legRowH, rectRadius: rr(0.1),
           fill: { color: STYLE.surface }, line: { type: 'none' }, objectName: 'legend:card' }));
       }
       const sum2 = total || 1;
@@ -2780,7 +2793,7 @@ CONTENT.sections.forEach((sec) => {
     const flat = cells.flat().map(Number).filter(v => !isNaN(v));
     const vmax = flat.length ? Math.max.apply(null, flat) : 1;
     const vmin = flat.length ? Math.min.apply(null, flat) : 0;
-    const levels = [STYLE.surface, STYLE.soft, STYLE.line, STYLE.accent];
+    const levels = [STYLE.surface, STYLE.soft, mixHex(STYLE.soft, STYLE.accent, 0.3), STYLE.accent];  // M9：第 3 级与 HTML accent-soft-2 同色系，不再落到灰线色
     colsH.forEach((ch, ci) => {
       s.addText(ch, { x: hreg.x + H.labelW + ci * (cw + H.cellGap), y: hreg.y, w: cw, h: H.headH,
         align: 'center', valign: 'middle', fontFace: STYLE.font, fontSize: sz(11), bold: true, color: STYLE.body });
@@ -2835,7 +2848,7 @@ CONTENT.sections.forEach((sec) => {
       s.addShape('roundRect', { x: trackX, y, w: trackW, h: B.barH, rectRadius: 0.5, fill: { color: STYLE.surface }, line: { color: STYLE.line, width: 0.75 } });
       const fw = Math.max(0.02, Math.min(1, v / (vmax || 1)) * trackW);
       s.addShape('roundRect', { x: trackX, y, w: fw, h: B.barH, rectRadius: 0.5,
-        fill: { color: hit ? STYLE.accent : STYLE.faint }, line: { type: 'none' } });
+        fill: { color: hit ? STYLE.accent : mixHex(STYLE.soft, STYLE.accent, 0.45) }, line: { type: 'none' } });  // M9：未达标仍是品牌色浅一级，不用灰
       if (!isNaN(tgt)) {
         const tx = trackX + Math.min(1, tgt / (vmax || 1)) * trackW;
         s.addShape('rect', { x: tx - 0.01, y: y - 0.07, w: 0.02, h: B.barH + 0.14, fill: { color: STYLE.body }, line: { type: 'none' } });
@@ -2863,7 +2876,7 @@ CONTENT.sections.forEach((sec) => {
       const acc = isRec(l) && l.accent;
       const lt = isRec(l) ? (l.t || '') : String(l[0] || '');
       const ld = isRec(l) ? (l.d || '') : String(l[1] || '');
-      s.addShape('roundRect', { x, y, w, h: rowH, rectRadius: 0.07,
+      s.addShape('roundRect', { x, y, w, h: rowH, rectRadius: rr(0.07),
         fill: { color: acc ? STYLE.soft : STYLE.surface },
         line: acc ? { type: 'none' } : { color: STYLE.line, width: 0.75 } });
       /* 标题列宽按层内宽比例分配（labelFrac≈0.3）；顶层窄时固定 3.2in 会把说明压成竖列叠印 →
@@ -2920,7 +2933,7 @@ CONTENT.sections.forEach((sec) => {
         const t = isRec(it) ? (it.t || '') : String(it[0] || '');
         const d = isRec(it) ? (it.d || '') : String(it[1] || '');
         const x = sreg.x + i * g.step;
-        s.addShape('roundRect', { x, y: cy, w: g.w, h: rowH, rectRadius: 0.07,
+        s.addShape('roundRect', { x, y: cy, w: g.w, h: rowH, rectRadius: rr(0.07),
           fill: { color: acc ? STYLE.soft : STYLE.surface },
           line: acc ? { type: 'none' } : { color: STYLE.line, width: 0.75 } });
         const pd = S2.pad, numH = S2.numH, ttlH = S2.titleH;
@@ -2965,7 +2978,7 @@ CONTENT.sections.forEach((sec) => {
     const tlAvail = bodyBottom - (CONTENT_TOP || T.labelY);
     const dy = 0;
     const TY = { labelY: T.labelY + dy, axisY: T.axisY + dy, dotY: T.dotY + dy, nameY: T.nameY + dy, descY: T.descY + dy };
-    const fzLab = tlShort ? 14 : 12, fzName = tlShort ? 21 : 17, fzDesc = tlShort ? 14.5 : 12;
+    const fzLab = 11, fzName = tlShort ? 21 : 17,  /* M9：时间标签降为眉题级，阶段名升一级，与 HTML 层级同比例 */ fzDesc = tlShort ? 14.5 : 12;
     s.addShape('line', { x: treg.x + 0.2, y: TY.axisY, w: treg.w - 0.4, h: 0.02, line: { color: STYLE.line, width: 1.5 } });
     ps.forEach((p, i) => {
       const x = treg.x + 0.2 + i * stepW;
@@ -2989,16 +3002,16 @@ CONTENT.sections.forEach((sec) => {
         const dHMax = Math.max(...ps.map(q => estTextH(String(q[2] || ''), cW - 0.4, sz(fzDesc), 1.5)));
         const gH = 0.55 + 0.12 + dHMax;
         const gy = cTop + Math.max(0.2, (cH - gH) / 2);
-        s.addShape('roundRect', { x: cx, y: cTop, w: cW, h: cH, rectRadius: 0.1,
+        s.addShape('roundRect', { x: cx, y: cTop, w: cW, h: cH, rectRadius: rr(0.1),
           fill: { color: p[3] === 'now' ? STYLE.soft : STYLE.surface }, line: { color: STYLE.line, width: 0.75 } });
         s.addText(p[1], { x: cx + 0.2, y: gy, w: cW - 0.4, h: 0.55, fontFace: STYLE.fontDisplay,
-          fontSize: sz(fzName), bold: true, color: p[3] === 'now' ? STYLE.accent : STYLE.ink, valign: 'middle' });
+          fontSize: (tlShort ? roleSz('stepTitle', 22) : sz(fzName)), bold: true, color: p[3] === 'now' ? STYLE.accent : STYLE.ink, valign: 'middle' });
         s.addText(p[2] || '', { x: cx + 0.2, y: gy + 0.67, w: cW - 0.4, h: Math.min(cH - 0.9, dH + 0.25), fontFace: STYLE.font,
           fontSize: sz(fzDesc), color: STYLE.body, lineSpacing: sz(fzDesc * 1.5), valign: 'top' });
         return;
       }
       s.addText(p[1], { x: x - 0.1, y: TY.nameY, w: stepW - 0.2, h: 0.5, fontFace: STYLE.fontDisplay,
-        fontSize: sz(fzName), bold: true, color: p[3] === 'now' ? STYLE.accent : STYLE.ink });
+        fontSize: (tlShort ? roleSz('stepTitle', 22) : sz(fzName)), bold: true, color: p[3] === 'now' ? STYLE.accent : STYLE.ink });
       s.addText(p[2] || '', { x: x - 0.1, y: TY.descY, w: stepW - 0.25, h: tlDescH, fontFace: STYLE.font,
         fontSize: sz(fzDesc), color: STYLE.body, lineSpacing: sz(fzDesc * 1.5) });
     });
@@ -3063,16 +3076,18 @@ CONTENT.sections.forEach((sec) => {
       const cardFz = snapFont(SOLVER.fitUp(f => Math.max(...ps.map(p =>
         SOLVER.estTextH(p[0] || '', g.w - 0.5, f + 1.5, 1.3) + SOLVER.estTextH(p[1] || '', g.w - 0.5, f, 1.45))) + 0.36,
         cardSol.size, { max: MODE_NAME === 'presentation' ? 16 : 14, min: fz0 }));
-      groups.forEach((col, ci) => col.forEach((p, ri) => {
+      /* M9：卡片网格按行优先排（与 HTML grid 自然流向一致：第一行先读完再换行） */
+      ps.forEach((p, k) => {
+        const ci = k % nCol, ri = Math.floor(k / nCol);
         const cx2 = treg.x + ci * g.step, cy2 = treg.y + ri * (cardSol.size + cardSol.gap);
-        s.addShape('roundRect', { x: cx2, y: cy2, w: g.w, h: cardSol.size, rectRadius: 0.1,
+        s.addShape('roundRect', { x: cx2, y: cy2, w: g.w, h: cardSol.size, rectRadius: rr(0.1),
           fill: { color: STYLE.surface }, line: { type: 'none' }, objectName: 'para:card' });
         s.addText([
-          { text: p[0] || '', options: { fontSize: sz(cardFz + 1.5), bold: true, color: STYLE.accent, breakLine: true } },
+          { text: p[0] || '', options: { fontSize: sz(cardFz + 1.5), bold: true, color: STYLE.ink, breakLine: true } },
           { text: p[1] || '', options: { fontSize: sz(cardFz), color: STYLE.body } },
         ], { x: cx2 + 0.25, y: cy2 + 0.12, w: g.w - 0.5, h: cardSol.size - 0.24, valign: 'middle',
           fontFace: STYLE.font, lineSpacing: sz(cardFz * 1.5), paraSpaceBefore: 4 });
-      }));
+      });
     }
     if (!sparse) groups.forEach((col, ci) => {
       if (!col.length) return;
@@ -3087,7 +3102,7 @@ CONTENT.sections.forEach((sec) => {
         const boxH = Math.min(availH,
           estTextH(p0[0] + '　', fw, sz(fz + 1), 1.5) +
           estTextH(p0[1] || '', fw, sz(fz - 1), 1.5) + sz(7) / 72 + 0.2);
-        s.addShape('roundRect', { x: colX, y: treg.y - 0.08, w: g.w, h: Math.max(0.3, boxH), rectRadius: 0.08,
+        s.addShape('roundRect', { x: colX, y: treg.y - 0.08, w: g.w, h: Math.max(0.3, boxH), rectRadius: rr(0.08),
           fill: { color: STYLE.soft }, line: { type: 'none' }, objectName: 'feature:bg' });
       }
       const runs = col.map(p => ([
@@ -3153,7 +3168,7 @@ CONTENT.sections.forEach((sec) => {
     const lnGap = PT.arch.laneGap, lnHW = PT.arch.laneHeadW;
     lnS.forEach((ln, li) => {
       const y3 = start + lnSol.offset + li * (lnH + lnGap);
-      s.addShape('roundRect', { x: MX, y: y3, w: CW, h: lnH, rectRadius: 0.07,
+      s.addShape('roundRect', { x: MX, y: y3, w: CW, h: lnH, rectRadius: rr(0.07),
         fill: { color: STYLE.surface }, line: { color: STYLE.line, width: 0.75 } });
       s.addShape('rect', { x: MX, y: y3, w: lnHW, h: lnH,
         fill: { color: STYLE.surface }, line: { color: STYLE.line, width: 0.75 } });
@@ -3165,7 +3180,7 @@ CONTENT.sections.forEach((sec) => {
         const stAcc = isRec(st) && st.accent;
         const stT = isRec(st) ? st.t : st;
         const sx = MX + lnHW + 0.2 + si * (stepW + PT.arch.stepGap);
-        s.addShape('roundRect', { x: sx, y: y3 + 0.13, w: stepW, h: lnH - 0.26, rectRadius: 0.06,
+        s.addShape('roundRect', { x: sx, y: y3 + 0.13, w: stepW, h: lnH - 0.26, rectRadius: rr(0.06),
           fill: { color: stAcc ? STYLE.soft : STYLE.bg },
           line: stAcc ? { type: 'none' } : { color: STYLE.line, width: 0.75 } });
         s.addText(stT, { x: sx + 0.06, y: y3 + 0.13, w: stepW - 0.12, h: lnH - 0.26,
@@ -3244,7 +3259,7 @@ CONTENT.sections.forEach((sec) => {
       }
       const cw = span * gw + (span - 1) * cdC.gap;
       const x = creg.x + col * (gw + cdC.gap), y = creg.y + row * (gh + cdC.gap);
-      s.addShape('roundRect', { x, y, w: cw, h: gh, rectRadius: 0.08,
+      s.addShape('roundRect', { x, y, w: cw, h: gh, rectRadius: rr(0.08),
         fill: { color: STYLE.surface }, line: { color: STYLE.line, width: 0.75 } });
       if (statement) {
         const lines = (cd.points || []).map(t => String(cardPtText(t)).replace(/^· /, ''));
@@ -3371,9 +3386,9 @@ CONTENT.sections.forEach((sec) => {
       const y = dTop + li * (lh + D.layerGap);
       const focus = lay[2] === 'focus';
       s.addShape('roundRect', { x: dreg.x, y, w: D.layerBarW, h: lh, rectRadius: 0.05,
-        fill: { color: focus ? STYLE.accent : STYLE.surface }, line: focus ? { type: 'none' } : { color: STYLE.line, width: 0.75 } });
+        fill: { color: focus ? STYLE.soft : STYLE.surface }, line: focus ? { color: STYLE.accent, width: 1 } : { color: STYLE.line, width: 0.75 } });  // M9：焦点层用浅底 + 品牌字，与 HTML 一致
       s.addText(lay[0], { x: dreg.x + 0.1, y: y + 0.1, w: D.layerBarW - 0.2, h: lh - 0.2, align: 'center', valign: 'middle',
-        fontFace: STYLE.font, fontSize: sz(12), bold: true, color: focus ? STYLE.onAccent : STYLE.body });
+        fontFace: STYLE.font, fontSize: sz(10.5), bold: true, color: focus ? STYLE.accent : STYLE.faint });
       const nodes = lay[1] || [];
       const nn = Math.max(1, nodes.length);
       const availW = CW - D.layerBarW - 0.2 - asideW - asideGap;
@@ -3386,7 +3401,7 @@ CONTENT.sections.forEach((sec) => {
         const acc = isRec(_nd) && _nd.accent;
         const ntt = String(isRec(_nd) ? (_nd.t || '') : (_nd == null ? '' : _nd));
         const nds = String(isRec(_nd) ? (_nd.d || '') : '');
-        s.addShape('roundRect', { x, y, w: nw, h: lh, rectRadius: 0.06,
+        s.addShape('roundRect', { x, y, w: nw, h: lh, rectRadius: rr(0.06),
           fill: { color: acc ? STYLE.soft : STYLE.surface }, line: { color: STYLE.line, width: 0.75 } });
         /* 节点内标题/注解：注解底对齐会「浮回」标题上（R1）。改为标题顶对齐 + 注解钳在标题下边；
            空间不足时降级为单框混排（标题粗体 + 注解小字），禁止叠印。 */
@@ -3425,7 +3440,7 @@ CONTENT.sections.forEach((sec) => {
     });
     if (aside) {
       const ax = MX + CW - asideW, ay = dTop, ah = n * lh + (n - 1) * D.layerGap;
-      s.addShape('roundRect', { x: ax, y: ay, w: asideW, h: ah, rectRadius: 0.08,
+      s.addShape('roundRect', { x: ax, y: ay, w: asideW, h: ah, rectRadius: rr(0.08),
         fill: { color: STYLE.soft }, line: { type: 'none' } });
       s.addText(String(aside.title || ''), { x: ax + 0.15, y: ay + 0.12, w: asideW - 0.3, h: 0.36,
         fontFace: STYLE.font, fontSize: sz(12.5), bold: true, color: STYLE.accent, valign: 'middle' });
@@ -3459,8 +3474,7 @@ CONTENT.sections.forEach((sec) => {
     const reg = REGIONS.regionOf('exhibit', 'primary', { withNote: !!(sec.soWhat || sec.footnote) })
       || { x: MX, y: PT.exhibit.chartY, w: CW, h: PT.exhibit.chartH };
     if (sec.exhibitNo) {
-      s.addText(exhibitBadge(sec.exhibitNo) + (sec.cap ? '　' + sec.cap : ''), { x: MX, y: PT.exhibit.badgeY, w: CW, h: 0.35,
-        fontFace: STYLE.font, fontSize: sz(11.5), bold: true, color: STYLE.accent, charSpacing: 2 });
+      s.addText(exhibitRuns(sec.exhibitNo, sec.cap, sz(11.5)), { x: MX, y: PT.exhibit.badgeY, w: CW, h: 0.35 });
     }
     if (ec.labels && ec.values) {
       const edcols = ec.colors || dataColors(styleArg);
@@ -3592,7 +3606,7 @@ CONTENT.sections.forEach((sec) => {
   s.addShape('rect', { x: MX, y: C.eyebrowY, w: 0.9, h: 0.045, fill: { color: STYLE.accent }, line: { type: 'none' } });
   const cEb = CONTENT.closing.eyebrow != null ? CONTENT.closing.eyebrow : '下一步';
   if (cEb) s.addText(cEb, { x: MX, y: C.eyebrowY + 0.16, w: CW, h: 0.4, fontFace: STYLE.font,
-    fontSize: sz(13), bold: true, color: STYLE.accent, charSpacing: 2 });
+    fontSize: sz(11), bold: true, color: STYLE.accent, charSpacing: 2 });
   s.addText(CONTENT.closing.title, { x: MX, y: C.titleY, w: CW - 1, h: C.titleH, fontFace: STYLE.fontDisplay,
     fontSize: sz(30), bold: true, color: STYLE.ink });
   /* 要点可为字符串（美化路由原样搬运）：统一成 [主句, 说明] */

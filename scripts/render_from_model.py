@@ -269,7 +269,9 @@ def metrics_row(metrics) -> str:
 
 
 def r_metrics(i, sec):
-    return wrap(i, 'metrics', metrics_row(sec.get('metrics')), sec, ' band--top')
+    # M9：独立指标页用「主视觉」变体——卡片撑高、数字居中放大，与 PPTX 指标页同构，不再顶部一条、下半页空
+    row = metrics_row(sec.get('metrics')).replace('<div class="grid g-4 rv a-start">', '<div class="grid g-4 rv a-stretch metrics-hero">', 1)
+    return wrap(i, 'metrics', row, sec, ' band--top')
 
 
 def r_kpi(i, sec):
@@ -376,7 +378,7 @@ def _mini_fig(m, i) -> str:
     cap = m.get('cap') or ''
     t = 'donut' if m.get('type') == 'donut' else None
     return (f'      <div class="mini">' + (f'<div class="fig__cap">{esc(cap)}</div>' if cap else '')
-            + chart_svg(m, i, t, 440, 150) + (f'<div class="mini__n">{cite(m["note"])}</div>' if m.get('note') else '')
+            + chart_svg(m, i, t, 440, 160) + (f'<div class="mini__n">{cite(m["note"])}</div>' if m.get('note') else '')
             + '</div>\n')
 
 
@@ -1107,7 +1109,20 @@ def render_body(model: dict) -> str:
     closing = model.get('closing') or {}
     cpts = closing.get('points') or []
     # 收尾要点可为空（美化路由：原稿收尾页只有一句致谢时不补任何文字）；eyebrow 可由模型关闭
-    body = ('    <div class="grid g-3 rv a-start">\n' + pts_list(cpts) + '\n    </div>\n') if cpts else ''
+    # M9：与 PPTX 收尾页同构——每条要点一张卡（标题 + 一句），不再是一条孤零零的列表
+    def _ckv(pt):
+        if isinstance(pt, (list, tuple)):
+            return str(pt[0] if pt else ''), str(pt[1] if len(pt) > 1 else '')
+        if isinstance(pt, dict):
+            return str(pt.get('title') or pt.get('k') or ''), str(pt.get('text') or pt.get('v') or '')
+        return str(pt), ''
+    if cpts:
+        cards = ''.join(f'      <div class="card closing__c"><h3 class="t-h3 closing__k">{esc(k)}</h3>'
+                        + (f'<p class="t-body closing__v">{esc(v)}</p>' if v else '') + '</div>\n'
+                        for k, v in (_ckv(x) for x in cpts[:4]))
+        body = f'    <div class="grid g-{min(4, max(2, len(cpts[:4])))} rv a-stretch">\n{cards}    </div>\n'
+    else:
+        body = ''
     _ceb = closing.get('eyebrow', '下一步')
     ceb = f'<div class="t-eyebrow">{esc(_ceb)}</div>' if _ceb else ''
     parts.append(f'''<section class="band band--accent" id="closing">

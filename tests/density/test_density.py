@@ -79,6 +79,16 @@ rules = {r for _, r, _ in LD.check_section(good, 'presentation')}
 ok(not ({'DENSITY_ECHO', 'DENSITY_NO_INSIGHT'} & rules), f'有解读的要点被误报 {rules}')
 ok(LD.echo_points(echo) == [0, 1] and LD.echo_points(good) == [], '复述序号判定错误')
 
+# 8b) M9 双信号复述检测：挂连词的伪解读仍判复述；复述标题措辞 ≠ 复述图；引入图外数字 = 新事实
+sig = LD.echo_signals(tm, ['制造 3 家', '说明制造 3 家'])
+ok(sig['derivable'] == 1.0 and sig['novelty'] < LD.ECHO_MARKER_NOVELTY_MIN, f'伪解读信号错误 {sig}')
+ok(LD.echo_points(dict(tm, points=[['制造 3 家', '说明制造 3 家']])) == [0], '「说明 + 复述」未被识别')
+bar4 = {'type': 'bar', 'title': '研发域一年内有望反超', 'chart': {'labels': ['客服', '研发'], 'values': [9, 15], 'unit': 'pt'}}
+ok(LD.echo_points(dict(bar4, points=[['差距 6pt', '按当前增幅差推算，研发域在工具链补齐后有望一年内反超客服']])) == [],
+   '复用标题措辞的推论被误判为复述')
+ok(LD.echo_points(dict(bar4, points=[['研发 15pt', '单任务成本须低于人工基线 30%']])) == [], '引入图外事实被误判为复述')
+ok(LD.echo_points(dict(bar4, points=[['研发 15pt 领先', '客服 9pt，相差 6pt']])) == [0], '纯数字复述（含差值）未识别')
+
 # 9) M8 小图组最多 2 张
 mini = {'labels': ['a', 'b'], 'values': [1, 2]}
 three = dict(comp, minis=[mini, mini, mini])

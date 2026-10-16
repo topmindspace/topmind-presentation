@@ -71,7 +71,7 @@
   {
    "layout": "narrative-2col",
    "title": "六成企业试点卡在治理与集成——规模化分水岭已经出现",
-   "fp": "f794fb074fc8",
+   "fp": "559eb8abe185",
    "shapes": 16
   },
   {
@@ -131,8 +131,8 @@
   {
    "layout": "distribution",
    "title": "各域就绪度分布：金融客服中位最高、离散最小",
-   "fp": "861a95c1b9b4",
-   "shapes": 36
+   "fp": "15640e9234ac",
+   "shapes": 41
   },
   {
    "layout": "mekko",
@@ -167,8 +167,8 @@
   {
    "layout": "hub-spoke",
    "title": "组件依赖拓扑：编排层是唯一枢纽，必须双活",
-   "fp": "396ebb52eeb8",
-   "shapes": 56
+   "fp": "d2c825608a3c",
+   "shapes": 25
   },
   {
    "layout": "media-full",
@@ -179,7 +179,7 @@
   {
    "layout": "area-tree",
    "title": "规模化企业行业构成：制造与金融合计过半",
-   "fp": "29b554dd0594",
+   "fp": "66ef0a58eee3",
    "shapes": 23
   },
   {
@@ -245,13 +245,13 @@
   {
    "layout": "triad",
    "title": "规模化三重门槛：技术可控、组织就绪、经济可行",
-   "fp": "2b0d3a561a1b",
+   "fp": "7b6b95f12356",
    "shapes": 18
   },
   {
    "layout": "feature-2col",
    "title": "主张与细节：为什么先做数据底座",
-   "fp": "370004c7cd5e",
+   "fp": "7d4d5320d49f",
    "shapes": 8
   },
   {
@@ -275,7 +275,7 @@
   {
    "layout": "chart-readout",
    "title": "图表 + 解读栏 + 关键数字：采纳率四步走至 60%",
-   "fp": "ec310b870bc9",
+   "fp": "4d3f771aa04b",
    "shapes": 23
   },
   {
@@ -293,7 +293,7 @@
   {
    "layout": "chart-band",
    "title": "行业构成 + 解读带：制造与金融合计过半",
-   "fp": "3fed93d7273b",
+   "fp": "7e9d35de865c",
    "shapes": 31
   },
   {

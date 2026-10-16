@@ -54,39 +54,54 @@
     "micro": 10
   },
   "modeTypeScale": {
-    "$comment": "三模式独立排版比例尺（pt）。默认按中型会议室投影。小会议室可保持原值；礼堂/大报告厅宜更大标题档、更少每页单元（见 pptx-export 会场节）。research=咨询密排（正文 10.5pt、标题 22pt）；architecture 与 presentation 同基。",
+    "$comment": "三模式独立排版比例尺（pt）。默认按中型会议室投影。小会议室可保持原值；礼堂/大报告厅宜更大标题档、更少每页单元（见 pptx-export 会场节）。research=咨询密排（正文 11.5pt、页标题 24pt、章节标题 34pt）；chapterTitle / kpiCard / kpiHero / stepTitle / coverHero 为 M9 新增角色（不进 typeScale 映射，只能经 roleSz 显式取用），经 roleSz() 取用；architecture 与 presentation 同基。",
     "presentation": {
       "coverTitle": 44,
       "coverSub": 18,
-      "h1": 30,
+      "h1": 32,
       "h2": 17,
       "lead": 14,
       "body": 13,
       "caption": 11,
       "micro": 10,
-      "chapterNum": 96
+      "chapterNum": 96,
+      "chapterTitle": 32,
+      "kpiCard": 24,
+      "kpiHero": 36,
+      "stepTitle": 22,
+      "coverHero": 52
     },
     "research": {
-      "coverTitle": 36,
+      "coverTitle": 44,
       "coverSub": 14,
-      "h1": 22,
-      "h2": 13.5,
-      "lead": 11.5,
-      "body": 10.5,
-      "caption": 9,
-      "micro": 8.5,
-      "chapterNum": 80
+      "h1": 24,
+      "h2": 15,
+      "lead": 12.5,
+      "body": 11.5,
+      "caption": 10.5,
+      "micro": 9.5,
+      "chapterNum": 80,
+      "chapterTitle": 34,
+      "kpiCard": 22,
+      "kpiHero": 34,
+      "stepTitle": 16,
+      "coverHero": 48
     },
     "architecture": {
       "coverTitle": 44,
       "coverSub": 19,
-      "h1": 30,
+      "h1": 32,
       "h2": 17,
       "lead": 14,
       "body": 13,
       "caption": 11,
       "micro": 10,
-      "chapterNum": 96
+      "chapterNum": 96,
+      "chapterTitle": 32,
+      "kpiCard": 24,
+      "kpiHero": 36,
+      "stepTitle": 22,
+      "coverHero": 52
     }
   },
   "typography": {

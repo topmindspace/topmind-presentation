@@ -26,15 +26,11 @@ metadata:
 | 给了公司模板 / 参考 PPTX / 品牌色 | 套模板 | `recipes/template.md` | 参考稿取色与字体 → 最接近的内置风格 → 按生成路线交付 |
 | 架构 / 拓扑 / 流程 / 泳道，要多页或 PPTX | 架构图 | `recipes/architecture.md` | 组件与关系 → C 模式 1–8 页 |
 
-判定不了时按「从零生成」。路线一旦选定，其余食谱不读；下面的门禁与铁律对所有路线有效。环境有疑问先跑 `python3 scripts/doctor.py`。
+判定不了按「从零生成」；选定后其余食谱不读，门禁与铁律对所有路线有效。环境有疑问先跑 `python3 scripts/doctor.py`。
 
 ## Gate 0 · 先给参考图（**标准模式**硬门禁）
 
-用户表达做报告意向后，**第一件事**展示参考图，再进入六项问询：
-
-- 每次开场：整体图 `assets/theme-overview.png`；想边看边挑给 `assets/style-gallery.html`。
-
-**标准模式**：跳过参考图直接问询 = 不合格。**Fast Mode**（下节）豁免 Gate 0 与六项。
+用户表达做报告意向后，**第一件事**给整体图 `assets/theme-overview.png`（想边看边挑给 `assets/style-gallery.html`），再进六项问询；跳过 = 不合格。**Fast Mode** 豁免 Gate 0 与六项。
 
 ## Fast Mode · 快速模式（用户显式 opt-in）
 
@@ -42,14 +38,16 @@ metadata:
 
 默认：mode **B**（路演/汇报/发布/演讲/融资→A；架构/拓扑→C）· style B→mckinsey / A→business-blue / C→graphite-dark · theme light（graphite→dark）· 篇幅 A10/B12/C6 · **html only**（要 PPTX 才开 B 通道）。
 
-**跳过** Gate 0/六项/完整大纲；**仍须**最小大纲→模型单写→strict 0/0→`quality_gate --deliver`（反截断、图表多样、Mode A craft 不降）。L0+L1（A/Fast 可加 L1.5）；一行宣布「Fast 选用：…」→ playbook §二；声明已跳过参考图。**标准模式**仍强制 Gate 0 + 六项。
+**跳过** Gate 0/六项/完整大纲（深度判定见 playbook §二）；**仍须**最小大纲→模型单写→strict 0/0→`quality_gate --deliver`（反截断、图表多样、Mode A craft 不降）。L0+L1（A/Fast 可加 L1.5）；一行宣布「Fast 选用：…」→ playbook §二；声明已跳过参考图。**标准模式**仍强制 Gate 0 + 六项。
 
 ## 唯一入口流程
 
 ```
 听意图 → [Fast? 快路径] : [Gate 0 → 六项（1 轮）→ 内容架构]
-      → 起骨架 → 模型单写（禁改 HTML 正文）→ 脚本回填 → strict 0/0 → 交付
+      → 写 model.json（唯一事实源）→ make_deck.py 一条命令出 HTML + PPTX 并跑完门禁 → 交付
 ```
+
+**一条命令**：`python3 scripts/make_deck.py 稿件.model.json [--out 目录] [--no-pptx] [--fidelity]`（或 `npx topmind-presentation build …`）。依次：渲染 HTML → HTML strict → 信息密度 → PPTX strict → PPTX 质检 →（可选）双端保真；失败即停，只摘失败行并给「怎么修」。骨架用 `scaffold_report.py --plan`，不手写 HTML。
 
 **预算（硬）**：交互轮次 **≤3**；**L0+L1 共 2 份**（本文件 + `playbook.md`）；A/Fast 可加 L1.5（`default-surface.md`+`presentation-craft.md`）。其余 L2 命中才读、不预读。
 
@@ -64,24 +62,19 @@ metadata:
 5. **交付格式**：仅 HTML（默认）/ HTML+PPTX（**B 通道**）。
 6. **参考图确认**：复述 Gate 0 路径，确认用户已看到。
 
-**载体**：优先结构化选项卡一次收集，否则对话文本一次列全。此后形式层面不再反复确认；内容层面按需一次大纲确认。
-
-## 生成路线的两种深度（先判定，再动手）
-
-- **轻量**（默认）：材料单一完整、判断已定 → 最小大纲 + 1 张规划卡。**完整**：长篇/材料杂/要看框架 → 证据盘点 → 故事线 → 主张树 → 逐页规划卡 → 大纲确认 1 轮。判定与步骤见 playbook §二。
-- **美化 / 套模板 / 架构图**：见上方路线表对应食谱；美化跳过篇幅与大纲问询，逐字逐数核对差异必须为 0。
+**载体**：优先结构化选项卡一次收集；此后形式不再反复确认，内容按需一次大纲确认。
 
 ## 变更与中断（过程可控 · 不重启六项问询）
 
-- 改风格/亮暗：header 即切 → 同步 `REPORT_MODEL.style/theme` → 重跑校验，不重写内容。加减页：只动受影响页 + Agenda + 编号 + 页码。
-- 换模式：不可就地改，保留证据/数字/结论按目标模式重排。中断续写：提取脚本取回模型再渲染，不从零重写。
-- 校验不通过：按修复指引逐条改；2 轮不收敛才读 `failure-modes.md`。
+- 改风格/亮暗：改 `REPORT_MODEL.style/theme` 后重跑 make_deck，不重写内容；加减页只动受影响页 + Agenda + 编号。
+- 换模式：保留证据/数字/结论按目标模式重排；中断续写用 `extract_model.py` 取回模型再渲染。
+- 校验不过：按「怎么修」逐条改；2 轮不收敛再读 `failure-modes.md`。
 
 ## 阶段路由（渐进式披露）
 
 > 披露分层（机器可读）：`L0=SKILL.md` · `L1=references/playbook.md` · `L2=按需`
 >
-> **纪律**：L0+L1 是默认全部所需；**只在命中"何时读"时才打开 L2，读完即执行、不预读**。取代码**一律** `extract_snippet.py`（`--list` / `--task` / `--chart` / `--page-type` / `--file --section`）。**整读大 L2 文件 = FAIL**（禁令清单见 playbook §十）。
+> **纪律**：L0+L1 即默认所需；**命中"何时读"才开 L2，不预读**。取代码**一律** `extract_snippet.py`（`--list` / `--task` / `--chart` / `--page-type` / `--file --section`）。**整读大 L2 文件 = FAIL**（禁令清单见 playbook §十）。
 
 **L2 索引**（命中条件与逐任务只读清单详见 playbook §十）：
 
@@ -97,7 +90,7 @@ metadata:
 
 > 门禁语义；阈值见 playbook 与 layout 常量 JSON。**motion=none**（无炫技转场）。
 
-1. **单文件零外链**——无 CDN/外部字体/外部图片；图形一律内联 SVG；`<img src>` 仅 `data:` 或带 `alt` 的相对路径（单图 ≤1.5MB、全篇 ≤8MB）；无素材图用配图占位（`components.md` §11c-3），不留空。
+1. **单文件零外链**——无 CDN/外部字体/外部图片；图形一律内联 SVG；`<img src>` 仅 `data:` 或带 `alt` 的相对路径（单图 ≤1.5MB、全篇 ≤8MB）。**没有素材图就不用图片版式**：结构/流程/关系改画可编辑示意图（diagram / steps / network，原生形状）；配图占位（`components.md` §11c-3）只在用户明确要后补图时用，交付前必须换成真图，不留空框。
 2. **模式先定后写**——从对应模式模板起步；`data-mode` = `REPORT_MODEL.mode`；页面无模式切换；PPTX 字号走三模式独立比例尺。
 3. **亮暗双主题一致**——CSS 变量整块换肤 + header 切换 + 文件级记忆；`REPORT_MODEL.theme` 与页面一致，PPTX 同主题导出；强调带只用 accent 家族；**末页禁 `band--deep`**。
 4. **每页一屏 + 高度稳定**——`section.band` ≥ 一屏；主内容不得溢出画布或压进结论条/注释带。放不下按「重构承载 → 拆页/分章 → 换布局形态 → 有限缩字号」；**禁**静默截断或为疏朗删结论条/证据。**大纲 = 3–7 章（每章 1+ 页），禁逐页标题罗列**。结论条 = MD3 tonal surface（无「So what」标签、**无左侧 accent 轨**）。模型文本 → 渲染文本覆盖率 ≥95%；PPTX 长标题/列表/表格按 `containers.adaptiveText` 单源规则自动收紧。
@@ -113,10 +106,10 @@ metadata:
 ## 交付物与验收
 
 - **HTML**：零外链可翻页、每页一屏。Header 工具栏：**T** 亮暗（按文件记忆，同步 `REPORT_MODEL.theme`）/ 12 套风格（实时换肤，交付前写回 `REPORT_MODEL.style`）/ **P** 预览 PPTX（页序列+精导提示词）/ **H** 生成指引 / **F** 全屏 / **B** 折叠。改风格/主题后同步 `REPORT_MODEL` 并重跑校验（不重写）。
-- **PPTX（B 通道）**：`extract_model` → `build_pptx.js` → `validate_pptx --strict`；16:9 可编辑。**A 不交付**（仅预览/`cross_verify`；playbook §九）。
-- **验收**：HTML strict 0/0；含 PPTX 再加 PPTX 0/0；失败给定向修复指引。
-- **交付说明**：`quality_gate.py --deliver`（PPTX 带 `--pptx/--model`）出七要素，缺一 FAIL。美化路由另交 `verify.json` + `report.md` + `compare.png`。
+- **PPTX（B 通道）**：`make_deck.py` 内含 `build_pptx.js --strict` → `validate_pptx --strict --model`；16:9 全原生可编辑（文本框 / 形状 / 原生图表）。**A 不交付**（仅预览/`cross_verify`；playbook §九）。
+- **验收**：HTML strict 0/0；含 PPTX 再加 PPTX 0/0；要求两端一致时加 `--fidelity`（`check_fidelity.py`：字级层级、颜色 ΔE、换行、位置、字体声明逐项量化）；失败给定向修复指引。
+- **交付说明**：`quality_gate.py --deliver` 出七要素，缺一 FAIL；美化另交 `verify.json` + `report.md` + `compare.png`。
 
 ## 环境依赖
 
-HTML 与校验脚本仅用标准库；PPTX 需 Node + pptxgenjs（`TOP_PPT_NODE_EXE`/`TOP_PPT_NODE_PATH`）；美化路由另需 python-pptx，前后对照图需 LibreOffice + poppler；参考图重生成需 playwright。回归：`regression.py`、`audit_*.py`。
+HTML 与校验仅用标准库；PPTX 需 Node + pptxgenjs（`TOP_PPT_NODE_EXE`/`TOP_PPT_NODE_PATH`）；美化需 python-pptx；渲染对照需 LibreOffice + poppler；双端保真与参考图需 playwright + Chrome。

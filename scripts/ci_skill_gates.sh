@@ -100,6 +100,7 @@ run_one() {
   # M7 最低信息密度门禁（元素种类 / 文字量 / 数据点，三模式分档）+ 自测
   "$PY" scripts/check_density.py assets/examples/*.model.json --strict || { echo "ci_skill_gates: 信息密度门禁失败" >&2; exit 1; }
   "$PY" tests/density/test_density.py || { echo "ci_skill_gates: 信息密度自测失败" >&2; exit 1; }
+  "$PY" tests/density/test_echo_eval.py || { echo "ci_skill_gates: 复述检测评测未达标（检出 ≥7/8、误报 ≤1/8）" >&2; exit 1; }
   "$PY" tests/m8/test_m8.py || { echo "ci_skill_gates: M8 回归自测失败" >&2; exit 1; }
 
   if [[ "$WITH_PPTX" == "1" ]]; then
@@ -154,6 +155,9 @@ run_one() {
       "$PY" tests/layouts/test_layouts.py || { echo "ci_skill_gates: 版式 golden 失败" >&2; exit 1; }
       # M5：PPTX 像素回归（三份黄金样张 → 48×27 灰度缩略图对比基线）
       "$PY" scripts/pixel_regression.py || { echo "ci_skill_gates: 像素回归失败" >&2; exit 1; }
+      # M9：HTML ↔ PPTX 逐页保真门禁（配对率 / 字级层级 / 颜色 ΔE / 换行 / 位置 / 字体声明）
+      [[ -d node_modules/playwright ]] || npm ci --no-audit --no-fund >/dev/null 2>&1 || npm install --no-audit --no-fund >/dev/null
+      "$PY" scripts/check_fidelity.py --examples --strict || { echo "ci_skill_gates: HTML↔PPTX 保真门禁失败（逐条修复提示见上）" >&2; exit 1; }
       "$PY" scripts/validate_pptx.py "dist/regression/native-rows.pptx" --strict \
         --model="tests/charts/native-rows.model.json" >/dev/null || { echo "ci_skill_gates: 行式原生图表探针失败" >&2; exit 1; }
       "$PY" - "dist/regression/native-rows.pptx" <<'PYEOF'

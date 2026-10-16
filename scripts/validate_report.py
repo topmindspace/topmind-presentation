@@ -1882,7 +1882,12 @@ def main():
         chk("Agenda 位于第二页", ok_second,
             f"共{len(band_secs)}页 agenda@{agenda_pos} 第2页@{second_band_pos}")
         n_items = txt.count('class="agenda__a"')
-        chk("Agenda 条目可点击跳转 (≥4)", n_items >= 4, f"{n_items} 条")
+        # M9：与 model-schema.json agendaMin 同源（presentation / research = 3），此前写死 ≥4 与 schema 矛盾
+        try:
+            _amin = int(json.loads((Path(__file__).with_name("model-schema.json")).read_text(encoding="utf-8"))["model"]["agendaMin"].get("presentation", 3))
+        except Exception:
+            _amin = 3
+        chk(f"Agenda 条目可点击跳转 (≥{_amin})", n_items >= _amin, f"{n_items} 条；不足时补章节（agenda 条目 = 章，3–7 条）")
         if n_items > AGENDA_SINGLE_MAX:
             # 只认大纲元素 class（禁被 engine.css 的 .agenda--2col 选择器误伤）
             has_2col = bool(re.search(

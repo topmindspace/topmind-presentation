@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### M9 全方位优化
+- 新增 HTML ↔ PPTX 逐页保真门禁 `check_fidelity.py` + `fidelity_html.js`：按段落配对，量化字级层级（相对整稿中位比值）、颜色 ΔE、换行、位置、字体声明；修复提示中文可执行；接入 CI（四份示例全部 PASS）。
+- 两端对齐：封面 / 章节标题 / 指标大数 / 卡内大数 / 时间线阶段名改走新增角色字号（coverHero · chapterTitle · kpiHero · kpiCard · stepTitle）；眉题降一级；结论条改 tonal；表头改 tonal；Exhibit 行改「品牌色编号 + 墨色图题」；卡片网格行优先。
+- PPTX 灰阶统一到品牌色系：热力图第 3 级、子弹图未达标条、树图、马赛克图、流带图（改用风格编码色板）、K 线阴线不再用灰。
+- 复杂信息图：关系网络改「枢纽居中 + 椭圆环 + 胶囊节点」与 HTML 同算法；箱线图改横向；树图标签带占比；信息图标签字号上调。
+- HTML：独立指标页改主视觉卡（不再顶部一条、下半页空）；收尾页改卡片；研究 / 架构模板的模式层改为 `html[data-mode]` 作用域，修复标题字号被风格层覆盖。
+- 风格性格：PPTX 卡片圆角按风格 `styleIdentity.radius` 等比缩放（mckinsey 方正、apple-mono / sky-airy 圆润）。
+- 一条命令流水线 `make_deck.py`（`npx topmind-presentation build`）：渲染 → HTML strict → 密度 → PPTX strict → PPTX 质检 →（可选）保真，失败只摘失败行并给「怎么修」。
+- 复述检测改为双信号（数字可推导率 + 汉字二元组新信息率），连词伪解读不再放行；新增 16 条人工标注小样本评测（检出 8/8、误报 0/8，旧法 3/8）。示例中被新法识别的复述要点按已有事实改写。
+- Agenda 条目下限与 schema 同源（≥3），修复与 `agendaMin` 矛盾的写死 ≥4。
+- SKILL.md 精简（流程改为「写 model → make_deck」），图片规则写入 illustration-layout.md。
+
 ### M8 遗留问题清理
 - 解读要点：规则写明「原因 / 影响 / 下一步，不复述数字，只用已有事实」；新增 DENSITY_ECHO / DENSITY_NO_INSIGHT 复述提示；四份示例与 Q1 的复述要点按原有事实改写。
 - 小图组最多 2 张（DENSITY_MINIS_MAX），HTML 与 PPTX 同步；PPTX 小图随之放大。

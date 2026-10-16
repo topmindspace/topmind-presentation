@@ -107,27 +107,128 @@ def _chart_tokens(sec: dict) -> list:
                         toks.append(x['name'])
             if isinstance(c.get('unit'), str):
                 toks.append(c['unit'])
-    for k in ('rowHeads', 'colHeads', 'labels'):
+    for k in ('rowHeads', 'colHeads', 'labels', 'legend'):
         toks += [x for x in (sec.get(k) or []) if isinstance(x, str)]
+    # 复杂信息图的结构化载荷：行数组里的字符串（items / cols / groups / nodes / flows …）
+    for k in ('items', 'cols', 'groups', 'nodes', 'flows', 'edges', 'series', 'cells', 'levels', 'lanes'):
+        for r in (sec.get(k) or []):
+            if isinstance(r, (list, tuple)):
+                toks += [x for x in r if isinstance(x, str)]
+            elif isinstance(r, dict) and isinstance(r.get('name'), str):
+                toks.append(r['name'])
+    if isinstance(sec.get('unit'), str):
+        toks.append(sec['unit'])
     return sorted({t for t in toks if t}, key=len, reverse=True)
 
 
+# M9：复述检测改为「双信号」——
+#   ① 数字可推导率：要点里的数字有多少能由图上数值直接得到（原值 / 两两差 / 合计 / 占比 / 倍数）；
+#   ② 新信息率：要点的汉字二元组（bigram）里，有多少既不在图表词表（标签 / 系列 / 单位 / 标题 /
+#      关键数字标签）里，也不是纯复述用语。
+# 两个信号都指向「复述」才判定：数字全部可推导且新信息率 < ECHO_NOVELTY_MIN。原因词只在新信息率
+# 达到下限时才算数（避免「说明 18%」这类挂个连词的伪解读绕过检查）。
+ECHO_NOVELTY_MIN = 0.30
+ECHO_MARKER_NOVELTY_MIN = 0.20
+ECHO_DERIVABLE_MIN = 0.5
+_MARKERS2 = tuple(m for m in REASON_MARKERS if len(m) >= 2)   # 单字标记（应 / 可 / 会…）常是词内字，如「供应链」，不作信号
+_CJK_RE = re.compile(r'[\u4e00-\u9fff]+')
+
+
+def _bigrams(text: str) -> set:
+    out = set()
+    for run in _CJK_RE.findall(text or ''):
+        if len(run) == 1:
+            out.add(run)
+        out.update(run[i:i + 2] for i in range(len(run) - 1))
+    return out
+
+
+def _chart_numbers(sec: dict) -> set:
+    """图上可直接得到的数：原值、同组两两差 / 和 / 倍数、同组占比（%）。同组 = 同一数组里的数值，
+    或「行数组」里同一列的数值（如 items:[[标签, 值]…]）。"""
+    groups = []
+    def nums_of(x):
+        return [float(v) for v in x if isinstance(v, (int, float)) and not isinstance(v, bool)]
+    def walk(x, key=''):
+        if key in ('notes', 'speakerNotes', 'points', 'title', 'eyebrow', 'lead', 'note', 'footnote', 'soWhat', 'keyMetrics'):
+            return
+        if isinstance(x, dict):
+            for k, y in x.items():
+                walk(y, k)
+        elif isinstance(x, (list, tuple)):
+            g = nums_of(x)
+            if g:
+                groups.append(g)
+            rows = [r for r in x if isinstance(r, (list, tuple))]
+            if rows:
+                width = max(len(r) for r in rows)
+                for j in range(width):
+                    col = nums_of([r[j] for r in rows if len(r) > j])
+                    if len(col) >= 2:
+                        groups.append(col)
+            for y in x:
+                if isinstance(y, (list, tuple, dict)):
+                    walk(y, key)
+        elif isinstance(x, str) and key not in ('unit', 'type'):
+            g = [float(n.replace(',', '')) for n in NUM_RE.findall(x)]
+            if g:
+                groups.append(g)
+    walk(sec)
+    out = set()
+    for g in groups:
+        g = g[:40]
+        tot = sum(v for v in g if v > 0)
+        for i, x in enumerate(g):
+            out.add(x)
+            if tot and len(g) >= 2:
+                out.add(round(x / tot * 100))
+            for y in g[i + 1:]:
+                out.update({abs(x - y), x + y})
+                if y:
+                    out.add(round(x / y, 1))
+                if x:
+                    out.add(round(y / x, 1))
+        if tot and len(g) >= 2:
+            out.add(tot)
+            # 任意两项之和的占比（「前两名合计 55%」这类）
+            for i, x in enumerate(g):
+                for y in g[i + 1:]:
+                    out.add(round((x + y) / tot * 100))
+    return {round(v, 1) for v in out}
+
+
+def echo_signals(sec: dict, p) -> dict:
+    """单条要点的两个信号：derivable（数字可推导率，无数字为 None）与 novelty（新信息率）。
+    novelty = 去掉数字、图表词表（标签 / 系列 / 单位 / 标题 / 关键数字标签）与复述用语后，
+    剩余汉字二元组占原文二元组的比例。"""
+    t = _point_text(p)
+    nums = [float(n.replace(',', '')) for n in NUM_RE.findall(t)]
+    cn = _chart_numbers(sec)
+    der = (sum(1 for n in nums if round(abs(n), 1) in cn) / len(nums)) if nums else None
+    rest = NUM_RE.sub(' ', t)
+    # 标题是论点不是图，不进词表（复述标题不等于复述图）
+    voc = _chart_tokens(sec) + [_point_text(m) for m in key_metrics(sec)]
+    for tok in sorted({w for v in voc for w in re.split(r'[\s，、：:；;（）()+/]+', v) if len(w) >= 2}, key=len, reverse=True):
+        rest = rest.replace(tok, ' ')
+    # 复述用语与连词（说明 / 因此…）本身不携带信息，一并扣除——否则「说明 + 复述」能骗过新信息率
+    for w in sorted(ECHO_STOP + _MARKERS2, key=len, reverse=True):
+        rest = rest.replace(w, ' ')
+    full = [g for g in _bigrams(t) if len(g) == 2]
+    left = [g for g in _bigrams(rest) if len(g) == 2]
+    nov = len(left) / max(1, len(full))
+    return {'derivable': der, 'novelty': round(nov, 2), 'marker': any(m in t for m in _MARKERS2)}
+
+
 def echo_points(sec: dict) -> list:
-    """返回只复述图表数字的要点序号：含数字、无原因/影响/下一步信号，
-    去掉数字、图表标签、单位与复述用词后剩余实义字 < 6。"""
-    toks = _chart_tokens(sec)
+    """返回判定为「复述图上数字」的要点序号（双信号，见上）。"""
     out = []
     for i, p in enumerate(readout_items(sec)):
-        t = _point_text(p)
-        if not NUM_RE.search(t) or any(m in t for m in REASON_MARKERS):
+        sg = echo_signals(sec, p)
+        if sg['derivable'] is None or sg['derivable'] < ECHO_DERIVABLE_MIN:
+            continue          # 无数字，或多数数字来自图外（新事实）——不算复述
+        if sg['marker'] and sg['novelty'] >= ECHO_MARKER_NOVELTY_MIN:
             continue
-        rest = NUM_RE.sub('', t)
-        for tok in toks:
-            rest = rest.replace(tok, '')
-        for w in ECHO_STOP:
-            rest = rest.replace(w, '')
-        rest = re.sub(r'[%％a-zA-Z×→~～·]+', '', rest)
-        if len(_PUNCT_RE.sub('', rest)) < 8:
+        if sg['novelty'] < ECHO_NOVELTY_MIN:
             out.append(i)
     return out
 

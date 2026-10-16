@@ -791,6 +791,9 @@ def pg_ghost(i, sec):
     pt = _schema_page_types().get(sec['type'], {})
     label = pt.get('label', sec['type']).split('（')[0]
     need = '、'.join(f.split(':')[0].replace('anyof', '') for f in pt.get('required', []) if f != 'title') or '正文'
+    if pt.get('density'):
+        # M7：图表页同时要解读要点与关键数字（信息密度契约），初稿就把空位标出来
+        need += '；解读要点 points、关键数字 keyMetrics'
     html = f'''<section class="band" id="s{i}" data-ghost="1">
   <div class="wrap">
 {shead(sec['eyebrow'], sec['title'], '')}

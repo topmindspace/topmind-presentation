@@ -137,7 +137,7 @@
   {
    "layout": "stream",
    "title": "价值兑现结构演变：副驾协同持续做厚",
-   "fp": "c7e77c9f1e99",
+   "fp": "26218227d3fd",
    "shapes": 382
   },
   {
@@ -271,6 +271,30 @@
    "title": "行业就绪度差异显著——金融客服先行，制造研发滞后",
    "fp": "4d06dc225935",
    "shapes": 52
+  },
+  {
+   "layout": "chart-readout",
+   "title": "图表 + 解读栏 + 关键数字：采纳率四步走至 60%",
+   "fp": "ec310b870bc9",
+   "shapes": 23
+  },
+  {
+   "layout": "chart-dual",
+   "title": "采纳率与试点率同步抬升：两条曲线互证",
+   "fp": "dcc3376097d0",
+   "shapes": 22
+  },
+  {
+   "layout": "chart-minis",
+   "title": "主图看总量，小图看结构：三域各自的爬坡曲线",
+   "fp": "5e054a71eb16",
+   "shapes": 26
+  },
+  {
+   "layout": "chart-band",
+   "title": "行业构成 + 解读带：制造与金融合计过半",
+   "fp": "3fed93d7273b",
+   "shapes": 31
   },
   {
    "layout": "closing",

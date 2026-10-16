@@ -389,6 +389,8 @@ def build_model(src, style, theme):
             continue
         lid, sec, intent = map_slide(sl, led, style, history, len(slides))
         sec['sourceSlide'] = sl['no']
+        if sec.get('chart') and not sec.get('keyMetrics'):
+            sec['compose'] = 'off'   # 美化只换承载不增文字：不自动派生关键数字（复合版式需原稿自带要点 / 数字）
         if sl.get('notes', '').strip():
             sec['speakerNotes'] = sl['notes']   # 原稿备注原样写回新稿（核对器逐页比对）
         sections.append(sec)

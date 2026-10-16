@@ -1,4 +1,4 @@
-# 版式库（layoutLibrary · 8 家族 44 版式）
+# 版式库（layoutLibrary · 8 家族 48 版式）
 
 > **何时读**：挑版式、排节奏、加新版式时。**单源** = `scripts/layout-constants.json` → `layoutLibrary`；本文是它的说明，数值以 JSON 为准。
 > **门禁**：`python scripts/check_rhythm.py <model.json|html> --strict`（节奏 / 家族覆盖 / 反模式，CI 对全部示例硬拦）；`python tests/layouts/test_layouts.py`（每个版式一页 golden + PPTX 几何指纹）。
@@ -52,13 +52,19 @@
 | `kpi-trend` | 主 KPI + 支撑数字 | type=kpi | ○ 轻 |
 | `chart-sidenote` | 主图 + 侧注 | type=exhibit | ◐ 中 |
 | `chart-table` | 图 + 表 | type=halftable | ● 密 |
-| `chart-full` | 通栏主图 | type=bar | ◐ 中 |
+| `chart-full` | 通栏主图（仅限无需解读的过渡页，`compose:"off"`） | type=bar | ◐ 中 |
 | `waterfall` | 瀑布拆解 | type=bar · chart=waterfall | ◐ 中 |
 | `rank-bar` | 排名条 | type=bullet | ◐ 中 |
 | `composition` | 构成环图 + 图例卡 | type=donut | ◐ 中 |
 | `distribution` | 分布箱线 | type=boxplot | ◐ 中 |
 | `mekko` | 双维占比（马赛克） | type=marimekko | ◐ 中 |
 | `stream` | 构成演变（河流图） | type=streamgraph | ◐ 中 |
+| `chart-readout` | 图表 + 解读栏 + 关键数字条 | compose=side（bar/donut/exhibit + points / keyMetrics） | ● 密 |
+| `chart-dual` | 双图对照 + 解读行 | compose=dual（+ chart2） | ● 密 |
+| `chart-minis` | 主图 + 小图组（small multiples） | compose=minis（+ minis） | ● 密 |
+| `chart-band` | 主图 + 底部解读带 | compose=band（信息图 / 结构图 / 指标页 + points） | ● 密 |
+
+> 复合版式规则与模型写法见 `density.md`；`compose` 匹配优先于单纯页型。
 
 ## 框架（`framework`）
 

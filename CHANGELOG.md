@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### M7 信息密度治理
+- 新增复合版式（chart-readout / chart-dual / chart-minis / chart-band），纳入版式库（48 种），HTML 与 PPTX 同步。
+- 模型层：图表页支持 points / keyMetrics / chart2 / minis / compose；缺关键数字时由单序列数据自动派生，缺解读给出提示。
+- 新增最低信息密度门禁 check_density.py（演示 / 研究 / 架构三档）及自测，接入 CI。
+- 新增 references/density.md（分档、复合版式、插图与图标规则），清理过时的极简规则。
+- 重做四份示例低密度页；修复 streamgraph 只占半高、环形图标签重复、热力图图例压住底栏。
+
 ### M6（未发版）
 - HTML 封面改为整块主色色块（与 PPTX 一致）；暗色主题用主色与背景 30% 混合，避免刺眼；12 套风格亮/暗均已核对。
 - 新渲染的 HTML 自动填充页眉、页脚、导航与 `<title>`，不再残留模板占位文字。

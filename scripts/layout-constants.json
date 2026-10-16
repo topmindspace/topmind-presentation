@@ -63,7 +63,8 @@
       "lead": 14,
       "body": 13,
       "caption": 11,
-      "micro": 10, "chapterNum": 96
+      "micro": 10,
+      "chapterNum": 96
     },
     "research": {
       "coverTitle": 36,
@@ -73,7 +74,8 @@
       "lead": 11.5,
       "body": 10.5,
       "caption": 9,
-      "micro": 8.5, "chapterNum": 80
+      "micro": 8.5,
+      "chapterNum": 80
     },
     "architecture": {
       "coverTitle": 44,
@@ -83,7 +85,8 @@
       "lead": 14,
       "body": 13,
       "caption": 11,
-      "micro": 10, "chapterNum": 96
+      "micro": 10,
+      "chapterNum": 96
     }
   },
   "typography": {
@@ -3982,7 +3985,7 @@
       {
         "id": "chart-full",
         "family": "data",
-        "name": "通栏主图",
+        "name": "通栏主图（仅限数据充分、无需解读的过渡页；缺解读会被 check_density 拦截）",
         "match": {
           "type": "bar"
         },
@@ -4256,6 +4259,42 @@
         "name": "评分热力表",
         "match": {
           "type": "heatmap"
+        },
+        "weight": "dense"
+      },
+      {
+        "id": "chart-readout",
+        "family": "data",
+        "name": "图表 + 解读栏 + 关键数字条",
+        "match": {
+          "compose": "side"
+        },
+        "weight": "medium"
+      },
+      {
+        "id": "chart-dual",
+        "family": "data",
+        "name": "双图对照 + 解读行",
+        "match": {
+          "compose": "dual"
+        },
+        "weight": "dense"
+      },
+      {
+        "id": "chart-minis",
+        "family": "data",
+        "name": "主图 + 小图组（small multiples）",
+        "match": {
+          "compose": "minis"
+        },
+        "weight": "dense"
+      },
+      {
+        "id": "chart-band",
+        "family": "data",
+        "name": "主图 + 底部解读带（关键数字 + 要点）",
+        "match": {
+          "compose": "band"
         },
         "weight": "dense"
       }

@@ -49,10 +49,23 @@ def load(path: Path) -> dict:
 
 
 def _specificity(m: dict) -> int:
-    return sum(1 for k in m if k not in ('maxItems', 'minItems'))
+    # compose（复合版式）比单纯页型 / 图表子类型更具体：命中即优先
+    return sum(3 if k == 'compose' else 1 for k in m if k not in ('maxItems', 'minItems'))
 
 
-def classify(page: dict) -> str:
+def compose_form(sec: dict) -> str:
+    """复合版式形态（与 render_from_model / build_pptx 同口径）：side | dual | minis | band | ''。"""
+    import lib_density as LD
+    t = (sec.get('type') or 'points').lower()
+    C = LD.compose_on(sec, t)
+    if not C:
+        return ''
+    if C['form'] == 'side':
+        return 'dual' if sec.get('chart2') else ('minis' if sec.get('minis') else 'side')
+    return 'band'
+
+
+def classify(page: dict, no_compose: bool = False) -> str:
     """page: {'kind': cover|agenda|closing|section, 'sec': dict, 'n': agenda 条数}"""
     best, score = None, -1
     for l in LAYOUTS:
@@ -70,7 +83,12 @@ def classify(page: dict) -> str:
                 continue
             sec = page['sec']
             t = (sec.get('type') or 'points').lower()
-            if m.get('type') != t:
+            if 'compose' in m:
+                if no_compose:
+                    continue
+                if compose_form(sec) != m['compose']:
+                    continue
+            elif m.get('type') != t:
                 continue
             if 'variant' in m and (sec.get('variant') or '') != m['variant']:
                 continue
@@ -104,6 +122,12 @@ def pages_of(model: dict) -> list:
         lay = BY_ID.get(p['layout'], {})
         p['family'] = lay.get('family', '?')
         p['weight'] = lay.get('weight', 'medium')
+        p['sig'] = p['layout']
+        if p['layout'] == 'chart-band':
+            # 底部解读带保留主图自身几何：相邻判定与视觉重量按主图版式算
+            base = classify(p, no_compose=True)
+            p['sig'] = 'chart-band:' + base
+            p['weight'] = BY_ID.get(base, {}).get('weight', p['weight'])
     return out
 
 
@@ -124,7 +148,7 @@ def check(model: dict) -> dict:
     # 节奏
     for i in range(1, len(pages)):
         a, b = pages[i - 1], pages[i]
-        if R.get('forbidAdjacentSameLayout') and a['layout'] == b['layout'] and not b.get('cont'):
+        if R.get('forbidAdjacentSameLayout') and a.get('sig', a['layout']) == b.get('sig', b['layout']) and not b.get('cont'):
             fails.append(f'第 {i}–{i + 1} 页同一版式「{BY_ID.get(b["layout"], {}).get("name", b["layout"])}」相邻（换同家族其它版式或调整顺序）')
     maxrun = R.get('maxSameWeightRun', 2)
     if isinstance(maxrun, dict):

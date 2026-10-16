@@ -19,7 +19,12 @@
       "theme",
       "subtitle",
       "meta",
-      "agenda:array", "agendaTitle", "agendaEyebrow", "contentLocked", "coverNotes", "agendaNotes"
+      "agenda:array",
+      "agendaTitle",
+      "agendaEyebrow",
+      "contentLocked",
+      "coverNotes",
+      "agendaNotes"
     ],
     "agendaMin": {
       "presentation": 3,
@@ -48,7 +53,9 @@
     "anchor",
     "cap",
     "source",
-    "highlightCol", "sourceSlide", "speakerNotes"
+    "highlightCol",
+    "sourceSlide",
+    "speakerNotes"
   ],
   "mutualExclusionHint": "verdict 与 soWhat 互斥：二者共用 annotation 结论条槽位，同页双填必叠印。comparison 页填 verdict 时不要再填 soWhat（渲染器已自动二选一，但模型侧应只给一个）。",
   "flagsHint": "flags = 待核实/待二次修改条目字符串数组（如 '2027 增速 xx%（口径未定）'）；渲染为 accent 强调色标注行，提示用户核对。",
@@ -122,6 +129,9 @@
       ],
       "required": [
         "metrics:array"
+      ],
+      "optional": [
+        "points:array"
       ]
     },
     "kpi": {
@@ -198,7 +208,16 @@
         "chart.start:array",
         "chart.target:array",
         "chart.dataTable",
-        "note"
+        "note",
+        "points:array",
+        "keyMetrics:array",
+        "chart2",
+        "minis:array",
+        "compose"
+      ],
+      "density": [
+        "points",
+        "keyMetrics"
       ]
     },
     "donut": {
@@ -217,7 +236,16 @@
         "chart.centerTotal",
         "chart.colors:array",
         "chart.dataTable",
-        "note"
+        "note",
+        "points:array",
+        "keyMetrics:array",
+        "chart2",
+        "minis:array",
+        "compose"
+      ],
+      "density": [
+        "points",
+        "keyMetrics"
       ]
     },
     "heatmap": {
@@ -234,7 +262,16 @@
       "optional": [
         "unit",
         "scaleLabel:array",
-        "note"
+        "note",
+        "points:array",
+        "keyMetrics:array",
+        "chart2",
+        "minis:array",
+        "compose"
+      ],
+      "density": [
+        "points",
+        "keyMetrics"
       ]
     },
     "bullet": {
@@ -249,7 +286,16 @@
       "optional": [
         "unit",
         "max",
-        "note"
+        "note",
+        "points:array",
+        "keyMetrics:array",
+        "chart2",
+        "minis:array",
+        "compose"
+      ],
+      "density": [
+        "points",
+        "keyMetrics"
       ]
     },
     "pyramid": {
@@ -263,7 +309,8 @@
         "levels:array"
       ],
       "optional": [
-        "note"
+        "note",
+        "points:array"
       ]
     },
     "image": {
@@ -406,7 +453,16 @@
         "chart.unit",
         "chart.colors:array",
         "chart.dataTable",
-        "note"
+        "note",
+        "points:array",
+        "keyMetrics:array",
+        "chart2",
+        "minis:array",
+        "compose"
+      ],
+      "density": [
+        "points",
+        "keyMetrics"
       ]
     },
     "twocol": {
@@ -447,7 +503,16 @@
         "chart.unit",
         "chart.colors:array",
         "chart.dataTable",
-        "note"
+        "note",
+        "points:array",
+        "keyMetrics:array",
+        "chart2",
+        "minis:array",
+        "compose"
+      ],
+      "density": [
+        "points",
+        "keyMetrics"
       ]
     },
     "matrix": {
@@ -459,6 +524,9 @@
         "rowHeads:array",
         "colHeads:array",
         "cells:array"
+      ],
+      "optional": [
+        "points:array"
       ]
     },
     "lane": {
@@ -468,6 +536,9 @@
       ],
       "required": [
         "lanes:array"
+      ],
+      "optional": [
+        "points:array"
       ]
     },
     "sankey": {
@@ -482,7 +553,16 @@
       "optional": [
         "unit",
         "chart.dataTable",
-        "note"
+        "note",
+        "points:array",
+        "keyMetrics:array",
+        "chart2",
+        "minis:array",
+        "compose"
+      ],
+      "density": [
+        "points",
+        "keyMetrics"
       ]
     },
     "treemap": {
@@ -497,7 +577,16 @@
       "optional": [
         "unit",
         "chart.dataTable",
-        "note"
+        "note",
+        "points:array",
+        "keyMetrics:array",
+        "chart2",
+        "minis:array",
+        "compose"
+      ],
+      "density": [
+        "points",
+        "keyMetrics"
       ]
     },
     "boxplot": {
@@ -512,7 +601,16 @@
       "optional": [
         "unit",
         "chart.dataTable",
-        "note"
+        "note",
+        "points:array",
+        "keyMetrics:array",
+        "chart2",
+        "minis:array",
+        "compose"
+      ],
+      "density": [
+        "points",
+        "keyMetrics"
       ]
     },
     "network": {
@@ -527,7 +625,8 @@
       ],
       "optional": [
         "chart.dataTable",
-        "note"
+        "note",
+        "points:array"
       ]
     },
     "marimekko": {
@@ -543,7 +642,16 @@
       "optional": [
         "unit",
         "chart.dataTable",
-        "note"
+        "note",
+        "points:array",
+        "keyMetrics:array",
+        "chart2",
+        "minis:array",
+        "compose"
+      ],
+      "density": [
+        "points",
+        "keyMetrics"
       ]
     },
     "streamgraph": {
@@ -558,7 +666,16 @@
       "optional": [
         "labels:array",
         "chart.dataTable",
-        "note"
+        "note",
+        "points:array",
+        "keyMetrics:array",
+        "chart2",
+        "minis:array",
+        "compose"
+      ],
+      "density": [
+        "points",
+        "keyMetrics"
       ]
     },
     "chapter": {
@@ -576,5 +693,6 @@
         "items:array"
       ]
     }
-  }
+  },
+  "densityHint": "M7 信息密度契约：每页 = 论点（结论句标题）+ 证据（图表 / 表格 / 数据）+ 解读（points：看到什么 → 意味着什么）。图表页必须配 points（演示 ≥2 条、研究 ≥3 条）与 keyMetrics（2–4 个关键数字；单序列图表缺省时按数据推导最高 / 最低 / 首末变化）。chart2 = 双图对照；minis = 主图 + 2–3 个小图；compose:\"off\" 关闭复合版式。门禁：scripts/check_density.py。"
 }

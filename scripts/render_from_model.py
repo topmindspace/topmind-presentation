@@ -38,6 +38,7 @@ PAGE_TO_PRESET = ((LC.get('layoutSystem') or {}).get('pageToPreset') or {})
 IMAGE_SPEC = LC.get('imageSpec') or {}
 sys.path.insert(0, str(ROOT / 'scripts'))
 import lib_chart_svg as LCS  # noqa: E402
+import lib_density as LD  # noqa: E402
 SKIN: dict = {}
 
 CONTENT_RE = re.compile(
@@ -159,6 +160,10 @@ def flags_block(sec: dict) -> str:
 
 
 def wrap(i: int, ptype: str, body: str, sec: dict, extra: str = '') -> str:
+    if ptype in ('heatmap', 'bullet', 'halftable', 'lane', 'pyramid', 'matrix', 'metrics'):
+        C = LD.compose_on(sec, ptype)
+        if C and C['form'] == 'band':
+            body = body + _readout_row(C['km'][:2], C['pts'][:3])
     return (f'{open_sec(i, ptype, extra, sec)}\n  <div class="wrap">\n'
             f'{shead(sec)}\n{body}{sowhat(sec)}{footnote(sec)}{flags_block(sec)}'
             f'  </div>\n</section>')
@@ -322,18 +327,100 @@ def r_table(i, sec):
     return wrap(i, 'table', body, sec, extra)
 
 
+def _km_tiles(km, cls='kstrip') -> str:
+    cells = []
+    for m in km:
+        if isinstance(m, (list, tuple)):
+            v, k = m[0], m[1] if len(m) > 1 else ''
+        else:
+            v, k = m.get('v') or m.get('value') or '', m.get('k') or ''
+        cells.append(f'<div class="kstrip__c"><div class="kstrip__v">{esc(v)}</div><div class="kstrip__k">{cite(k)}</div></div>')
+    return f'    <div class="{cls} rv" style="--n:{max(1, len(km))}">' + ''.join(cells) + '</div>\n'
+
+
+def _kv(p):
+    if isinstance(p, (list, tuple)):
+        return (str(p[0]) if p else ''), (str(p[1]) if len(p) > 1 else '')
+    if isinstance(p, dict):
+        return str(p.get('k') or p.get('t') or ''), str(p.get('v') or p.get('d') or '')
+    return '', str(p)
+
+
+def _readout(pts) -> str:
+    lis = []
+    for n, p in enumerate(pts[:5], 1):
+        k, v = _kv(p)
+        lis.append(f'<li><span class="readout__n">{n}</span><div><div class="readout__k">{cite(k)}</div>'
+                   + (f'<p class="readout__v">{cite(v)}</p>' if v else '') + '</div></li>')
+    return '<ol class="readout">' + ''.join(lis) + '</ol>'
+
+
+def _readout_row(km, pts) -> str:
+    """band 形态：关键数字卡 + 解读卡同一行（与 PPTX readoutRow 同构）。"""
+    cells = []
+    for m in km:
+        v, k = _kv(m)
+        cells.append(f'<div class="cband__km"><div class="kstrip__v">{esc(v)}</div><div class="kstrip__k">{cite(k)}</div></div>')
+    for p in pts[:4]:
+        k, v = _kv(p)
+        cells.append(f'<div class="cband__p"><div class="readout__k">{cite(k)}</div>'
+                     + (f'<p class="readout__v">{cite(v)}</p>' if v else '') + '</div>')
+    if not cells:
+        return ''
+    cols = ' '.join(['minmax(0,.62fr)'] * len(km) + ['minmax(0,1fr)'] * len(pts[:4]))
+    return (f'    <div class="cband rv" style="grid-template-columns:{cols}">'
+            + ''.join(cells) + '</div>\n')
+
+
+def _mini_fig(m, i) -> str:
+    cap = m.get('cap') or ''
+    t = 'donut' if m.get('type') == 'donut' else None
+    return (f'      <div class="mini">' + (f'<div class="fig__cap">{esc(cap)}</div>' if cap else '')
+            + chart_svg(m, i, t, 440, 150) + (f'<div class="mini__n">{cite(m["note"])}</div>' if m.get('note') else '')
+            + '</div>\n')
+
+
+def compose_body(i, sec, ptype, fig_html):
+    """M7 复合版式（信息密度）：论点（标题）+ 证据（主图）+ 解读（要点）+ 关键数字。
+    side：关键数字条 + 主图 | 解读栏；chart2 → 双图对照 + 解读行；minis → 主图 + 小图组。
+    band：主图 + 底部「关键数字 + 解读」带。返回 None 表示不升级（保持原版式）。"""
+    C = LD.compose_on(sec, ptype)
+    if not C:
+        return None
+    km, pts = C['km'], C['pts']
+    if C['form'] == 'band':
+        return fig_html + _readout_row(km[:2], pts[:3])
+    out = _km_tiles(km) if km else ''
+    if sec.get('chart2'):
+        c2 = sec['chart2']
+        fig2 = _exhibit_box({'cap': c2.get('cap') or ''}, chart_svg(c2, i * 10 + 1, None, 640, 320), i)
+        out += '    <div class="grid g-2 rv a-start">\n' + fig_html + fig2 + '    </div>\n'
+        if pts:
+            out += _readout_row([], pts)
+        return out
+    minis = [m for m in (sec.get('minis') or []) if isinstance(m, dict) and m.get('labels')][:3]
+    if minis:
+        out += ('    <div class="grid g-side rv a-start">\n' + fig_html
+                + '      <div class="minis">\n' + ''.join(_mini_fig(m, i * 10 + k) for k, m in enumerate(minis))
+                + '      </div>\n    </div>\n')
+        if pts:
+            out += _readout_row([], pts)
+        return out
+    if pts:
+        out += ('    <div class="grid g-comp rv a-stretch">\n' + fig_html
+                + f'      {_readout(pts)}\n    </div>\n')
+    else:
+        out += fig_html
+    return out
+
+
 def _fig_with_side(i, sec, ptype, fig_html):
-    """图 + 侧注：有 points 时 g-side 两栏（主图 + 读图要点），否则主图满宽。"""
-    pts = sec.get('points')
+    """图 + 解读：命中复合版式时走 compose_body；否则主图满宽（低密度，check_density 会拦）。"""
     if sec.get('exhibitNo') and not sec.get('source') and sec.get('footnote'):
         sec = dict(sec)
         sec.pop('footnote')  # 已进 Exhibit 来源行
-    if pts:
-        body = ('    <div class="grid g-side rv a-start">\n'
-                f'{fig_html}'
-                f'      <div class="stack gap-4">{pts_list(pts)}</div>\n'
-                '    </div>\n')
-    else:
+    body = compose_body(i, sec, ptype, fig_html)
+    if body is None:
         body = fig_html
     return wrap(i, ptype, body, sec)
 
@@ -1128,6 +1215,12 @@ def main() -> int:
     sg = ((LC.get('styleGrammar') or {}).get('styles') or {}).get(model.get('style') or '') or {}
     SKIN = dict(sg.get('chartSkin') or {})
     body = render_body(model)
+    # M7 信息密度：低密度页在渲染时就提示（门禁 = check_density.py --strict）
+    _mode = model.get('mode') or 'presentation'
+    for _i, _sec in enumerate(model.get('sections') or []):
+        for _lv, _rule, _msg in LD.check_section(_sec, _mode):
+            print(f'[render_from_model] 信息密度 {_lv} p{_i + 1}「{(_sec.get("title") or "")[:18]}」{_rule}：{_msg}',
+                  file=sys.stderr)
 
     if args.body_only:
         sys.stdout.write(body)

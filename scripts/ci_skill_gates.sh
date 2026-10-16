@@ -97,6 +97,9 @@ run_one() {
   "$PY" tests/solver/test_solver_py.py
   # M3：版式库节奏 / 家族覆盖 / 反模式（全部示例硬门禁）
   for m in assets/examples/*.model.json; do "$PY" scripts/check_rhythm.py "$m" --strict || exit 1; done
+  # M7 最低信息密度门禁（元素种类 / 文字量 / 数据点，三模式分档）+ 自测
+  "$PY" scripts/check_density.py assets/examples/*.model.json --strict || { echo "ci_skill_gates: 信息密度门禁失败" >&2; exit 1; }
+  "$PY" tests/density/test_density.py || { echo "ci_skill_gates: 信息密度自测失败" >&2; exit 1; }
 
   if [[ "$WITH_PPTX" == "1" ]]; then
     ensure_python_pptx

@@ -1292,6 +1292,7 @@ def render_body(model: dict) -> str:
     auto_ex = not any(s.get('exhibitNo') for s in secs)
     for i, sec in enumerate(secs, 1):
         t = (sec.get('type') or 'points').lower()
+        sec = LDN.dual_units(sec)
         if auto_ex and model.get('mode') == 'research' and (t in ('exhibit', 'bar', 'halftable', 'donut') or t in LCS.INFO):
             ex_n += 1
             if not sec.get('exhibitNo'):

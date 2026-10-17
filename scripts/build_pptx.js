@@ -2714,7 +2714,8 @@ if (MODE_NAME === 'research' && !CONTENT.sections.some(x => x && x.exhibitNo)) {
   const EXT = new Set(['exhibit', 'bar', 'halftable', 'donut', 'boxplot', 'marimekko', 'network', 'sankey', 'streamgraph', 'treemap']);
   CONTENT.sections.forEach((x) => { if (x && EXT.has(String(x.type || '').toLowerCase())) x.exhibitNo = ++exN; });
 }
-CONTENT.sections.forEach((sec) => {
+CONTENT.sections.forEach((sec0) => {
+  const sec = DENSE.dualUnits(sec0);
   const type = sec.type || 'points';
   // Batch 2: honor layoutPreset (scaffold/recommend_layout → PPTX IR alignment)
   if (!sec.layoutPreset) {
@@ -2857,13 +2858,16 @@ CONTENT.sections.forEach((sec) => {
     if (sec.pull) { s.addText(sec.pull, { x: rx, y, w: rw, h: pullH, fontFace: STYLE.fontDisplay, fontSize: fzPull, bold: true, color: STYLE.ink, valign: 'top', margin: 0 }); y += pullH + 0.3; }
     if (ms.length) {
       const mw = (rw - 0.2 * (ms.length - 1)) / ms.length;
+      /* 数字一行放下：同组统一字号，从 32pt 逐档下探（「≤ 2 小时」这类带单位的值不折行） */
+      const mvW = mw - 0.3 - (ms.some(m => m[2]) ? 0.56 : 0);
+      const fzM = [32, 28, 24, 20].find(f => ms.every(m => estLines(String(m[0]), mvW, f) === 1)) || 20;
       ms.forEach((m, i) => {
         const mx = rx + i * (mw + 0.2);
         s.addShape('roundRect', { x: mx, y, w: mw, h: mH, rectRadius: rr(0.1), fill: { color: STYLE.surface }, line: { type: 'none' }, objectName: 'km:card' });
         const ix = m[2] ? 0.56 : 0;
         if (m[2]) iconMark(s, m[2], mx + 0.16, y + (mH - 0.4) / 2, 0.4);
         s.addText([
-          { text: m[0], options: { fontFace: STYLE.fontDisplay, fontSize: 32, bold: true, color: STYLE.accent, breakLine: true } },
+          { text: m[0], options: { fontFace: STYLE.fontDisplay, fontSize: fzM, bold: true, color: STYLE.accent, breakLine: true } },
           { text: m[1], options: { fontFace: STYLE.font, fontSize: sz(10.5), color: STYLE.body } },
         ], { x: mx + 0.16 + ix, y: y + 0.04, w: mw - 0.3 - ix, h: mH - 0.08, valign: 'middle', margin: 0 });
       });

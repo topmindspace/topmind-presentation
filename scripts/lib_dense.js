@@ -75,7 +75,25 @@ function overflow(sec) {
   }
   return out;
 }
-module.exports = { DASH_MAX_CHARTS, DASH_MAX_KM, DASH_MAX_PTS, MAG_MAX_METRICS, MAG_MAX_PTS, niceCeil, dashCharts, dashLegend, kv3, pt3, focusKind, focusVariant, overflow };
+/* 双图对照页：长单位挪进各自图注（与 lib_dense.py dual_units 同口径），返回新 sec */
+function dualUnits(sec) {
+  if (!(sec.chart && typeof sec.chart === 'object' && sec.chart2 && typeof sec.chart2 === 'object')) return sec;
+  const out = Object.assign({}, sec);
+  ['chart', 'chart2'].forEach((k) => {
+    const c = Object.assign({}, sec[k]);
+    const u = String(c.unit || '');
+    if ([...u].length > 2) {
+      const onSec = k === 'chart' && !!sec.cap;
+      let cap = String((onSec ? sec.cap : c.cap) || '');
+      cap = cap ? cap + '（' + u + '）' : u;
+      if (onSec) out.cap = cap; else c.cap = cap;
+      c.unit = '';
+    }
+    out[k] = c;
+  });
+  return out;
+}
+module.exports = { dualUnits, DASH_MAX_CHARTS, DASH_MAX_KM, DASH_MAX_PTS, MAG_MAX_METRICS, MAG_MAX_PTS, niceCeil, dashCharts, dashLegend, kv3, pt3, focusKind, focusVariant, overflow };
 /* M13 中文标题防孤字：按估算字宽模拟换行；两行时一律在「标点后 / 词边界」平衡断行（末行不留孤字）。
    数字与单位（18 个、3.2 天、+27%）、英文单词不拆开。返回带 \n 的标题；单行或已平衡时原样返回。 */
 function balanceTitle(text, widthIn, fontPt, asciiRatio) {

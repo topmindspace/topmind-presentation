@@ -66,6 +66,26 @@ def dash_charts(sec: dict) -> list:
     return cs
 
 
+def dual_units(sec: dict) -> dict:
+    """双图对照页（chart + chart2）：长单位（>2 字）同样挪进各自图注——半宽图里「0.7 元/kg」的数据标签会互相挤压。返回新 sec。"""
+    if not (isinstance(sec.get('chart'), dict) and isinstance(sec.get('chart2'), dict)):
+        return sec
+    sec = dict(sec)
+    for k in ('chart', 'chart2'):
+        c = dict(sec[k])
+        u = str(c.get('unit') or '')
+        if len(u) > 2:
+            cap = str((sec.get('cap') if k == 'chart' and sec.get('cap') else c.get('cap')) or '')
+            cap = f'{cap}（{u}）' if cap else u
+            if k == 'chart' and sec.get('cap'):
+                sec['cap'] = cap
+            else:
+                c['cap'] = cap
+            c['unit'] = ''
+        sec[k] = c
+    return sec
+
+
 def dash_legend(cs: list) -> list:
     """共用图例：所有多系列图的系列名一致时只画一次（返回系列名列表，否则 []）。"""
     names = [tuple(s.get('name') or '' for s in (c.get('series') or [])) for c in cs if c.get('series')]

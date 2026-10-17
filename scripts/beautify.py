@@ -227,6 +227,62 @@ def map_slide(sl, led: Ledger, style, history, n_slides):
                 pts.append(led.whole(no, p['text']))
         return pts
 
+    def mk_chart(c):
+        labels = [led.whole(no, x) for x in c['categories']]
+        ser = c['series']
+        for s_ in ser:
+            if len(ser) > 1 and s_['name']:
+                led.whole(no, s_['name'])
+        ch = {'labels': labels}
+        if len(ser) > 1:
+            ch['series'] = [{'name': s_['name'], 'values': [fmt_num(v) for v in s_['values']]} for s_ in ser]
+            ch['values'] = ch['series'][-1]['values']
+        else:
+            ch['values'] = [fmt_num(v) for v in ser[0]['values']]
+        k = c['chartType']
+        ch['type'] = {'hbar': 'hbar', 'line': 'line', 'area': 'area', 'stack': 'stack', 'donut': 'donut'}.get(k, 'bar')
+        if k == 'donut':
+            ch['centerLabel'], ch['centerTotal'] = '', False
+        return ch
+
+    def joined_points(limit):
+        """要点超过版式上限时合并进最后一条（原文逐字保留，不丢、不改写）。"""
+        pts = side_points()
+        if len(pts) <= limit:
+            return pts
+        flat = lambda x: x if isinstance(x, str) else '　'.join(x)
+        return pts[:limit - 1] + ['　'.join(flat(x) for x in pts[limit - 1:])]
+
+    # M13 复杂原稿 ①：一页 2–4 张图 → 仪表盘（共享坐标、图注取系列名、文字收进解读行）
+    if len(charts) >= 2:
+        chs = []
+        for c in charts[:4]:
+            ch = mk_chart(c)
+            nm = (c['series'][0].get('name') or '') if len(c['series']) == 1 else ''
+            if nm:
+                ch['cap'] = led.whole(no, nm)
+            chs.append(ch)
+        # 两张图：优先「双图对照 + 解读行」（chart + chart2），与相邻仪表盘页错开版式；3–4 张图走仪表盘
+        if len(chs) == 2 and not (history and history[-1] == 'chart-dual'):
+            sec = {'type': 'bar', 'title': T, 'chart': chs[0], 'chart2': chs[1]}
+            if chs[0].get('cap'):
+                sec['cap'] = chs[0]['cap']
+            if paras:
+                sec['points'] = joined_points(3)
+            return 'chart-dual', sec, 'data'
+        sec = {'type': 'dashboard', 'title': T, 'charts': chs, 'numbered': False}
+        if paras:
+            sec['points'] = joined_points(3)
+        return 'chart-dash', sec, 'data'
+
+    # M13 复杂原稿 ②：表 + 图 → 半表半图，说明文字进结论条
+    if charts and tables:
+        rows = [[led.whole(no, c) if c.strip() else c for c in r] for r in tables[0]['rows']]
+        sec = {'type': 'halftable', 'title': T, 'table': {'head': rows[0], 'rows': rows[1:]}, 'chart': mk_chart(charts[0])}
+        if paras:
+            sec['soWhat'] = '　'.join(x if isinstance(x, str) else '　'.join(x) for x in side_points())
+        return 'chart-table', sec, 'data'
+
     if charts:
         c = charts[0]
         labels = [led.whole(no, x) for x in c['categories']]
@@ -306,6 +362,9 @@ def map_slide(sl, led: Ledger, style, history, n_slides):
 
     if texts and 3 <= len(texts) <= 6 and len(texts) == len(paras) and all(re.match(r'^.{1,14}?[：:].+$', t) for t in texts):
         kvs = [led.kv(no, t) for t in texts]
+        # M13 密集文字：5–6 条且说明平均 >24 字时卡片会溢出 → 改要点列（双栏），不缩字号硬塞
+        if len(kvs) >= 5 and sum(len(v) for _, v in kvs) / len(kvs) > 24:
+            return 'argument-3', {'type': 'points', 'title': T, 'points': kvs}, 'viewpoint'
         cands = ['feature-cards', 'bento', 'argument-3'] if len(kvs) >= 3 else ['feature-cards', 'argument-3']
         lid = PICK.pick(cands, style, history)
         if lid == 'argument-3':
@@ -389,7 +448,9 @@ def build_model(src, style, theme):
             continue
         lid, sec, intent = map_slide(sl, led, style, history, len(slides))
         sec['sourceSlide'] = sl['no']
-        if sec.get('chart') and not sec.get('keyMetrics'):
+        if sec.get('chart2') and not sec.get('keyMetrics'):
+            sec['compose'] = 'nokm'  # 双图对照需复合版式承载，但不派生原稿没有的关键数字
+        elif sec.get('chart') and not sec.get('keyMetrics'):
             sec['compose'] = 'off'   # 美化只换承载不增文字：不自动派生关键数字（复合版式需原稿自带要点 / 数字）
         if sl.get('notes', '').strip():
             sec['speakerNotes'] = sl['notes']   # 原稿备注原样写回新稿（核对器逐页比对）
@@ -444,6 +505,8 @@ def build_model(src, style, theme):
         model['agenda'] = [[f'{i:02d}', a, ''] for i, a in enumerate(agenda_items, 1)]
         model['agendaTitle'] = agenda_title
         model['agendaEyebrow'] = ''
+    else:
+        model['agenda'] = False   # 原稿没有目录页：新稿也不加（双端都认 agenda:false = 不出大纲页）
     model['sections'] = sections
     model['closing'] = closing or {'title': sections[-1]['title'] if sections else model['title'], 'points': []}
     # 图片：只有满版图页会迁入；其余图片不丢弃、不重绘，列入 unsupported 让人工处理

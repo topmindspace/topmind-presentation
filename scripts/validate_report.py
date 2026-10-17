@@ -239,6 +239,13 @@ def _check_charts(txt, chk):
 CARRIERS = checks_html.CARRIERS  # 单源 scripts/checks_html.py
 
 
+def _order_locked(txt):
+    """美化稿：每个 section 都带 sourceSlide → 页序由原稿锁定（不得插页 / 调序 / 换图表类型）。"""
+    model, err = _extract_model(txt)
+    secs = [x for x in ((model or {}).get('sections') or []) if isinstance(x, dict)]
+    return not err and bool(secs) and all(x.get('sourceSlide') for x in secs)
+
+
 def _check_chart_variety(txt, chk, mode):
     """图表与版式多样性（阈值单源 charts.variety；判定逻辑 checks_html）。
 
@@ -268,6 +275,10 @@ def _check_chart_variety(txt, chk, mode):
 
     if v.get('noRepeatAdjacent'):
         adj = checks_html.adjacent_same_type(per_page)
+        if adj and _order_locked(txt):
+            # M13：美化稿页序与图表类型由原稿锁定（每页带 sourceSlide，原生图表逐值核对），相邻同型不可改 → 只记录
+            print(f"  [INFO] 图表相邻同型（原稿页序锁定，不计分）: {adj}")
+            adj = None
         chk("图表不连续同型（相邻图表页不得同 data-chart）", not adj,
             "; ".join(adj[:3]) if adj else "", level="WARN")
 
@@ -847,7 +858,7 @@ def _check_model_consistency(txt, chk, mode, style):
         chk("模型 agenda 条数与正文一致", n_html == n_model,
             f"model={n_model} 正文={n_html}", level="WARN")
     n_bands = len(_bands(txt))
-    lo, hi = len(secs) + 3, len(secs) + 7
+    lo, hi = len(secs) + (2 if model.get('agenda') is False else 3), len(secs) + 7  # agenda:false 少一页结构页
     chk("页数粗匹配（正文 band ≈ sections + 结构页）", lo <= n_bands <= hi,
         f"正文 {n_bands} 页 vs 模型 {len(secs)}+{lo - len(secs)}~{hi - len(secs)}", level="WARN")
     return model
@@ -1955,6 +1966,9 @@ def main():
         if content_n > 4:
             chk("存在 Agenda 大纲页（architecture 内容页 >4 时建议补）", has_agenda,
                 f"内容页 {content_n} 页无 Agenda", level="WARN")
+    elif re.search(r'"agenda"\s*:\s*false', txt):
+        # M13：模型显式 agenda:false（美化原稿本无目录页，新稿不得凭空加页）——不要求大纲页
+        chk("存在 Agenda 大纲页（模型 agenda:false 显式关闭）", not has_agenda)
     else:
         chk("存在 Agenda 大纲页", has_agenda)
     if has_agenda:

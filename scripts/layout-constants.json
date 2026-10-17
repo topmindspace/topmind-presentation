@@ -4355,7 +4355,10 @@
           "compose": "band"
         },
         "weight": "dense"
-      }
+      },
+      {"id": "chart-dash", "family": "data", "name": "仪表盘（2–4 图 + KPI 条 + 解读行）", "match": {"type": "dashboard"}, "weight": "dense"},
+      {"id": "magazine", "family": "media", "name": "杂志版（大图 + 金句 + 数字 + 要点）", "match": {"type": "magazine"}, "weight": "medium"},
+      {"id": "focus", "family": "viewpoint", "name": "简单页（单一锚点 + 留白）", "match": {"type": "focus"}, "weight": "light"}
     ]
   },
   "styleGrammar": {

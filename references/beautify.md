@@ -31,6 +31,11 @@ python scripts/beautify.py 原稿.pptx --out 新目录 [--style business-blue] [
 | 标题为「目录 / 大纲 / 议程」 | 目录页，标题沿用原文 |
 | 末页「谢谢 / Q&A / 结束」 | 结束页，不加眉标 |
 | 原生图表 + 文字 | 主图 + 侧注；饼图走构成环图（不加「合计」） |
+| 一页 2 张原生图表 | 双图对照 + 解读行（`chart2`，`compose:"nokm"` 不派生关键数字） |
+| 一页 3–4 张原生图表 | 仪表盘（同单位同类型共享量程；图注 = 原图标题），文字落在解读行 |
+| 表格 + 原生图表 | 半表半图（表左图右），表外文字作注 |
+| 图片 + 5–6 条要点 | 图文分栏（要点左、图片右，图片等比完整显示 + 浅底细框） |
+| 5–6 条且说明平均 >24 字 | 要点列（不缩字号硬塞进卡片） |
 | 表格 | 对比表，表外文字作导语或注 |
 | 「标签框 + 内容框」成行 | 分层架构 |
 | 带序号的网格方框 | 横向步骤（手打序号改由版式绘制） |
@@ -61,10 +66,11 @@ python scripts/beautify.py 原稿.pptx --out 新目录 [--style business-blue] [
 
 - **不改字**：不润色、不补结论条、不加眉标文案、不生成 So what；原稿没有的话一个字也不加。
 - **不支持的对象**（SmartArt、OLE、音视频、非满版图片）不重绘、不猜内容，全部写进 `report.md` 的「不支持对象」，注明原稿页码；图片会导出到 `media/` 供人工放回。
-- **备注**会读出来，但这一版不写回新稿。
+- **备注**原样写回新稿每页的演讲者备注，核对器逐页比对。
 - 动画、切换和母版装饰一律不迁移。
 - 只做排版：页序与原稿一一对应；放不下时按求解器规则拆页，拆出的页在 `pageMap` 里仍指回原页。
+- 页序锁定：每页都带 `sourceSlide` 时，`check_rhythm` 的同重量连排、`validate_report` 的相邻图表同型只记 INFO（原稿顺序不能改）；相邻同版式仍要换承载。
 
 ## 测试
 
-`python tests/beautify/test_beautify.py`：三份自造的朴素样例（`tests/beautify/samples/`，由 `make_samples.py` 确定性生成：课件 / 经营汇报 / 方案）全部核对差异为 0，原稿不变，产物通过 `validate_pptx` / `validate_report` / `check_rhythm` 三道 strict 校验；另有负例，模型里改一个字或一个图表数值都必须被拦住。CI（`ci_skill_gates.sh --with-pptx`）硬门禁。
+`python tests/beautify/test_beautify.py`：四份自造样例（`tests/beautify/samples/`，由 `make_samples.py` 确定性生成：课件 / 经营汇报 / 方案 / 复杂运营复盘——一页多图、表 + 图、图片 + 密集文字、长句清单）全部核对差异为 0，原稿不变，产物通过 `validate_pptx` / `validate_report` / `check_rhythm` 三道 strict 校验；另有负例，模型里改一个字或一个图表数值都必须被拦住。CI（`ci_skill_gates.sh --with-pptx`）硬门禁。

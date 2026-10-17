@@ -1584,7 +1584,7 @@ def validate_model_roundtrip(
         return warnings
     sections = [s for s in (model.get("sections") or []) if isinstance(s, dict)]
     # M13：模型没写 agenda 时两端都按章自动归并出大纲页（architecture ≤4 节的极简形态除外）
-    has_agenda = bool(model.get("agenda")) or not (model.get("mode") == "architecture" and len(sections) <= 4)
+    has_agenda = model.get("agenda") is not False and (bool(model.get("agenda")) or not (model.get("mode") == "architecture" and len(sections) <= 4))
     expected = len(sections) + 2 + (1 if has_agenda else 0)  # 封面 + 大纲(可选) + sections + 收尾
     if slide_count != expected:
         warnings.append(

@@ -1237,7 +1237,9 @@ def render_body(model: dict) -> str:
     # Agenda = 章节大纲（3–7 章），不是逐页标题罗列。
     # 模型给了合法 agenda（≤8 条）就原样用；否则按 eyebrow 章前缀归并，而不是按页重建。
     MAX_CH = 8
-    if not agenda or len(agenda) > MAX_CH or len(agenda) == len(secs) and len(secs) > MAX_CH:
+    if model.get('agenda') is False:   # M13：显式关闭大纲页（美化原稿无目录时）
+        chapter_first = {}
+    elif not agenda or len(agenda) > MAX_CH or len(agenda) == len(secs) and len(secs) > MAX_CH:
         chapters = {}
         order = []
         for i, s in enumerate(secs, 1):
@@ -1263,7 +1265,7 @@ def render_body(model: dict) -> str:
                 num = str(ag[0]).zfill(2) if str(ag[0]).isdigit() else str(ag[0])
                 chapter_first.setdefault(num, gi)
 
-    if agenda or not (model.get('mode') == 'architecture' and len(secs) <= 4):
+    if model.get('agenda') is not False and (agenda or not (model.get('mode') == 'architecture' and len(secs) <= 4)):
         lis = []
         for gi, ag in enumerate(agenda, 1):
             num = ag[0] if isinstance(ag, (list, tuple)) and ag else f'{gi:02d}'

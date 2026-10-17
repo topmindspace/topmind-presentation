@@ -32,21 +32,26 @@ def nice_ceil(v: float) -> float:
 
 
 def dash_charts(sec: dict) -> list:
-    """2–4 张图：同单位、同类数值图共享坐标上限（坐标对齐）；图注按叙事顺序编号 ①②③④。"""
+    """2–4 张图：同单位且同图型的数值图共享坐标上限（坐标对齐；无单位时量级差 >5 倍不共享）；图注按叙事顺序编号 ①②③④。"""
     cs = [dict(c) for c in (sec.get('charts') or []) if isinstance(c, dict) and c.get('labels')][:DASH_MAX_CHARTS]
     if sec.get('sharedScale', True):
         groups: dict = {}
         for c in cs:
             if (c.get('type') or 'bar') in SHARED_SCALE_TYPES and c.get('max') is None:
-                groups.setdefault(c.get('unit') or '', []).append(c)
-        for g in groups.values():
+                groups.setdefault((c.get('unit') or '', c.get('type') or 'bar'), []).append(c)
+        for (unit, _t), g in groups.items():
             if len(g) < 2:
                 continue
-            vals = [abs(float(v)) for c in g for v in (c.get('values') or []) if isinstance(v, (int, float))]
+            per = []
             for c in g:
+                vs = [abs(float(v)) for v in (c.get('values') or []) if isinstance(v, (int, float))]
                 for se in c.get('series') or []:
-                    vals += [abs(float(v)) for v in se.get('values') or [] if isinstance(v, (int, float))]
-            m = nice_ceil(max(vals) if vals else 0)
+                    vs += [abs(float(v)) for v in se.get('values') or [] if isinstance(v, (int, float))]
+                per.append(max(vs) if vs else 0)
+            # 没写单位时只有量级相近（最大 / 最小 ≤5 倍）才视为同一度量，否则各用各的坐标，避免小量级图被压平
+            if not unit and (min(per) <= 0 or max(per) / min(per) > 5):
+                continue
+            m = nice_ceil(max(per) if per else 0)
             if m:
                 for c in g:
                     c['max'] = m

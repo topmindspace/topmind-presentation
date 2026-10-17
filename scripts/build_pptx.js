@@ -572,6 +572,8 @@ function cols(total, n, gap) {
 }
 /* 行高收敛：在 [floor, pref] 内按可用高度取值。
    floor 是绝对硬下限（可低于几何里的软下限），保证条目数超容量时**宁可行高更小也不越界**。 */
+/* M13：valign top 文本框首行中线（上内边距 0.05in + 半个 1.2 倍行高）——列表方点对齐首行，不再按行盒居中错位 */
+function firstLineMid(y, fzPt) { return y + 0.05 + fzPt * 1.2 / 144; }
 function fitRowH(avail, n, pref, floor) {
   const lo = (floor == null) ? 0.22 : floor;
   return Math.max(lo, Math.min(pref, avail / Math.max(1, n)));
@@ -631,7 +633,7 @@ if (modelArg) {
   }
   /* M13 双端同源：模型没写 agenda 时 HTML 端按章（chapter / eyebrow「NN ·」/ 页序）自动归并出大纲页，
      PPTX 原先直接不出大纲页 → 两端页序错一位。此处按 render_from_model 同一规则补齐。 */
-  if (!(Array.isArray(CONTENT.agenda) && CONTENT.agenda.length)) {   // 只补「完全没写」的情形；写了的 agenda 原样用（分页逻辑不变）
+  if (CONTENT.agenda !== false && !(Array.isArray(CONTENT.agenda) && CONTENT.agenda.length)) {   // 只补「完全没写」的情形；写了的 agenda 原样用（分页逻辑不变）
     const secs = (CONTENT.sections || []).filter(x => x && typeof x === 'object');
     if (!(CONTENT.mode === 'architecture' && secs.length <= 4) && secs.length) {
       const chapters = {}, order = [];
@@ -996,8 +998,12 @@ function addImageEl(s, src, x, y, w, h, radius, opts) {
     if (fit === 'contain') {
       const dim = imagePixelSize(resolved);
       if (dim) {
-        const k = Math.min(w / dim[0], h / dim[1]);
+        /* M13：与 HTML .img--contain 同构——浅底细框卡 + 内边距，图等比居中（不再裸图悬空） */
+        const pad = opts.frame === false ? 0 : 0.14;
+        const k = Math.min((w - 2 * pad) / dim[0], (h - 2 * pad) / dim[1]);
         o.w = dim[0] * k; o.h = dim[1] * k; o.x = x + (w - o.w) / 2; o.y = y + (h - o.h) / 2;
+        if (pad) s.addShape('roundRect', { x: o.x - pad, y: o.y - pad, w: o.w + 2 * pad, h: o.h + 2 * pad, rectRadius: 0.08,
+          fill: { color: STYLE.surface }, line: { color: STYLE.line, width: 0.75 }, objectName: 'imgframe:contain' });
         delete o.sizing;
       }
     }
@@ -1132,7 +1138,7 @@ function imageLayoutShapes(s, layout, img, items, points, isPh, fit, y0, y1) {
     const fz = sz(fzI), fzSm = sz(snapFont(fzI - 1));
     ptsI.forEach((pt, i) => {
       const lyI = iy + i * rowHI;
-      s.addShape('rect', { x: rxI, y: lyI + rowHI / 2 - 0.06, w: 0.12, h: 0.12,
+      s.addShape('rect', { x: rxI, y: firstLineMid(lyI, fz) - 0.06, w: 0.12, h: 0.12,
         fill: { color: STYLE.accent }, line: { type: 'none' } });
       s.addText([
         { text: pt[0] ? pt[0] + '　' : '', options: { fontSize: fz, bold: true, color: STYLE.ink } },
@@ -2562,7 +2568,7 @@ function composeKM(sec, type) {
   if (sec.compose === 'off') return [];
   const km = (sec.keyMetrics || []).filter(Boolean).map(metricKV);
   if (km.length) return km.slice(0, 4);
-  if (type === 'halftable' || (sec.metrics && sec.metrics.length)) return [];
+  if (type === 'halftable' || sec.compose === 'nokm' || (sec.metrics && sec.metrics.length)) return [];
   return deriveKeyMetrics(sec.chart, type).slice(0, 3);
 }
 function composeOn(sec, type) {
@@ -2954,7 +2960,7 @@ CONTENT.sections.forEach((sec) => {
         fontFace: STYLE.font, fontSize: sz(15), bold: true, color: isRight ? STYLE.accent : STYLE.ink });
       pts.forEach((p, pi) => {
         const py = cpy + 0.18 + C2.titleH + 0.16 + pi * rowH;
-        s.addShape('rect', { x: sd.x + 0.24, y: py + rowH / 2 - 0.06, w: 0.12, h: 0.12,
+        s.addShape('rect', { x: sd.x + 0.24, y: firstLineMid(py, fz) - 0.06, w: 0.12, h: 0.12,
           fill: { color: isRight ? STYLE.accent : STYLE.faint }, line: { type: 'none' } });
         s.addText([
           { text: p[0] + '　', options: { fontSize: fz, bold: true, color: STYLE.ink } },
@@ -3725,7 +3731,9 @@ CONTENT.sections.forEach((sec) => {
       const fz = sz(fzB), fzSm = sz(snapFont(fzB - 1));
       pts.forEach((pt, i) => {
         const ly = ly0 + i * rowH;
-        s.addShape('rect', { x, y: ly + rowH / 2 - 0.06, w: 0.12, h: 0.12, fill: { color: STYLE.accent }, line: { type: 'none' } });
+        /* 方点对齐首行中线（valign top 时不再落在行盒中线、与文字错位） */
+        const my = big ? ly + rowH / 2 - 0.06 : firstLineMid(ly, fz) - 0.06;
+        s.addShape('rect', { x, y: my, w: 0.12, h: 0.12, fill: { color: STYLE.accent }, line: { type: 'none' } });
         s.addText([
           { text: pt[0] ? pt[0] + (pt[1] ? '　' : '') : '', options: { fontSize: fz, bold: true, color: STYLE.ink } },
           { text: pt[1], options: { fontSize: pt[0] ? fzSm : fz, color: pt[0] ? STYLE.body : STYLE.ink } },
@@ -3929,7 +3937,7 @@ CONTENT.sections.forEach((sec) => {
     const fz = sz(fzB), fzSm = sz(snapFont(fzB - 1));
     pts.forEach((p, i) => {
       const y = bodyY + i * rowH;
-      s.addShape('rect', { x: MX, y: bigList ? y + (rowH - 0.1) / 2 - P.markSize / 2 : y + 0.16, w: P.markSize, h: P.markSize,
+      s.addShape('rect', { x: MX, y: bigList ? y + (rowH - 0.1) / 2 - P.markSize / 2 : firstLineMid(y, fz) - P.markSize / 2, w: P.markSize, h: P.markSize,
         fill: { color: STYLE.accent }, line: { type: 'none' } });
       s.addText([
         /* 纯字符串要点（pointKV 落在 p[1]）按主句排：主字号 + 墨色，不再前缀全角空格 */

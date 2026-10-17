@@ -144,7 +144,7 @@ def _all_text(o) -> str:
 def check(model: dict) -> dict:
     R, A = LIB['rhythm'], LIB['antiPatterns']
     pages = pages_of(model)
-    fails, warns = [], []
+    fails, warns, infos = [], [], []
     # 节奏
     for i in range(1, len(pages)):
         a, b = pages[i - 1], pages[i]
@@ -153,13 +153,16 @@ def check(model: dict) -> dict:
     maxrun = R.get('maxSameWeightRun', 2)
     if isinstance(maxrun, dict):
         maxrun = maxrun.get(model.get('mode') or 'presentation', maxrun.get('default', 2))
+    secs_ = [x for x in (model.get('sections') or []) if isinstance(x, dict)]
+    locked = bool(secs_) and all(x.get('sourceSlide') for x in secs_)
     i = 0
     while i < len(pages):
         j = i
         while j + 1 < len(pages) and (pages[j + 1]['weight'] == pages[i]['weight'] or pages[j + 1].get('cont')):
             j += 1
         if j - i + 1 > maxrun:
-            fails.append(f'第 {i + 1}–{j + 1} 页连续 {j - i + 1} 页视觉重量都是「{pages[i]["weight"]}」'
+            # M13：美化稿（每页都带 sourceSlide）页序由原稿锁定、不得插页或调序 → 只记录，不计分
+            (infos if locked else fails).append(f'第 {i + 1}–{j + 1} 页连续 {j - i + 1} 页视觉重量都是「{pages[i]["weight"]}」'
                          f'（上限 {maxrun}；密 → 疏 → 强调交替，插入章节扉页 / 大数字 / 金句页打断）')
         i = j + 1
     content = [p for p in pages if p['kind'] == 'section']
@@ -188,7 +191,7 @@ def check(model: dict) -> dict:
         if t == 'cards' and len(sec.get('cards') or []) > A.get('maxCardsSameShape', 8):
             fails.append(f'第 {i} 页同构卡片 {len(sec["cards"])} 张 > {A["maxCardsSameShape"]}')
     return {'pages': [{k: p[k] for k in ('kind', 'title', 'layout', 'family', 'weight')} for p in pages],
-            'families': fams, 'fails': fails, 'warns': warns}
+            'families': fams, 'fails': fails, 'warns': warns, 'infos': infos}
 
 
 def main() -> int:
@@ -207,6 +210,8 @@ def main() -> int:
             print('  [FAIL]', p)
         for p in r['warns']:
             print('  [WARN]', p)
+        for p in r.get('infos') or []:
+            print('  [INFO]（原稿页序锁定）', p)
         if not r['fails'] and not r['warns']:
             print('  [PASS] 节奏 / 家族覆盖 / 反模式')
     bad = r['fails'] or (a.strict and r['warns'])

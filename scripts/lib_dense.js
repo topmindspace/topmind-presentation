@@ -13,13 +13,15 @@ function dashCharts(sec) {
   const cs = (sec.charts || []).filter(c => c && typeof c === 'object' && c.labels).slice(0, DASH_MAX_CHARTS).map(c => Object.assign({}, c));
   if (sec.sharedScale !== false) {
     const g = {};
-    cs.forEach(c => { if (SHARED.has(c.type || 'bar') && c.max == null) (g[c.unit || ''] = g[c.unit || ''] || []).push(c); });
-    Object.values(g).forEach(grp => {
+    cs.forEach(c => { if (SHARED.has(c.type || 'bar') && c.max == null) { const k = (c.unit || '') + '\u0001' + (c.type || 'bar'); (g[k] = g[k] || []).push(c); } });
+    Object.entries(g).forEach(([key, grp]) => {
       if (grp.length < 2) return;
-      const vals = [];
-      grp.forEach(c => { (c.values || []).forEach(v => { if (typeof v === 'number') vals.push(Math.abs(v)); });
-        (c.series || []).forEach(se => (se.values || []).forEach(v => { if (typeof v === 'number') vals.push(Math.abs(v)); })); });
-      const m = niceCeil(vals.length ? Math.max(...vals) : 0);
+      const per = grp.map(c => { const vs = [];
+        (c.values || []).forEach(v => { if (typeof v === 'number') vs.push(Math.abs(v)); });
+        (c.series || []).forEach(se => (se.values || []).forEach(v => { if (typeof v === 'number') vs.push(Math.abs(v)); }));
+        return vs.length ? Math.max(...vs) : 0; });
+      if (!key.split('\u0001')[0] && (Math.min(...per) <= 0 || Math.max(...per) / Math.min(...per) > 5)) return;   // 无单位且量级差 >5 倍：不共享
+      const m = niceCeil(Math.max(...per));
       if (m) grp.forEach(c => { c.max = m; });
     });
   }

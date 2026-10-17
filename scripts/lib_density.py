@@ -396,8 +396,8 @@ def compose_km(sec: dict, ptype: str) -> list:
     km = [x for x in (sec.get('keyMetrics') or []) if x]
     if km:
         return km[:4]
-    if ptype == 'halftable' or sec.get('metrics'):
-        return []
+    if ptype == 'halftable' or sec.get('compose') == 'nokm' or sec.get('metrics'):
+        return []   # compose:"nokm" = 允许复合版式但不派生关键数字（美化稿只用原稿文字）
     return derive_key_metrics(sec.get('chart') or {}, ptype)[:3]
 
 

@@ -40,7 +40,7 @@ M7 诊断（四份示例 + Q1 家庭储能，共 63 个内容页）发现：图�
 | `chart-band` | 主图保持原几何 + 底部「关键数字 + 解读」带 | 信息图 / 热力 / 矩阵 / 结构图 / 指标页 + `points`（+ `keyMetrics` ≤2） |
 | 图文混排 / 配图加说明 / 案例卡 | 沿用 `text-media`、`media-half`、`feature-cards`、`bento` | `split` / `image` / `cards` |
 
-HTML 与 PPTX 同构：判定在 `lib_density.compose_on`（Python）与 `composeOn`（build_pptx.js），两端同口径。`compose:"off"` 可关闭（例如数据充分、确实只需要一张大图的过渡页）。
+HTML 与 PPTX 同构：判定在 `lib_density.compose_on`（Python）与 `composeOn`（build_pptx.js），两端同口径。`compose:"off"` 可关闭（例如数据充分、确实只需要一张大图的过渡页）。`compose:"nokm"` 保留复合版式但不派生关键数字（美化稿只用原稿已有文字，双图对照页用它）。
 
 ## 四、模型契约（每页 = 论点 + 证据 + 解读）
 

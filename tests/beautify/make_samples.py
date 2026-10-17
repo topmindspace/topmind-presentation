@@ -186,7 +186,57 @@ def proposal():
     p.save(os.path.join(OUT, 'proposal-callcenter.pptx'))
 
 
+def complex_ops():
+    """M13 复杂原稿：一页多图、表 + 图、图片 + 密集文字、长清单——美化后不得丢内容。"""
+    p = deck()
+    cover(p, '2026 年上半年门店运营复盘', '多图表 · 表格 · 现场照片 · 密集文字', '运营管理部　2026-07-15')
+    s = blank(p)
+    title(s, '销售与客流双双回升', color=PURPLE)
+    cd = CategoryChartData(); cd.categories = ['1 月', '2 月', '3 月', '4 月', '5 月', '6 月']
+    cd.add_series('销售额', (820, 760, 910, 980, 1040, 1120))
+    s.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(0.4), Inches(1.4), Inches(4.6), Inches(3.6), cd)
+    cd = CategoryChartData(); cd.categories = ['1 月', '2 月', '3 月', '4 月', '5 月', '6 月']
+    cd.add_series('客流', (31, 28, 34, 36, 38, 41))
+    s.shapes.add_chart(XL_CHART_TYPE.LINE, Inches(5.1), Inches(1.4), Inches(4.6), Inches(3.6), cd)
+    box(s, 0.4, 5.2, 9.2, 1.6, ['销售额 6 月达到 1120 万元，环比增长 8%', '客流 6 月 41 万人次，连续四个月上升'], size=16, color=BLUE)
+    s = blank(p)
+    title(s, '三个维度看门店健康度', color=GREEN)
+    for i, (kind, t, cats, vals) in enumerate([
+            (XL_CHART_TYPE.BAR_CLUSTERED, '坪效', ['A 类', 'B 类', 'C 类'], (5.2, 3.8, 2.1)),
+            (XL_CHART_TYPE.PIE, '门店结构', ['A 类', 'B 类', 'C 类'], (24, 46, 30)),
+            (XL_CHART_TYPE.COLUMN_CLUSTERED, '复购率', ['A 类', 'B 类', 'C 类'], (38, 29, 17))]):
+        cd = CategoryChartData(); cd.categories = cats; cd.add_series(t, vals)
+        s.shapes.add_chart(kind, Inches(0.3 + i * 3.2), Inches(1.5), Inches(3.0), Inches(3.2), cd)
+    box(s, 0.4, 5.0, 9.2, 1.8, ['C 类门店坪效只有 A 类的四成', '复购率随门店等级递减', 'B 类门店数量最多，是提升重点'], size=15)
+    s = blank(p)
+    title(s, '区域明细与达成', color=ORANGE)
+    rows = [['区域', '门店数', '销售额（万元）', '达成率'], ['华东', '42', '2860', '106%'], ['华南', '31', '1920', '97%'],
+            ['华北', '27', '1540', '92%'], ['西南', '18', '880', '85%']]
+    tb = s.shapes.add_table(len(rows), 4, Inches(0.4), Inches(1.5), Inches(5.2), Inches(2.5)).table
+    for i, r in enumerate(rows):
+        for j, v in enumerate(r):
+            tb.cell(i, j).text = v
+    cd = CategoryChartData(); cd.categories = ['华东', '华南', '华北', '西南']; cd.add_series('达成率', (106, 97, 92, 85))
+    s.shapes.add_chart(XL_CHART_TYPE.BAR_CLUSTERED, Inches(5.9), Inches(1.5), Inches(3.8), Inches(3.4), cd)
+    box(s, 0.4, 5.3, 9.2, 1.2, ['西南区域达成率最低，门店密度不足'], size=15, color=RED)
+    s = blank(p)
+    title(s, '旗舰店改造现场')
+    s.shapes.add_picture(_sketch_png(), Inches(0.4), Inches(1.5), Inches(4.4), Inches(3.3))
+    box(s, 5.0, 1.5, 4.6, 5.2, ['动线重排：收银台后移 6 米', '新增咖啡吧与休息区 40 平方米', '电子价签覆盖全部 2400 个 SKU',
+                                '自助收银 8 台，高峰排队缩短一半', '会员扫码入店，识别率 92%', '改造工期 21 天，未停业'], size=14)
+    bullets(p, '下半年重点工作', [
+        '一、C 类门店分批改造：9 月前完成 12 家，年底前再完成 18 家，改造标准沿用旗舰店方案并按面积分档',
+        '二、会员运营：上线会员日与社群券，目标复购率从 29% 提升到 35%，每月复盘一次券核销与毛利',
+        '三、供应链：华北、西南两个区域仓 10 月投用，生鲜损耗率从 4.1% 压到 3% 以内',
+        '四、人员：店长轮岗制度覆盖全部 A 类门店，新店长培训周期从 6 周缩短到 4 周',
+        '五、数字化：门店经营看板接入实时客流，异常波动 15 分钟内推送到区域经理',
+        '六、预算：改造与数字化合计投入 3600 万元，预计 14 个月回本'], size=14)
+    bullets(p, '谢谢', ['欢迎提问'], size=24)
+    notes(p, {2: '两张图分别看钱和人。', 4: '达成率口径为年度目标的上半年分解值。'})
+    p.save(os.path.join(OUT, 'complex-ops.pptx'))
+
+
 if __name__ == '__main__':
     os.makedirs(OUT, exist_ok=True)
-    lecture(); business(); proposal()
+    lecture(); business(); proposal(); complex_ops()
     print('samples ->', OUT)

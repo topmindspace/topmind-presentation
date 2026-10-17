@@ -2,7 +2,7 @@
 """M4 已有 PPT 美化：三份朴素样例端到端 + 篡改负例。
 
 断言：
-  1. 三份样例（课件 / 经营汇报 / 方案）verify 全 PASS：文本差异 0、数字全部找回、图表数据与原生 chart XML 一致；
+  1. 四份样例（课件 / 经营汇报 / 方案 / 复杂运营复盘：一页多图、表 + 图、图片 + 密集文字）verify 全 PASS：文本差异 0、数字全部找回、图表数据与原生 chart XML 一致；
   2. 原文件字节不变；输出落在新目录；
   3. 图文页的图片迁入新稿；原稿演讲者备注逐字写回（verify 第 f 项）；
   4. 产物过 validate_pptx / validate_report / check_rhythm 三道 strict；
@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT / 'scripts'))
 import beautify  # noqa: E402
 
 SAMPLES = ROOT / 'tests' / 'beautify' / 'samples'
-NAMES = ['lecture-dataviz', 'business-q3', 'proposal-callcenter']
+NAMES = ['lecture-dataviz', 'business-q3', 'proposal-callcenter', 'complex-ops']   # M13：一页多图 / 表 + 图 / 图片 + 密集文字
 
 
 def h(p):
@@ -110,7 +110,7 @@ def main():
     if fails:
         print('test_beautify: FAIL'); [print('  -', f) for f in fails]
         return 1
-    print('test_beautify: OK（3 份样例差异 0 · 原稿不变 · 2 类篡改均被拦住）')
+    print(f'test_beautify: OK（{len(NAMES)} 份样例差异 0 · 原稿不变 · 2 类篡改均被拦住）')
     return 0
 
 

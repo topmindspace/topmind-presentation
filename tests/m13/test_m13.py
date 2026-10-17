@@ -114,7 +114,14 @@ p.writeFile({fileName:process.argv[1]}).then(()=>console.log('ok'));
     im = Image.open(ROOT / 'assets/icons/数据.png')
     ok(im.mode == 'P', f'图标 PNG 不是调色板模式（{im.mode}），PPTX 无法按主色换色')
 
+# 6) 文档查重（audit_skill ⑦）：结果不随前文长度变化，也不跨文件拼出假重复
+import audit_skill as AS  # noqa: E402
+_dup = '甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌'  # 21 字：步长 4 的旧实现在一半偏移下漏检
+for k in range(4):
+    ok(len(AS.dup_spans('x' * k + '前文' + _dup + '后文', ['别处' + _dup + '别的'])) == 1, f'查重随前文偏移 {k} 字漏检')
+ok(not AS.dup_spans('甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉', ['……甲乙丙丁戊己庚辛壬癸', '子丑寅卯辰巳午未申酉……']), '查重把相邻两个文件拼出了假重复')
+
 if fails:
     print('[m13] FAIL\n  ' + '\n  '.join(fails))
     sys.exit(1)
-print('[m13] 自测 PASS（端到端 · 标题防孤字 · 负例门禁 · 象形图同几何 · 图标包）')
+print('[m13] 自测 PASS（端到端 · 标题防孤字 · 负例门禁 · 象形图同几何 · 图标包 · 文档查重）')

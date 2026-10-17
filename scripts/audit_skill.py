@@ -68,31 +68,27 @@ def norm_text(text: str) -> str:
     return _NORM_STRIP.sub('', text)
 
 
-def dup_spans(sk_text: str, refs_text: str) -> list[str]:
-    """返回 SKILL.md 与 references 的共同归一化片段（合并相邻窗口）。"""
-    a, b = norm_text(sk_text), norm_text(refs_text)
+def dup_spans(sk_text: str, refs_text) -> list[str]:
+    """返回 SKILL.md 与 references 的共同归一化片段（合并相邻窗口）。
+
+    逐位滑窗（步长 1）：references 的全部 DUP_WIN 字窗口先建成集合，SKILL.md 每个起点都查一次。
+    旧实现步长 4，能否命中取决于片段在 SKILL.md 里的起点对 4 取余——前文多一个字（如版本号 0.2.9 → 0.2.10）
+    就可能让同一处重复时有时无。"""
+    # references 逐文件建窗口：拼成一串再归一化会让「上一文件末尾 + 下一文件开头」凑出假重复
+    docs = [refs_text] if isinstance(refs_text, str) else list(refs_text)
+    a = norm_text(sk_text)
+    wins = set()
+    for d in docs:
+        nb = norm_text(d)
+        wins.update(nb[j:j + DUP_WIN] for j in range(len(nb) - DUP_WIN + 1))
     ranges: list[tuple[int, int]] = []
-    i = 0
-    while i + DUP_WIN <= len(a):
+    for i in range(len(a) - DUP_WIN + 1):
         w = a[i:i + DUP_WIN]
-        if _CJK.search(w) and w in b:
-            p = b.find(w)
-            lo, hi = i, i + DUP_WIN
-            # 命中后向两侧扩展到最长共同片段（闭合步长 4 的对齐缺口）
-            while lo > 0 and p > 0 and a[lo - 1] == b[p - 1]:
-                lo -= 1
-                p -= 1
-            hi_b = p + DUP_WIN
-            while hi < len(a) and hi_b < len(b) and a[hi] == b[hi_b]:
-                hi += 1
-                hi_b += 1
-            if ranges and lo <= ranges[-1][1]:
-                ranges[-1] = (ranges[-1][0], hi)
+        if w in wins and _CJK.search(w):
+            if ranges and i <= ranges[-1][1]:
+                ranges[-1] = (ranges[-1][0], i + DUP_WIN)
             else:
-                ranges.append((lo, hi))
-            i = hi  # 跳过已覆盖区间（顺带提速）
-        else:
-            i += 4
+                ranges.append((i, i + DUP_WIN))
     return [a[lo:hi] for lo, hi in ranges]
 
 
@@ -235,7 +231,7 @@ def main() -> int:
         f'{n_refs} 处引用全部存在')
 
     # ⑦ 冗余报告（SKILL.md ↔ 全部 references，含 playbook；归一化滑窗子串）
-    refs_all = '\n'.join(p.read_text(encoding='utf-8') for p in sorted(REF.glob('*.md')))
+    refs_all = [p.read_text(encoding='utf-8') for p in sorted(REF.glob('*.md'))]
     dup = dup_spans(sk, refs_all)
     chk('⑦ 内容重复（SKILL.md ↔ references · 归一化 ≥%d 字）' % DUP_WIN,
         len(dup) <= DUP_MAX,

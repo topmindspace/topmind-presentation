@@ -24,7 +24,7 @@
 /* ══ topmind-presentation 公共样式引擎（assets/templates/engine.css 的内联副本 · 由 scripts/sync_runtime.py 注入，禁止手改） ══ */
 /* ══ topmind-presentation 公共样式引擎（assets/templates/engine.css）══
    由 scripts/sync_runtime.py 注入到 templates/*.html 的 __TOPPPT_ENGINE__ 标记块 · 禁止在各模板手改。
-   含：结构 token / 9 套风格 token / 排版类 / 栅格（含密度版式扩展 g-hero--rev/g-side--rev/g-31/g-13、
+   含：结构 token / 12 套风格 token / 排版类 / 栅格（含密度版式扩展 g-hero--rev/g-side--rev/g-31/g-13、
        拼贴栅格 g-bento + span 工具类、交错版式 .stagger、键值 .kv）/
        强调带（band--accent / band--accent--solid / band--deep）/
        顶栏+工具组（含全屏按钮与折叠态）/ 组件 / SVG 语义类 /
@@ -874,7 +874,7 @@ html[data-theme="dark"] .f-neg{fill:var(--neg,#F28B82)}html[data-theme="dark"] .
 .t-on-inv{fill:var(--text-inv)}
 /* ── 编码色板（数据系列 / 图例色点 / 小段标签）──
    与结构色纪律正交：结构色（标题/正文/边框/按钮/大面积底色）恒为中性 + 单一强调色；
-   编码色只出现在数据本体。**9 套风格各有自己的 c1–c5**（单源 = scripts/layout-constants.json
+   编码色只出现在数据本体。**12 套风格各有自己的 c1–c5**（单源 = scripts/layout-constants.json
    的 styleDataColors / styleDataColorsDark；改色值改 JSON，再跑 sync_runtime.py）。
    无 data-style 时回落中性，不串色。 */
 :root{--c1:var(--accent);--c2:var(--surface-3);--c3:var(--border);
@@ -1226,7 +1226,7 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
 <section class="band band--top" id="agenda">
   <div class="wrap">
     <div class="shead rv"><h2 class="t-h1 shead__title">报告大纲</h2></div>
-    <ol class="agenda agenda--2col rv">      <li class="agenda__i"><a class="agenda__a" href="#s1"><span class="agenda__n">01</span><span><span class="agenda__t">为什么是我们</span><div class="agenda__d">01 · 为什么是我们</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s2"><span class="agenda__n">02</span><span><span class="agenda__t">安装与分发</span><div class="agenda__d">02 · 安装与分发</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s3"><span class="agenda__n">03</span><span><span class="agenda__t">双交付</span><div class="agenda__d">03 · 双交付</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s4"><span class="agenda__n">04</span><span><span class="agenda__t">三模式</span><div class="agenda__d">04 · 三模式</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s5"><span class="agenda__n">05</span><span><span class="agenda__t">图表工艺</span><div class="agenda__d">05 · 图表工艺</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s7"><span class="agenda__n">06</span><span><span class="agenda__t">风格主题</span><div class="agenda__d">06 · 风格主题</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s8"><span class="agenda__n">07</span><span><span class="agenda__t">质量门禁</span><div class="agenda__d">07 · 质量门禁</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s10"><span class="agenda__n">08</span><span><span class="agenda__t">Header 工具栏</span><div class="agenda__d">08 · Header 工具栏</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s12"><span class="agenda__n">09</span><span><span class="agenda__t">Fast Mode</span><div class="agenda__d">09 · Fast Mode</div></span></a></li></ol>
+    <ol class="agenda agenda--2col rv">      <li class="agenda__i"><a class="agenda__a" href="#s1"><span class="agenda__n">01</span><span><span class="agenda__t">为什么是我们</span><div class="agenda__d">01 · 为什么是我们</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s2"><span class="agenda__n">02</span><span><span class="agenda__t">安装与分发</span><div class="agenda__d">02 · 安装与分发</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s3"><span class="agenda__n">03</span><span><span class="agenda__t">双交付</span><div class="agenda__d">03 · 双交付</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s4"><span class="agenda__n">04</span><span><span class="agenda__t">三模式</span><div class="agenda__d">04 · 三模式</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s5"><span class="agenda__n">05</span><span><span class="agenda__t">能力盘点</span><div class="agenda__d">05 · 能力盘点</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s6"><span class="agenda__n">06</span><span><span class="agenda__t">美化已有 PPT：只换版式，不改一个字</span><div class="agenda__d">美化</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s9"><span class="agenda__n">07</span><span><span class="agenda__t">质量门禁</span><div class="agenda__d">07 · 质量门禁</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s11"><span class="agenda__n">08</span><span><span class="agenda__t">Header 工具栏</span><div class="agenda__d">08 · Header 工具栏</div></span></a></li>      <li class="agenda__i"><a class="agenda__a" href="#s13"><span class="agenda__n">09</span><span><span class="agenda__t">Fast Mode</span><div class="agenda__d">09 · Fast Mode</div></span></a></li></ol>
   </div>
 </section>
 
@@ -1319,42 +1319,68 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
   </div>
 </section>
 
-<section class="band" id="s5" data-skel="P3" data-page-type="donut">
+<section class="band band--grid" id="s5" data-skel="P7" data-page-type="dashboard" data-charts="2">
   <div class="wrap">
     <div class="shead rv">
-      <h2 class="t-h1 shead__title">交付面三件套：演示 HTML · 可编辑 PPTX · 门禁说明</h2>
+      <h2 class="t-h1 shead__title">能力盘点：<span class="nw">51 个</span>版式、<span class="nw">37 </span>种图表、<span class="nw">72 个</span>图标</h2>
     </div>
-    <div class="kstrip rv" style="--n:3"><div class="kstrip__c"><div class="kstrip__v">1 份</div><div class="kstrip__k">模型同时生成两种格式</div></div><div class="kstrip__c"><div class="kstrip__v">12 套</div><div class="kstrip__k">风格，亮暗双主题</div></div><div class="kstrip__c"><div class="kstrip__v">48 种</div><div class="kstrip__k">版式进入覆盖门禁</div></div></div>
-    <div class="grid g-comp rv a-stretch">
-      <div class="fig rv">      <svg class="chart" data-chart="donut" viewBox="0 0 900 340" role="img" preserveAspectRatio="xMidYMid meet">
-        <path d="M200,22 A148,148 0 0 1 287,289.7 L252.2,241.8 A88.8,88.8 0 0 0 200,81.2 Z" class="f-c1" stroke="var(--surface)" stroke-width="2"><title>可翻页 HTML 40</title></path>
-        <path d="M287,289.7 A148,148 0 0 1 52,170 L111.2,170 A88.8,88.8 0 0 0 252.2,241.8 Z" class="f-c2" stroke="var(--surface)" stroke-width="2"><title>保真 PPTX 35</title></path>
-        <path d="M52,170 A148,148 0 0 1 200,22 L200,81.2 A88.8,88.8 0 0 0 111.2,170 Z" class="f-c3" stroke="var(--surface)" stroke-width="2"><title>质检交付说明 25</title></path>
-        <text x="200" y="176" text-anchor="middle" class="f-txt" font-size="18" font-weight="700">同源模型</text>
-        <rect x="408" y="107" width="14" height="14" rx="4" class="f-c1"/>
-        <text x="432" y="120" text-anchor="start" class="f-txt" font-size="15" font-weight="600">可翻页 HTML</text>
-        <text x="870" y="120" text-anchor="end" class="f-txt2" font-size="14">40%</text>
-        <line x1="408" y1="142" x2="870" y2="142" class="s-bds"/>
-        <rect x="408" y="159" width="14" height="14" rx="4" class="f-c2"/>
-        <text x="432" y="172" text-anchor="start" class="f-txt" font-size="15" font-weight="600">保真 PPTX</text>
-        <text x="870" y="172" text-anchor="end" class="f-txt2" font-size="14">35%</text>
-        <line x1="408" y1="194" x2="870" y2="194" class="s-bds"/>
-        <rect x="408" y="211" width="14" height="14" rx="4" class="f-c3"/>
-        <text x="432" y="224" text-anchor="start" class="f-txt" font-size="15" font-weight="600">质检交付说明</text>
-        <text x="870" y="224" text-anchor="end" class="f-txt2" font-size="14">25%</text>
-        <line x1="408" y1="246" x2="870" y2="246" class="s-bds"/>
+    <div class="kstrip rv" style="--n:4"><div class="kstrip__c dkm"><span class="ico ico--line" data-icon="图表"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6" rx="1"/><rect x="12" y="8" width="3" height="10" rx="1"/><rect x="17" y="4" width="3" height="14" rx="1"/></svg></span><div><div class="kstrip__v">51</div><div class="kstrip__k">版式（8 个家族）</div></div></div><div class="kstrip__c dkm"><span class="ico ico--line" data-icon="数据"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg></span><div><div class="kstrip__v">37</div><div class="kstrip__k">图表类型</div></div></div><div class="kstrip__c dkm"><span class="ico ico--line" data-icon="星标"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2.8 2.8 5.8 6.4.9-4.6 4.5 1.1 6.3-5.7-3-5.7 3 1.1-6.3L2.8 9.5l6.4-.9z"/></svg></span><div><div class="kstrip__v">72</div><div class="kstrip__k">原创图标</div></div></div><div class="kstrip__c dkm"><span class="ico ico--line" data-icon="设置"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.8M12 18.7v2.8M2.5 12h2.8M18.7 12h2.8M5.2 5.2l2 2M16.8 16.8l2 2M18.8 5.2l-2 2M7.2 16.8l-2 2"/></svg></span><div><div class="kstrip__v">12</div><div class="kstrip__k">风格（浅深两色）</div></div></div></div>
+    <div class="dash dash--2 rv">
+      <div class="fig dash__c"><div class="fig__cap">① 版式按视觉重量</div>      <svg class="chart chart--x" data-chart="hbar" viewBox="0 0 620 260" role="img" preserveAspectRatio="xMidYMid meet">
+        <rect x="54" y="29.8" width="476" height="32.5" rx="6" class="f-s2"/>
+        <rect data-anim="grow" x="54" y="29.8" width="63.5" height="32.5" rx="6" class="f-acc"><title>强调 4个</title></rect>
+        <text x="40" y="51" text-anchor="end" class="f-txt2" font-size="14" font-weight="500">强调</text>
+        <text x="127.5" y="51" text-anchor="start" class="f-txt2" font-size="14" font-weight="600">4个</text>
+        <rect x="54" y="85.8" width="476" height="32.5" rx="6" class="f-s2"/>
+        <rect data-anim="grow" x="54" y="85.8" width="79.3" height="32.5" rx="6" class="f-acc"><title>疏 5个</title></rect>
+        <text x="40" y="107" text-anchor="end" class="f-txt2" font-size="14" font-weight="500">疏</text>
+        <text x="143.3" y="107" text-anchor="start" class="f-txt2" font-size="14" font-weight="600">5个</text>
+        <rect x="54" y="141.8" width="476" height="32.5" rx="6" class="f-s2"/>
+        <rect data-anim="grow" x="54" y="141.8" width="428.4" height="32.5" rx="6" class="f-acc"><title>中 27个</title></rect>
+        <text x="40" y="163" text-anchor="end" class="f-txt2" font-size="14" font-weight="500">中</text>
+        <text x="492.4" y="163" text-anchor="start" class="f-txt2" font-size="14" font-weight="600">27个</text>
+        <rect x="54" y="197.8" width="476" height="32.5" rx="6" class="f-s2"/>
+        <rect data-anim="grow" x="54" y="197.8" width="238" height="32.5" rx="6" class="f-acc"><title>密 15个</title></rect>
+        <text x="40" y="219" text-anchor="end" class="f-txt2" font-size="14" font-weight="500">密</text>
+        <text x="302" y="219" text-anchor="start" class="f-txt2" font-size="14" font-weight="600">15个</text>
       </svg>
-      </div>
-      <ol class="readout"><li><span class="readout__n">1</span><div><div class="readout__k">可翻页 HTML</div><p class="readout__v">上台直接演示，键盘翻页、亮暗主题切换</p></div></li><li><span class="readout__n">2</span><div><div class="readout__k">可编辑 PPTX</div><p class="readout__v">原生图表与文本框，拿到手还能继续改</p></div></li><li><span class="readout__n">3</span><div><div class="readout__k">质检交付说明</div><p class="readout__v">strict 门禁结果随交付一起给出</p></div></li></ol>
+</div>
+      <div class="fig dash__c"><div class="fig__cap">② 图表导出方式</div>      <svg class="chart" data-chart="donut" viewBox="0 0 620 260" role="img" preserveAspectRatio="xMidYMid meet">
+        <path d="M160,22 A108,108 0 1 1 132.8,234.5 L143.7,192.7 A64.8,64.8 0 1 0 160,65.2 Z" class="f-c1" stroke="var(--surface)" stroke-width="2"><title>原生 PPT 图表 20</title></path>
+        <path d="M132.8,234.5 A108,108 0 0 1 160,22 L160,65.2 A64.8,64.8 0 0 0 143.7,192.7 Z" class="f-c2" stroke="var(--surface)" stroke-width="2"><title>可编辑形状 17</title></path>
+        <text x="160" y="134" text-anchor="middle" class="f-txt" font-size="34" font-weight="700">37</text>
+        <text x="160" y="160" text-anchor="middle" class="f-txt3" font-size="13">合计</text>
+        <rect x="328" y="93" width="14" height="14" rx="4" class="f-c1"/>
+        <text x="352" y="106" text-anchor="start" class="f-txt" font-size="15" font-weight="600">原生 PPT 图表</text>
+        <text x="590" y="106" text-anchor="end" class="f-txt2" font-size="14">20种 · 54%</text>
+        <line x1="328" y1="128" x2="590" y2="128" class="s-bds"/>
+        <rect x="328" y="145" width="14" height="14" rx="4" class="f-c2"/>
+        <text x="352" y="158" text-anchor="start" class="f-txt" font-size="15" font-weight="600">可编辑形状</text>
+        <text x="590" y="158" text-anchor="end" class="f-txt2" font-size="14">17种 · 46%</text>
+        <line x1="328" y1="180" x2="590" y2="180" class="s-bds"/>
+      </svg>
+</div>
     </div>
-    <div class="sowhat rv"><span class="sowhat__v">双通道不是二选一：HTML 上台演示，PPTX 可继续编辑，门禁证明可交付。</span></div>
+    <div class="cband rv" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)"><div class="cband__p"><div class="readout__k">中等重量占一半以上</div><p class="readout__v">27 个版式承担主体页面，密页与疏页、强调页穿插控制节奏</p></div><div class="cband__p"><div class="readout__k">原生图表过半</div><p class="readout__v">20 种导出后可在 PowerPoint 里双击改数据</p></div></div>
   </div>
 </section>
 
-<section class="band" id="s6" data-skel="P8" data-page-type="bar">
+<section class="band band--focus" id="s6" data-skel="P3" data-page-type="focus" data-focus="number" data-variant="left">
   <div class="wrap">
     <div class="shead rv">
-      <h2 class="t-h1 shead__title">0.2.5 精简发布内容：npm 解包体积从 16.9 MB 降到 7.3 MB</h2>
+      <h2 class="t-h1 shead__title">美化已有 PPT：只换版式，不改一个字</h2>
+    </div>
+    <div class="focus focus--left focus--number rv">
+      <div class="focus__a"><div class="focus__num">0</div><p class="focus__cap t-lead">美化前后的文字差异（逐字、逐数、逐图核对）</p></div>
+      <div class="focus__b"><p class="focus__t t-body">一页多图改成仪表盘，表加图改成半表半图，图片与备注原样保留。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="s7" data-skel="P8" data-page-type="bar">
+  <div class="wrap">
+    <div class="shead rv">
+      <h2 class="t-h1 shead__title"><span class="nw">0.2.5 </span>精简发布内容：npm 解包体积从 <span class="nw">16.9 </span>MB 降到 <span class="nw">7.3 </span>MB</h2>
     </div>
     <div class="kstrip rv" style="--n:3"><div class="kstrip__c"><div class="kstrip__v">−57%</div><div class="kstrip__k">解包体积（16.9 → 7.3 MB）</div></div><div class="kstrip__c"><div class="kstrip__v">−69 个</div><div class="kstrip__k">发布文件（266 → 197）</div></div><div class="kstrip__c"><div class="kstrip__v">−65%</div><div class="kstrip__k">压缩包（13.3 → 4.6 MB）</div></div></div>
     <div class="grid g-side rv a-start">
@@ -1423,10 +1449,10 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
   </div>
 </section>
 
-<section class="band band--top" id="s7" data-skel="P2" data-page-type="metrics">
+<section class="band band--top" id="s8" data-skel="P2" data-page-type="metrics">
   <div class="wrap">
     <div class="shead rv">
-      <h2 class="t-h1 shead__title">开场先看风格：12 套，每套都有浅深两色</h2>
+      <h2 class="t-h1 shead__title">开场先看风格：<span class="nw">12 </span>套，每套都有浅深两色</h2>
     </div>
     <div class="grid g-4 rv a-stretch metrics-hero">
       <div class="metric"><div class="metric__v t-metric">12</div><div class="metric__k">风格套装</div><div class="metric__n"></div></div>
@@ -1439,10 +1465,10 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
   </div>
 </section>
 
-<section class="band" id="s8" data-skel="P4" data-page-type="comparison" data-variant="problem-solution">
+<section class="band" id="s9" data-skel="P4" data-page-type="comparison" data-variant="problem-solution">
   <div class="wrap">
     <div class="shead rv">
-      <h2 class="t-h1 shead__title">散装出稿止步，strict 0/0 才算交付</h2>
+      <h2 class="t-h1 shead__title">散装出稿止步，<span class="nw">strict 0</span>/<span class="nw">0 </span>才算交付</h2>
     </div>
     <div class="grid g-ps g-half rv">
       <div class="card"><h3 class="t-h3">散装路径 · 风险</h3>
@@ -1455,7 +1481,7 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
   </div>
 </section>
 
-<section class="band" id="s9" data-skel="P8" data-page-type="bar">
+<section class="band" id="s10" data-skel="P8" data-page-type="bar">
   <div class="wrap">
     <div class="shead rv">
       <h2 class="t-h1 shead__title">从想法到上台：工艺链路如何把主张垫实</h2>
@@ -1504,7 +1530,7 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
   </div>
 </section>
 
-<section class="band" id="s10" data-skel="P8" data-page-type="table">
+<section class="band" id="s11" data-skel="P8" data-page-type="table">
   <div class="wrap">
     <div class="shead rv">
       <h2 class="t-h1 shead__title">打开 HTML 即演示：顶栏快捷操作一览</h2>
@@ -1514,7 +1540,7 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
   </div>
 </section>
 
-<section class="band" id="s11" data-skel="P1" data-page-type="split">
+<section class="band" id="s12" data-skel="P1" data-page-type="split">
   <div class="wrap">
     <div class="shead rv">
       <h2 class="t-h1 shead__title">核图优先：排名对比用横向条，一眼分出轻重</h2>
@@ -1550,10 +1576,10 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
   </div>
 </section>
 
-<section class="band" id="s12" data-skel="P2" data-page-type="timeline">
+<section class="band" id="s13" data-skel="P2" data-page-type="timeline">
   <div class="wrap">
     <div class="shead rv">
-      <h2 class="t-h1 shead__title">Fast Mode：跳过问询，不跳过工艺</h2>
+      <h2 class="t-h1 shead__title"><span class="nw">Fast Mode</span>：跳过问询，不跳过工艺</h2>
     </div>
     <div class="fig rv"><div class="tl tl--h" style="--n:3">
         <div class="tl__i"><div class="tl__d"></div><div class="tl__l">触发</div><div class="tl__t">显式 opt-in</div><p class="t-body">快速模式 / fast / 一键出稿 / 少问一句</p></div>
@@ -2364,55 +2390,83 @@ window.REPORT_MODEL = {
       "soWhat": "先定模式再写页——A/B/C 契约决定密度、图表与结论条用法。"
     },
     {
-      "type": "donut",
-      "layoutPreset": "P3",
-      "eyebrow": "05 · 图表工艺",
-      "title": "交付面三件套：演示 HTML · 可编辑 PPTX · 门禁说明",
-      "chart": {
-        "labels": [
-          "可翻页 HTML",
-          "保真 PPTX",
-          "质检交付说明"
-        ],
-        "values": [
-          40,
-          35,
-          25
-        ],
-        "unit": "%",
-        "centerLabel": "同源模型",
-        "dataTable": "notes"
-      },
-      "note": "口径：产品交付构成示意——三者同源 REPORT_MODEL，缺一则不算完整上台交付。",
-      "soWhat": "双通道不是二选一：HTML 上台演示，PPTX 可继续编辑，门禁证明可交付。",
+      "type": "dashboard",
+      "eyebrow": "05 · 能力盘点",
+      "title": "能力盘点：51 个版式、37 种图表、72 个图标",
       "keyMetrics": [
         [
-          "1 份",
-          "模型同时生成两种格式"
+          "51",
+          "版式（8 个家族）",
+          "图表"
         ],
         [
-          "12 套",
-          "风格，亮暗双主题"
+          "37",
+          "图表类型",
+          "数据"
         ],
         [
-          "48 种",
-          "版式进入覆盖门禁"
+          "72",
+          "原创图标",
+          "星标"
+        ],
+        [
+          "12",
+          "风格（浅深两色）",
+          "设置"
         ]
+      ],
+      "charts": [
+        {
+          "type": "hbar",
+          "labels": [
+            "强调",
+            "疏",
+            "中",
+            "密"
+          ],
+          "values": [
+            4,
+            5,
+            27,
+            15
+          ],
+          "unit": "个",
+          "cap": "版式按视觉重量"
+        },
+        {
+          "type": "donut",
+          "labels": [
+            "原生 PPT 图表",
+            "可编辑形状"
+          ],
+          "values": [
+            20,
+            17
+          ],
+          "unit": "种",
+          "cap": "图表导出方式"
+        }
       ],
       "points": [
         [
-          "可翻页 HTML",
-          "上台直接演示，键盘翻页、亮暗主题切换"
+          "中等重量占一半以上",
+          "27 个版式承担主体页面，密页与疏页、强调页穿插控制节奏"
         ],
         [
-          "可编辑 PPTX",
-          "原生图表与文本框，拿到手还能继续改"
-        ],
-        [
-          "质检交付说明",
-          "strict 门禁结果随交付一起给出"
+          "原生图表过半",
+          "20 种导出后可在 PowerPoint 里双击改数据"
         ]
       ]
+    },
+    {
+      "type": "focus",
+      "eyebrow": "美化",
+      "title": "美化已有 PPT：只换版式，不改一个字",
+      "number": [
+        "0",
+        "美化前后的文字差异（逐字、逐数、逐图核对）"
+      ],
+      "text": "一页多图改成仪表盘，表加图改成半表半图，图片与备注原样保留。"
     },
     {
       "type": "bar",
@@ -2757,7 +2811,7 @@ window.REPORT_MODEL = {
       ]
     ]
   }
-};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+};;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 /* __TOPPPT_RUNTIME_START__ */
 /* ══ PPTX 页序运行时（assets/pptx-export.js 的内联副本 · 由 scripts/sync_runtime.py 注入，禁止手改） ══ */

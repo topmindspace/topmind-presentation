@@ -23,7 +23,7 @@ function loadSharp() {
   try { return require('sharp'); } catch (_) { return null; }
 }
 
-/** 需要预生成的描边色：9 套风格 light/dark 的 accent + 一个兜底深灰 */
+/** 需要预生成的描边色：12 套风格 light/dark 的 accent + 一个兜底深灰 */
 function collectColors() {
   const colors = new Set(['#333333']);
   const add = (a) => {

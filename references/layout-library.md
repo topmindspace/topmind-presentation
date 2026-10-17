@@ -1,4 +1,4 @@
-# 版式库（layoutLibrary · 8 家族 48 版式）
+# 版式库（layoutLibrary · 8 家族 51 版式）
 
 > **何时读**：挑版式、排节奏、加新版式时。**单源** = `scripts/layout-constants.json` → `layoutLibrary`；本文是它的说明，数值以 JSON 为准。
 > **门禁**：`python scripts/check_rhythm.py <model.json|html> --strict`（节奏 / 家族覆盖 / 反模式，CI 对全部示例硬拦）；`python tests/layouts/test_layouts.py`（每个版式一页 golden + PPTX 几何指纹）。
@@ -43,6 +43,7 @@
 | `contrast` | 对比论点 | type=comparison | ◐ 中 |
 | `problem-solution` | 问题 → 方案 | type=comparison · variant=problem-solution | ◐ 中 |
 | `narrative-2col` | 双栏论述 | type=twocol | ● 密 |
+| `focus` | 简单页（一个数字 / 一句观点 / 一个图标 / 一张图 + 留白，12 种变体） | type=focus | ○ 轻 |
 
 ## 数据（`data`）
 
@@ -63,6 +64,7 @@
 | `chart-dual` | 双图对照 + 解读行 | compose=dual（+ chart2） | ● 密 |
 | `chart-minis` | 主图 + 小图组（small multiples，最多 2 张） | compose=minis（+ minis） | ● 密 |
 | `chart-band` | 主图 + 底部解读带 | compose=band（信息图 / 结构图 / 指标页 + points） | ● 密 |
+| `chart-dash` | 仪表盘（2–4 图 + 关键数字条 + 解读行；共用配色、坐标与图例） | type=dashboard | ● 密 |
 
 > 复合版式规则与模型写法见 `density.md`；`compose` 匹配优先于单纯页型。
 
@@ -96,6 +98,7 @@
 | `media-full` | 满版图 + 图注 | type=image · image=full | ○ 轻 |
 | `media-grid` | 图片网格 | type=image · image=grid | ◐ 中 |
 | `media-half` | 左图右文 | type=image · image=half | ◐ 中 |
+| `magazine` | 杂志版（大图 + 观点句 + ≤2 数字 + ≤3 条带图标要点） | type=magazine | ◐ 中 |
 
 ## 卡片和网格（`cards`）
 
@@ -120,4 +123,4 @@
 
 ## 新增版式
 
-1. 先确认现有 48 个版式组合不出来；2. 在 `layoutLibrary.layouts` 加条目（id / family / name / match / weight）；3. 双渲染器实现（`render_from_model.py` + `build_pptx.js`）；4. `python tests/layouts/build_gallery.py && python tests/layouts/test_layouts.py --update`，看 golden 图再提交。
+1. 先确认现有 51 个版式组合不出来；2. 在 `layoutLibrary.layouts` 加条目（id / family / name / match / weight）；3. 双渲染器实现（`render_from_model.py` + `build_pptx.js`）；4. `python tests/layouts/build_gallery.py && python tests/layouts/test_layouts.py --update`，看 golden 图再提交。

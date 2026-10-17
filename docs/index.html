@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>topmind-presentation Showcase</title>
-  <meta name="description" content="TopMindspace topmind-presentation / topmind-presentation — HTML+PPT 双交付，正式商务演示：三模式 × 九风格；日常 HTML 上台，按需导出可编辑 PPTX；Showcase · Header 工具栏（T/P/H/F/B）。" />
+  <meta name="description" content="TopMindspace topmind-presentation / topmind-presentation — HTML+PPT 双交付，正式商务演示：三模式 × 12 套风格；日常 HTML 上台，按需导出可编辑 PPTX；Showcase · Header 工具栏（T/P/H/F/B）。" />
   <meta name="theme-color" content="#0a0b0f" />
   <link rel="canonical" href="https://topmindspace.github.io/presentation/" />
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
@@ -32,6 +32,7 @@
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 24px; }
     figure { margin: 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
     figure img { width: 100%; display: block; aspect-ratio: 16/9; object-fit: cover; }
+    figure img.full { aspect-ratio: auto; object-fit: contain; }
     figcaption { padding: 10px 14px; font-size: 0.85rem; color: var(--muted); }
     .meta { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 0.9rem; color: var(--muted); }
     code { font-size: 0.85em; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; }
@@ -41,7 +42,7 @@
   <main class="wrap">
     <p class="eyebrow">TopMindspace · Agent Skills</p>
     <h1>topmind-presentation / topmind-presentation</h1>
-    <p class="lead"><strong>HTML + PPT 双交付</strong>，为<strong>正式商务演示</strong>而生：日常用可翻页 HTML 等同幻灯片，需要时再导出高保真可编辑 PPTX。参考 MD3——合适信息密度、克制表达。三模式 × 九风格 · Showcase 含多样图表与 <strong>Header 工具栏</strong>（T/P/H/F/B）· strict 0/0。</p>
+    <p class="lead"><strong>HTML + PPT 双交付</strong>，为<strong>正式商务演示</strong>而生：日常用可翻页 HTML 等同幻灯片，需要时再导出高保真可编辑 PPTX。参考 MD3——合适信息密度、克制表达。三模式 × 12 套风格 · Showcase 含多样图表与 <strong>Header 工具栏</strong>（T/P/H/F/B）· strict 0/0。</p>
     <figure style="margin:24px 0">
       <img src="./assets/presentation-cover.png" alt="topmind-presentation · 正式商务演示" loading="lazy" style="border-radius:12px" />
     </figure>
@@ -55,29 +56,44 @@
     <h2 style="font-family:var(--display);font-size:1.35rem;margin:0 0 8px">主题总览（Gate 0）</h2>
     <div class="grid" style="grid-template-columns:1fr">
       <figure>
-        <img src="./site-assets/theme-overview.png" alt="12 套风格总览" loading="lazy" />
+        <img class="full" src="./site-assets/theme-overview.png" alt="12 套风格总览" loading="lazy" />
         <figcaption>12 套风格总览 · 另见 <a href="./style-gallery.html">风格画廊</a></figcaption>
       </figure>
     </div>
     <h2 style="font-family:var(--display);font-size:1.35rem;margin:36px 0 8px">产品 Showcase 样张</h2>
     <div class="grid">
       <figure>
-        <img src="./site-assets/showcase-cover.png" alt="Showcase cover" loading="lazy" />
-        <figcaption>Cover</figcaption>
+        <img src="./site-assets/showcase-cover.png" alt="Showcase 封面" loading="lazy" />
+        <figcaption>封面</figcaption>
       </figure>
       <figure>
-        <img src="./site-assets/showcase-s4.png" alt="三模式" loading="lazy" />
+        <img src="./site-assets/showcase-modes.png" alt="三模式" loading="lazy" />
         <figcaption>三模式</figcaption>
       </figure>
       <figure>
-        <img src="./site-assets/showcase-s6.png" alt="质量门禁" loading="lazy" />
+        <img src="./site-assets/showcase-gates.png" alt="质量门禁" loading="lazy" />
         <figcaption>质量门禁</figcaption>
+      </figure>
+    </div>
+    <h2 style="font-family:var(--display);font-size:1.35rem;margin:36px 0 8px">高密度与简单页：22 页运营复盘示例</h2>
+    <div class="grid">
+      <figure>
+        <img src="./site-assets/dense-dashboard.png" alt="多图表仪表盘" loading="lazy" />
+        <figcaption>仪表盘：4 个关键数字 + 4 张图 + 解读行</figcaption>
+      </figure>
+      <figure>
+        <img src="./site-assets/dense-magazine.png" alt="杂志版" loading="lazy" />
+        <figcaption>杂志版：插图 + 观点句 + 数字 + 带图标要点</figcaption>
+      </figure>
+      <figure>
+        <img src="./site-assets/dense-focus.png" alt="简单页" loading="lazy" />
+        <figcaption>简单页：一句观点，留白给听众</figcaption>
       </figure>
     </div>
     <h2 id="beautify" style="font-family:var(--display);font-size:1.35rem;margin:36px 0 8px">已有 PPT 美化：前后对比</h2>
     <div class="grid" style="grid-template-columns:1fr">
       <figure>
-        <img src="./site-assets/beautify-before-after.jpg" alt="复杂运营复盘稿美化前后对比" loading="lazy" />
+        <img class="full" src="./site-assets/beautify-before-after.jpg" alt="复杂运营复盘稿美化前后对比" loading="lazy" />
         <figcaption>左：原稿（一页多图、表 + 图、图片 + 密集文字）· 右：美化后。每个字、每个数、图表数据、图片和备注都与原稿核对一致</figcaption>
       </figure>
     </div>

@@ -89,7 +89,7 @@ const path = require('path');
   --out=<file>     输出路径（等价于位置参数；二者只能给一个）
   --strict         图标资产缺失（回落色块）时直接失败（exit 3）
   --demo           显式使用内嵌示例内容（仅调试）
-  --style=<name>   覆盖模型的风格（9 套风格 token 见 scripts/layout-constants.json）
+  --style=<name>   覆盖模型的风格（12 套风格 token 见 scripts/layout-constants.json）
   --theme=light|dark  主题（--theme 覆盖 > 模型 theme > 默认 light）`);
     process.exit(0);
   }
@@ -131,9 +131,9 @@ const CHROME_FLAGS = CHROME.chromeFlags(CHROME.peekModel());
 const DENSE = require('./lib_dense.js');
 const ICON_STYLE = (CHROME.peekModel() || {}).iconStyle === 'fill' ? 'fill' : 'line';   // M13：全篇统一图标风格
 CHROME.applyChrome(LC, CHROME_FLAGS);
-const STYLE_PRESETS = LC.styles;                      // 9 套风格 token（light）
-const STYLE_PRESETS_DARK = LC.stylesDark || {};       // 9 套风格 token（dark）
-const STYLE_DATA_COLORS = LC.styleDataColors || {};            // 9 套风格各自的编码色板（light）
+const STYLE_PRESETS = LC.styles;                      // 12 套风格 token（light）
+const STYLE_PRESETS_DARK = LC.stylesDark || {};       // 12 套风格 token（dark）
+const STYLE_DATA_COLORS = LC.styleDataColors || {};            // 12 套风格各自的编码色板（light）
 const STYLE_DATA_COLORS_DARK = LC.styleDataColorsDark || {};   // 深色主题版（按 model.theme 选择）
 const { pw: PW, ph: PH, mx: MX } = LC.page;           // 16:9，页边距
 const CW = PW - 2 * MX;
@@ -384,7 +384,7 @@ const sz = (pt) => {
 const rr = (v) => { const id = (LC.styleIdentity || {})[styleArg] || {}; const px = parseFloat(id.radius); return +(v * (px ? px / 16 : 1)).toFixed(3); };
 /* M9：按角色名取字号（chapterTitle / kpiCard 等），值仍出自 modeTypeScale，validate 比例尺照常生效 */
 const roleSz = (role, base) => { const m = (MTS && (MTS[MODE_NAME] || MTS.presentation)) || {}; return m[role] != null ? m[role] : sz(base); };
-/* 编码色板：9 套风格**各有自己的** c1–c5（单源 styleDataColors / styleDataColorsDark）。
+/* 编码色板：12 套风格**各有自己的** c1–c5（单源 styleDataColors / styleDataColorsDark）。
    与 HTML 侧的 .f-c1~c5 语义类同源；结构色纪律不受影响——本表只用于数据系列。 */
 const _dcWarned = new Set();
 function dataColors(style) {
@@ -1273,6 +1273,7 @@ function chartBaseOpts(c, colors, multi, kind) {
     valAxisHidden: true, valAxisLineShow: false, catAxisLineShow: false,
     catGridLine: { style: 'none' }, valGridLine: { style: 'none' },
     valAxisMinVal: 0,
+    catAxisLabelFrequency: 1,   // M13：类目多（≥7）时渲染器会隔一个省略标签——强制每个都显示
     showLegend: !!multi && c.legend !== false, legendPos: 'b', legendColor: STYLE.body,
     legendFontSize: sz(10.5), legendFontFace: STYLE.font,
     showTitle: false,
@@ -1282,6 +1283,9 @@ function chartBaseOpts(c, colors, multi, kind) {
     opts.dataLabelFormatCode = _dec ? '0' + _ds : '0';   // 单位写在小图标题里，标签只留数字（避免折行）
     const vs = (c.values || []).filter(v => typeof v === 'number');
     if (!c.max && vs.length) opts.valAxisMaxVal = Math.max.apply(null, vs) * 1.18;
+  }
+  if (c._tight) {   /* M13：窄格横向条类目多（每行 <0.3in）——类目与数值降到 9pt，渲染器才不会隔行省略类目名 */
+    opts.dataLabelFontSize = sz(9); opts.catAxisLabelFontSize = sz(9);
   }
   if (colors) opts.chartColors = colors;
   if (c.max) opts.valAxisMaxVal = c.max;
@@ -1354,6 +1358,8 @@ function nativeChart(s, c, x, y, w, h, dcols) {
       /* M7：值与百分比二选一（此前同时显示，标签成「70 / 1%」两行乱码）——单位为 % 时只显示值 */
       showValue: String(c.unit || '') === '%', dataLabelPosition: 'ctr',
       dataLabelColor: STYLE.onAccent, showPercent: String(c.unit || '') !== '%',
+      /* M13：显示百分比时格式码必须是百分比——此前沿用 '0"单位"'，0.54 被显示成「1 种」 */
+      ...(String(c.unit || '') !== '%' ? { dataLabelFormatCode: '0%' } : {}),
       showLegend: true, legendPos: 'r',
       dataBorder: { pt: 1.5, color: STYLE.bg },
     });
@@ -2652,7 +2658,8 @@ function readoutRow(s, km, pts, x, y, w, h) {
 function compChart(s, c, ptype, x, y, w, h) {
   const cc = Object.assign({}, c || {});
   if (ptype === 'donut' && !cc.type) cc.type = 'donut';
-  if (!(cc.labels && (cc.values || (cc.series && cc.series.length)))) return;   // M13：多系列（series）图表此前被当成空图跳过
+  if (!(cc.labels && (cc.values || (cc.series && cc.series.length)))) return;
+  if ((cc.type === 'hbar' || cc.type === 'lollipop' || cc.type === 'dotplot') && h / Math.max(1, cc.labels.length) < 0.3) cc._tight = true;   // M13：多系列（series）图表此前被当成空图跳过
   chartBlock(s, cc, x, y, w, h, cc.colors || (cc.type === 'donut' ? donutColors(styleArg) : dataColors(styleArg)));
 }
 function capText(s, t, x, y, w) {

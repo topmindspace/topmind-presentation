@@ -1,6 +1,6 @@
 /* ══ topmind-presentation 公共样式引擎（assets/templates/engine.css）══
    由 scripts/sync_runtime.py 注入到 templates/*.html 的 __TOPPPT_ENGINE__ 标记块 · 禁止在各模板手改。
-   含：结构 token / 9 套风格 token / 排版类 / 栅格（含密度版式扩展 g-hero--rev/g-side--rev/g-31/g-13、
+   含：结构 token / 12 套风格 token / 排版类 / 栅格（含密度版式扩展 g-hero--rev/g-side--rev/g-31/g-13、
        拼贴栅格 g-bento + span 工具类、交错版式 .stagger、键值 .kv）/
        强调带（band--accent / band--accent--solid / band--deep）/
        顶栏+工具组（含全屏按钮与折叠态）/ 组件 / SVG 语义类 /
@@ -850,7 +850,7 @@ html[data-theme="dark"] .f-neg{fill:var(--neg,#F28B82)}html[data-theme="dark"] .
 .t-on-inv{fill:var(--text-inv)}
 /* ── 编码色板（数据系列 / 图例色点 / 小段标签）──
    与结构色纪律正交：结构色（标题/正文/边框/按钮/大面积底色）恒为中性 + 单一强调色；
-   编码色只出现在数据本体。**9 套风格各有自己的 c1–c5**（单源 = scripts/layout-constants.json
+   编码色只出现在数据本体。**12 套风格各有自己的 c1–c5**（单源 = scripts/layout-constants.json
    的 styleDataColors / styleDataColorsDark；改色值改 JSON，再跑 sync_runtime.py）。
    无 data-style 时回落中性，不串色。 */
 :root{--c1:var(--accent);--c2:var(--surface-3);--c3:var(--border);

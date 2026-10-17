@@ -82,7 +82,7 @@ metadata:
 - A/Fast L1.5 → `default-surface.md` + `presentation-craft.md` · 骨架 `layout-grammar.md` · 插画 → `illustration-layout.md`
 - 组件/版式**代码** → `components.md` · 页型表 `page-type-matrix.md` · 图表 `charts.md` + 决策树 `chart-decision-tree.md` · 信息图 → `infographics.md`
 - 配色/主题/字阶 → `styles.md` + `design-system.md` · 写作 → `content-rules.md` · 图标语义 → `icons.md`（48 原创图标 `assets/icons/`，`icon:<名>` / `data-icon`）
-- 扩展点 → `extending.md` · 风格包 → `style-pack.md` · 版式库 → `layout-library.md`（48 版式 · `check_rhythm.py`）· 信息密度 → `density.md`（论点+证据+解读；解读写原因/影响/下一步，不复述数字、只用已有事实；复合版式；`check_density.py`）· 变体 → `layout-variants.md` · 复杂信息图 `infographics-guide.md`
+- 扩展点 → `extending.md` · 风格包 → `style-pack.md` · 版式库 → `layout-library.md`（51 版式 · `check_rhythm.py`）· 信息密度 → `density.md`（论点+证据+解读；解读写原因/影响/下一步，不复述数字、只用已有事实；复合版式；`check_density.py`）· 变体 → `layout-variants.md` · 复杂信息图 `infographics-guide.md`
 - 美化已有 PPTX → `references/beautify.md` · PPTX 精导 → `references/pptx-export.md` · 深度高保真 → `references/high-fidelity.md` · 修复顺序 → `failure-modes.md` · 技能维护 → `tech-design.md`
 
 

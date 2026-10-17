@@ -101,10 +101,10 @@ def structural_pages(model: dict | None, n: int) -> set[int]:
     expected = 1 + (1 if model.get("agenda") else 0) + len(model.get("sections") or []) + 1
     for k in range(expected, n):  # 多出来的尾页（refs 等）
         s.add(k)
-    # 章节扉页（chapter）是结构页：大号章节号 + 留白是设计本意，与封面同口径豁免
+    # 章节扉页（chapter）与简单页（focus：一个数字 / 一句话 + 留白）留白是设计本意，与封面同口径豁免
     off = 1 + (1 if model.get("agenda") else 0)
     for i, sec in enumerate(model.get("sections") or []):
-        if isinstance(sec, dict) and sec.get("type") == "chapter":
+        if isinstance(sec, dict) and sec.get("type") in ("chapter", "focus"):
             s.add(off + i + 1)
     return s
 

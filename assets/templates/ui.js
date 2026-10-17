@@ -413,3 +413,19 @@ if(e.isIntersecting){e.target.classList.add('in');o.unobserve(e.target)}})},
   window.addEventListener('resize',function(){
     if(modal&&modal.classList.contains('open'))fitSlides()},{passive:true});
 })();
+
+/* ── M12 行距回退（containers.lineSpacing）：正文默认 1.5；某页内容高于一屏时给该页加 lh-tight 降到 1.3，不再更低 ── */
+(function(){
+  function fit(){
+    [].forEach.call(document.querySelectorAll('section.band'),function(b){
+      b.classList.remove('lh-tight');
+      if(b.classList.contains('band--cover'))return;
+      var lim=parseFloat(getComputedStyle(b).minHeight)||window.innerHeight;
+      if(b.scrollHeight>lim+2)b.classList.add('lh-tight');
+    });
+  }
+  var t;function later(){clearTimeout(t);t=setTimeout(fit,120)}
+  if(document.readyState==='complete')fit();else window.addEventListener('load',fit);
+  window.addEventListener('resize',later,{passive:true});
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+})();

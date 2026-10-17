@@ -23,6 +23,9 @@
       "agendaTitle",
       "agendaEyebrow",
       "contentLocked",
+      "showEyebrow",
+      "showFootnotes",
+      "pageNumber",
       "coverNotes",
       "agendaNotes"
     ],

@@ -95,6 +95,45 @@ def cite(text: str) -> str:
                   esc(text))
 
 
+# M12 页面装饰开关（与 scripts/lib_chrome.js 同口径）：默认无眉标、无页脚注释行；原文锁定时两者默认开启
+_CHROME = {'showEyebrow': False, 'showFootnotes': False, 'pageNumber': True}
+
+
+def chrome_flags(model: dict) -> dict:
+    locked = bool(model.get('contentLocked'))
+    def pick(k):
+        v = model.get(k)
+        return v if isinstance(v, bool) else locked
+    return {'showEyebrow': pick('showEyebrow'), 'showFootnotes': pick('showFootnotes'),
+            'pageNumber': model.get('pageNumber') is not False}
+
+
+def strip_footnotes(model: dict, flags: dict) -> dict:
+    """页脚注释关闭：Exhibit 页来源行仍归图表（source 缺省取 footnote），其余注释移入演讲者备注。"""
+    if flags.get('showFootnotes') or not isinstance(model.get('sections'), list):
+        return model
+    out = dict(model)
+    secs = []
+    for sec in model['sections']:
+        if not isinstance(sec, dict) or (sec.get('footnote') is None and sec.get('note') is None):
+            secs.append(sec)
+            continue
+        s = dict(sec)
+        if s.get('exhibitNo') and not s.get('source') and s.get('footnote'):
+            s['source'] = s.pop('footnote')
+        moved = []
+        for k in ('footnote', 'note'):
+            t = s.get(k)
+            if t is None or not str(t).strip() or re.search(r'\[\d+\]', str(t)):
+                continue  # 带 [n] 引用的来源注释照常显示（证据链的一环）
+            moved.append(str(s.pop(k)))
+        if moved:
+            s['speakerNotes'] = '\n'.join([x for x in (s.get('speakerNotes'), '\n'.join(moved)) if x])
+        secs.append(s)
+    out['sections'] = secs
+    return out
+
+
 _LOCKED = False  # 美化路由（model.contentLocked）：原稿文字锁定，渲染器不得自行添加标点
 
 
@@ -131,8 +170,10 @@ def open_sec(i: int, ptype: str, extra: str = '', sec: dict = None) -> str:
 def shead(sec: dict) -> str:
     lead = sec.get('lead') or ''
     lead_html = f'\n    <p class="t-lead shead__desc">{cite(lead)}</p>' if lead else ''
+    eb = (sec.get('eyebrow') or '') if _CHROME.get('showEyebrow') else ''
+    eb_html = f'      <div class="t-eyebrow">{esc(eb)}</div>\n' if eb else ''
     return (f'    <div class="shead rv">\n'
-            f'      <div class="t-eyebrow">{esc(sec.get("eyebrow") or "")}</div>\n'
+            f'{eb_html}'
             f'      <h2 class="t-h1 shead__title">{esc(sec.get("title") or "")}</h2>'
             f'{lead_html}\n    </div>')
 
@@ -249,6 +290,16 @@ def chart_svg(chart: dict, idx: int, force_type: str | None = None, w: int = 900
 
 def r_points(i, sec):
     pts = sec.get('points') or []
+    mets = sec.get('metrics') or []
+    # M12：要点 + ≤3 个指标 = 「左要点列表 + 右侧纵向指标卡」，与 PPTX points 页同构（此前 HTML 是两张半空卡 + 底部指标行）
+    if pts and 0 < len(mets) <= 3:
+        side = ''.join(
+            f'<div class="metric pm__m"><div class="metric__v t-metric">{esc(v)}</div><div class="metric__k">{cite(k)}</div></div>'
+            for v, k in ((m[0], m[1] if len(m) > 1 else '') if isinstance(m, (list, tuple)) else
+                         (m.get('v') or m.get('value') or '', m.get('k') or '') for m in mets))
+        body = (f'    <div class="grid g-pm rv a-stretch">\n      <div class="pm__list">{pts_list(pts)}</div>\n'
+                f'      <div class="pm__side">{side}</div>\n    </div>\n')
+        return wrap(i, 'points', body, sec)
     half = (len(pts) + 1) // 2 or 1
     col1, col2 = pts[:half], pts[half:]
     # 要点分两栏无标题卡承载；不足两组时单卡——不再补「要点一 / 要点二 / （第二组要点）」占位字
@@ -488,6 +539,13 @@ def r_twocol(i, sec):
     if variant == '2-col-feature' and cols:
         cols[0] = cols[0].replace('class="t-body"', 'class="t-body col--feature"', 1)
         extra = ' data-variant="2-col-feature"'
+    # M12：短段落（≤6 段、每段有标签且正文 ≤60 字）走段落卡片网格，行优先——与 PPTX twocol 稀疏卡片同条件同顺序
+    if (variant != '2-col-feature' and 0 < len(paras) <= 6
+            and all(isinstance(p, (list, tuple)) and len(p) >= 2 and p[0] and len(str(p[1])) <= 60 for p in paras)):
+        cards = ''.join(f'      <div class="card para__c"><h3 class="t-h3">{esc(p[0])}</h3><p class="t-body">{cite(p[1])}</p></div>\n'
+                        for p in paras)
+        body = f'    <div class="cols-2 cols-2--cards grid g-2 rv a-stretch">\n{cards}    </div>\n'
+        return wrap(i, 'twocol', body, sec)
     body = '    <div class="cols-2 rv">\n' + '\n'.join(cols) + '\n    </div>\n'
     return wrap(i, 'twocol', body, sec, extra)
 
@@ -630,7 +688,7 @@ def r_quote(i, sec):
               + '    </div>\n')
     body = (
         '    <div class="shead shead--center rv">\n'
-        f'      <p class="t-lead" style="max-width:860px;margin-inline:auto;font-weight:600">{cite(sec.get("quote") or "")}</p>\n'
+        f'      <p class="t-h2 quote__t" style="max-width:960px;margin-inline:auto">{cite(sec.get("quote") or "")}</p>\n'
         f'      <p class="t-sm" style="color:var(--accent-text)">—— {esc(sec.get("author") or "")}'
         + (f' · {esc(sec.get("context"))}' if sec.get('context') else '')
         + '</p>\n    </div>\n' + ev)
@@ -985,7 +1043,10 @@ def r_chapter(i, sec):
             f'      <h2 class="t-display shead__title">{esc(sec.get("title") or "")}</h2>\n'
             + (f'      <p class="t-lead">{cite(sec.get("lead"))}</p>\n' if sec.get('lead') else '')
             + (f'      <ol class="chap__list">{items}</ol>\n' if items else '')
-            + '    </div>\n  </div>\n</section>')
+            + '    </div>\n  </div>\n'
+            # M12：章节页的结论条两端统一（PPTX 底部 so-what 条 ↔ HTML .sowhat，同一字段 soWhat）
+            + (f'  <div class="wrap">\n{sowhat(sec)}  </div>\n' if sec.get('soWhat') else '')
+            + '</section>')
 
 
 RENDERERS = {
@@ -1018,8 +1079,10 @@ def _fill_chrome(t: str, model: dict, body: str) -> str:
 
 
 def render_body(model: dict) -> str:
-    global _LOCKED
+    global _LOCKED, _CHROME
     _LOCKED = bool(model.get('contentLocked'))
+    _CHROME = chrome_flags(model)
+    model = strip_footnotes(model, _CHROME)
     parts = []
     # 封面
     parts.append(f'''<!-- 封面 -->
@@ -1097,7 +1160,7 @@ def render_body(model: dict) -> str:
                 f'<span class="agenda__n">{esc(num)}</span>'
                 f'<span><span class="agenda__t">{esc(title)}</span>'
                 f'<div class="agenda__d">{esc(desc)}</div></span></a></li>')
-        _aeb = model.get('agendaEyebrow', '目录')
+        _aeb = model.get('agendaEyebrow', '目录') if _CHROME.get('showEyebrow') else ''
         ag_eb = f'<div class="shead rv"><div class="t-eyebrow">{esc(_aeb)}</div>\n      ' if _aeb else '<div class="shead rv">'
         parts.append(f'''<section class="band band--top" id="agenda">
   <div class="wrap">
@@ -1137,7 +1200,7 @@ def render_body(model: dict) -> str:
         body = f'    <div class="grid g-{min(4, max(2, len(cpts[:4])))} rv a-stretch">\n{cards}    </div>\n'
     else:
         body = ''
-    _ceb = closing.get('eyebrow', '下一步')
+    _ceb = closing.get('eyebrow', '下一步') if _CHROME.get('showEyebrow') else ''
     ceb = f'<div class="t-eyebrow">{esc(_ceb)}</div>' if _ceb else ''
     parts.append(f'''<section class="band band--accent" id="closing">
   <div class="wrap">

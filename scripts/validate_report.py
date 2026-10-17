@@ -286,6 +286,20 @@ def _check_page_model(txt, chk, mode):
                 ('min-height:calc(100vh - var(--bar-h))' in txt)
     chk("页面高度模型（--band-min / 一屏最小高度）", has_model,
         "缺少每页一屏的 min-height 机制（见 design-system.md §1c）")
+    # M12 行距（containers.lineSpacing）：正文段落/列表默认 1.5，页面过高时降 1.3（.lh-tight），不得更低
+    _ls = (LC.get('containers') or {}).get('lineSpacing') or {}
+    _d, _m = _ls.get('default', 1.5), _ls.get('min', 1.3)
+    _sel_re = re.compile(r'\.ul li|\.t-body|\.t-sm|\.kv dd|\.step__d|\.readout__v')
+    tight = []
+    for m in re.finditer(r'([^{}<>]{1,400})\{([^{}]{0,800})\}', txt):
+        if not _sel_re.search(m.group(1)):
+            continue
+        lh = re.search(r'line-height:\s*([0-9.]+)', m.group(2))
+        if lh and 0.5 < float(lh.group(1)) < _m - 1e-6:
+            tight.append(f'{m.group(1).strip()[-28:]} {lh.group(1)}')
+    chk(f"正文行距（默认 {_d}，不足时 {_m}，不得更低）",
+        f'--lh-text:{_d}' in txt and f'.lh-tight{{--lh-text:{_m}' in txt and not tight,
+        f"缺 --lh-text:{_d} / .lh-tight{{--lh-text:{_m}}}，或正文规则行距过紧：{tight[:3]}")
     bands = _bands(txt)
     if not bands:
         return
@@ -440,14 +454,30 @@ def _norm_cov(s: str) -> str:
 def _model_cov_strings(model) -> list:
     """从 REPORT_MODEL 递归抽取候选正文串（去重、保序）。"""
     out, seen = [], set()
+    # M12：默认不显示眉标与页脚注释（showEyebrow / showFootnotes，原文锁定时默认显示）——关闭的装饰字不计入
+    locked = bool(isinstance(model, dict) and model.get('contentLocked'))
+    def _flag(k):
+        v = model.get(k) if isinstance(model, dict) else None
+        return v if isinstance(v, bool) else locked
+    hide = set()
+    if not _flag('showEyebrow'):
+        hide |= {'agendaeyebrow'}
+    if not _flag('showFootnotes'):
+        hide |= {'footnote', 'note'}
+    hide_eb = not _flag('showEyebrow')
 
     def walk(node, skip_sub=False):
         if isinstance(node, dict):
+            is_chapter = str(node.get('type') or '').lower() == 'chapter'
             # 信息图页型：chart 数据子树是故意占位（r_info），不计入
             info_data = isinstance(node.get('type'), str) and node.get('type').lower() in _COV_INFO_TYPES
             for k, v in node.items():
                 kl = str(k).lower()
                 if kl in _COV_SKIP_KEYS or str(k).startswith('data-'):
+                    continue
+                if kl in hide and not (isinstance(v, str) and re.search(r'\[\d+\]', v)):
+                    continue
+                if kl == 'eyebrow' and hide_eb and not is_chapter:
                     continue
                 if info_data and kl in _COV_INFO_DATA_KEYS:
                     continue

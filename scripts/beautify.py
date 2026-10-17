@@ -633,6 +633,8 @@ def verify(src, frz, model, plan, led, pptx_path, html_path):
             t = norm(x)
             if not t or any(c.match(t) for c in CHROME):
                 continue
+            if t == str(k + 1):   # M12 克制页码（chrome:pageno）只是本页序号，不算新增文本
+                continue
             rest = t
             for f in sorted(keep_all, key=len, reverse=True):
                 if f and f in rest:

@@ -1334,7 +1334,7 @@
     "wrapInsetPx": 112,
     "sheadPx": 190,
     "unitPx": 170,
-    "lineFactor": 1.65
+    "lineFactor": 1.5
   },
   "emphasis": {
     "$comment": "强调带约束（validate_report.py 消费）。band--accent = 主题一致强调带（浅色/深色同向，用于收尾/CTA）；band--accent--solid = 强调色实底带（引言/金句）；band--deep = 反相强调页（浅色主题下渲染为深色，仅限显式选择）。deepMaxPages 限制反相页数量，deepForbiddenLast 禁止末页反相（否则浅色模式末尾出现深色页）。",
@@ -1417,8 +1417,14 @@
     "minPad": 0.06,
     "textMetrics": {
       "$comment": "PPTX 侧文本度量单源（build_pptx.js estTextH/fitFont 与 validate_pptx.py 溢出估算共用）。lineFactor 偏小会让校验器比生成引擎更宽松，造成溢出假阴——两侧必须同值。emAsciiRatio = 拉丁/数字相对 CJK 的字宽比。",
-      "lineFactor": 1.45,
+      "lineFactor": 1.5,
       "emAsciiRatio": 0.52
+    },
+    "lineSpacing": {
+      "$comment": "M12 行距单源：普通文本框里的段落与列表默认行距 = 字号 × default（HTML line-height:1.5；PPTX 固定磅值 1.5×字号），高度不够时降到 min（1.3），不得更低。只作用于正文级字号（≤ bodyMaxPt）且至少两行的文本；标题、单行标签、数字不受影响。build_pptx.js / validate_pptx.py / checks_html.py / lib_solver 共用。",
+      "default": 1.5,
+      "min": 1.3,
+      "bodyMaxPt": 16
     },
     "overflowRule": "溢出处置优先级（禁静默截断）：① 重构承载（列表/卡片/表/图/组合版式）→ ② 拆页/分章（议程→主张→证据卡→明细；01a/01b；信息须完整）→ ③ 换布局形态（V1–V4/多列/卡栅格）→ ④ 有限 fontShrink（阶梯内、模式 floor 以上、最多 4 档）→ ⑤ 禁止：静默截断、砍 so-what/证据/口径、为审美稀疏删决策必需信息。单页字数预算是预警不是删字许可证。",
     "fontShrink": {
@@ -1462,7 +1468,7 @@
         "denseItems": 6,
         "gapFactor": 0.5,
         "denseGapFactor": 0.25,
-        "lineFactor": 1.45,
+        "lineFactor": 1.5,
         "denseLineFactor": 1.3,
         "max": 14,
         "denseMax": 12

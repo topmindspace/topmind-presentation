@@ -3,40 +3,40 @@
   {
    "layout": "cover",
    "title": "版式画廊 · architecture",
-   "fp": "5287e22c23f8",
-   "shapes": 6
+   "fp": "8bfdaa6ee5a1",
+   "shapes": 5
   },
   {
    "layout": "agenda",
    "title": "大纲",
-   "fp": "c5e80470b619",
-   "shapes": 13
+   "fp": "ff922be779c8",
+   "shapes": 12
   },
   {
    "layout": "swimlane",
    "title": "一次任务请求的五步闭环",
-   "fp": "b673a54064ac",
-   "shapes": 44
+   "fp": "5c0e8f59296f",
+   "shapes": 43
   },
   {
    "layout": "closing",
    "title": "谢谢",
-   "fp": "2e3fde8bdf93",
-   "shapes": 6
+   "fp": "d5cccc627d0d",
+   "shapes": 5
   }
  ],
  "gallery-research.model.json": [
   {
    "layout": "cover",
    "title": "版式画廊 · research",
-   "fp": "5287e22c23f8",
-   "shapes": 6
+   "fp": "8bfdaa6ee5a1",
+   "shapes": 5
   },
   {
    "layout": "agenda-2col",
    "title": "大纲",
-   "fp": "f576b14dd070",
-   "shapes": 23
+   "fp": "eb896ae90210",
+   "shapes": 22
   },
   {
    "layout": "chapter",
@@ -47,260 +47,260 @@
   {
    "layout": "argument-3",
    "title": "范式跃迁：智能体的本质是目标驱动的自主执行",
-   "fp": "c47fe7d821ce",
-   "shapes": 19
+   "fp": "c8cc346b8d44",
+   "shapes": 18
   },
   {
    "layout": "quote-evidence",
    "title": "规模化瓶颈不在模型，而在治理与集成",
-   "fp": "6ab7ae73bb55",
-   "shapes": 17
+   "fp": "85991defb91b",
+   "shapes": 16
   },
   {
    "layout": "contrast",
    "title": "从试点到规模化：两条路径的分野",
-   "fp": "77aa1b177058",
-   "shapes": 23
+   "fp": "72ec081dbf9a",
+   "shapes": 22
   },
   {
    "layout": "problem-solution",
    "title": "散装出稿止步，strict 0/0 才算交付",
-   "fp": "f5d269d97297",
-   "shapes": 24
+   "fp": "76f6c553a796",
+   "shapes": 23
   },
   {
    "layout": "narrative-2col",
    "title": "六成企业试点卡在治理与集成——规模化分水岭已经出现",
-   "fp": "559eb8abe185",
-   "shapes": 16
+   "fp": "261aec909d26",
+   "shapes": 14
   },
   {
    "layout": "kpi-wall",
    "title": "平台化之后：接入更快、治理更稳、成本更低",
-   "fp": "47ab1ebb94d7",
-   "shapes": 18
+   "fp": "ef93c3e3371a",
+   "shapes": 17
   },
   {
    "layout": "kpi-trend",
    "title": "六成企业已越过 PoC，规模化不足两成",
-   "fp": "01760597412a",
-   "shapes": 17
+   "fp": "c00b20911dff",
+   "shapes": 16
   },
   {
    "layout": "chart-sidenote",
    "title": "客服域一马当先，研发域势能最大——域间分化明显",
-   "fp": "4c044e8f83fe",
-   "shapes": 10
+   "fp": "48d286892e23",
+   "shapes": 8
   },
   {
    "layout": "chart-full",
    "title": "企业智能体采纳率：四个季度四步走至 60%",
-   "fp": "067a3566bd60",
-   "shapes": 8
+   "fp": "435da58acec8",
+   "shapes": 7
   },
   {
    "layout": "chart-table",
    "title": "试点率与增幅互证：研发域一年内有望反超",
-   "fp": "6543dadf4a7a",
-   "shapes": 11
+   "fp": "0cf96844a374",
+   "shapes": 10
   },
   {
    "layout": "waterfall",
    "title": "试点率增长归因：工具链补齐贡献过半",
-   "fp": "8317725501a2",
-   "shapes": 16
+   "fp": "3fcad45968d0",
+   "shapes": 14
   },
   {
    "layout": "rank-bar",
    "title": "四项能力对照目标：治理与集成缺口最大",
-   "fp": "8a40e44c44e3",
-   "shapes": 26
+   "fp": "45dcf12009f9",
+   "shapes": 25
   },
   {
    "layout": "composition",
    "title": "试点企业分布：过六成跨越 PoC",
-   "fp": "6f90bd0ca372",
-   "shapes": 27
+   "fp": "20c59a153baa",
+   "shapes": 26
   },
   {
    "layout": "matrix-2x2",
    "title": "高价值低难度场景优先——矩阵给出放量顺序",
-   "fp": "917dbbcdaf3d",
-   "shapes": 22
+   "fp": "40562697f4e1",
+   "shapes": 21
   },
   {
    "layout": "distribution",
    "title": "各域就绪度分布：金融客服中位最高、离散最小",
-   "fp": "fd99522a5d65",
-   "shapes": 42
+   "fp": "89f72aa37438",
+   "shapes": 40
   },
   {
    "layout": "mekko",
    "title": "渠道结构演变：线上占比三年提升 21 个百分点",
-   "fp": "f2a37daaecc9",
-   "shapes": 28
+   "fp": "b0bd44b0612f",
+   "shapes": 26
   },
   {
    "layout": "stream",
    "title": "价值兑现结构演变：副驾协同持续做厚",
-   "fp": "7601c245dc7c",
-   "shapes": 383
+   "fp": "d0a0a069fbee",
+   "shapes": 381
   },
   {
    "layout": "layer-stack",
    "title": "四层解耦 + 横切护栏：模型、编排、应用、接入各司其职",
-   "fp": "a93274fac2fb",
-   "shapes": 63
+   "fp": "c63f5f5bcdd3",
+   "shapes": 62
   },
   {
    "layout": "pyramid",
    "title": "三级递进：先接得进来，再管得住，最后放得开",
-   "fp": "7f5307130202",
-   "shapes": 15
+   "fp": "107d18b5b7d0",
+   "shapes": 14
   },
   {
    "layout": "funnel",
    "title": "转化漏斗：访问到签约逐级收窄",
-   "fp": "c32bef3f9aba",
-   "shapes": 7
+   "fp": "f7e8bfeb9daa",
+   "shapes": 6
   },
   {
    "layout": "hub-spoke",
    "title": "组件依赖拓扑：编排层是唯一枢纽，必须双活",
-   "fp": "91b74bb025c4",
-   "shapes": 26
+   "fp": "6c46e26bd8f9",
+   "shapes": 25
   },
   {
    "layout": "media-full",
    "title": "满版配图：现场全景",
-   "fp": "b53c14f4e63e",
-   "shapes": 8
+   "fp": "3a4e8719d332",
+   "shapes": 7
   },
   {
    "layout": "area-tree",
    "title": "规模化企业行业构成：制造与金融合计过半",
-   "fp": "b4bc1816a0c7",
-   "shapes": 24
+   "fp": "76c759720e81",
+   "shapes": 22
   },
   {
    "layout": "steps-h",
    "title": "请求到交付：五段管线全程可审计",
-   "fp": "a5dbd25ecaab",
-   "shapes": 30
+   "fp": "fa704498f7cb",
+   "shapes": 29
   },
   {
    "layout": "milestones",
    "title": "四个季度里程碑：先打底座，再放场景",
-   "fp": "264316289f73",
-   "shapes": 23
+   "fp": "12661cad67b8",
+   "shapes": 26
   },
   {
    "layout": "feature-cards",
    "title": "平台化三件套：编排、记忆、治理缺一不可",
-   "fp": "5ce356da36eb",
-   "shapes": 18
+   "fp": "193122922ec6",
+   "shapes": 17
   },
   {
    "layout": "milestones-icon",
    "title": "四个里程碑：半年完成平台化",
-   "fp": "6e82361fb172",
-   "shapes": 22
+   "fp": "0dab81fb6526",
+   "shapes": 21
   },
   {
    "layout": "roadmap-gantt",
    "title": "实施排期：四阶段串行推进共 18 周",
-   "fp": "6c57faf5703d",
-   "shapes": 10
+   "fp": "6a2d42479134",
+   "shapes": 8
   },
   {
    "layout": "flow-sankey",
    "title": "线索转化流向：初筛环节流失占比近六成",
-   "fp": "50d1a0956b37",
-   "shapes": 33
+   "fp": "658c2c2d8b4a",
+   "shapes": 31
   },
   {
    "layout": "bento",
    "title": "三家标杆的共同做法：同一套护栏，不同业务形态",
-   "fp": "844f22b7507e",
-   "shapes": 22
+   "fp": "a21c44a52e5c",
+   "shapes": 21
   },
   {
    "layout": "text-media",
    "title": "平台化先行是穿越分水岭的共同路径",
-   "fp": "b3d907c710e3",
-   "shapes": 15
+   "fp": "45c0713033c5",
+   "shapes": 14
   },
   {
    "layout": "media-grid",
    "title": "图片网格：四个场景",
-   "fp": "1cd252b22be0",
-   "shapes": 17
+   "fp": "0d58e4f0291d",
+   "shapes": 16
   },
   {
    "layout": "media-half",
    "title": "左图右文：控制台界面",
-   "fp": "282d06127ab5",
-   "shapes": 14
+   "fp": "d9b66adea690",
+   "shapes": 13
   },
   {
    "layout": "triad",
    "title": "规模化三重门槛：技术可控、组织就绪、经济可行",
-   "fp": "7b6b95f12356",
-   "shapes": 18
+   "fp": "256dff1f393f",
+   "shapes": 16
   },
   {
    "layout": "feature-2col",
    "title": "主张与细节：为什么先做数据底座",
-   "fp": "7d4d5320d49f",
-   "shapes": 8
+   "fp": "84b8d07cbbe4",
+   "shapes": 7
   },
   {
    "layout": "compare-table",
    "title": "三类形态能力边界分明，同事级智能体尚在早期",
-   "fp": "fc51c0716755",
-   "shapes": 6
+   "fp": "da2f7c9c7165",
+   "shapes": 5
   },
   {
    "layout": "compare-table-hl",
    "title": "编排引擎选型：自研内核 + 开放协议综合最优",
-   "fp": "4ab64e11c2f8",
-   "shapes": 8
+   "fp": "227a3348715f",
+   "shapes": 7
   },
   {
    "layout": "score-heat",
    "title": "行业就绪度差异显著——金融客服先行，制造研发滞后",
-   "fp": "4d06dc225935",
-   "shapes": 52
+   "fp": "82b7db5c4ada",
+   "shapes": 51
   },
   {
    "layout": "chart-readout",
    "title": "图表 + 解读栏 + 关键数字：采纳率四步走至 60%",
-   "fp": "ee8af3d0b2fa",
-   "shapes": 24
+   "fp": "d80bda3d1c92",
+   "shapes": 22
   },
   {
    "layout": "chart-dual",
    "title": "采纳率与试点率同步抬升：两条曲线互证",
-   "fp": "c0c4ea9be4cc",
-   "shapes": 23
+   "fp": "e26cf93910d7",
+   "shapes": 21
   },
   {
    "layout": "chart-minis",
    "title": "主图看总量，小图看结构：客服与研发的爬坡曲线",
-   "fp": "1548226b1eae",
-   "shapes": 24
+   "fp": "03ca437cb7fb",
+   "shapes": 22
   },
   {
    "layout": "chart-band",
    "title": "行业构成 + 解读带：制造与金融合计过半",
-   "fp": "4b8cab70a123",
-   "shapes": 32
+   "fp": "3ffe6d75b101",
+   "shapes": 30
   },
   {
    "layout": "closing",
    "title": "谢谢",
-   "fp": "2e3fde8bdf93",
-   "shapes": 6
+   "fp": "d5cccc627d0d",
+   "shapes": 5
   }
  ]
 }

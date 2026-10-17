@@ -125,6 +125,10 @@ if (!LC || typeof LC !== 'object' || !LC.page || !LC.styles) {
   console.error('[build_pptx] FAIL: layout-constants.json 缺关键顶层键（page/styles），疑似损坏。');
   process.exit(1);
 }
+/* M12 页面装饰开关（lib_chrome.js）：默认无眉标、无页脚注释行、只留克制页码；腾出的高度在常量派生前交给正文区 */
+const CHROME = require('./lib_chrome.js');
+const CHROME_FLAGS = CHROME.chromeFlags(CHROME.peekModel());
+CHROME.applyChrome(LC, CHROME_FLAGS);
 const STYLE_PRESETS = LC.styles;                      // 9 套风格 token（light）
 const STYLE_PRESETS_DARK = LC.stylesDark || {};       // 9 套风格 token（dark）
 const STYLE_DATA_COLORS = LC.styleDataColors || {};            // 9 套风格各自的编码色板（light）
@@ -143,6 +147,7 @@ const CONTENT_BOTTOM_NOTE = LAY.contentBottomWithNote != null ? LAY.contentBotto
 const REGIONS = require('./lib_layout_regions.js');
 /* M1 布局求解器（行高分配 / 字号放大 / 容量拆页；纯函数、与 HTML 端和测试共用） */
 const SOLVER = require('./lib_solver.js');
+CHROME.applyChrome(REGIONS.LC, CHROME_FLAGS);
 
 /* ══ 语义图标真导出（SVG→PNG · scripts/icon-assets.json 预生成缓存）══
  * HTML .card__ico / .ul--ico 的 SVG 图标在此栅格化为 PNG 嵌入，不再用 accent 方块替代。
@@ -295,6 +300,41 @@ function estLines(text, widthIn, fontPt) {
 function estTextH(text, widthIn, fontPt, lineFactor) {
   return estLines(text, widthIn, fontPt) * fontPt * (lineFactor || TM_LINE) / 72;
 }
+/* M12 行距单源（containers.lineSpacing）：正文级字号、至少两行的普通文本框默认行距 1.5×字号；
+   估算装不下时降到 1.3×，不再更低（再装不下交给缩字号/拆页）。所有 addText 都经此统一，调用处不再手写行距。 */
+const LS = (LC.containers && LC.containers.lineSpacing) || {};
+const LS_DEF = LS.default || 1.5, LS_MIN = LS.min || 1.3, LS_BODY_MAX = LS.bodyMaxPt || 16;
+const LS_STATS = { def: 0, min: 0 };
+function _paraTexts(text) {
+  if (!Array.isArray(text)) return String(text == null ? '' : text).split('\n');
+  const out = ['']; let maxFz = 0;
+  for (const r of text) {
+    if (!r) continue;
+    const t = typeof r === 'string' ? r : String(r.text == null ? '' : r.text);
+    out[out.length - 1] += t;
+    const o = (r && r.options) || {};
+    if (o.fontSize) maxFz = Math.max(maxFz, o.fontSize);
+    if (o.breakLine || o.bullet) out.push('');
+  }
+  if (out.length > 1 && out[out.length - 1] === '') out.pop();
+  out.maxFz = maxFz;
+  return out;
+}
+function lineSpacingFor(text, o) {
+  if (!o || o.fit === 'shrink' || o.lineSpacingMultiple) return null;
+  const paras = _paraTexts(text);
+  const fz = Math.max(o.fontSize || 0, paras.maxFz || 0);
+  if (!fz || fz > LS_BODY_MAX || typeof o.w !== 'number' || typeof o.h !== 'number') return null;
+  const ml = Array.isArray(o.margin) ? o.margin : null;
+  const w = o.w - (ml ? (ml[1] + ml[3]) / 72 : 0.1);
+  let lines = 0;
+  for (const p of paras) lines += estLines(p.split('\n').join(''), w, fz) + (p.split('\n').length - 1);
+  if (lines < 2) return null;
+  const gap = (o.paraSpaceBefore || 0) * Math.max(0, paras.length - 1) / 72;
+  const avail = o.h - (ml ? (ml[0] + ml[2]) / 72 : 0.1);
+  const need = (lf) => lines * fz * lf / 72 + gap;
+  return need(LS_DEF) <= avail + 0.02 ? LS_DEF : LS_MIN;
+}
 /* 有限缩字号（v8.2）：优先取最大可装字号；内容偏多时允许阶梯下探。
    策略（containers.fontShrink 单源）：先优化内容/组合/拆页，最后才缩字号；
    maxShrinkSteps 限制相对首选档的下探步数，floorPt 为模式绝对下限。
@@ -376,14 +416,15 @@ function fitFont(items, widthIn, availIn, opts) {
   const raw = (opts.ladder || FONT_LADDER).filter(v => v <= (opts.max || 99) && v >= floor);
   const lineFactor = opts.lineFactor || TM_LINE;
   const pad = opts.pad || 0;
-  const needH = (f) => {
+  const needH = (f, lf) => {
     let h = 0;
-    for (const it of items) h += estTextH(it, widthIn, f, lineFactor) + f * (opts.gapFactor || 0.5) / 72;
+    for (const it of items) h += estTextH(it, widthIn, f, lf || lineFactor) + f * (opts.gapFactor || 0.5) / 72;
     return h + pad;
   };
-  /* 首选：阶梯中最大且装得下的字号 */
+  /* 首选：阶梯中最大且装得下的字号；M12：同一字号先试 1.5 倍行距，再试 1.3 倍（行距先让，字号后让） */
   for (const f of raw) {
     if (needH(f) <= availIn) return f;
+    if (lineFactor > LS_MIN && needH(f, LS_MIN) <= availIn) return f;
   }
   /* 全装不下：在 maxShrinkSteps 内从「首选档」下探（首选=opts.max 或阶梯首档） */
   const preferred = raw.length ? raw[0] : floor;
@@ -392,7 +433,7 @@ function fitFont(items, widthIn, availIn, opts) {
     .slice(prefIdx, prefIdx + 1 + maxSteps)
     .filter(v => v >= floor && v <= (opts.max || 99));
   for (const f of limited) {
-    if (needH(f) <= availIn) return f;
+    if (needH(f, LS_MIN) <= availIn) return f;
   }
   /* 仍装不下：取 limited 最小（或 floor），宁可字号偏小也不越界；内容优化由上层负责 */
   const bottom = limited.length ? limited[limited.length - 1] : floor;
@@ -449,6 +490,7 @@ if (modelArg) {
     console.error(`[build_pptx] FAIL: 模型根节点必须是对象（${modelArg}）。`);
     process.exit(1);
   }
+  CONTENT = CHROME.stripFootnotes(CONTENT, CHROME_FLAGS);
   /* M1 容量求解：超载页（条目/字数超过该页型承载力）必须拆成续页，禁止硬塞或静默截断。
      --strict：拒绝出稿并提示先跑 solve_model.js（让 HTML 与 PPTX 同源拆页）；非 strict：自动拆页并告警。 */
   const sp = require('./lib_solver.js').splitModel(CONTENT);
@@ -598,7 +640,15 @@ function _langify(text, opts) {
       }
       return _sh(type, o);
     };
-    sl.addText = (text, opts) => _t(_langify(text), (typeof text === 'string' && _HAN.test(text)) ? Object.assign({ lang: 'zh-CN' }, opts || {}) : opts);
+    sl.addText = (text, opts) => {
+      const lf = lineSpacingFor(text, opts);
+      if (lf) {
+        const fz = Math.max((opts && opts.fontSize) || 0, (_paraTexts(text).maxFz) || 0);
+        opts = Object.assign({}, opts, { lineSpacing: Math.round(fz * lf * 10) / 10 });
+        LS_STATS[lf === LS_DEF ? 'def' : 'min']++;
+      }
+      return _t(_langify(text), (typeof text === 'string' && _HAN.test(text)) ? Object.assign({ lang: 'zh-CN' }, opts || {}) : opts);
+    };
     sl.addTable = (rows, opts) => { [rows, opts] = tableSkin(rows, opts); return _tb((rows || []).map(r => (r || []).map(c => {
       if (c && typeof c === 'object' && _HAN.test(String(c.text || ''))) return Object.assign({}, c, { options: Object.assign({ lang: 'zh-CN' }, c.options || {}) });
       if (typeof c === 'string' && _HAN.test(c)) return { text: c, options: { lang: 'zh-CN' } };
@@ -630,21 +680,25 @@ function head(s, eyebrow, title, lead) {
     x: MX, y: PT.common.headEyebrowY, w: CW, h: 0.4,
     titleY: PT.common.headTitleY, ruleY: PT.common.headRuleY, leadY: PT.common.leadY,
   };
+  /* M12：眉标默认关闭（showEyebrow 开启才画）；关闭时 applyChrome 已把标题 / 分隔线 / 导语整体上移 */
+  if (!CHROME_FLAGS.showEyebrow) eyebrow = '';
   if (eyebrow) s.addText(eyebrow, { x: H.x, y: H.y, w: H.w, h: 0.4, fontFace: STYLE.font,
     fontSize: sz(11), bold: true, color: STYLE.accent, charSpacing: 2 });
   /* 主标题自适应（adaptiveText.title 单源）：先按字符数分档定上限，再按高度验算降一档，避免压到分隔线 */
-  const titleH = eyebrow ? (H.ruleY - H.titleY - 0.06) : 1.6 - 0.6;
+  const titleH = H.ruleY - H.titleY - 0.06;
   const tMax = titleMaxFor(title);
   const tSize = sz(estTextH(title, CW, sz(tMax), 1.25) > titleH ? Math.min(tMax, AT_TITLE.step1 || 24) : tMax);
-  s.addText(title, { x: H.x, y: eyebrow ? H.titleY : 0.6, w: H.w, h: Math.max(0.6, titleH),
+  s.addText(title, { x: H.x, y: H.titleY, w: H.w, h: Math.max(0.6, titleH),
     fontFace: STYLE.fontDisplay, fontSize: tSize, bold: SP.titleBold !== false, color: STYLE.ink, fit: 'shrink' });
-  headRule(s, H.x, eyebrow ? H.ruleY : 1.6, H.w);
+  headRule(s, H.x, H.ruleY, H.w);
   if (lead) s.addText(lead, { x: H.x, y: H.leadY || PT.common.leadY, w: H.w, h: 0.5, fontFace: STYLE.font,
     fontSize: sz(14), color: STYLE.body });
 }
+/* M12：页脚只留一个克制的页码（不写总页数，封面不标）；pageNumber:false 时不画 */
 function footer(s, n, total) {
-  s.addText(`${n} / ${total}`, { x: PW - 1.4, y: LAY.pageNumY != null ? LAY.pageNumY : PH - 0.5,
-    w: 0.9, h: 0.3, align: 'right', fontFace: STYLE.font, fontSize: sz(10), color: STYLE.faint });
+  if (!CHROME_FLAGS.pageNumber || n === 1) return;
+  s.addText(String(n), { x: PW - 1.4, y: LAY.pageNumY != null ? LAY.pageNumY : PH - 0.5,
+    w: 0.9, h: 0.3, align: 'right', fontFace: STYLE.font, fontSize: sz(9), color: STYLE.faint, objectName: 'chrome:pageno' });
 }
 /* so-what 结论条（research 通用可选件，与 HTML .sowhat 同源） */
 /* 容器语义名（p:cNvPr@name）：供 validate_pptx 按 containers.pad 分型扣内边距。
@@ -2272,7 +2326,7 @@ function addTable(s, tbl, x, y, w, availH, opts) {
   pages.forEach((pageItems, pi) => {
     const s = base();
     const sub = pages.length > 1 ? `（${pi + 1}/${pages.length}）` : '';
-    head(s, CONTENT.agendaEyebrow != null ? CONTENT.agendaEyebrow : 'AGENDA', (CONTENT.agendaTitle || '报告大纲') + sub);
+    head(s, CONTENT.agendaEyebrow != null ? CONTENT.agendaEyebrow : '目录', (CONTENT.agendaTitle || '报告大纲') + sub);
     const colN = pageItems.length > 8 ? 2 : 1;
     const perCol = Math.ceil(pageItems.length / colN);
     /* 预留 0.25in，避免末行底边落入 severe-overlap 安全网 */
@@ -2506,8 +2560,10 @@ CONTENT.sections.forEach((sec) => {
   const _C = composeOn(sec, type);
   const exBadge = ((type !== 'exhibit' || _C) && sec.exhibitNo) ? exhibitBadge(sec.exhibitNo) + (sec.cap ? '　' + sec.cap : '') : null;
   const bodyY0 = sec.lead ? PT.common.bodyYWithLead : (_C ? COMPOSE_TOP : CONTENT_TOP);
-  const bodyY = exBadge ? bodyY0 + (_C ? 0.34 : 0.42) : bodyY0;  // M10：复合页 Exhibit 行与主图间距收紧
-  if (exBadge) {
+  /* M12：半表半图页的 Exhibit 帧头归右侧图表（与 HTML .exhibit 框同构），左侧表格从正文顶开始 */
+  const exRight = !!exBadge && type === 'halftable' && (!_C || _C.form === 'band');
+  const bodyY = exBadge && !exRight ? bodyY0 + (_C ? 0.34 : 0.42) : bodyY0;  // M10：复合页 Exhibit 行与主图间距收紧
+  if (exBadge && !exRight) {
     s.addText(exhibitRuns(sec.exhibitNo, sec.cap, sz(11.5)), { x: MX, y: bodyY0 - 0.06, w: CW, h: 0.3 });
   }
   const flagItems = Array.isArray(sec.flags) ? sec.flags.filter(Boolean) : [];
@@ -2539,6 +2595,11 @@ CONTENT.sections.forEach((sec) => {
       ANNOT = { soWhat: sec.soWhat ? { x: MX, y: BA.soWhatY, w: CW, h: BA.soWhatH } : null,
         foot: hasFoot ? { x: MX, y: bandTop - 0.12 - BA.footH, w: CW - 1.2, h: BA.footH } : null };
       bodyBottom = hasFoot ? ANNOT.foot.y - 0.06 : bandTop - 0.2;
+    } else if (type === 'metrics') {
+      /* M12：指标页的解读带紧跟指标卡（HTML 是卡片行 + 解读行顺排），不再沉到页底留出大空档 */
+      const mTop = bodyY + 0.15, mH = Math.min(2.3, Math.max(1.6, (bodyBottom - mTop - bandH - 0.25) * 0.62));
+      readoutRow(s, _C.km.slice(0, 2), _C.pts.slice(0, 3), MX, mTop + mH + 0.25, CW, bandH);
+      bodyBottom = mTop + mH;
     } else {
       readoutRow(s, _C.km.slice(0, 2), _C.pts.slice(0, 3), MX, bodyBottom - bandH, CW, bandH);
       bodyBottom -= bandH + 0.2;
@@ -2726,7 +2787,7 @@ CONTENT.sections.forEach((sec) => {
       { x: MX + 1.05, y: Q.textY, w: CW - 2.1, h: Q.textH };
     /* 金句页用主题一致强调带（accent-soft 底）——浅色主题下不再出现深色页 */
     s.addShape('rect', { x: 0, y: 0, w: PW, h: PH, fill: { color: STYLE.soft }, line: { type: 'none' } });
-    if (sec.eyebrow) s.addText(sec.eyebrow, { x: MX, y: PT.common.headEyebrowY, w: CW, h: 0.4,
+    if (CHROME_FLAGS.showEyebrow && sec.eyebrow) s.addText(sec.eyebrow, { x: MX, y: PT.common.headEyebrowY, w: CW, h: 0.4,
       fontFace: STYLE.font, fontSize: sz(11), bold: true, color: STYLE.accent, charSpacing: 2 });
     s.addText(sec.title, { x: MX, y: PT.common.headTitleY, w: CW, h: 1.0,
       fontFace: STYLE.fontDisplay, fontSize: sz(30), bold: true, color: STYLE.ink });
@@ -2739,20 +2800,28 @@ CONTENT.sections.forEach((sec) => {
     const qTop = bodyY;
     const qTextH = qm.length ? Math.max(1.0, (qBot - qTop) - evH - 0.95) : qreg.h;
     const qY = qm.length ? qTop : qreg.y;
-    const qW = qm.length ? CW : qreg.w, qX = qm.length ? MX : qreg.x;
+    /* M12：有证据时金句框左右各收 1.7in（对齐 HTML 金句 max-width 居中框），文字居中 */
+    const qW = qm.length ? CW - 3.4 : qreg.w, qX = qm.length ? MX + 1.7 : qreg.x;
     const qSize = qm.length
-      ? ([30, 24, 20, 16].map(sz).find(f => estTextH(sec.quote, qW, f, 1.4) <= qTextH) || sz(16))
+      ? ([26, 22, 20].map(sz).find(f => estLines(sec.quote, qW, f) === 1) ||   /* M12：能一行放下就取一行的最大字号，避免两行末尾孤字 */
+         [26, 22, 20, 16].map(sz).find(f => estTextH(sec.quote, qW, f, 1.4) <= qTextH) || sz(16))
       : (estTextH(sec.quote, qreg.w, sz(20), 1.4) > qTextH ? sz(16) : sz(20));
-    s.addText(sec.quote, { x: qX, y: qY, w: qW, h: qTextH,
+    /* M12：金句与署名居中（与 HTML .shead--center 同构）；有证据时「金句 → 署名 → 出处 → 证据卡」顺排成一组，
+       整组在正文区垂直居中（HTML band--fit 同理），不再把金句框撑满、证据卡沉底 */
+    const qH = qm.length ? Math.min(qTextH, estTextH(sec.quote, qW, qSize, 1.4) + 0.2) : qTextH;
+    const blockH = qH + 0.47 + (sec.context ? 0.42 : 0) + 0.35 + evH;
+    const qY2 = qm.length ? qTop + Math.max(0, (qBot - qTop - blockH) / 2) : qY;
+    s.addText(sec.quote, { x: qX, y: qY2, w: qW, h: qH, align: qm.length ? 'center' : 'left',
       fontFace: STYLE.fontDisplay, fontSize: qSize, bold: true, color: STYLE.ink, valign: 'middle' });
-    const authY = qm.length ? qY + qTextH + 0.02 : Q.authorY;
-    s.addText('—— ' + sec.author, { x: qm.length ? MX : qreg.x, y: authY, w: qm.length ? CW : qreg.w, h: 0.45, align: qm.length ? 'left' : 'right',
+    const authY = qm.length ? qY2 + qH + 0.02 : Q.authorY;
+    s.addText('—— ' + sec.author, { x: qm.length ? qX : qreg.x, y: authY, w: qm.length ? qW : qreg.w, h: 0.45, align: qm.length ? 'center' : 'right',
       fontFace: STYLE.font, fontSize: sz(13), bold: true, color: STYLE.accent });
-    if (sec.context) s.addText(sec.context, { x: qreg.x, y: qm.length ? authY + 0.47 : Q.contextY, w: qreg.w, h: 0.4, align: 'right',
+    if (sec.context) s.addText(sec.context, { x: qm.length ? qX : qreg.x, y: qm.length ? authY + 0.45 : Q.contextY, w: qm.length ? qW : qreg.w, h: 0.4, align: qm.length ? 'center' : 'right',
       fontFace: STYLE.font, fontSize: sz(11), color: STYLE.faint });
+    const evY = authY + 0.47 + (sec.context ? 0.42 : 0) + 0.33;
     if (qm.length) {
       const g = cols(CW, qm.length, 0.25);
-      const ey = qBot - evH;
+      const ey = Math.min(qBot - evH, evY);
       qm.forEach((m, i) => {
         const ex = MX + i * g.step;
         s.addShape('roundRect', { x: ex, y: ey, w: g.w, h: evH, rectRadius: 0.09,
@@ -3060,15 +3129,34 @@ CONTENT.sections.forEach((sec) => {
     const ps = (sec.phases || []).map(phaseKV);
     const n = Math.max(1, ps.length);
     const stepW = (treg.w - 1.0) / n;
-    /* 短时间线（≤5 阶段、描述短）：字号上调、描述区加高，整组在主体区垂直居中——不再把下半页留空。
-       普通时间线 dy=0 / 原字号，几何不变。 */
-    const tlShort = MODE_NAME === 'presentation' && n <= 5 && ps.every(p => String(p[2] || '').length <= 40);
-    const tlDescH = tlShort ? 1.5 : T.descH;
-    const tlBlockH = T.descY + tlDescH - T.labelY;
-    const tlAvail = bodyBottom - (CONTENT_TOP || T.labelY);
-    const dy = 0;
-    const TY = { labelY: T.labelY + dy, axisY: T.axisY + dy, dotY: T.dotY + dy, nameY: T.nameY + dy, descY: T.descY + dy };
-    const fzLab = 11, fzName = tlShort ? 21 : 17,  /* M9：时间标签降为眉题级，阶段名升一级，与 HTML 层级同比例 */ fzDesc = tlShort ? 14.5 : 12;
+    /* M12 阶段卡（与 HTML .tl--h 同条件、同结构）：2–5 个阶段、非图标变体、每段说明 ≤40 字时，
+       轴线在上、每个阶段一张色调卡（时间标签 + 阶段名 + 说明，顶对齐），进行中的一张用强调底色。三种模式一致。 */
+    const tlCards = n >= 2 && n <= 5 && sec.variant !== 'timeline' && ps.every(p => String(p[2] || '').length <= 40);
+    const big = MODE_NAME === 'presentation';
+    if (tlCards) {
+      const gap = 0.22, cW = (treg.w - gap * (n - 1)) / n;
+      const axisY = bodyY + 0.12, cTop = axisY + 0.42;
+      const cH = Math.max(1.6, Math.min(bodyBottom - 0.1 - cTop, PH * 0.42));
+      const fzName = big ? roleSz('stepTitle', 22) : sz(17), fzDesc = sz(big ? 14.5 : 12);
+      s.addShape('line', { x: treg.x + 0.1, y: axisY, w: treg.w - 0.2, h: 0.02, line: { color: STYLE.line, width: 1.5 } });
+      ps.forEach((p, i) => {
+        const cx = treg.x + i * (cW + gap);
+        const on = p[3] === 'done' || p[3] === 'now', now = p[3] === 'now';
+        s.addShape('ellipse', { x: cx + 0.22, y: axisY - T.dotR / 2, w: T.dotR, h: T.dotR,
+          fill: { color: on ? STYLE.accent : STYLE.bg }, line: { color: on ? STYLE.accent : STYLE.line, width: 1.5 } });
+        s.addShape('roundRect', { x: cx, y: cTop, w: cW, h: cH, rectRadius: rr(0.1),
+          fill: { color: now ? STYLE.soft : STYLE.surface }, line: { color: STYLE.line, width: 0.75 }, objectName: 'tl:card' });
+        const ix = cx + 0.24, iw = cW - 0.48;
+        s.addText(p[0], { x: ix, y: cTop + 0.22, w: iw, h: 0.32, fontFace: STYLE.font,
+          fontSize: sz(11), bold: true, color: STYLE.accent, charSpacing: 1, margin: 0 });
+        s.addText(p[1], { x: ix, y: cTop + 0.6, w: iw, h: 0.5, fontFace: STYLE.fontDisplay,
+          fontSize: fzName, bold: true, color: now ? STYLE.accent : STYLE.ink, valign: 'top', margin: 0 });
+        s.addText(p[2] || '', { x: ix, y: cTop + 1.18, w: iw, h: Math.max(0.4, cH - 1.32), fontFace: STYLE.font,
+          fontSize: fzDesc, color: STYLE.body, valign: 'top', margin: 0 });
+      });
+    } else {
+    const fzLab = 11, fzName = 17, fzDesc = 12;
+    const TY = { labelY: T.labelY, axisY: T.axisY, dotY: T.dotY, nameY: T.nameY, descY: T.descY };
     s.addShape('line', { x: treg.x + 0.2, y: TY.axisY, w: treg.w - 0.4, h: 0.02, line: { color: STYLE.line, width: 1.5 } });
     ps.forEach((p, i) => {
       const x = treg.x + 0.2 + i * stepW;
@@ -3083,28 +3171,12 @@ CONTENT.sections.forEach((sec) => {
       }
       s.addText(p[0], { x: x - 0.1, y: TY.labelY, w: stepW - 0.2, h: 0.4, fontFace: STYLE.font,
         fontSize: sz(fzLab), bold: true, color: STYLE.accent, charSpacing: 1 });
-      if (tlShort) {
-        /* 短时间线：轴下每个阶段一张色调卡，卡片铺到主体区底部，名称 + 说明在卡内垂直居中 */
-        const cTop = TY.nameY - 0.22, cH = Math.max(1.6, bodyBottom - 0.12 - cTop);
-        const cW = stepW - 0.18, cx = x - 0.22;
-        const dH = estTextH(String(p[2] || ''), cW - 0.4, sz(fzDesc), 1.5);
-        /* 各卡共用同一偏移（按最长说明算），阶段名保持一条水平线 */
-        const dHMax = Math.max(...ps.map(q => estTextH(String(q[2] || ''), cW - 0.4, sz(fzDesc), 1.5)));
-        const gH = 0.55 + 0.12 + dHMax;
-        const gy = cTop + Math.max(0.2, (cH - gH) / 2);
-        s.addShape('roundRect', { x: cx, y: cTop, w: cW, h: cH, rectRadius: rr(0.1),
-          fill: { color: p[3] === 'now' ? STYLE.soft : STYLE.surface }, line: { color: STYLE.line, width: 0.75 } });
-        s.addText(p[1], { x: cx + 0.2, y: gy, w: cW - 0.4, h: 0.55, fontFace: STYLE.fontDisplay,
-          fontSize: (tlShort ? roleSz('stepTitle', 22) : sz(fzName)), bold: true, color: p[3] === 'now' ? STYLE.accent : STYLE.ink, valign: 'middle' });
-        s.addText(p[2] || '', { x: cx + 0.2, y: gy + 0.67, w: cW - 0.4, h: Math.min(cH - 0.9, dH + 0.25), fontFace: STYLE.font,
-          fontSize: sz(fzDesc), color: STYLE.body, lineSpacing: sz(fzDesc * 1.5), valign: 'top' });
-        return;
-      }
       s.addText(p[1], { x: x - 0.1, y: TY.nameY, w: stepW - 0.2, h: 0.5, fontFace: STYLE.fontDisplay,
-        fontSize: (tlShort ? roleSz('stepTitle', 22) : sz(fzName)), bold: true, color: p[3] === 'now' ? STYLE.accent : STYLE.ink });
-      s.addText(p[2] || '', { x: x - 0.1, y: TY.descY, w: stepW - 0.25, h: tlDescH, fontFace: STYLE.font,
-        fontSize: sz(fzDesc), color: STYLE.body, lineSpacing: sz(fzDesc * 1.5) });
+        fontSize: sz(fzName), bold: true, color: p[3] === 'now' ? STYLE.accent : STYLE.ink });
+      s.addText(p[2] || '', { x: x - 0.1, y: TY.descY, w: stepW - 0.25, h: Math.max(T.descH, bodyBottom - TY.descY - 0.1), fontFace: STYLE.font,
+        fontSize: sz(fzDesc), color: STYLE.body, valign: 'top' });
     });
+    }
   } else if (type === 'bar') {
     const c = sec.chart || {};
     const dcols = c.colors || dataColors(styleArg);
@@ -3160,7 +3232,9 @@ CONTENT.sections.forEach((sec) => {
     const paraGapPt = Math.min(30, Math.round(7 + (spareIn * 72) / maxPer));
     /* M1 组合规则：内容稀疏（估高 < 版心 55%）时改为「段落卡片网格」——每段一张 MD3 tonal 卡，
        行高由求解器撑满版心；标签作卡标题、正文在下，避免顶部一小块文字 + 下半页空白。 */
-    const sparse = sec.variant !== '2-col-feature' && colNeed(fz) < availH * 0.55;
+    /* M12：与 HTML r_twocol 同条件——≤6 段、每段有标签且正文 ≤60 字 → 段落卡片网格（行优先） */
+    const sparse = sec.variant !== '2-col-feature' && ps.length > 0 && ps.length <= 6 &&
+      ps.every(p => p[0] && String(p[1] || '').length <= 60);
     if (sparse) {
       const cardSol = SOLVER.rows(availH - 0.05, maxPer, { pref: 1.0, min: 0.5, max: 2.2, gap: 0.2, center: false });
       const cardFz = snapFont(SOLVER.fitUp(f => Math.max(...ps.map(p =>
@@ -3216,7 +3290,16 @@ CONTENT.sections.forEach((sec) => {
     if (ecH.labels && ecH.values) {
       const rxH = MX + CW * PT.research.halfChartX;
       const rwH = CW * PT.research.halfChartW;
-      chartBlock(s, ecH, rxH, yH, rwH, Math.max(1.2, bodyBottom - yH), (ecH.colors || dataColors(styleArg)));
+      let cyH = yH;
+      if (exRight) {
+        s.addText(exhibitRuns(sec.exhibitNo, sec.cap, sz(11.5)), { x: rxH, y: yH - 0.04, w: rwH, h: 0.3 });
+        cyH = yH + 0.38;
+      }
+      /* 帧头在右时来源行也归右栏，贴在图下（HTML .exhibit__src 同位） */
+      const srcIn = exRight && (sec.footnote || sec.note);
+      const chH = Math.max(1.2, bodyBottom - cyH - (srcIn ? 0.36 : 0));
+      chartBlock(s, ecH, rxH, cyH, rwH, chH, (ecH.colors || dataColors(styleArg)));
+      if (srcIn) ANNOT = Object.assign({}, ANNOT || {}, { foot: { x: rxH, y: cyH + chH + 0.04, w: rwH, h: 0.3 } });
     }
   } else if (type === 'matrix') {
     const rhH = sec.rowHeads || [], chH = sec.colHeads || [];
@@ -3694,7 +3777,7 @@ CONTENT.sections.forEach((sec) => {
   /* 收尾页用主题一致强调带（accent-soft 底 + 常规文字）——浅色主题下不再出现深色收尾页 */
   s.addShape('rect', { x: 0, y: 0, w: PW, h: PH, fill: { color: STYLE.soft }, line: { type: 'none' } });
   s.addShape('rect', { x: MX, y: C.eyebrowY, w: 0.9, h: 0.045, fill: { color: STYLE.accent }, line: { type: 'none' } });
-  const cEb = CONTENT.closing.eyebrow != null ? CONTENT.closing.eyebrow : '下一步';
+  const cEb = !CHROME_FLAGS.showEyebrow ? '' : (CONTENT.closing.eyebrow != null ? CONTENT.closing.eyebrow : '下一步');
   if (cEb) s.addText(cEb, { x: MX, y: C.eyebrowY + 0.16, w: CW, h: 0.4, fontFace: STYLE.font,
     fontSize: sz(11), bold: true, color: STYLE.accent, charSpacing: 2 });
   s.addText(CONTENT.closing.title, { x: MX, y: C.titleY, w: CW - 1, h: C.titleH, fontFace: STYLE.fontDisplay,
@@ -3755,6 +3838,7 @@ async function writeWithFontPairs(file) {
 writeWithFontPairs(out).then(() => {
   console.log('已生成: ' + out + '  (风格: ' + (STYLE_PRESETS[styleArg] ? styleArg : 'business-blue') +
     ' · 主题: ' + (THEME === 'dark' ? '深色 dark' : '浅色 light') + ' · 模式: ' + MODE_NAME + ')');
+  console.log(`[build_pptx] 行距：1.5× ${LS_STATS.def} 处 · 1.3× ${LS_STATS.min} 处（containers.lineSpacing）`);
   if (SHRINK_FLOOR_HITS.length) {
     const low = SHRINK_FLOOR_HITS.filter(h => h.pt <= (FS_POLICY.warnBelow || 9.5));
     console.warn('[build_pptx] 注意：' + SHRINK_FLOOR_HITS.length + ' 处文本缩字号已触底' +

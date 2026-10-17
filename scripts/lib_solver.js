@@ -51,7 +51,7 @@ function estLines(text, widthIn, pt) {
   const perLine = Math.max(1, Math.floor((widthIn * 72) / pt));
   return Math.max(1, Math.ceil(units / perLine));
 }
-function estTextH(text, widthIn, pt, lf) { return estLines(text, widthIn, pt) * pt * (lf || 1.45) / 72; }
+function estTextH(text, widthIn, pt, lf) { return estLines(text, widthIn, pt) * pt * (lf || LS_DEFAULT) / 72; }
 
 /* ── 容量模型：每种列表型页型的「条目承载上限」，按模式区分 ── */
 const CAP = {
@@ -82,15 +82,22 @@ function densityK(model) {
   return DENSITY_K[d] || 1;
 }
 
+/* M12：正文行距 1.5（containers.lineSpacing.default，原估算口径 1.45）；默认不显示 eyebrow，
+   正文区高 4.55in → 4.89in（+7.5%）。字数承载按两者折算：textK = (1.45/1.5) × (眉标关闭 ? 1.075 : 1)。 */
+const LS_DEFAULT = 1.5, LS_BASE = 1.45, CHROME_GAIN = 1.075;
+function textK(model) {
+  return round((LS_BASE / LS_DEFAULT) * (model && model.showEyebrow ? 1 : CHROME_GAIN));
+}
+
 /** 容量比：条目数 / 上限（文字很长时按字数加权）。>1 = 超载。k = 密度系数。 */
-function capacity(sec, mode, k) {
+function capacity(sec, mode, k, tk) {
   const t = sec && sec.type;
   const acc = LISTS[t];
   if (!acc) return 0;
   const arr = acc.get(sec) || [];
   const cap = ((CAP[mode] || CAP.presentation)[t] || 99) * (k || 1);
   const chars = JSON.stringify(arr).length;
-  const charCap = cap * (mode === 'research' ? 90 : 70);
+  const charCap = cap * (mode === 'research' ? 90 : 70) * (tk || 1);
   return round(Math.max(arr.length / cap, chars / charCap));
 }
 
@@ -99,10 +106,11 @@ function splitModel(model, opts) {
   opts = opts || {};
   const mode = String(model.mode || 'presentation');
   const k = densityK(model);
+  const tk = textK(model);
   const out = [];
   const log = [];
   for (const sec of model.sections || []) {
-    const ratio = capacity(sec, mode, k);
+    const ratio = capacity(sec, mode, k, tk);
     const acc = LISTS[sec && sec.type];
     const arr = acc ? (acc.get(sec) || []) : [];
     if (!acc || ratio <= 1 || arr.length < 2) { out.push(sec); continue; }
@@ -135,4 +143,4 @@ function grid12(totalW, span, gutter) {
 
 function round(v) { return Math.round(v * 1000) / 1000; }
 
-module.exports = { rows, fitUp, estLines, estTextH, capacity, splitModel, grid12, densityK, CAP, LADDER, DENSITY_K, STYLE_DENSITY };
+module.exports = { textK, rows, fitUp, estLines, estTextH, capacity, splitModel, grid12, densityK, CAP, LADDER, DENSITY_K, STYLE_DENSITY };

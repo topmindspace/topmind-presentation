@@ -78,7 +78,15 @@ def density_k(model):
     return DENSITY_K.get(d, 1)
 
 
-def capacity(sec, mode, k=1):
+LS_DEFAULT, LS_BASE, CHROME_GAIN = 1.5, 1.45, 1.075
+
+
+def text_k(model):
+    """M12：与 lib_solver.js textK 同口径（行距 1.5 折算 × 眉标关闭腾出的正文高度）。"""
+    return _r((LS_BASE / LS_DEFAULT) * (1 if (model or {}).get('showEyebrow') else CHROME_GAIN))
+
+
+def capacity(sec, mode, k=1, tk=1):
     t = (sec or {}).get('type')
     acc = LISTS.get(t)
     if not acc:
@@ -86,16 +94,17 @@ def capacity(sec, mode, k=1):
     arr = acc[0](sec) or []
     cap = CAP.get(mode, CAP['presentation']).get(t, 99) * (k or 1)
     chars = _js_len(arr)
-    char_cap = cap * (90 if mode == 'research' else 70)
+    char_cap = cap * (90 if mode == 'research' else 70) * (tk or 1)
     return _r(max(len(arr) / cap, chars / char_cap))
 
 
 def split_model(model):
     mode = str(model.get('mode') or 'presentation')
     k = density_k(model)
+    tk = text_k(model)
     out, log = [], []
     for sec in model.get('sections') or []:
-        ratio = capacity(sec, mode, k)
+        ratio = capacity(sec, mode, k, tk)
         acc = LISTS.get((sec or {}).get('type'))
         arr = (acc[0](sec) or []) if acc else []
         if not acc or ratio <= 1 or len(arr) < 2:

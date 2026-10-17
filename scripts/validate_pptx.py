@@ -312,6 +312,58 @@ def text_overflow_check(shape: ET.Element, slide_no: int) -> list[dict[str, Any]
     return out
 
 
+def line_spacing_check(shape: ET.Element, slide_no: int) -> list[dict[str, Any]]:
+    """M12 行距门禁（containers.lineSpacing）：正文级字号、估算 ≥2 行的文本框，
+    每段行距须 ≥ min×字号（默认 1.3）；缺 lnSpc（单倍≈1.2）同样判失败。"""
+    out: list[dict[str, Any]] = []
+    cfg = _containers_cfg().get("lineSpacing") or {}
+    lmin = float(cfg.get("min") or 1.3)
+    body_max = float(cfg.get("bodyMaxPt") or 16)
+    box = shape_bounds(shape)
+    if box is None:
+        return out
+    w_in = box[2] / 914400.0 - 0.1
+    if w_in <= 0.2:
+        return out
+    paras = [p for p in shape.findall(".//a:p", NS)
+             if "".join((t.text or "") for t in p.findall(".//a:t", NS)).strip()]
+    if not paras:
+        return out
+    sizes = font_sizes_pt(shape)
+    if not sizes:
+        return out
+    fz = max(sizes)
+    if fz > body_max:
+        return out
+    lines = 0
+    for p in paras:
+        txt = "".join((t.text or "") for t in p.findall(".//a:t", NS))
+        lines += max(1, int(est_text_width_in(txt, fz) / w_in + 0.999))
+    if lines < 2:
+        return out
+    for p in paras:
+        ln = p.find("./a:pPr/a:lnSpc", NS)
+        ratio = None
+        if ln is not None:
+            pts = ln.find("a:spcPts", NS)
+            pct = ln.find("a:spcPct", NS)
+            if pts is not None:
+                ratio = int(pts.get("val", "0")) / 100.0 / fz
+            elif pct is not None:
+                ratio = int(pct.get("val", "0")) / 100000.0 * 1.2
+        if ratio is None or ratio < lmin - 0.02:
+            txt = "".join((t.text or "") for t in p.findall(".//a:t", NS))
+            out.append(issue(
+                "LINE_SPACING_TIGHT",
+                f'正文行距过紧："{txt[:16]}…" {fz:.1f}pt 行距 '
+                f'{"单倍" if ratio is None else f"{ratio:.2f}×"} < {lmin}×（默认 1.5×，最低 1.3×；'
+                "containers.lineSpacing）。",
+                slide=slide_no,
+            ))
+            break
+    return out
+
+
 def text_overflow_vertical_check(shape: ET.Element, slide_no: int) -> list[dict[str, Any]]:
     """Multi-segment cumulative vertical overflow (TEXT_OVERFLOW_VERTICAL).
 
@@ -745,6 +797,7 @@ def _containers_cfg() -> dict[str, Any]:
         "overflowRule": cont.get("overflowRule") or "",
         "lineFactor": float(tm.get("lineFactor") or LINE_FACTOR),
         "emAsciiRatio": float(tm.get("emAsciiRatio") or EM_ASCII_RATIO),
+        "lineSpacing": cont.get("lineSpacing") or {},
     }
 
 
@@ -977,7 +1030,8 @@ def chrome_footer_y_in(shapes: list[ET.Element], height: int) -> float | None:
         _x, y, _cx, _cy = box
         if y < threshold:
             continue
-        if not pager.match(text):
+        # M12：页码只写 N（objectName=chrome:pageno）；旧稿 N / M 仍认
+        if not pager.match(text) and _shape_object_name(shape) != "chrome:pageno":
             continue
         sizes = font_sizes_pt(shape)
         if sizes and max(sizes) > 14:
@@ -1066,6 +1120,7 @@ def inspect_slide(
     for shape in shapes:
         warnings.extend(text_overflow_check(shape, slide_number))
         warnings.extend(text_overflow_vertical_check(shape, slide_number))
+        warnings.extend(line_spacing_check(shape, slide_number))
         warnings.extend(container_overflow_check(shape, slide_number))
 
     warnings.extend(annotation_band_overlap_check(
@@ -1156,7 +1211,7 @@ def inspect_slide(
             issue("LOW_CONTENT_DENSITY", "页面元素 ≤1 个；检查信息密度。", slide=slide_number)
         )
 
-    if native_text_shapes >= 2 and len(combined_text) < 25 and not pictures:
+    if native_text_shapes >= 2 and len(combined_text) < 25 and not pictures and not tables and not charts and slide_number > 1:
         warnings.append(
             issue("LOW_TEXT_DENSITY", "多个文本框但总字符 <25；信息密度不足。", slide=slide_number)
         )
@@ -1199,7 +1254,7 @@ def inspect_slide(
     # 页码形如 "3 / 22" 或纯数字
     body_wo_pager = re.sub(r"\b\d+\s*/\s*\d+\b", "", combined_text)
     body_wo_pager = re.sub(r"^\s*\d+\s*$", "", body_wo_pager, flags=re.M)
-    if body_chars < 40 and native_text_shapes <= 2 and not pictures and not tables and not charts:
+    if body_chars < 40 and native_text_shapes <= 2 and not pictures and not tables and not charts and slide_number > 1:
         warnings.append(
             issue("TITLE_ONLY_PAGE",
                   f"页面可测文本仅 {body_chars} 字且无图/表/图表（疑似只有标题）。",
@@ -1440,6 +1495,7 @@ def validate_model_roundtrip(
             )
         )
     first_sec = 3 if has_agenda else 2
+    show_eb = bool(model.get("showEyebrow", bool(model.get("contentLocked"))))
     for i, sec in enumerate(sections):
         slide_no = first_sec + i
         if slide_no > len(slide_texts):
@@ -1450,6 +1506,8 @@ def validate_model_roundtrip(
                 issue("MODEL_ROUNDTRIP_TITLE_MISSING",
                       f"第 {i + 1} 章标题「{title[:36]}」未落在第 {slide_no} 页。", slide=slide_no)
             )
+        if not show_eb and sec.get("type") != "chapter":
+            sec = {k: v for k, v in sec.items() if k != "eyebrow"}   # M12：默认不渲染眉标
         probes = _model_probe_strings(sec)
         if probes:
             slide_text = _roundtrip_corpus(
@@ -1549,6 +1607,8 @@ def validate_model_roundtrip(
     if closing_title and slide_texts and closing_title not in slide_texts[-1]:
         warnings.append(issue("MODEL_ROUNDTRIP_CLOSING_TITLE", "模型收尾标题未出现在最后一页。"))
     if isinstance(closing, dict) and slide_texts:
+        if not show_eb:
+            closing = {k: v for k, v in closing.items() if k != "eyebrow"}
         closing_probes = _model_probe_strings(closing)
         if closing_probes:
             slide_text = _roundtrip_corpus(

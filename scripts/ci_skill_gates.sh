@@ -111,6 +111,7 @@ run_one() {
     # M4：已有 PPT 美化——3 份朴素样例逐字逐数核对 + 篡改负例
     "$PY" tests/beautify/test_beautify.py || { echo "ci_skill_gates: 美化核对失败" >&2; exit 1; }
     "$PY" tests/m11/test_m11.py || { echo "ci_skill_gates: M11 回归自测失败（美化 12 风格 / Exhibit 编号 / 复合承载件 / make_deck）" >&2; exit 1; }
+    "$PY" tests/m12/test_m12.py || { echo "ci_skill_gates: M12 回归自测失败（行距 1.5/1.3 / 默认无眉标与注释 / 阶段卡时间线）" >&2; exit 1; }
   fi
 
   # M5：doctor 自检 + 打包后安装冒烟

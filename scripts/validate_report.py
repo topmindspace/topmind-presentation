@@ -81,7 +81,7 @@ LC = load_constants()
 MODE_BUDGETS = LC['checkBudgets']
 CHART_TYPES = set(LC['charts'].get('types') or [])
 CHART_MIN = LC['charts'].get('minSize') or {}
-# 图表多样性预算（治「登记 36 种、实际只用 bar/line/donut」）
+# 图表多样性预算（治「登记 37 种、实际只用 bar/line/donut」）
 CHART_VARIETY = LC['charts'].get('variety') or {}
 AI_FLAVOR = LC['aiFlavor'].get('words') or []
 STYLE_ACCENTS = {k: {str(h).lower() for h in v}

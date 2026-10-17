@@ -156,7 +156,7 @@ run_one() {
       # M2：行式图表原生化探针（gantt / progress / funnel / vsbar → 原生可编辑 chart part）
       node scripts/build_pptx.js --out="dist/regression/native-rows.pptx" --strict \
         --model="tests/charts/native-rows.model.json" >/dev/null
-      # M3：版式库 golden（44 版式全覆盖 + PPTX 几何指纹）
+      # M3：版式库 golden（51 版式全覆盖 + PPTX 几何指纹）
       "$PY" tests/layouts/test_layouts.py || { echo "ci_skill_gates: 版式 golden 失败" >&2; exit 1; }
       # M5：PPTX 像素回归（三份黄金样张 → 48×27 灰度缩略图对比基线）
       "$PY" scripts/pixel_regression.py || { echo "ci_skill_gates: 像素回归失败" >&2; exit 1; }

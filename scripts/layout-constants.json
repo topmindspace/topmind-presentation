@@ -871,7 +871,7 @@
       }
     },
     "variety": {
-      "$comment": "图表多样性预算（validate_report.py 与 evals/run_evals.py 消费）——治「图表定义 36 种、实际只用 bar/line/donut」。类型数下限 = min(minTypes[模式], max(1, ⌈图表页数 × minTypesRatio⌉))；noRepeatAdjacent = 相邻图表页不得同 data-chart；compositeMinRatio/compositeModes 只对 research 生效（A 演示一屏一主张，C 架构一页一图）。preferCoreFirst：多样性宜先拉开 layoutSystem.defaultCharts（核图 8）；advanced 图种在使用时同样计入 minTypes（不因用 advanced 受罚），但仅当内容意图命中时选用，禁为凑下限硬上冷门图。禁反模式：简单图全幅、极偏 donut/pie（见 layout-qa / sizeByComplexity）。判据与选型见 references/playbook.md §五。",
+      "$comment": "图表多样性预算（validate_report.py 与 evals/run_evals.py 消费）——治「图表定义 37 种、实际只用 bar/line/donut」。类型数下限 = min(minTypes[模式], max(1, ⌈图表页数 × minTypesRatio⌉))；noRepeatAdjacent = 相邻图表页不得同 data-chart；compositeMinRatio/compositeModes 只对 research 生效（A 演示一屏一主张，C 架构一页一图）。preferCoreFirst：多样性宜先拉开 layoutSystem.defaultCharts（核图 8）；advanced 图种在使用时同样计入 minTypes（不因用 advanced 受罚），但仅当内容意图命中时选用，禁为凑下限硬上冷门图。禁反模式：简单图全幅、极偏 donut/pie（见 layout-qa / sizeByComplexity）。判据与选型见 references/playbook.md §五。",
       "minTypes": {
         "presentation": 4,
         "research": 6,

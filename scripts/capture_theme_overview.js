@@ -4,7 +4,10 @@
  * 用法：
  *   npm install playwright            # 或在任意位置安装 playwright 后设置 NODE_PATH
  *   npx playwright install chromium   # 首次需要下载浏览器
- *   node scripts/capture_theme_overview.js [--channel=msedge|chrome|chromium] [--scale=1]
+ *   node scripts/capture_theme_overview.js [--channel=msedge|chrome|chromium] [--scale=1] [--out=<目录>]
+ *
+ * --out = 输出目录（默认 assets/，供 README 与 Gate 0 用）。刷新落地页时可直接指到站点仓库，
+ *         例如 --out=../topmindspace.github.io/assets/img/presentation（站点仓库与本仓库并排克隆时；站点用 JPG，见 docs/PUBLISHING.md「落地页」）。
  *
  * --scale = deviceScaleFactor（默认 1）。参考图只用于"让用户看见风格与主题"，
  * 1480px 视口下 1 倍即够清晰，量化后约 300KB，控制 npm 包体。
@@ -13,7 +16,7 @@
  * 最后回落到 Playwright 自带的 chromium（无本机浏览器依赖）。
  *
  * 产物：assets/theme-overview.png —— 唯一一张主题总览图（演示 Tab，12 套风格全覆盖）。
- * README、Gate 0 与落地页共用这一张；研究 / 架构形态请直接打开 assets/style-gallery.html 切 Tab。
+ * README 与 Gate 0 用这一张（落地页另存一份 JPG 到站点仓库）；研究 / 架构形态请直接打开 assets/style-gallery.html 切 Tab。
  * 截图前断言 Tab 文案与卡片数 = 单源风格数，防止画廊漂移。
  * 本机浏览器：TOP_PPT_BROWSER_PATH=/path/to/chrome 可指定可执行文件。 */
 const path = require('path');
@@ -28,6 +31,7 @@ try {
 
 const TAB_TEXT = { presentation: '演示汇报', research: '研究报告', architecture: '信息架构图' };
 const channelArg = (process.argv.find((a) => a.startsWith('--channel=')) || '').split('=')[1];
+const outArg = (process.argv.find((a) => a.startsWith('--out=')) || '').slice('--out='.length);
 const scaleArg = parseFloat((process.argv.find((a) => a.startsWith('--scale=')) || '').split('=')[1]);
 const SCALE = Number.isFinite(scaleArg) && scaleArg > 0 ? scaleArg : 1;
 const CHANNEL = channelArg || process.env.TOP_PPT_BROWSER_CHANNEL
@@ -35,7 +39,8 @@ const CHANNEL = channelArg || process.env.TOP_PPT_BROWSER_CHANNEL
 
 (async () => {
   const gallery = 'file:///' + path.resolve(__dirname, '../assets/style-gallery.html').replace(/\\/g, '/');
-  const outDir = path.resolve(__dirname, '../assets');
+  const outDir = outArg ? path.resolve(outArg) : path.resolve(__dirname, '../assets');
+  require('fs').mkdirSync(outDir, { recursive: true });
   /* channel 为空 → 用 Playwright 自带 chromium（不依赖本机已装浏览器） */
   const exe = process.env.TOP_PPT_BROWSER_PATH;
   const browser = await chromium.launch(exe ? { executablePath: exe } : (CHANNEL ? { channel: CHANNEL } : {}));

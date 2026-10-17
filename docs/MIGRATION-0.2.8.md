@@ -31,7 +31,7 @@
 | 移除 | 替代 |
 |---|---|
 | `assets/theme-overview-research.png`、`assets/theme-overview-architecture.png` | 一张 `assets/theme-overview.png` 展示 12 套风格；按模式看效果用 `assets/style-gallery.html` |
-| `assets/showcase/`、`docs/showcase/` 截图包、`scripts/capture_showcase_pages.js` | 落地页 `docs/index.html` 与 `docs/showcase.html` |
+| `assets/showcase/`、`docs/showcase/` 截图包、`scripts/capture_showcase_pages.js` | 落地页 https://topmindspace.github.io/presentation/（0.2.11 起由 topmindspace.github.io 仓库维护，本仓库不再放 `docs/index.html` / `docs/showcase.html`） |
 | npm 包内的示例 HTML | 包内保留 `assets/examples/*.model.json`，一条 `render_from_model.py` 即可得到 HTML |
 
 ## 行为变化

@@ -12,6 +12,8 @@
      Markdown 相对链接指向的文件必须存在
   3. npm pack 内容走 package.json 的 files 白名单：不含 docs/、assets/showcase/、evals/、
      dist/、node_modules/、__pycache__/，解包体积不超过 PACK_LIMIT
+  4. docs/ 只放发布规范与迁移说明（DOCS_ALLOWED）：落地页、showcase、截图在 topmindspace.github.io 仓库，
+     不再放进本仓库；README / README.en.md / docs/*.md 的相对链接也必须指向存在的文件
 """
 from __future__ import annotations
 
@@ -30,6 +32,7 @@ except Exception:
 ROOT = Path(__file__).resolve().parent.parent
 PACK_LIMIT = 10 * 1024 * 1024
 PACK_FORBIDDEN = ('docs/', 'assets/showcase/', 'evals/', 'dist/', 'node_modules/', '__pycache__/')
+DOCS_ALLOWED = re.compile(r'^(PUBLISHING|MIGRATION-[\w.\-]+)\.md$')
 LINK_RE = re.compile(r'\]\(([^)\s]+)\)')
 
 
@@ -69,6 +72,29 @@ def check_refs() -> list[str]:
     return errs
 
 
+def check_docs() -> list[str]:
+    """docs/ 白名单 + 人读文档（README 中英文、docs/*.md）的相对链接存在性。"""
+    errs: list[str] = []
+    docs = ROOT / 'docs'
+    if docs.is_dir():
+        for p in sorted(docs.rglob('*')):
+            if p.is_file() and not (p.parent == docs and DOCS_ALLOWED.match(p.name)):
+                errs.append(f'docs/ 只放 PUBLISHING.md 与 MIGRATION-*.md（落地页在 topmindspace.github.io 仓库）：'
+                            f'{p.relative_to(ROOT).as_posix()}')
+    for f in [ROOT / 'README.md', ROOT / 'README.en.md', *sorted(docs.glob('*.md'))]:
+        if not f.exists():
+            continue
+        rel = f.relative_to(ROOT).as_posix()
+        text = re.sub(r'```.*?```', '', f.read_text(encoding='utf-8'), flags=re.S)  # 代码块里的路径不是链接
+        for target in LINK_RE.findall(text) + re.findall(r'(?:src|href)="([^"]+)"', text):
+            if re.match(r'^(https?:|mailto:|#)', target):
+                continue
+            path = target.split('#', 1)[0]
+            if path and not (f.parent / path).exists():
+                errs.append(f'{rel}: 相对链接不存在：{target}')
+    return errs
+
+
 def check_pack() -> list[str]:
     npm = shutil.which('npm')
     if not npm:
@@ -97,6 +123,7 @@ def main() -> int:
     if None in v.values() or len(set(v.values())) != 1:
         errs.append('版本号不一致或缺失')
     errs += check_refs()
+    errs += check_docs()
     if '--no-pack' not in sys.argv[1:]:
         errs += check_pack()
     if errs:
@@ -104,7 +131,7 @@ def main() -> int:
         for e in errs:
             print(f'  ✗ {e}')
         return 1
-    print('PASS: 版本一致、引用不出技能目录、npm 包内容符合白名单')
+    print('PASS: 版本一致、引用不出技能目录、docs/ 白名单与文档链接、npm 包内容符合白名单')
     return 0
 
 

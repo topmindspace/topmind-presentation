@@ -45,6 +45,21 @@
 
 Secret **`NPM_TOKEN`**（granular，scope `@topmindspace` 写权限）配置在 GitHub Actions。
 
+## 落地页（站点）
+
+- 线上地址：<https://topmindspace.github.io/presentation/>。页面源码、截图与中英文文案都在 **topmindspace/topmindspace.github.io** 仓库（`presentation/index.html`、`assets/img/presentation/`、`i18n/zh.json` / `i18n/en.json`），由该仓库的 GitHub Pages 发布。
+- 本仓库**没有**开 GitHub Pages，`docs/` 只放本文件和 `MIGRATION-0.2.8.md`，不要再往这里放落地页、showcase 或截图。
+- 风格画廊仍是本仓库的 `assets/style-gallery.html`（随包分发）；README 与 Gate 0 用 `assets/theme-overview.png`。
+- 刷新站点截图（站点仓库与本仓库并排克隆时）：
+  ```bash
+  # 风格总览：直接输出到站点仓库，再转成站点用的 JPG
+  node scripts/capture_theme_overview.js --out=../topmindspace.github.io/assets/img/presentation
+  python3 -c "from PIL import Image;p='../topmindspace.github.io/assets/img/presentation/theme-overview';Image.open(p+'.png').convert('RGB').save(p+'.jpg',quality=85,optimize=True,progressive=True)"
+  rm ../topmindspace.github.io/assets/img/presentation/theme-overview.png
+  ```
+  其余截图（示例页、高密度页、简单页、美化前后对比）用 `make_deck.py` / `beautify.py` 出稿后截取，存成 JPG 放进同一目录；改了图片尺寸要同步 `presentation/index.html` 里的 `width` / `height`。
+- 站点要求：蓝白 MD3 风格，中英文、明暗主题都要正常；全站不写版本号（站点仓库 `scripts/check_no_versions.py` 会拦）；安装命令用 `npx @topmindspace/topmind-presentation install`。站点仓库在 main 上提交并 push，不强推；push 后等 Pages 部署完成，再用线上页面截图核对。
+
 ## 命名
 
 | 面 | 规则 | 示例 |

@@ -243,6 +243,12 @@ function iconMark(s, name, x, y, size, opts) {
 /* M13 简单版式（focus）：一个放大的锚点 + 至多一个从属元素。与 HTML .focus--left / center / split 同构：
    left = 锚点占左 ~57%，从属文字在右下（细分隔线起头）；center = 居中；split = 左锚点 / 右文字（约 4:6）。
    装饰只用大号淡色序号（decoNo）与柔和圆形底，不铺满、不堆图标。 */
+/* 居中文字框按估算字宽收窄并居中：避免满宽框（左边界在版心左缘）与 HTML 的文字实际位置错位 */
+function centerBox(t, pt, maxW) {
+  const w = String(t || '').split('\n').reduce((m, ln) => Math.max(m, [...ln].reduce((a, c) => a + (/[\x00-\xff]/.test(c) ? pt * TM_ASCII : pt), 0) / 72), 0) + 0.25;
+  const bw = Math.min(maxW, Math.max(1.2, w));
+  return { x: MX + (CW - bw) / 2, w: bw };
+}
 function focusPage(s, sec, y0, y1) {
   const k = DENSE.focusKind(sec), v = DENSE.focusVariant(sec);
   const H = y1 - y0, cy = y0 + H / 2;
@@ -250,7 +256,28 @@ function focusPage(s, sec, y0, y1) {
     fontFace: STYLE.fontDisplay, fontSize: 96, bold: true, color: STYLE.soft, margin: 0, objectName: 'focus:deco' });
   const sub = (txt, x, y, w, h, fz, opts) => txt && s.addText(String(txt), Object.assign({ x, y, w, h, fontFace: STYLE.font, fontSize: fz,
     color: STYLE.body, valign: 'top', margin: 0 }, opts || {}));
-  if (k === 'number') {
+  if (k === 'number' && v === 'center') {
+    /* 居中变体：巨号居中，说明与补充文字收窄到 60% 宽居中（与 HTML .focus--center 同构） */
+    const n = DENSE.kv3(sec.number || []), tw = CW * 0.6, tx = MX + (CW - tw) / 2;
+    const blockH = 1.9 + 0.6 + (sec.text ? 0.9 : 0), by = y0 + Math.max(0.1, (H - blockH) / 2);
+    const nfz = estLines(n[0], CW, 96) > 1 ? 52 : 96, nb = centerBox(n[0], nfz, CW);
+    s.addText(n[0], { x: nb.x, y: by, w: nb.w, h: 1.9, align: 'center', fontFace: STYLE.fontDisplay, fontSize: nfz,
+      bold: true, color: STYLE.accent, valign: 'bottom', margin: 0, objectName: 'focus:anchor' });
+    const cb = centerBox(n[1], sz(20), tw), tb = centerBox(sec.text, sz(15), tw);
+    sub(n[1], cb.x, by + 2.0, cb.w, 0.5, sz(20), { color: STYLE.ink, bold: true, align: 'center' });
+    sub(sec.text, tb.x, by + 2.6, tb.w, 0.9, sz(15), { align: 'center' });
+  } else if ((k === 'statement' || k === 'text') && v === 'center') {
+    const t = String(k === 'statement' ? sec.statement : sec.text || ''), aw = CW * (k === 'statement' ? 0.7 : 0.6), ax = MX + (CW - aw) / 2;
+    const fz = k === 'statement' ? [34, 30, 26].map(sz).find(f => estTextH(t, aw, f, 1.3) <= H * 0.5) || sz(24)
+      : [26, 24, 22, 20].map(sz).find(f => estTextH(t, aw, f, 1.5) <= H * 0.55) || sz(18);
+    const th = estTextH(t, aw, fz, 1.5) + 0.3, subH = (k === 'statement' && sec.text) ? 0.9 : 0;
+    const ty = y0 + Math.max(0.3, (H - th - subH) / 2);
+    s.addShape('rect', { x: MX + (CW - 0.6) / 2, y: ty - 0.32, w: 0.6, h: 0.05, fill: { color: STYLE.accent }, line: { type: 'none' }, objectName: 'focus:rule' });
+    const sb = centerBox(t, fz, aw);
+    s.addText(t, { x: sb.x, y: ty, w: sb.w, h: th, align: 'center', fontFace: k === 'statement' ? STYLE.fontDisplay : STYLE.font, fontSize: fz,
+      bold: k === 'statement', color: k === 'statement' ? STYLE.ink : STYLE.body, valign: 'top', margin: 0, objectName: 'focus:anchor' });
+    if (subH) { const xb = centerBox(sec.text, sz(14), aw); sub(sec.text, xb.x, ty + th + 0.1, xb.w, 0.8, sz(14), { align: 'center' }); }
+  } else if (k === 'number') {
     const n = DENSE.kv3(sec.number || []);
     const aw = CW * 0.57;
     s.addText(n[0], { x: MX, y: cy - 1.25, w: aw, h: 1.9, fontFace: STYLE.fontDisplay, fontSize: estLines(n[0], aw, 96) > 1 ? 52 : 96,
@@ -278,11 +305,16 @@ function focusPage(s, sec, y0, y1) {
     }
   } else if (k === 'icon' || k === 'iconText') {
     const d = 2.1;
-    if (v === 'center' || k === 'icon') {
-      iconMark(s, sec.icon || sec.title, MX + (CW - d) / 2, y0 + Math.max(0.1, (H - d - 1.2) / 2), d, { round: true, name: 'focus:anchor' });
+    if (v === 'center') {
+      /* 只有图标 + 一个短标签时加两圈同心光环做装饰（HTML .focus__ico::before/::after 同构），避免页面只剩一个小圆点 */
+      const iy = y0 + Math.max(0.1, (H - d - 1.2) / 2);
+      if (!sec.text) [1.75, 1.4].forEach((r, ri) => s.addShape('ellipse', { x: MX + (CW - d * r) / 2, y: iy + d / 2 - d * r / 2, w: d * r, h: d * r,
+        fill: { type: 'none' }, line: { color: ri ? mixHex(STYLE.soft, STYLE.accent, 0.25) : STYLE.soft, width: 1.25 }, objectName: 'focus:halo' }));
+      iconMark(s, sec.icon || sec.title, MX + (CW - d) / 2, iy, d, { round: true, name: 'focus:anchor' });
       const ly = y0 + Math.max(0.1, (H - d - 1.2) / 2) + d + 0.3;
-      sub(sec.label, MX + CW * 0.2, ly, CW * 0.6, 0.45, sz(20), { align: 'center', bold: true, color: STYLE.ink });
-      sub(sec.text, MX + CW * 0.2, ly + (sec.label ? 0.5 : 0), CW * 0.6, 0.8, sz(15), { align: 'center' });
+      const lb = centerBox(sec.label, sz(20), CW * 0.6), xb = centerBox(sec.text, sz(15), CW * 0.6);
+      sub(sec.label, lb.x, ly, lb.w, 0.45, sz(20), { align: 'center', bold: true, color: STYLE.ink });
+      sub(sec.text, xb.x, ly + (sec.label ? 0.5 : 0), xb.w, 0.8, sz(15), { align: 'center' });
     } else {
       const lw = CW * 0.4;
       iconMark(s, sec.icon || sec.title, MX + (lw - d) / 2, cy - d / 2, d, { round: true, name: 'focus:anchor' });
@@ -291,7 +323,7 @@ function focusPage(s, sec, y0, y1) {
       const th = estTextH(sec.text || '', bw, sz(18), 1.5);
       const by = cy - (lab + th) / 2;
       sub(sec.label, bx, by, bw, 0.5, sz(22), { bold: true, color: STYLE.ink });
-      sub(sec.text, bx, by + lab, bw, th + 0.1, sz(18));
+      sub(sec.text, bx, by + lab, bw, th + 0.4, sz(18));
     }
   } else if (k === 'twoText') {
     const ts = (sec.texts || []).slice(0, 2).map(DENSE.pt3), gap = 0.7, w = (CW - gap) / 2;
@@ -303,10 +335,20 @@ function focusPage(s, sec, y0, y1) {
       sub(t[0], x, ty + 0.2, w, 0.45, sz(20), { bold: true, color: STYLE.ink });
       sub(t[1], x, ty + 0.72, w, hh, sz(15));
     });
+  } else if (k === 'chart' && v === 'split') {
+    /* 分栏变体：图 60% 左，说明 40% 右且垂直居中（HTML .focus--split.focus--chart 同比例） */
+    const gw = CW * 0.6, ch = Math.min(H - 0.7, 4.0), ty = y0 + Math.max(0.4, (H - ch) / 2);
+    capText(s, (sec.chart || {}).cap, MX, ty - 0.38, gw);
+    compChart(s, sec.chart, (sec.chart || {}).type === 'donut' ? 'donut' : 'bar', MX, ty, gw, ch);
+    const bx = MX + gw + 0.5, bw = CW - gw - 0.5, th = estTextH(sec.text || '', bw, sz(16), 1.5);
+    s.addShape('rect', { x: bx, y: cy - th / 2 - 0.3, w: 0.6, h: 0.05, fill: { color: STYLE.accent }, line: { type: 'none' }, objectName: 'focus:rule' });
+    sub(sec.text, bx, cy - th / 2, bw, th + 0.2, sz(16));
   } else if (k === 'chart') {
     const cw = Math.min(CW * 0.72, 9.0), cx = MX + (CW - cw) / 2;
-    const th = sec.text ? 0.7 : 0, ch = Math.min(H - th - 0.2, 4.0), ty = y0 + Math.max(0.05, (H - ch - th) / 2);
-    s.addShape('rect', { x: cx, y: ty - 0.25, w: 0.6, h: 0.05, fill: { color: STYLE.accent }, line: { type: 'none' }, objectName: 'focus:rule' });
+    const th = sec.text ? 0.7 : 0, ch = Math.min(H - th - 0.2, 4.0), ty = y0 + Math.max((sec.chart || {}).cap ? 0.55 : 0.05, (H - ch - th) / 2);
+    const fcap = (sec.chart || {}).cap;
+    s.addShape('rect', { x: cx, y: ty - (fcap ? 0.6 : 0.25), w: 0.6, h: 0.05, fill: { color: STYLE.accent }, line: { type: 'none' }, objectName: 'focus:rule' });
+    capText(s, fcap, cx, ty - 0.45, cw);
     compChart(s, sec.chart, (sec.chart || {}).type === 'donut' ? 'donut' : 'bar', cx, ty, cw, ch);
     sub(sec.text, cx, ty + ch + 0.15, cw, 0.6, sz(14), { align: 'center' });
   }
@@ -586,6 +628,25 @@ if (modelArg) {
     }
     console.warn(`[build_pptx] 警告：页面超载已自动拆页 ${desc}（HTML 端请同步运行 solve_model.js）`);
     CONTENT = sp.model;
+  }
+  /* M13 双端同源：模型没写 agenda 时 HTML 端按章（chapter / eyebrow「NN ·」/ 页序）自动归并出大纲页，
+     PPTX 原先直接不出大纲页 → 两端页序错一位。此处按 render_from_model 同一规则补齐。 */
+  if (!(Array.isArray(CONTENT.agenda) && CONTENT.agenda.length)) {   // 只补「完全没写」的情形；写了的 agenda 原样用（分页逻辑不变）
+    const secs = (CONTENT.sections || []).filter(x => x && typeof x === 'object');
+    if (!(CONTENT.mode === 'architecture' && secs.length <= 4) && secs.length) {
+      const chapters = {}, order = [];
+      secs.forEach((x, i) => {
+        const eb = String(x.eyebrow || '').trim();
+        const m = eb.match(/^(\d{1,2})\s*[·・\-—]/);
+        const key = (x.chapter != null && x.chapter !== '') ? String(x.chapter) : (m ? m[1].padStart(2, '0') : String(i + 1).padStart(2, '0'));
+        if (!chapters[key]) {
+          const mt = eb.match(/^\d{1,2}\s*[·・\-—]\s*(.+)$/);
+          chapters[key] = [key, (mt && mt[1].trim()) || x.title || '', eb];
+          order.push(key);
+        }
+      });
+      CONTENT.agenda = order.map(k => chapters[k]);
+    }
   }
   MODEL_DIR = path.dirname(path.resolve(modelArg));   // 素材图片相对路径锚点
   if (CONTENT.style && !styleArg) styleArg = CONTENT.style;   // 模型里的风格作为默认
@@ -2447,10 +2508,10 @@ function addTable(s, tbl, x, y, w, availH, opts) {
       s.addText(it[0], { x, y, w: 0.9, h: rowH - 0.05, fontFace: STYLE.font, fontSize: numSize,
         bold: true, color: STYLE.accent, valign: 'top' });
       s.addText([
-        { text: title + '\n', options: { fontSize: tSize, bold: true, color: STYLE.ink } },
+        { text: title + (it[2] ? '\n' : ''), options: { fontSize: tSize, bold: true, color: STYLE.ink } },
         { text: it[2] || '', options: { fontSize: dSize, color: STYLE.body } },
-      ], { x: x + 1.0, y: y + 0.03, w: titleBoxW, h: rowH - 0.08, fontFace: STYLE.font,
-        valign: 'top', lineSpacing: tSize + 5 });
+      ], { x: x + 1.0, y: y + 0.03, w: titleBoxW, h: it[2] ? rowH - 0.08 : Math.min(rowH - 0.08, (tSize + 5) / 72 + 0.12), fontFace: STYLE.font,
+        valign: 'top', lineSpacing: tSize + 5 });   // 无说明的条目只占一行高（与 HTML 无 .agenda__d 同构）
     });
     const _an = mergeNotes(pi === 0 ? CONTENT.agendaNotes : null, notes.join('\n'));
     if (_an) s.addNotes(_an);

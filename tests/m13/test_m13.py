@@ -38,6 +38,9 @@ with tempfile.TemporaryDirectory() as td:
     r = run([sys.executable, str(S / 'make_deck.py'), str(ROOT / 'tests/m13/layouts.model.json'), '--out', str(td / 'e2e')]
             + (['--fidelity'] if has_pw else []))
     ok(r.returncode == 0 and '全部通过' in r.stdout, 'layouts.model.json 端到端未全过：' + r.stdout[-400:])
+    r = run([sys.executable, str(S / 'make_deck.py'), str(ROOT / 'tests/m13/simple.model.json'), '--out', str(td / 'simple')]
+            + (['--fidelity'] if has_pw else []))
+    ok(r.returncode == 0 and '全部通过' in r.stdout, 'simple.model.json（简单页 12 变体）端到端未全过：' + r.stdout[-400:])
 
     # 2) 标题平衡断行
     js = ("const D=require(process.argv[1]);"

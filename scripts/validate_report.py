@@ -1688,7 +1688,10 @@ def _check_layout_qa(txt, chk, mode, model):
     skels = []
     for i, b, head in content:
         m = re.search(r'data-skel="(P\d+)"', b)
-        if m:
+        fm = re.search(r'data-focus="(\w+)" data-variant="(\w+)"', b)
+        if m and fm:   # M13 简单页：同一骨架下按「锚点类型 × 变体」区分，三连同款仍拦
+            skels.append((i, f"{m.group(1)}:{fm.group(1)}-{fm.group(2)}"))
+        elif m:
             skels.append((i, m.group(1)))
         else:
             sig = _layout_sig(b)

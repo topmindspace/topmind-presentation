@@ -1152,7 +1152,9 @@ def r_focus(i, sec):
         anchor = ''.join(f'<div class="focus__col"><div class="focus__k t-h3">{cite(a)}</div><p class="t-body">{cite(b)}</p></div>' for a, b, _ in ts)
         sub = ''
     elif k == 'chart':
-        anchor = '<div class="fig focus__fig">' + chart_svg(sec.get('chart') or {}, i, None, 760, 300) + '</div>'
+        cap = (sec.get('chart') or {}).get('cap')
+        anchor = ('<div class="fig focus__fig">' + (f'<div class="fig__cap">{cite(cap)}</div>' if cap else '')
+                  + chart_svg(sec.get('chart') or {}, i, None, 760, 300) + '</div>')
         sub = f'<p class="focus__t t-body">{cite(sec["text"])}</p>' if sec.get('text') else ''
     else:
         anchor = f'<p class="focus__para t-lead">{cite(sec.get("text") or "")}</p>'
@@ -1274,7 +1276,7 @@ def render_body(model: dict) -> str:
                 f'      <li class="agenda__i"><a class="agenda__a" href="#{href_id}">'
                 f'<span class="agenda__n">{esc(num)}</span>'
                 f'<span><span class="agenda__t">{esc(title)}</span>'
-                f'<div class="agenda__d">{esc(desc)}</div></span></a></li>')
+                + (f'<div class="agenda__d">{esc(desc)}</div>' if desc else '') + '</span></a></li>')
         _aeb = model.get('agendaEyebrow', '目录') if _CHROME.get('showEyebrow') else ''
         ag_eb = f'<div class="shead rv"><div class="t-eyebrow">{esc(_aeb)}</div>\n      ' if _aeb else '<div class="shead rv">'
         parts.append(f'''<section class="band band--top" id="agenda">

@@ -124,6 +124,7 @@ STRICT_FAILURE_CODES = {
     "ICON_OVERUSE",
     "ICON_STYLE_MIXED",
     "TITLE_ORPHAN",
+    "CROWD_GAP",
 }
 # 深度模式专属校验码（--deep 时并入 STRICT_FAILURE_CODES；默认不跑，保持轻量）
 DEEP_STRICT_CODES = {
@@ -1241,6 +1242,33 @@ def inspect_slide(
     if len(tile_styles) > 1:
         warnings.append(issue("ICON_STYLE_MIXED", "同页出现线性与填充两种图标风格：全篇统一 iconStyle。", slide=slide_number))
 
+    # M13 CROWD_GAP：同一行相邻卡片（圆角矩形底块 ≥1.2×0.6in）间距 <0.10in 视为拥挤（贴边 0 间距的色块拼接不算卡片）
+    _cards = []
+    for el in all_elements:
+        g = el.find('.//a:prstGeom', NS)
+        if g is None or g.get('prst') != 'roundRect' or el.find('.//a:solidFill', NS) is None:
+            continue
+        nm = _shape_object_name(el) or ''
+        if nm.startswith(('focus:', 'icontile:', 'boxplot:', 'mekko:', 'pic:', 'heat:', 'matrix:')):   # 图内色块 / 矩阵格是数据编码，不是卡片
+            continue
+        bx = shape_bounds(el)
+        if bx is None:
+            continue
+        x, y, cx, cy = (v / 914400 for v in bx)
+        if cx >= 1.2 and cy >= 0.6 and cx < width / 914400 * 0.9:
+            _cards.append((x, y, cx, cy))
+    _crowd = 0
+    for i, a in enumerate(_cards):
+        for b in _cards[i + 1:]:
+            ov = min(a[1] + a[3], b[1] + b[3]) - max(a[1], b[1])
+            if ov < 0.5 * min(a[3], b[3]):
+                continue
+            l, r = (a, b) if a[0] <= b[0] else (b, a)
+            gap = r[0] - (l[0] + l[2])
+            if 0.005 < gap < 0.10:
+                _crowd += 1
+    if _crowd:
+        warnings.append(issue("CROWD_GAP", f"{_crowd} 处相邻卡片间距 <0.10in：卡片之间至少留 0.12in（--sp-3），放不下就减卡或拆页。", slide=slide_number))
     # M13 TITLE_ORPHAN：标题（≥24pt）按框宽模拟换行，末行 ≤2 字或「数字 | 单位」被拆开即判孤字
     _A = '{http://schemas.openxmlformats.org/drawingml/2006/main}'
     for shape in shapes:

@@ -2245,7 +2245,7 @@ function infoMarimekko(s, sec, y0, y1) {
     segs.forEach((sg, k) => {
       const hh = sg.value / sum * (gy1 - gy0);
       s.addShape('roundRect', { x: F.X(x + 2), y: F.Y(y + 1), w: F.L(cw - 4), h: F.L(Math.max(1, hh - 2)), rectRadius: F.L(6),
-        fill: { color: k === 0 ? STYLE.accent : soft2 }, line: { type: 'none' } });
+        fill: { color: k === 0 ? STYLE.accent : soft2 }, line: { type: 'none' }, objectName: 'mekko:seg' });
       const segLabel = sg.label != null ? sg.label : (fmtNum(sg.value) + '%');
       s.addText(segLabel, { x: F.X(x), y: F.Y(y + hh / 2) - 0.13, w: F.L(cw), h: 0.26, align: 'center', margin: 0,
         fontFace: STYLE.font, fontSize: sz(Math.min(12, F.pt(14))), bold: true, fit: 'shrink',
@@ -3140,7 +3140,7 @@ CONTENT.sections.forEach((sec) => {
         const onAcc = lvl >= 3;
         s.addShape('roundRect', { x: hreg.x + H.labelW + ci * (cw + H.cellGap), y, w: cw, h: rowH,
           rectRadius: 0.05, fill: { color: levels[lvl] },
-          line: lvl === 0 ? { color: STYLE.line, width: 0.75 } : { type: 'none' } });
+          line: lvl === 0 ? { color: STYLE.line, width: 0.75 } : { type: 'none' }, objectName: 'heat:cell' });
         s.addText(has ? (String(v) + (sec.unit || '')) : '—',
           { x: hreg.x + H.labelW + ci * (cw + H.cellGap), y, w: cw, h: rowH, align: 'center', valign: 'middle',
             fontFace: STYLE.font, fontSize: sz(11.5), bold: lvl >= 2, color: onAcc ? STYLE.onAccent : STYLE.body });

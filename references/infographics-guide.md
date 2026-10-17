@@ -58,5 +58,59 @@
 做法与边界：
 - 能用原生图表就用原生（`MODEL_CHART_COUNT` 会核对）；形状通道的 `dataTable` 不得为 `off`。
 - 复合版式在 PPTX 里由同一求解器分区：主图、副图、解读带、关键数字各自成原生对象，双端位置差用 `check_fidelity.py` 量化（位置 p90 ≤0.12）。
-- 已知差距：Exhibit 来源行在 PPTX 略低；marimekko / boxplot / sankey / streamgraph 的图内标签有少量偏移。演讲时以 HTML 为准，交付编辑以 PPTX 为准。
+- M13 起复杂信息图（marimekko · boxplot · streamgraph · sankey · treemap）在 PPTX 端用 `svgFrame` 按 HTML 的 viewBox 900×340 等比落位，图内标签与 HTML 同位；Exhibit 来源行贴在主图正下方，与 HTML 图框内的来源行同序。剩余差距：表格页的「注：」行仍按版心底边落位（HTML 跟随表格高度），位置差 <0.2。
 - 正文行距双端统一为 1.5 倍、不够时 1.3 倍；页眉眉标与页脚小字默认不显示（`showEyebrow` / `showFootnotes` / `pageNumber` 可开关），省下的高度留给图表。
+
+## 4. 高密度复合页：仪表盘与杂志版（M13）
+
+一页同时有数字、图表、观点、图标、图片时，不要堆在一个通用版式里，按内容选：
+
+| 页型 | 什么时候用 | 模型 | 双端落版 |
+|---|---|---|---|
+| `dashboard` 仪表盘 | 2–4 张**同一口径**的小图 + ≤4 个关键数字 + ≤3 条结论 | `keyMetrics`（可带 `icon`）· `charts[]`（每张带 `cap`）· `points` · 可选 `legend` | 图标 KPI 条 → 共享图例 → n 张图一行 → 底部解读行 |
+| `magazine` 杂志版 | 一张有说服力的图片 + 一句金句 + ≤2 个数字 + ≤3 条要点 | `image` · `pull` · `metrics` · `points` | 左图 53% 宽，右侧金句 / 数字 / 要点竖排 |
+| 大数字 + 图 + 要点 | 一个数字统领全页 | 普通图表页 + `keyMetrics` + `points`（复合版式自动成 side / band） | 数字条在上，主图 + 解读栏 |
+| 图文交错 | 2–3 组「图 + 说明」 | `type: image` + `image.layout: grid` | 网格，说明紧贴图下 |
+
+**多图同页（2–4 张）的规矩**（`lib_dense.dash_charts` / `dashCharts` 双端同源）：
+1. **共享图例与配色**：同一系列在每张图里同色；图例只画一次（`legend` 或自动取首张多系列图的系列名）。
+2. **共享坐标**：同单位、同类型（bar / hbar / line / stack / area / lollipop / dotplot）且没写 `max` 的图，自动取同一个「好看的上限」，高矮可以直接比。
+3. **叙事顺序**：图注自动加 ①②③④，按「总量 → 结构 → 趋势 → 对比」排；结论行按同一顺序引用编号。
+4. **一行排开**：PPTX 里 2×2 网格的小图字太小，n 张图一律单行；每张图最窄 ≈2.9in。
+
+**什么时候必须拆页**：超过 4 张图；图之间单位或口径不同；任何一张需要 6 个以上类目才讲得清；需要逐图解释（每张图要 2 句以上说明）。拆成「仪表盘总览 + 逐图展开」两到三页。
+
+**元素优先级与取舍**（放不下时按此顺序保留，多出的进演讲者备注，不静默丢弃，`DENSE.overflow`）：标题 > 图表 > 关键数字 > 解读 > 图标 > 图片说明。上限：图 4 · 数字 4 · 结论 3（杂志版数字 2）。
+
+**拥挤门禁**：`LAYOUT_COLLISION` / `CONTAINER_OVERFLOW`（重叠与溢出）、`CROWD_GAP`（相邻卡片间距 <0.12in）、`LAYOUT_MULTI_FOCUS`（一屏大件 ≤1）、`ICON_OVERUSE`（单页图标 ≤8）、`ICON_STYLE_MIXED`；版心填充率与对齐沿用 `LAYOUT_FILL` / `LAYOUT_QA_ALIGN_RHYTHM`。
+
+## 5. 简单页：一个图标、一段话、一个数字（M13 · `type: focus`）
+
+内容很少的页面不要把字放大铺满，也不要只放一行小字。`focus` 页型用**留白 + 非对称构图 + 放大的视觉锚点**：
+
+| 内容 | 写法 | 变体（`variant`） | 默认 |
+|---|---|---|---|
+| 一个数字 | `number: ["73%", "说明"]` + 可选 `text` · `decoNo` | `left` 左侧巨号 + 右侧说明 · `center` 居中 | left |
+| 一句观点 | `statement` + 可选 `text` | `left` 左对齐大字 + 细线 · `center` | left |
+| 一段话 | `text` | `left` 窄栏（≤60% 宽）+ 大段首 · `center` | left |
+| 一个图标 | `icon` + `label` + 可选 `text` | `center` 大图标居中 · `split` 左图标右文字 | center |
+| 一张图表 | `chart` + `text` | `center` 图表居中 · `split` 图 60% + 说明 40% | center |
+| 图标 + 文字 | `icon` + `label` + `text` | `split`（默认）· `center` | split |
+| 两段文字 | `texts: [[标题, 说明], [标题, 说明]]` | `split` 左右两栏 + 顶线 | split |
+
+**选择规则**：结论句 ≤20 字且没有数据 → statement；有一个统领数字 → number；需要解释背景 → text；表达「类别 / 承诺 / 原则」→ icon / iconText；两件事对照 → twoText；只有一张小图 → chart。同一份稿子里 focus 页不连续超过 2 页，也不超过全篇 25%。
+
+**稀疏门禁 `FOCUS_SPARSE`**（与密度门禁不冲突：`focus` 页免检 UNDERFILL / LAYOUT_FILL / TITLE_ONLY / LOW_CONTENT，改用本门禁）：
+- PPTX：正文外框占版心 12%–85%，且有放大锚点（≥22pt 文字、图表、图标块或 `focus:anchor`）。
+- HTML：有放大锚点（`focus__num / stmt / ico / fig / para / col`），正文 6–220 字。
+- 字多于 220 字说明它不是简单页，改用 points / cards；少于 6 字只剩标题，补一句说明。
+
+## 6. 信息图生成流程与质检
+
+1. **定问题**：这一页回答什么？一句话写成标题（结论句，不是话题词）。
+2. **选形态**：按 §2 的问题 → 图型；数据只有一个比例 → pictogram / waffle；多张同口径小图 → dashboard；内容很少 → focus。
+3. **写模型**：只写数据和结论，不写坐标；图标名取 `assets/icons/index.json`。
+4. **一键出稿**：`python scripts/make_deck.py model.json --out out --fidelity`（渲染 → HTML 质检 → 密度 → PPTX → PPTX 质检 → 双端保真）。
+5. **看图**：两端各截一遍（`render_pptx_png.py` / 浏览器截图），逐页看拥挤、孤字、图例重复、图标风格。
+6. **质检项**：图表多样性、数据追溯（`dataTable`）、占比图最小扇区 ≥5%、`TITLE_ORPHAN`（标题末行孤字）、`FOCUS_SPARSE`、`ICON_*`、保真位置 p90 ≤0.12。
+

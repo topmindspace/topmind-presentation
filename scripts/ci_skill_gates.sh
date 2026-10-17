@@ -112,6 +112,7 @@ run_one() {
     "$PY" tests/beautify/test_beautify.py || { echo "ci_skill_gates: 美化核对失败" >&2; exit 1; }
     "$PY" tests/m11/test_m11.py || { echo "ci_skill_gates: M11 回归自测失败（美化 12 风格 / Exhibit 编号 / 复合承载件 / make_deck）" >&2; exit 1; }
     "$PY" tests/m12/test_m12.py || { echo "ci_skill_gates: M12 回归自测失败（行距 1.5/1.3 / 默认无眉标与注释 / 阶段卡时间线）" >&2; exit 1; }
+    "$PY" tests/m13/test_m13.py || { echo "ci_skill_gates: M13 回归自测失败（高密度 / 简单页 / 图标 / 象形图 / 标题防孤字 / 拥挤门禁）" >&2; exit 1; }
   fi
 
   # M5：doctor 自检 + 打包后安装冒烟

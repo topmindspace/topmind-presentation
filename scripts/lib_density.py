@@ -10,11 +10,11 @@ import re
 
 # 视觉证据页型（图表 / 信息图）
 CHART_TYPES = {'bar', 'donut', 'exhibit', 'halftable', 'heatmap', 'treemap', 'marimekko',
-               'streamgraph', 'sankey', 'boxplot', 'bullet'}
+               'streamgraph', 'sankey', 'boxplot', 'bullet', 'dashboard'}
 # 结构图页型（架构模式的拓扑 / 分层图）：要求配说明，不强求关键数字
 DIAGRAM_TYPES = {'diagram', 'network', 'lane', 'pyramid', 'matrix'}
 # 不参与密度门禁的页型（节奏页 / 引言页 / 纯指标页本身就是数字）
-EXEMPT_TYPES = {'chapter', 'quote', 'cover', 'closing', 'info'}
+EXEMPT_TYPES = {'chapter', 'quote', 'cover', 'closing', 'info', 'focus'}   # M13 focus 简单页走 FOCUS_SPARSE（留白区间）
 # 图表数据可推导关键数字的子类型（单序列数值）
 DERIVABLE_CHARTS = {'bar', 'hbar', 'donut', 'pie', 'line', 'area', 'lollipop', 'dotplot', 'rose',
                     'radialbar', 'funnel', 'vsbar'}

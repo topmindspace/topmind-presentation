@@ -24,6 +24,7 @@
       "agendaEyebrow",
       "contentLocked",
       "showEyebrow",
+      "iconStyle",
       "showFootnotes",
       "pageNumber",
       "coverNotes",
@@ -694,6 +695,55 @@
       "optional": [
         "number",
         "items:array"
+      ]
+    },
+    "dashboard": {
+      "label": "多图表综合页 / 仪表盘（2–4 张图共用配色、坐标与图例，①②③④ 叙事顺序；可加关键数字条与解读行）",
+      "modes": [
+        "presentation",
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "charts:array"
+      ],
+      "optional": [
+        "keyMetrics:array",
+        "points:array",
+        "sharedScale",
+        "numbered"
+      ]
+    },
+    "magazine": {
+      "label": "杂志型图文穿插（大图 + 观点句 + ≤2 大数字 + ≤3 条带图标要点）",
+      "modes": [
+        "presentation",
+        "research"
+      ],
+      "required": [
+        "anyof:image.src:str|image.placeholder"
+      ],
+      "optional": [
+        "pull",
+        "metrics:array",
+        "points:array"
+      ]
+    },
+    "focus": {
+      "label": "简单版式（单图标 / 单段文本 / 一句观点 / 一个数字 / 单图表 / 图标+文本 / 两段文本；variant=left|center|split）",
+      "modes": [
+        "presentation",
+        "research",
+        "architecture"
+      ],
+      "required": [
+        "anyof:statement:str|number:array|text:str|icon:str|texts:array|chart.labels:array"
+      ],
+      "optional": [
+        "focus",
+        "variant",
+        "label",
+        "decoNo"
       ]
     }
   },

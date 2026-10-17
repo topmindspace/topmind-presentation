@@ -119,6 +119,11 @@ STRICT_FAILURE_CODES = {
     # R6：元素两两重叠 + 版心填充率（本次诊断盲区）
     "ELEMENT_OVERLAP",
     "LAYOUT_FILL",
+    # M13：简单页稀疏门禁（留白区间：不撑满、不空荡、必须有放大的锚点）+ 图标滥用 / 风格混用 + 标题孤字
+    "FOCUS_SPARSE",
+    "ICON_OVERUSE",
+    "ICON_STYLE_MIXED",
+    "TITLE_ORPHAN",
 }
 # 深度模式专属校验码（--deep 时并入 STRICT_FAILURE_CODES；默认不跑，保持轻量）
 DEEP_STRICT_CODES = {
@@ -1091,6 +1096,7 @@ def inspect_slide(
         return name.startswith('icon:')
     icon_pictures = [p for p in pictures if _is_icon_pic(p)]
     content_pictures = [p for p in pictures if not _is_icon_pic(p)]
+    is_focus = any((_shape_object_name(el) or '').startswith('focus:') for el in all_elements)   # M13 简单页
 
     for element in all_elements:
         box = shape_bounds(element)
@@ -1189,7 +1195,7 @@ def inspect_slide(
         right_gap = max(0, width - right) / max(width, 1)
         bottom_gap = max(0, height - bottom) / max(height, 1)
         # v9：任一轴留白过大即失衡（原「右+下同时」过严，漏掉上重下空等截图问题）
-        if (right_gap > UNBALANCED_GAP_RATIO or bottom_gap > UNBALANCED_GAP_RATIO) and len(all_elements) >= 2:
+        if (right_gap > UNBALANCED_GAP_RATIO or bottom_gap > UNBALANCED_GAP_RATIO) and len(all_elements) >= 2 and not is_focus:
             warnings.append(
                 issue("UNBALANCED_EMPTY_SPACE",
                       f"留白失衡（右 {right_gap:.0%} / 下 {bottom_gap:.0%}，阈值 {UNBALANCED_GAP_RATIO:.0%}）。",
@@ -1201,17 +1207,51 @@ def inspect_slide(
             issue("EMPTY_OR_UNMEASURABLE_SLIDE", "页面没有任何可测量的原生元素。", slide=slide_number)
         )
 
+    # M13 简单页（focus:*）：有意留白，不走普通页的密度 / 填充 / 失衡门禁，改走 FOCUS_SPARSE
+    names = [_shape_object_name(el) or '' for el in all_elements]
+    is_focus = any(n.startswith('focus:') for n in names)
+    if is_focus:
+        body = []
+        for el, n in zip(all_elements, names):
+            bx = shape_bounds(el)
+            if bx is None or n in ('chrome:pageno', 'focus:deco') or bx[1] < int(1.45 * 914400):
+                continue
+            body.append(bx)
+        bw, bh = width - 2 * int(0.6 * 914400), height - int(1.6 * 914400) - int(0.6 * 914400)
+        if body:
+            l = min(b[0] for b in body); t = min(b[1] for b in body)
+            r = max(b[0] + b[2] for b in body); btm = max(b[1] + b[3] for b in body)
+            ratio = ((r - l) * (btm - t)) / max(1, bw * bh)
+        else:
+            ratio = 0.0
+        big_font = max(font_sizes or [0]) >= 22
+        anchor = big_font or bool(charts) or any(n.startswith('icontile:') or n == 'focus:anchor' for n in names)
+        lo, hi = 0.12, 0.85
+        if not anchor or ratio < lo or ratio > hi:
+            warnings.append(issue("FOCUS_SPARSE",
+                f"简单页留白不合理：正文外框占版心 {ratio:.0%}（合理区间 {lo:.0%}–{hi:.0%}）"
+                + ("" if anchor else "，且缺放大的视觉锚点（≥22pt 文字 / 图标 / 图表）")
+                + "——不要把字或图标铺满整页，也不要只放一行小字。", slide=slide_number))
+    # M13 图标：单页 ≤8 个；线性 / 填充不得混用（全篇统一 iconStyle，跨页另在 validate 汇总）
+    n_icons = len(icon_pictures)
+    if n_icons > 8:
+        warnings.append(issue("ICON_OVERUSE", f"单页图标 {n_icons} 个（上限 8）：图标只做路标，不做装饰。", slide=slide_number))
+    tile_styles = {n.split(':', 1)[1] for n in names if n.startswith('icontile:')}
+    if len(tile_styles) > 1:
+        warnings.append(issue("ICON_STYLE_MIXED", "同页出现线性与填充两种图标风格：全篇统一 iconStyle。", slide=slide_number))
+
     # R6：版心填充率（宽/高分别算；封面/大纲/收尾等结构页豁免）
     _struct_text = combined_text[:200] if combined_text else ""
     _is_struct = bool(re.search(r"(报告大纲|AGENDA|下一步|参考资料|封面)", _struct_text)) or slide_number <= 2
-    warnings.extend(layout_fill_check(bounds, slide_number, width, height, is_structural=_is_struct))
+    if not is_focus:
+        warnings.extend(layout_fill_check(bounds, slide_number, width, height, is_structural=_is_struct))
 
-    if len(all_elements) <= 1 and not pictures:
+    if len(all_elements) <= 1 and not pictures and not is_focus:
         warnings.append(
             issue("LOW_CONTENT_DENSITY", "页面元素 ≤1 个；检查信息密度。", slide=slide_number)
         )
 
-    if native_text_shapes >= 2 and len(combined_text) < 25 and not pictures and not tables and not charts and slide_number > 1:
+    if native_text_shapes >= 2 and len(combined_text) < 25 and not pictures and not tables and not charts and slide_number > 1 and not is_focus:
         warnings.append(
             issue("LOW_TEXT_DENSITY", "多个文本框但总字符 <25；信息密度不足。", slide=slide_number)
         )
@@ -1254,7 +1294,7 @@ def inspect_slide(
     # 页码形如 "3 / 22" 或纯数字
     body_wo_pager = re.sub(r"\b\d+\s*/\s*\d+\b", "", combined_text)
     body_wo_pager = re.sub(r"^\s*\d+\s*$", "", body_wo_pager, flags=re.M)
-    if body_chars < 40 and native_text_shapes <= 2 and not pictures and not tables and not charts and slide_number > 1:
+    if body_chars < 40 and native_text_shapes <= 2 and not pictures and not tables and not charts and slide_number > 1 and not is_focus:
         warnings.append(
             issue("TITLE_ONLY_PAGE",
                   f"页面可测文本仅 {body_chars} 字且无图/表/图表（疑似只有标题）。",

@@ -265,6 +265,9 @@
 | 单图全场聚焦（架构/全景） | D 全幅图表（§43） | A1 分层带（§37） | C | `diagram` / `exhibit` |
 | 现状基线 / 指标快照 | F 指标墙（§45） | R4 指标带 | B→F | `metrics` |
 | 单个核心数字压场 | kpi 大数页（§41） | — | A/B | `kpi` |
+| 一页 2–4 张同口径图 + 关键数字 + 解读（仪表盘） | 多图表综合页（`infographics-guide.md` §4） | 拆成 2 页 bar | A/B | `dashboard` |
+| 大图 + 观点 + 大数字 + 带图标要点（图文穿插） | 杂志型（`infographics-guide.md` §4） | 左图右文 `image` half | A/B | `magazine` |
+| 只有一个数字 / 一句观点 / 一段话 / 一个图标 / 一张图 / 两段对照（简单页） | 简单版式 left / center / split（`infographics-guide.md` §5） | 金句页 `quote` | A/B/C | `focus` |
 | 构成占比（环形口径） | 环形图页（§42） | R7 半表半图 | A/B | `donut` / `halftable` |
 | 构成占比（饼图口径） | pie 饼图（`charts.md` §16 变体） | 环形图页（§42） | A/B | `donut` |
 | 构成占比（多系列 ≤4 段） | multidonut 多段环形（`charts.md` §29） | 环形图页（§42） | A/B | `donut` |

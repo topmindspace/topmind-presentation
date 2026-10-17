@@ -367,7 +367,7 @@ def _check_bands(txt, chk, mode="presentation"):
         is_deep = 'band--deep' in head_tag
         if is_fit and plain_len > B["fit"]:
             fit_overload.append(f"第{i}页 {plain_len}字")
-        is_chapter = 'band--chapter' in head_tag   # M3 章节扉页：有意留白的结构锚点
+        is_chapter = 'band--chapter' in head_tag or 'band--focus' in head_tag   # M3 章节扉页 / M13 简单页：有意留白（简单页另走 FOCUS_SPARSE）
         if (not is_fit and not is_deep and not is_chapter and units == 0 and plain_len < B["empty"]):
             too_empty.append(f"第{i}页 {plain_len}字")
     chk(f"单页文字量 ≤ {B['char']} 字（{mode} 模式 · 防溢出）", not over_chars,
@@ -389,7 +389,7 @@ def _check_bands(txt, chk, mode="presentation"):
     for i, b in enumerate(bands, 1):
         if 'id="refs"' in b or 'id="appendix"' in b:
             continue
-        if 'band--flow' in b[:220]:
+        if 'band--flow' in b[:220] or 'band--grid' in b[:240]:
             continue
         b_clean = re.sub(r'<script\b[\s\S]*?</script>', ' ', b)
         b_clean = re.sub(r'<style\b[\s\S]*?</style>', ' ', b_clean)
@@ -1096,7 +1096,7 @@ def _check_v9_hard_gates(txt, chk, model):
         bid = bid_m.group(1) if bid_m else ''
         if bid in exempt or any(f'id="{e}"' in head for e in exempt):
             continue
-        if 'band--deep' in head or 'band--accent' in head or 'band--chapter' in head:
+        if 'band--deep' in head or 'band--accent' in head or 'band--chapter' in head or 'band--focus' in head:
             continue
         b2 = re.sub(r'<script\b[\s\S]*?</script>', ' ', b)
         b2 = re.sub(r'<style\b[\s\S]*?</style>', ' ', b2)
@@ -1266,7 +1266,7 @@ def _check_layout_grammar(txt, chk, mode):
         if 'band--flow' in head:
             continue
         # 轻量合法页：金句/强调带/大数压场（fill 目标放宽）
-        is_light = ('band--fit' in head or 'band--accent' in head or
+        is_light = ('band--fit' in head or 'band--accent' in head or 'band--focus' in head or
                     'band--deep' in head or 'quote' in head)
 
         # ① 骨架类（或 data-skel 标记）
@@ -1794,7 +1794,7 @@ def _check_layout_qa(txt, chk, mode, model):
         wrap_px = int(B.get('wrap') or 1400) - WRAP_INSET_PX
         cpl = max(10, int(wrap_px / fs_px))
         for i, b, head in content:
-            if 'band--flow' in head:
+            if 'band--flow' in head or 'band--grid' in head:
                 continue
             # 已有拆页/续页信号则豁免
             if re.search(r'(续|续表|01[ab]|02[ab]|part\s*[12]|跟进|详见下页)', b, re.I):

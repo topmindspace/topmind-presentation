@@ -1826,7 +1826,10 @@
       "network": "P9",
       "marimekko": "P9",
       "streamgraph": "P9",
-      "chapter": "P3"
+      "chapter": "P3",
+      "dashboard": "P7",
+      "magazine": "P1",
+      "focus": "P3"
     },
     "defaultCharts": [
       "bar",

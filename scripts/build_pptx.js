@@ -128,6 +128,8 @@ if (!LC || typeof LC !== 'object' || !LC.page || !LC.styles) {
 /* M12 页面装饰开关（lib_chrome.js）：默认无眉标、无页脚注释行、只留克制页码；腾出的高度在常量派生前交给正文区 */
 const CHROME = require('./lib_chrome.js');
 const CHROME_FLAGS = CHROME.chromeFlags(CHROME.peekModel());
+const DENSE = require('./lib_dense.js');
+const ICON_STYLE = (CHROME.peekModel() || {}).iconStyle === 'fill' ? 'fill' : 'line';   // M13：全篇统一图标风格
 CHROME.applyChrome(LC, CHROME_FLAGS);
 const STYLE_PRESETS = LC.styles;                      // 9 套风格 token（light）
 const STYLE_PRESETS_DARK = LC.stylesDark || {};       // 9 套风格 token（dark）
@@ -228,6 +230,87 @@ function addIcon(s, name, x, y, size, colorHex) {
   return false;
 }
 
+/* M13 图标路标（与 HTML .ico--line / .ico--fill 同构）：line = 浅色底 + 强调色描边；fill = 强调色实底 + 反白描边。
+   模型级 iconStyle 全篇统一（validate_pptx ICON_STYLE_MIXED 拦混用）。 */
+function iconMark(s, name, x, y, size, opts) {
+  opts = opts || {};
+  const fill = (opts.fill != null ? opts.fill : ICON_STYLE === 'fill');
+  s.addShape(opts.round ? 'ellipse' : 'roundRect', { x, y, w: size, h: size, rectRadius: rr(Math.min(0.12, size * 0.28)),
+    fill: { color: fill ? STYLE.accent : STYLE.soft }, line: { type: 'none' }, objectName: opts.name || ('icontile:' + (fill ? 'fill' : 'line')) });
+  const k = opts.round ? 0.46 : 0.56, is = size * k;
+  addIcon(s, name, x + (size - is) / 2, y + (size - is) / 2, is, fill ? 'FFFFFF' : STYLE.accent);
+}
+/* M13 简单版式（focus）：一个放大的锚点 + 至多一个从属元素。与 HTML .focus--left / center / split 同构：
+   left = 锚点占左 ~57%，从属文字在右下（细分隔线起头）；center = 居中；split = 左锚点 / 右文字（约 4:6）。
+   装饰只用大号淡色序号（decoNo）与柔和圆形底，不铺满、不堆图标。 */
+function focusPage(s, sec, y0, y1) {
+  const k = DENSE.focusKind(sec), v = DENSE.focusVariant(sec);
+  const H = y1 - y0, cy = y0 + H / 2;
+  if (sec.decoNo) s.addText(String(sec.decoNo), { x: MX + CW - 4.2, y: y0 - 0.9, w: 4.2, h: 2.6, align: 'right', valign: 'top',
+    fontFace: STYLE.fontDisplay, fontSize: 96, bold: true, color: STYLE.soft, margin: 0, objectName: 'focus:deco' });
+  const sub = (txt, x, y, w, h, fz, opts) => txt && s.addText(String(txt), Object.assign({ x, y, w, h, fontFace: STYLE.font, fontSize: fz,
+    color: STYLE.body, valign: 'top', margin: 0 }, opts || {}));
+  if (k === 'number') {
+    const n = DENSE.kv3(sec.number || []);
+    const aw = CW * 0.57;
+    s.addText(n[0], { x: MX, y: cy - 1.25, w: aw, h: 1.9, fontFace: STYLE.fontDisplay, fontSize: estLines(n[0], aw, 96) > 1 ? 52 : 96,
+      bold: true, color: STYLE.accent, valign: 'bottom', margin: 0, objectName: 'focus:anchor' });
+    sub(n[1], MX, cy + 0.75, aw, 0.6, sz(20), { color: STYLE.ink, bold: true });
+    if (sec.text) {
+      const bx = MX + aw + 0.5, bw = CW - aw - 0.5;
+      s.addShape('line', { x: bx, y: cy + 0.15, w: bw, h: 0.0001, line: { color: STYLE.line, width: 1 } });
+      sub(sec.text, bx, cy + 0.35, bw, Math.max(0.6, y1 - cy - 0.5), sz(15));
+    }
+  } else if (k === 'statement' || k === 'text') {
+    const t = String(k === 'statement' ? sec.statement : sec.text || ''), aw = CW * (k === 'statement' ? 0.72 : 0.62);
+    const fz = k === 'statement' ? [34, 30, 26].map(sz).find(f => estTextH(t, aw, f, 1.3) <= H * 0.55) || sz(24)
+      : [22, 20, 18].map(sz).find(f => estTextH(t, aw, f, 1.5) <= H * 0.6) || sz(16);
+    const th = estTextH(t, aw, fz, 1.5) + 0.3;
+    const ty = y0 + Math.max(0.2, (H - th) * 0.42);
+    s.addShape('rect', { x: MX, y: ty - 0.32, w: 0.6, h: 0.05, fill: { color: STYLE.accent }, line: { type: 'none' }, objectName: 'focus:rule' });
+    s.addText(t, { x: MX, y: ty, w: aw, h: th, fontFace: k === 'statement' ? STYLE.fontDisplay : STYLE.font, fontSize: fz,
+      bold: k === 'statement', color: k === 'statement' ? STYLE.ink : STYLE.body, valign: 'top', margin: 0, objectName: 'focus:anchor' });
+    if (k === 'statement' && sec.text) {
+      const bx = MX + aw + 0.45, bw = CW - aw - 0.45;
+      if (bw > 1.6) { s.addShape('line', { x: bx, y: ty + th - 0.9, w: bw, h: 0.0001, line: { color: STYLE.line, width: 1 } });
+        sub(sec.text, bx, ty + th - 0.72, bw, 1.2, sz(13)); }
+      else sub(sec.text, MX, ty + th + 0.25, aw, 0.9, sz(14));
+    }
+  } else if (k === 'icon' || k === 'iconText') {
+    const d = 2.1;
+    if (v === 'center' || k === 'icon') {
+      iconMark(s, sec.icon || sec.title, MX + (CW - d) / 2, y0 + Math.max(0.1, (H - d - 1.2) / 2), d, { round: true, name: 'focus:anchor' });
+      const ly = y0 + Math.max(0.1, (H - d - 1.2) / 2) + d + 0.3;
+      sub(sec.label, MX + CW * 0.2, ly, CW * 0.6, 0.45, sz(20), { align: 'center', bold: true, color: STYLE.ink });
+      sub(sec.text, MX + CW * 0.2, ly + (sec.label ? 0.5 : 0), CW * 0.6, 0.8, sz(15), { align: 'center' });
+    } else {
+      const lw = CW * 0.4;
+      iconMark(s, sec.icon || sec.title, MX + (lw - d) / 2, cy - d / 2, d, { round: true, name: 'focus:anchor' });
+      const bx = MX + lw + 0.3, bw = CW - lw - 0.3;
+      const lab = sec.label ? 0.55 : 0;
+      const th = estTextH(sec.text || '', bw, sz(18), 1.5);
+      const by = cy - (lab + th) / 2;
+      sub(sec.label, bx, by, bw, 0.5, sz(22), { bold: true, color: STYLE.ink });
+      sub(sec.text, bx, by + lab, bw, th + 0.1, sz(18));
+    }
+  } else if (k === 'twoText') {
+    const ts = (sec.texts || []).slice(0, 2).map(DENSE.pt3), gap = 0.7, w = (CW - gap) / 2;
+    const hs = ts.map(t => 0.55 + estTextH(t[1], w, sz(15), 1.5));
+    const hh = Math.max(...hs), ty = y0 + Math.max(0.2, (H - hh) * 0.45);
+    ts.forEach((t, i) => {
+      const x = MX + i * (w + gap);
+      s.addShape('rect', { x, y: ty, w, h: 0.035, fill: { color: STYLE.accent }, line: { type: 'none' }, objectName: 'focus:rule' });
+      sub(t[0], x, ty + 0.2, w, 0.45, sz(20), { bold: true, color: STYLE.ink });
+      sub(t[1], x, ty + 0.72, w, hh, sz(15));
+    });
+  } else if (k === 'chart') {
+    const cw = Math.min(CW * 0.72, 9.0), cx = MX + (CW - cw) / 2;
+    const th = sec.text ? 0.7 : 0, ch = Math.min(H - th - 0.2, 4.0), ty = y0 + Math.max(0.05, (H - ch - th) / 2);
+    s.addShape('rect', { x: cx, y: ty - 0.25, w: 0.6, h: 0.05, fill: { color: STYLE.accent }, line: { type: 'none' }, objectName: 'focus:rule' });
+    compChart(s, sec.chart, (sec.chart || {}).type === 'donut' ? 'donut' : 'bar', cx, ty, cw, ch);
+    sub(sec.text, cx, ty + ch + 0.15, cw, 0.6, sz(14), { align: 'center' });
+  }
+}
 /* 取 --name=value 参数值（路径里含 '=' 时 split('=')[1] 会截断，用 slice 精确取） */
 const _argVal = (name) => {
   const a = process.argv.find(x => x.startsWith(name + '='));
@@ -2631,6 +2714,81 @@ CONTENT.sections.forEach((sec) => {
       s.addText(m[1], { x: x + 0.15, y: cY, w: mw - 0.3, h: _C ? Math.min(M.capH, reg.y + cardH - cY - 0.06) : M.capH, align: 'center',
         fontFace: STYLE.font, fontSize: sz(11.5), color: STYLE.body });
     });
+  } else if (type === 'dashboard') {
+    /* M13 多图表综合页：关键数字条（可带图标）→ 2–4 张图（共用配色 / 坐标上限 / 图例，①②③④）→ 解读行 */
+    const cs = DENSE.dashCharts(sec), n = Math.max(1, cs.length), leg = DENSE.dashLegend(cs);
+    const km = (sec.keyMetrics || []).slice(0, DENSE.DASH_MAX_KM).map(DENSE.kv3);
+    const pts = (sec.points || []).slice(0, DENSE.DASH_MAX_PTS).map(DENSE.pt3).map(p => [p[0], p[1]]);
+    let y = bodyY + 0.05, yb = bodyBottom;
+    if (km.length) {
+      const kh = 0.86, gap = 0.2, cw = (CW - gap * (km.length - 1)) / km.length;
+      km.forEach((m, i) => {
+        const cx = MX + i * (cw + gap);
+        s.addShape('roundRect', { x: cx, y, w: cw, h: kh, rectRadius: rr(0.1), fill: { color: STYLE.surface }, line: { type: 'none' }, objectName: 'km:card' });
+        const ix = m[2] ? 0.62 : 0;
+        if (m[2]) iconMark(s, m[2], cx + 0.18, y + (kh - 0.44) / 2, 0.44);
+        s.addText([
+          { text: m[0], options: { fontFace: STYLE.fontDisplay, fontSize: 24, bold: true, color: STYLE.accent, breakLine: true } },
+          { text: m[1], options: { fontFace: STYLE.font, fontSize: sz(11), color: STYLE.body } },
+        ], { x: cx + 0.18 + ix, y: y + 0.04, w: cw - 0.36 - ix, h: kh - 0.08, valign: 'middle', margin: 0 });
+      });
+      y += kh + 0.22;
+    }
+    if (leg.length) {
+      const dc = dataColors(styleArg);
+      s.addText(leg.map((nm, k) => ({ text: '■ ' + nm + '    ', options: { color: dc[k % dc.length] } })),
+        { x: MX, y, w: CW, h: 0.28, fontFace: STYLE.font, fontSize: sz(10.5), margin: 0, objectName: 'dash:legend' });
+      y += 0.34;
+    }
+    if (pts.length) { const rh = 0.98; readoutRow(s, [], pts, MX, yb - rh, CW, rh); yb -= rh + 0.2; }
+    const colsN = n, rowsN = 1, gap = 0.22;   // M13：2–4 张图一行排开（坐标底边对齐，四张也不叠两行——两行时每张不足 1.2in，原生图表读不清）
+    const cw = (CW - gap * (colsN - 1)) / colsN, ch = (yb - y - gap * (rowsN - 1)) / rowsN;
+    cs.forEach((c, k) => {
+      const cx = MX + (k % colsN) * (cw + gap), cy = y + Math.floor(k / colsN) * (ch + gap);
+      s.addShape('roundRect', { x: cx, y: cy, w: cw, h: ch, rectRadius: rr(0.1), fill: { color: STYLE.surface }, line: { type: 'none' }, objectName: 'dash:cell' });
+      s.addText(c.cap || '', { x: cx + 0.18, y: cy + 0.1, w: cw - 0.36, h: 0.3, align: 'center', fontFace: STYLE.font, fontSize: sz(11.5), bold: true, color: STYLE.faint, margin: 0 });
+      const cc = Object.assign({}, c, leg.length ? { legend: false } : {});
+      compChart(s, cc, cc.type === 'donut' ? 'donut' : 'bar', cx + 0.12, cy + 0.44, cw - 0.24, ch - 0.54);
+    });
+  } else if (type === 'magazine') {
+    /* M13 杂志型：左大图（≈54%）+ 右栏「观点 → 大数字 → 带图标要点」，右栏整体垂直居中 */
+    const im = sec.image || {};
+    const iw = CW * 0.535, gap = 0.4, rx = MX + iw + gap, rw = CW - iw - gap;
+    const top = bodyY + 0.05, h = bodyBottom - top;
+    addImageEl(s, im.src || '', MX, top, iw, h, PT.image && PT.image.radius, { placeholder: !!im.placeholder || !im.src, layout: 'half', fit: im.fit });
+    const ms = (sec.metrics || []).slice(0, DENSE.MAG_MAX_METRICS).map(DENSE.kv3);
+    const pts = (sec.points || []).slice(0, DENSE.MAG_MAX_PTS).map(DENSE.pt3);
+    const fzPull = sz(17), fzK = sz(13), fzV = sz(11.5);
+    const pullH = sec.pull ? estTextH(sec.pull, rw, fzPull, 1.5) + 0.1 : 0;
+    const mH = ms.length ? 0.95 : 0;
+    const ptH = pts.map(p => Math.max(0.5, estTextH(p[0], rw - 0.62, fzK, 1.3) + (p[1] ? estTextH(p[1], rw - 0.62, fzV, 1.5) : 0) + 0.06));
+    const blockH = pullH + (pullH ? 0.3 : 0) + mH + (mH ? 0.3 : 0) + ptH.reduce((a, b) => a + b, 0) + Math.max(0, pts.length - 1) * 0.18;
+    let y = top + Math.max(0, (h - blockH) / 2);
+    if (sec.pull) { s.addText(sec.pull, { x: rx, y, w: rw, h: pullH, fontFace: STYLE.fontDisplay, fontSize: fzPull, bold: true, color: STYLE.ink, valign: 'top', margin: 0 }); y += pullH + 0.3; }
+    if (ms.length) {
+      const mw = (rw - 0.2 * (ms.length - 1)) / ms.length;
+      ms.forEach((m, i) => {
+        const mx = rx + i * (mw + 0.2);
+        s.addShape('roundRect', { x: mx, y, w: mw, h: mH, rectRadius: rr(0.1), fill: { color: STYLE.surface }, line: { type: 'none' }, objectName: 'km:card' });
+        const ix = m[2] ? 0.56 : 0;
+        if (m[2]) iconMark(s, m[2], mx + 0.16, y + (mH - 0.4) / 2, 0.4);
+        s.addText([
+          { text: m[0], options: { fontFace: STYLE.fontDisplay, fontSize: 32, bold: true, color: STYLE.accent, breakLine: true } },
+          { text: m[1], options: { fontFace: STYLE.font, fontSize: sz(10.5), color: STYLE.body } },
+        ], { x: mx + 0.16 + ix, y: y + 0.04, w: mw - 0.3 - ix, h: mH - 0.08, valign: 'middle', margin: 0 });
+      });
+      y += mH + 0.3;
+    }
+    pts.forEach((p, i) => {
+      iconMark(s, p[2] || p[0], rx, y + 0.02, 0.42);
+      s.addText([
+        { text: p[0], options: { fontSize: fzK, bold: true, color: STYLE.ink, breakLine: !!p[1] } },
+        ...(p[1] ? [{ text: p[1], options: { fontSize: fzV, color: STYLE.body } }] : []),
+      ], { x: rx + 0.6, y, w: rw - 0.62, h: ptH[i], fontFace: STYLE.font, valign: 'top', margin: 0 });
+      y += ptH[i] + 0.18;
+    });
+  } else if (type === 'focus') {
+    focusPage(s, sec, bodyY, bodyBottom);
   } else if (type === 'kpi') {
     const K = PT.kpi;
     const hreg = REGIONS.regionOf('kpi', 'hero') ||
@@ -3759,6 +3917,7 @@ CONTENT.sections.forEach((sec) => {
     return String(b[0] || '') + (b[1] == null ? '' : ' ' + b[1]) + (b[2] == null ? '' : '/' + b[2]);
   }).join('；'));
   if (sec.levels) _notes.push('层级：' + sec.levels.map(l => (isRec(l) ? l.t : l[0]) || '').join(' → '));
+  DENSE.overflow(sec).forEach(o => _notes.push('（版面上限外，移入备注）' + o[1]));
   if (sec.soWhat) _notes.push('结论：' + sec.soWhat);
   if (sec.layoutPreset) _notes.push('布局骨架：' + sec.layoutPreset);
   if (flagItems.length) _notes.push('待核实（需二次确认）：' + flagItems.join('；'));

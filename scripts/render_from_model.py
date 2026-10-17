@@ -38,7 +38,8 @@ PAGE_TO_PRESET = ((LC.get('layoutSystem') or {}).get('pageToPreset') or {})
 IMAGE_SPEC = LC.get('imageSpec') or {}
 sys.path.insert(0, str(ROOT / 'scripts'))
 import lib_chart_svg as LCS  # noqa: E402
-import lib_density as LD  # noqa: E402
+import lib_density as LD
+import lib_dense as LDN  # noqa: E402
 SKIN: dict = {}
 
 CONTENT_RE = re.compile(
@@ -97,6 +98,7 @@ def cite(text: str) -> str:
 
 # M12 页面装饰开关（与 scripts/lib_chrome.js 同口径）：默认无眉标、无页脚注释行；原文锁定时两者默认开启
 _CHROME = {'showEyebrow': False, 'showFootnotes': False, 'pageNumber': True}
+_ICON_STYLE = 'line'   # M13：模型级 iconStyle（line / fill），全篇统一
 
 
 def chrome_flags(model: dict) -> dict:
@@ -160,6 +162,11 @@ def open_sec(i: int, ptype: str, extra: str = '', sec: dict = None) -> str:
     sid = sec_anchor(i, sec)
     # extra 里的裸 band--* 类名并入 class（此前会被写成无效属性）
     toks = extra.split(' ') if extra else []
+    # M13：简单页（focus）有意留白，走稀疏页门禁；网格页（dashboard / magazine）由网格约束高度
+    if ptype == 'focus':
+        toks.append('band--focus')
+    elif ptype in ('dashboard', 'magazine'):
+        toks.append('band--grid')
     cls_extra = [t for t in toks if t.startswith('band--') and '=' not in t]
     attr = ' '.join(t for t in toks if t and t not in cls_extra)
     cls = ' '.join(['band'] + cls_extra)
@@ -261,8 +268,9 @@ def pick_icon_name(title: str = '', idx: int = 0) -> str:
 def card_head(title: str, idx: int = 0, icon_name: str | None = None) -> str:
     """卡片头：图标路标 + 标题（与 scaffold 的 .card__hd + .card__ico 同源）。
     icon_name 写入 data-icon，供 extract_model / build_pptx 真导出同名图标。"""
-    name = icon_name or pick_icon_name(title, idx)
-    return (f'<div class="card__hd"><div class="card__ico" data-icon="{esc(name)}">{pick_icon(title, idx)}</div>'
+    name = icon_name if icon_name in ICONS else pick_icon_name(title, idx)
+    fill = ' card__ico--fill' if _ICON_STYLE == 'fill' else ''
+    return (f'<div class="card__hd"><div class="card__ico{fill}" data-icon="{esc(name)}">{ICONS[name]}</div>'
             f'<h3 class="t-h3">{esc(title)}</h3></div>')
 
 
@@ -1052,6 +1060,92 @@ def r_chapter(i, sec):
             + '</section>')
 
 
+# ── M13 高密度复合版式（双端同规则：scripts/lib_dense.py ↔ build_pptx.js densePlan）──
+def _ico(name, fill=None, cls='ico'):
+    """图标路标：线性（浅色底 + 强调色描边）或填充（强调色实底 + 反白描边）；模型级 iconStyle 统一，不混用。"""
+    nm = name if name in ICONS else pick_icon_name(name or '', 0)
+    f = _ICON_STYLE == 'fill' if fill is None else fill
+    return f'<span class="{cls} {cls}--{"fill" if f else "line"}" data-icon="{esc(nm)}">{ICONS[nm]}</span>'
+
+
+def _km_icon_tiles(km) -> str:
+    cells = []
+    for m in km[:LDN.DASH_MAX_KM]:
+        v, k, ic = LDN.kv3(m)
+        cells.append('<div class="kstrip__c dkm">' + (_ico(ic) if ic else '')
+                     + f'<div><div class="kstrip__v">{esc(v)}</div><div class="kstrip__k">{cite(k)}</div></div></div>')
+    return f'    <div class="kstrip rv" style="--n:{max(1, len(cells))}">' + ''.join(cells) + '</div>\n'
+
+
+def r_dashboard(i, sec):
+    cs = LDN.dash_charts(sec)
+    n = max(1, len(cs))
+    leg = LDN.dash_legend(cs)
+    body = _km_icon_tiles(sec['keyMetrics']) if sec.get('keyMetrics') else ''
+    if leg:
+        body += ('    <div class="dash__legend rv">' + ''.join(
+            f'<span><i style="background:var(--c{k + 1},var(--accent))"></i>{esc(nm)}</span>' for k, nm in enumerate(leg))
+            + '</div>\n')
+    w, h = {1: (900, 300), 2: (620, 260), 3: (420, 240), 4: (320, 240)}[n]
+    figs = ''.join(f'      <div class="fig dash__c"><div class="fig__cap">{esc(c.get("cap") or "")}</div>'
+                   + chart_svg(dict(c, legend=False) if leg else c, i * 10 + k, None, w, h) + '</div>\n'
+                   for k, c in enumerate(cs))
+    body += f'    <div class="dash dash--{n} rv">\n{figs}    </div>\n'
+    pts = (sec.get('points') or [])[:LDN.DASH_MAX_PTS]
+    if pts:
+        body += _readout_row([], [list(LDN.pt3(p)[:2]) for p in pts])
+    return wrap(i, 'dashboard', body, sec, f' data-charts="{n}"')
+
+
+def r_magazine(i, sec):
+    im = sec.get('image') or {}
+    src = im.get('src') or ''
+    fig = _media_figure(src, 'half', im.get('fit') or 'cover', im.get('caption') or '',
+                        placeholder=bool(im.get('placeholder')) or not src)
+    mets = ''.join(f'<div class="mag__m">{_ico(ic) if ic else ""}<div><div class="metric__v t-metric">{esc(v)}</div>'
+                   f'<div class="metric__k">{cite(k)}</div></div></div>'
+                   for v, k, ic in (LDN.kv3(m) for m in (sec.get('metrics') or [])[:LDN.MAG_MAX_METRICS]))
+    pts = ''.join(f'<li>{_ico(ic or k)}<div><div class="readout__k">{cite(k)}</div>'
+                  + (f'<p class="readout__v">{cite(v)}</p>' if v else '') + '</div></li>'
+                  for k, v, ic in (LDN.pt3(p) for p in (sec.get('points') or [])[:LDN.MAG_MAX_PTS]))
+    side = ((f'<p class="mag__pull t-h3">{cite(sec["pull"])}</p>' if sec.get('pull') else '')
+            + (f'<div class="mag__ms">{mets}</div>' if mets else '')
+            + (f'<ul class="mag__pts">{pts}</ul>' if pts else ''))
+    body = f'    <div class="mag rv">\n      <div class="mag__fig">\n{fig}      </div>\n      <div class="mag__side">{side}</div>\n    </div>\n'
+    return wrap(i, 'magazine', body, sec)
+
+
+def r_focus(i, sec):
+    """M13 简单版式：单一锚点放大 + 不对称留白 + 克制装饰（大号淡色序号 / 柔和圆形底 / 细分隔线）。"""
+    k, v = LDN.focus_kind(sec), LDN.focus_variant(sec)
+    deco = f'<div class="focus__deco" aria-hidden="true">{esc(sec.get("decoNo") or "")}</div>' if sec.get('decoNo') else ''
+    if k == 'number':
+        n = sec.get('number') or []
+        nv, nk, ic = LDN.kv3(n)
+        anchor = f'<div class="focus__num">{esc(nv)}</div><p class="focus__cap t-lead">{cite(nk)}</p>'
+        sub = f'<p class="focus__t t-body">{cite(sec["text"])}</p>' if sec.get('text') else ''
+    elif k == 'statement':
+        anchor = f'<p class="focus__stmt">{cite(sec.get("statement") or "")}</p>'
+        sub = f'<p class="focus__t t-body">{cite(sec["text"])}</p>' if sec.get('text') else ''
+    elif k in ('icon', 'iconText'):
+        anchor = _ico(sec.get('icon') or sec.get('title') or '', cls='focus__ico')
+        sub = (f'<p class="focus__lab t-h3">{cite(sec["label"])}</p>' if sec.get('label') else '') + \
+              (f'<p class="focus__t t-lead">{cite(sec["text"])}</p>' if sec.get('text') else '')
+    elif k == 'twoText':
+        ts = [LDN.pt3(t) for t in (sec.get('texts') or [])[:2]]
+        anchor = ''.join(f'<div class="focus__col"><div class="focus__k t-h3">{cite(a)}</div><p class="t-body">{cite(b)}</p></div>' for a, b, _ in ts)
+        sub = ''
+    elif k == 'chart':
+        anchor = '<div class="fig focus__fig">' + chart_svg(sec.get('chart') or {}, i, None, 760, 300) + '</div>'
+        sub = f'<p class="focus__t t-body">{cite(sec["text"])}</p>' if sec.get('text') else ''
+    else:
+        anchor = f'<p class="focus__para t-lead">{cite(sec.get("text") or "")}</p>'
+        sub = ''
+    body = (f'    <div class="focus focus--{v} focus--{k} rv">{deco}\n      <div class="focus__a">{anchor}</div>\n'
+            + (f'      <div class="focus__b">{sub}</div>\n' if sub else '') + '    </div>\n')
+    return wrap(i, 'focus', body, sec, f' data-focus="{k}" data-variant="{v}"')
+
+
 RENDERERS = {
     'chapter': r_chapter,
     'points': r_points, 'metrics': r_metrics, 'kpi': r_kpi, 'table': r_table,
@@ -1062,6 +1156,7 @@ RENDERERS = {
     'pyramid': r_pyramid, 'halftable': r_halftable, 'matrix': r_matrix,
     'sankey': r_info, 'treemap': r_info, 'boxplot': r_info, 'network': r_info,
     'marimekko': r_info, 'streamgraph': r_info,
+    'dashboard': r_dashboard, 'magazine': r_magazine, 'focus': r_focus,
 }
 
 
@@ -1082,7 +1177,8 @@ def _fill_chrome(t: str, model: dict, body: str) -> str:
 
 
 def render_body(model: dict) -> str:
-    global _LOCKED, _CHROME
+    global _LOCKED, _CHROME, _ICON_STYLE
+    _ICON_STYLE = 'fill' if model.get('iconStyle') == 'fill' else 'line'
     _LOCKED = bool(model.get('contentLocked'))
     _CHROME = chrome_flags(model)
     model = strip_footnotes(model, _CHROME)

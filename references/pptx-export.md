@@ -129,6 +129,10 @@ HTML 侧仍用 MD3 clamp；双端都以「最后一排可读」为准（`present
 >
 > **自适应排版**：所有文本块按可用高度自适应字号/行距（`fitFont`），表格行高按可用高度计算，列表/泳道/矩阵/卡片行高随容器收敛——保证不越界、不重叠（`validate_pptx.py` 硬拦越界与文本溢出）。**几何铁律**：① 架构节点标题/注解按实际节点高度钳制（注解不得「浮回」标题上，空间不足降级单框混排）；② 图表类目标签含在图高 `h` 内（禁画到 `y+h` 外压 so-what）；③ 多栏均分用**版心全宽**推导（`(CW-(n-1)×gap)/n`，禁用单栏宽当总宽）；④ 图例落图区底部（`bodyBottom-0.28`），禁用页面底部固定偏移；⑤ KPI 支撑指标列在 `dividerX` 右侧（禁全宽默认返回压住 hero）；⑥ 有图注时图片下界收到 `contentBottomWithNote`。Agenda：>8 条自动双列、>12 条自动分页（Agenda I/II）、长标题截断全称沉 notes（`titleMaxChars=36`）、两通道列优先一致。
 
+> **正文行距（M12 单源 `containers.lineSpacing`）**：普通文本框里的段落与列表默认 **1.5 倍**，高度不够时降到 **1.3 倍**，不得更低。PPTX 写精确磅值（`lineSpacing = 字号 × 1.5 / 1.3`，不用 spcPct——150% 实际约等于 1.8 倍字号）；`fitFont` 先在同一字号试 1.5 → 1.3，仍放不下才降字号。HTML 用 `--lh-text`，放不下时 `ui.js` 给该页加 `.lh-tight`（1.3）。求解器容量按同一行距折算（`lib_solver` textK）。`validate_pptx.py` 的 `LINE_SPACING_TIGHT`、`validate_report.py` 的「正文行距」检查兜底。
+>
+> **页面装饰（M12 默认做减法）**：默认不显示页头眉标（eyebrow）和页脚小字（footnote / note），只留一个 9pt 浅色页码（`chrome:pageno`，封面不显示）；省下的高度交给求解器排正文。模型级开关：`showEyebrow`（默认 false）、`showFootnotes`（默认 false）、`pageNumber`（默认 true）；`contentLocked`（美化已有 PPTX）默认全显示，原文一字不丢。隐藏的页脚小字写进演讲者备注；**带 `[n]` 引用的来源行与 Exhibit 来源行照常显示**；章节扉页的章名眉标保留。
+
 > 保真机制：每种子页型对应 HTML 的一种锁定版式（`components.md` §36d/§37–38b/§39–42 ↔ 页型表），坐标/字号按同一套常量映射（`layout-constants.json` 的 `pageTypes` + `modeTypeScale`）。**三模式独立比例尺**：research 密排（正文 10.5pt、h1 22pt）；architecture 与 presentation 同基但 diagram 走全幅几何。图表颜色：**12 套风格各有自己的编码色板 c1–c5**（单源 `styleDataColors` / `styleDataColorsDark`，按 `model.theme` 选择），多系列图表自动取用（`dataColors(style, theme)`）；未登记风格时回落「accent / faint / body / line」四阶单色系。**页型字段与必填约束以 `model-schema.json` 为唯一事实源**（`:array` = 非空数组、`:str` = 非空字符串），浏览器端 `validateModel` 与 `extract_model.py` 校验同一份定义。
 
 ## 页序预览（已内置三模板）

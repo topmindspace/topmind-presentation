@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [0.2.9] - 2026-10-17
+
+### M12 行距、页面减法与复杂信息图
+- 正文行距：普通文本框的段落与列表默认 1.5 倍，高度不够时降到 1.3 倍，不再更低。HTML（`--lh-text` / `.lh-tight`）与 PPTX（精确磅值）同源于 `containers.lineSpacing`，求解器容量估算同步折算；新增 `LINE_SPACING_TIGHT`（validate_pptx）与「正文行距」检查（validate_report）。
+- 页面做减法：默认去掉页头眉标和页脚小字，只留一个 9pt 浅色页码；省下的高度交给求解器排正文。新增模型开关 `showEyebrow`、`showFootnotes`、`pageNumber`；美化路线默认全显示。隐藏的页脚小字写进演讲者备注，带 `[n]` 引用的来源行与 Exhibit 来源行照常显示。保真门禁、往返核对、美化核对与像素 / 版式基线同步更新。
+- PPTX 时间线：2–5 个阶段时改为阶段卡 + 轴线，与 HTML 一致；章节扉页结论两端都显示；研究模式保真位置 p90 从 0.118 降到约 0.10，留出余量。
+- 版式：要点 + 指标页改为左列表右指标卡；短段落双栏改为卡片网格；金句页居中且避免单字换行；showcase 两处触到字号下限的文案改写。
+- 第二次全新主题试跑（社区养老服务站 · 演示模式，15 页，收进 `tests/trial/yanglao.model.json` 并接入 CI）。发现并修复：表格页的 `points` 两端都没渲染（现在表下一行解读卡，HTML 与 PPTX 同构）；金句页缺 `author` 时 PPTX 显示「—— undefined」；页型必填字段（`model-schema` 的 `pageTypes.required`）此前没有门禁，validate_report 新增「页型必填字段齐全」检查。
+- 新增 `references/infographics-guide.md`（复杂信息图指南）：模型字段与示例、选型与组合规则、PPTX 原生图表与形状的边界。
+- 文档、四个示例、试跑样例、主题总览、风格画廊、showcase 与 README 截图全部按新行为重新生成；新增 `tests/m12/test_m12.py` 并接入 CI。
+
 ## [0.2.8] - 2026-10-17
 
 ### M11 复审、安装命令与全新主题试跑

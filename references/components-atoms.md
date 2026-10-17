@@ -627,7 +627,7 @@ python scripts/prepare_images.py ./photos --layout grid --mode path   # 大图�
 ## 结论条 `.sowhat`（本页重点收口）
 
 > **语义**：本页关键 takeaway，不是脚注。  
-> **版式**：MD3 tonal surface——`accent-soft` 满铺 + 细描边 + 略大于正文的 `--fw-title` / `line-height:1.65` + 舒适内边距（`--sp-5`/`--sp-6`）。**禁止左侧 accent 装饰轨**（anti-AI-flavor）。  
+> **版式**：MD3 tonal surface——`accent-soft` 满铺 + 细描边 + 略大于正文的 `--fw-title` / `line-height:var(--lh-text)`（1.5，不足 1.3） + 舒适内边距（`--sp-5`/`--sp-6`）。**禁止左侧 accent 装饰轨**（anti-AI-flavor）。  
 > **标签**：**默认不显示**「So what / SO WHAT / 结论」字样；只写句子（或 `.sowhat__stack` 短多行）。不提供标签变体。  
 > **间距**：与上方主内容 `margin-top: clamp(28px,3.6vh,48px)`（≥`--sp-6` 量级），禁止贴底；善用页内呼吸，不挤、不空。  
 > **PPTX**：`soWhatBar()` 同源 soft 满铺衬底 + 正文（无左轨），**不绘制 SO WHAT 字符串**。

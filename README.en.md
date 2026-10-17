@@ -9,7 +9,7 @@ English | [中文](./README.md)
 
 An agent skill for presentations. It turns your material into a **single-file, page-turning HTML deck** and, when needed, an **editable 16:9 PPTX**. Both come from one content model, so colours, layouts and numbers match. It can also re-lay-out an existing PPTX without changing a word.
 
-- Version: **v0.2.8**
+- Version: **v0.2.9**
 - Agents start at `SKILL.md`; this README is for people installing and maintaining the skill
 - The generated content and the skill's own docs are in Chinese
 
@@ -29,6 +29,8 @@ An agent skill for presentations. It turns your material into a **single-file, p
 | Illustrations | Text-and-image layouts (full, image-left/text-right, bleed, grid, compare, logo wall); layer diagrams, swimlanes, flows and topologies export as editable native shapes |
 | Beautify an existing deck | The original is read-only; every word, number, image and speaker note is checked before the new deck is delivered |
 | Quality gates | HTML and PPTX must each pass strict with 0 errors and 0 warnings; page-by-page HTML↔PPTX fidelity check; rendered pages are checked for fill, balance and pixel regressions |
+| Page layout | Body text uses 1.5× line spacing by default (1.3× when space is short); no eyebrow or footer note by default, only a quiet page number, so the space goes to content (`showEyebrow` / `showFootnotes` / `pageNumber` switches) |
+| Complex infographics | How to write composite layouts, paired charts, small multiples and image layouts, and where PPTX fidelity ends: [`references/infographics-guide.md`](./references/infographics-guide.md) (Chinese) |
 | Extensible | Extension points for custom layouts, styles and charts within the rules: [`references/extending.md`](./references/extending.md) |
 
 ## Five routes

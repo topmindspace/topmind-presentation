@@ -17,6 +17,8 @@
 | 强调某一格 / 某一步 | 单元 / 步骤写成 `{ "t": "...", "accent": true }` | 矩阵、泳道、步骤、分层图通用，两端同样高亮 |
 | 编号与出处 | `exhibitNo`、`cap`、`source`、`footnote`、`soWhat` | 研究模式一个 `exhibitNo` 都不写时自动编号；写了任意一个即按手写编号 |
 | 待核实标注 | `flags: ["…"]` | 渲染为强调色核对条，提醒用户确认 |
+| 页眉页脚 | 顶层 `showEyebrow`、`showFootnotes`（默认 false）、`pageNumber`（默认 true） | 默认只留克制页码，隐藏的页脚小字进演讲者备注；带 `[n]` 引用的来源行照常显示；美化路线（`contentLocked`）默认全显示 |
+| 复杂信息图的写法与组合 | 见 `infographics-guide.md` | 字段示例、选型组合、PPTX 原生图表与形状的边界 |
 
 ## 二、维护者扩展（改单源 + 跑门禁）
 

@@ -9,7 +9,7 @@
 
 一个给智能体用的演示文稿技能：把材料做成**可翻页的单文件 HTML**，需要时再导出**可编辑的 16:9 PPTX**。两份交付出自同一份内容模型，配色、版式和数字一致。也能把已有的 PPTX 原文不动地重新排版。
 
-- 版本：**v0.2.8**
+- 版本：**v0.2.9**
 - 智能体从 `SKILL.md` 进入；本 README 写给安装和维护的人
 
 <p align="center">
@@ -28,6 +28,8 @@
 | 插图 | 图文混排（满版 / 左图右文 / 出血 / 网格 / 对比 / Logo 墙）；分层图、泳道、流程、拓扑在 PPTX 里是可编辑的原生形状 |
 | 已有 PPT 美化 | 原稿只读，逐字逐数、图片与演讲者备注核对一致后出新稿 |
 | 质量门禁 | HTML 与 PPTX 各自 strict 0 错误 0 警告才交付；双端逐页保真比对；渲染后检查填充率、重心和像素回归 |
+| 版面 | 正文行距默认 1.5 倍（放不下降到 1.3 倍）；默认不放眉标和页脚小字，只留页码，省下的空间给正文（`showEyebrow` / `showFootnotes` / `pageNumber` 可开关） |
+| 复杂信息图 | 复合版式、双图对照、小图组、图文混排的写法与 PPTX 边界见 [`references/infographics-guide.md`](./references/infographics-guide.md) |
 | 可扩展 | 规则内自定义版式、风格、图表的扩展点见 [`references/extending.md`](./references/extending.md) |
 
 ## 五条路线

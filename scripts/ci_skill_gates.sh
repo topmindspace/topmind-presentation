@@ -163,6 +163,8 @@ run_one() {
       [[ -d node_modules/playwright ]] || npm ci --no-audit --no-fund >/dev/null 2>&1 || npm install --no-audit --no-fund >/dev/null
       # M11：全新主题端到端试跑（研究模式 · warm-sand · 复合版式 / 瀑布 / 矩阵 / 示意图 / 图文混排），make_deck 六步全过
       "$PY" scripts/make_deck.py tests/trial/jiejiao.model.json --out dist/trial --fidelity || { echo "ci_skill_gates: 端到端试跑失败（tests/trial）" >&2; exit 1; }
+      # M12：第二个全新主题（演示模式 · 社区养老：阶段卡时间线 / 主图 + 小图组 / 瀑布 / 表 + 解读卡 / 金句）
+      "$PY" scripts/make_deck.py tests/trial/yanglao.model.json --out dist/trial --fidelity || { echo "ci_skill_gates: 端到端试跑失败（tests/trial/yanglao）" >&2; exit 1; }
       "$PY" scripts/check_fidelity.py --examples --strict || { echo "ci_skill_gates: HTML↔PPTX 保真门禁失败（逐条修复提示见上）" >&2; exit 1; }
       "$PY" scripts/validate_pptx.py "dist/regression/native-rows.pptx" --strict \
         --model="tests/charts/native-rows.model.json" >/dev/null || { echo "ci_skill_gates: 行式原生图表探针失败" >&2; exit 1; }

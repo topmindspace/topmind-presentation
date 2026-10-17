@@ -238,8 +238,9 @@ PPTX 无"页高"概念（固定 13.333×7.5in），对应纪律是**内容不越
   /* 风格语汇基线（每套风格可覆盖；清单 = layout-constants.styleIdentity） */
   --letter-display: -0.03em;
   --letter-eyebrow: 0.11em;
-  --lh-body: 1.68;
-  --lh-lead: 1.62;
+  --lh-text: 1.5;   /* 正文行距：默认 1.5；高度不足时 .lh-tight 降到 1.3，不再更低 */
+  --lh-body: var(--lh-text);
+  --lh-lead: var(--lh-text);
   --link: var(--accent-text);
   /* 间距 · 8pt */
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
@@ -283,7 +284,7 @@ html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;
 body{
   margin:0;background:var(--bg);color:var(--text);
   font-family:var(--font-body);
-  font-size:var(--fs-body);line-height:1.65;letter-spacing:.01em;
+  font-size:var(--fs-body);line-height:var(--lh-text);letter-spacing:.01em;
   -webkit-font-smoothing:antialiased;font-feature-settings:"kern" 1,"liga" 1;
   transition:background-color .28s cubic-bezier(.2,0,0,1),color .28s cubic-bezier(.2,0,0,1);
 }
@@ -295,10 +296,10 @@ h1,h2,h3,h4{font-family:var(--font-display);font-weight:var(--fw-title);color:va
 .t-h1{font-size:var(--fs-h1);line-height:1.18;letter-spacing:-.022em;font-weight:var(--fw-title)}
 .t-h2{font-size:var(--fs-h2);line-height:1.25;letter-spacing:-.015em;font-weight:var(--fw-title)}
 .t-h3{font-size:var(--fs-h3);line-height:1.35;letter-spacing:-.008em;font-weight:var(--fw-title)}
-.t-lead{font-size:var(--fs-lead);line-height:1.62;color:var(--text-2)}
-.t-body{font-size:var(--fs-body);line-height:1.68;color:var(--text-2)}
-.t-sm{font-size:var(--fs-sm);line-height:1.6;color:var(--text-3)}
-.t-xs{font-size:var(--fs-xs);line-height:1.55;color:var(--text-3)}
+.t-lead{font-size:var(--fs-lead);line-height:var(--lh-lead);color:var(--text-2)}
+.t-body{font-size:var(--fs-body);line-height:var(--lh-body);color:var(--text-2)}
+.t-sm{font-size:var(--fs-sm);line-height:var(--lh-text);color:var(--text-3)}
+.t-xs{font-size:var(--fs-xs);line-height:var(--lh-text);color:var(--text-3)}
 .t-metric{font-size:var(--fs-metric);line-height:1;letter-spacing:-.035em;font-weight:500;
   font-variant-numeric:tabular-nums}
 .t-eyebrow{font-size:var(--fs-xs);font-weight:600;letter-spacing:.11em;text-transform:uppercase;

@@ -4,7 +4,7 @@
   "theme": "light",
   "title": "topmind-presentation",
   "subtitle": "HTML + PPT 双交付 · 为正式商务演示而生",
-  "meta": "产品介绍 · 2026-10-11 · v0.2.8",
+  "meta": "产品介绍 · 2026-10-11 · v0.2.9",
   "agenda": [
     [
       "01",
@@ -155,7 +155,7 @@
           "icon": "数据"
         }
       ],
-      "footnote": "包名 @topmindspace/topmind-presentation · 当前线 0.2.8（latest）",
+      "footnote": "包名 @topmindspace/topmind-presentation · 当前线 0.2.9（latest）",
       "soWhat": "版本号与 tag 一致，装哪一版就用哪一版；升级、拒绝降级、同名替换三条规则都有测试。",
       "variant": "bento-grid"
     },

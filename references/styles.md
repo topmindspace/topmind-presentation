@@ -55,7 +55,7 @@ html[data-style="business-blue"] {
                "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
   --font-display: var(--font-body);
   --radius: 16px; --fw-display:700; --fw-title:600;
-  --letter-display:-.03em; --letter-eyebrow:.11em; --lh-body:1.68; --lh-lead:1.62; --link:#1b66c9;
+  --letter-display:-.03em; --letter-eyebrow:.11em; --lh-body:var(--lh-text); --lh-lead:var(--lh-text); --link:#1b66c9;
   --bg:#ffffff; --surface:#ffffff; --surface-1:#f8f9fa; --surface-2:#f1f3f4; --surface-3:#e8eaed;
   --surface-inv:#202124; --text:#202124; --text-2:#5f6368; --text-3:#80868b; --text-inv:#ffffff;
   --border:#dadce0; --border-soft:#e8eaed;
@@ -87,7 +87,7 @@ html[data-style="apple-mono"] {
   --radius: 20px; --fw-display:600; --fw-title:500;
   --fs-display: clamp(3rem,5.4vw,4.75rem);   /* typeBoost */
   --fs-h1: clamp(2.125rem,3.6vw,3.25rem);
-  --letter-display:-.04em; --letter-eyebrow:.12em; --lh-body:1.75; --lh-lead:1.7;
+  --letter-display:-.04em; --letter-eyebrow:.12em; --lh-body:var(--lh-text); --lh-lead:var(--lh-text);
   --gap:clamp(22px,2.2vw,36px); --link:#0071e3;
   --bg:#ffffff; --surface:#ffffff; --surface-1:#f5f5f7; --surface-2:#f5f5f7; --surface-3:#e8e8ed;
   --surface-inv:#1d1d1f; --text:#1d1d1f; --text-2:#6e6e73; --text-3:#86868b; --text-inv:#f5f5f7;
@@ -111,14 +111,14 @@ html[data-style="apple-mono"][data-theme="dark"] {
 **定位**：结构化、正式、咨询范。衬线标题 + 无衬线正文 + 细线框架 + 小圆角 + 高密表格。
 **适用**：战略、咨询、立项、可研、对标。
 **特点**：强调色为藏青；标题用衬线（Georgia/宋体），eyebrow 小字大写拉开字距；靠 1px hairline 与网格分块，几乎不用阴影。
-**语汇**：咨询范 · **serifDisplay** · 圆角 6（近直角）· 密度 dense · `--letter-eyebrow:.14em` · 行高收紧 1.55 · gap 收紧。
+**语汇**：咨询范 · **serifDisplay** · 圆角 6（近直角）· 密度 dense · `--letter-eyebrow:.14em` · 行高随全局 1.5（不足 1.3）· gap 收紧。
 
 ```css
 html[data-style="mckinsey"] {
   --font-body: "Inter","IBM Plex Sans",-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
   --font-display: "Georgia","Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;
   --radius: 6px; --fw-display:600; --fw-title:600;
-  --letter-display:-.015em; --letter-eyebrow:.14em; --lh-body:1.55; --lh-lead:1.5;
+  --letter-display:-.015em; --letter-eyebrow:.14em; --lh-body:var(--lh-text); --lh-lead:var(--lh-text);
   --gap:clamp(14px,1.3vw,22px);
   --bg:#ffffff; --surface:#ffffff; --surface-1:#f2f4f7; --surface-2:#f2f4f7; --surface-3:#e4e7ec;
   --surface-inv:#101828; --text:#101828; --text-2:#475467; --text-3:#667085; --text-inv:#ffffff;
@@ -149,7 +149,7 @@ html[data-style="brand-red"] {
   --font-body: "HarmonyOS Sans","PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,"Segoe UI",sans-serif;
   --font-display: var(--font-body);
   --radius: 14px; --fw-display:700; --fw-title:600;
-  --letter-display:-.025em; --letter-eyebrow:.12em; --lh-body:1.66; --lh-lead:1.6;
+  --letter-display:-.025em; --letter-eyebrow:.12em; --lh-body:var(--lh-text); --lh-lead:var(--lh-text);
   --bg:#ffffff; --surface:#ffffff; --surface-1:#faf7f7; --surface-2:#f5f0f0; --surface-3:#ece5e5;
   --surface-inv:#1f1a1b; --text:#1f1a1b; --text-2:#5d5456; --text-3:#8a8083; --text-inv:#ffffff;
   --border:#e2d9da; --border-soft:#ece5e5;
@@ -176,7 +176,7 @@ html[data-style="warm-sand"] {
   --font-body: "Inter","Source Han Sans","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
   --font-display: "Georgia","Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;
   --radius: 12px; --fw-display:600; --fw-title:600;
-  --letter-display:-.01em; --letter-eyebrow:.13em; --lh-body:1.72; --lh-lead:1.65;
+  --letter-display:-.01em; --letter-eyebrow:.13em; --lh-body:var(--lh-text); --lh-lead:var(--lh-text);
   --gap:clamp(18px,1.8vw,30px);
   --bg:#fbf9f6; --surface:#ffffff; --surface-1:#f6f2ec; --surface-2:#efe9df; --surface-3:#e6ded2;
   --surface-inv:#2a2521; --text:#2a2521; --text-2:#6b5f52; --text-3:#93836f; --text-inv:#f6f2ec;
@@ -205,7 +205,7 @@ html[data-style="deep-teal"] {
   --font-body: "Inter","Source Han Sans","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
   --font-display: var(--font-body);
   --radius: 12px; --fw-display:700; --fw-title:600;
-  --letter-display:-.028em; --letter-eyebrow:.11em; --lh-body:1.66; --lh-lead:1.6;
+  --letter-display:-.028em; --letter-eyebrow:.11em; --lh-body:var(--lh-text); --lh-lead:var(--lh-text);
   --bg:#ffffff; --surface:#ffffff; --surface-1:#f2f6f5; --surface-2:#e8f0ef; --surface-3:#dce7e5;
   --surface-inv:#14201e; --text:#14201e; --text-2:#4a5a57; --text-3:#73837f; --text-inv:#ffffff;
   --border:#cfdedc; --border-soft:#e0eae9;
@@ -234,7 +234,7 @@ html[data-style="graphite-dark"] {
   --font-body: "Inter","SF Pro Text","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
   --font-display: "Inter","SF Pro Display","PingFang SC",sans-serif;
   --radius: 14px; --fw-display:700; --fw-title:600;
-  --letter-display:-.03em; --letter-eyebrow:.1em; --lh-body:1.62; --lh-lead:1.55;
+  --letter-display:-.03em; --letter-eyebrow:.1em; --lh-body:var(--lh-text); --lh-lead:var(--lh-text);
   --gap:clamp(14px,1.4vw,24px);
   --bg:#f4f5f7; --surface:#ffffff; --surface-1:#eceef1; --surface-2:#e3e6ea; --surface-3:#d8dbdf;
   --surface-inv:#14171b; --text:#1a1d21; --text-2:#4b5158; --text-3:#767c84; --text-inv:#eef2f6;
@@ -265,7 +265,7 @@ html[data-style="indigo-violet"] {
   --font-body: "Inter","SF Pro Text","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
   --font-display: var(--font-body);
   --radius: 16px; --fw-display:700; --fw-title:600;
-  --letter-display:-.032em; --letter-eyebrow:.12em; --lh-body:1.68; --lh-lead:1.62;
+  --letter-display:-.032em; --letter-eyebrow:.12em; --lh-body:var(--lh-text); --lh-lead:var(--lh-text);
   --bg:#ffffff; --surface:#ffffff; --surface-1:#f4f4fb; --surface-2:#ececf7; --surface-3:#e0e0f0;
   --surface-inv:#1b1a2e; --text:#1b1a2e; --text-2:#52506b; --text-3:#7a779a; --text-inv:#ffffff;
   --border:#d7d7e8; --border-soft:#e6e6f2;
@@ -299,7 +299,7 @@ html[data-style="spectrum"] {
   --font-body: "Inter","SF Pro Text","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
   --font-display: var(--font-body);
   --radius: 14px; --fw-display:700; --fw-title:600;
-  --letter-display:-.03em; --letter-eyebrow:.1em; --lh-body:1.6; --lh-lead:1.55;
+  --letter-display:-.03em; --letter-eyebrow:.1em; --lh-body:var(--lh-text); --lh-lead:var(--lh-text);
   --gap:clamp(12px,1.2vw,20px);
   --bg:#fbfcfe; --surface:#ffffff; --surface-1:#f4f6fa; --surface-2:#eceff5; --surface-3:#dfe4ec;
   --surface-inv:#171a21; --text:#171a21; --text-2:#4d5566; --text-3:#7b8494; --text-inv:#ffffff;
@@ -385,7 +385,7 @@ PPTX 端读 `layout-constants.json` 的 `styles` / `stylesDark` / `styleDataColo
 ```css
 html[data-style="ink-academic"]{
 --font-body:"Inter","Source Han Sans","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
---radius:8px;--font-display:"Georgia","Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;--fw-display:600;--letter-eyebrow:.14em;--lh-body:1.6;--gap:clamp(14px,1.3vw,22px);
+--radius:8px;--font-display:"Georgia","Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;--fw-display:600;--letter-eyebrow:.14em;--lh-body:var(--lh-text);--gap:clamp(14px,1.3vw,22px);
 --bg:#ffffff;--surface:#ffffff;--surface-1:#f4f6f9;--surface-2:#eceff4;--surface-3:#dfe4eb;
 --surface-inv:#14181f;--text:#14181f;--text-2:#454d59;--text-3:#6b7380;--text-inv:#ffffff;
 --border:#d5dae1;--border-soft:#e4e8ee;
@@ -418,7 +418,7 @@ PPTX 端读 `layout-constants.json` 的 `styles` / `stylesDark` / `styleDataColo
 ```css
 html[data-style="coral-launch"]{
 --font-body:"HarmonyOS Sans","Inter","Source Han Sans","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;--font-display:var(--font-body);
---radius:18px;--fw-display:700;--fs-display:clamp(3rem,5.2vw,4.5rem);--letter-display:-.035em;--lh-body:1.72;--gap:clamp(22px,2.2vw,36px);
+--radius:18px;--fw-display:700;--fs-display:clamp(3rem,5.2vw,4.5rem);--letter-display:-.035em;--lh-body:var(--lh-text);--gap:clamp(22px,2.2vw,36px);
 --bg:#ffffff;--surface:#ffffff;--surface-1:#fbf6f5;--surface-2:#f6eeec;--surface-3:#eee2df;
 --surface-inv:#1e1a19;--text:#1e1a19;--text-2:#5a5250;--text-3:#857c79;--text-inv:#ffffff;
 --border:#eadfdc;--border-soft:#f2e9e7;
@@ -451,7 +451,7 @@ PPTX 端读 `layout-constants.json` 的 `styles` / `stylesDark` / `styleDataColo
 ```css
 html[data-style="sky-airy"]{
 --font-body:"Inter","Source Han Sans","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;--font-display:var(--font-body);
---radius:20px;--fw-display:700;--fs-display:clamp(2.9rem,5vw,4.4rem);--lh-body:1.8;--lh-lead:1.7;--gap:clamp(22px,2.2vw,36px);
+--radius:20px;--fw-display:700;--fs-display:clamp(2.9rem,5vw,4.4rem);--lh-body:var(--lh-text);--lh-lead:var(--lh-text);--gap:clamp(22px,2.2vw,36px);
 --bg:#ffffff;--surface:#ffffff;--surface-1:#f3f8fc;--surface-2:#eaf3fa;--surface-3:#dbe9f4;
 --surface-inv:#0f1d2a;--text:#0f1d2a;--text-2:#4a5968;--text-3:#73818f;--text-inv:#ffffff;
 --border:#d6e4ef;--border-soft:#e6eff6;

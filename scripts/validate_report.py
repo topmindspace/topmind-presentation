@@ -280,6 +280,35 @@ def _check_chart_variety(txt, chk, mode):
             level="WARN")
 
 
+def _check_required_fields(chk, model):
+    """M12：页型必填字段（model-schema.json pageTypes[type].required）。缺字段时渲染端会出空框或「undefined」。"""
+    if not isinstance(model, dict):
+        return
+    pts = json.loads(Path(__file__).with_name("model-schema.json").read_text(encoding="utf-8")).get("pageTypes") or {}
+
+    def get(o, path):
+        for k in path.split("."):
+            if not isinstance(o, dict):
+                return None
+            o = o.get(k)
+        return o
+
+    def empty(v):
+        return v is None or v == "" or v == [] or v == {}
+
+    miss = []
+    for i, sec in enumerate(model.get("sections") or []):
+        if not isinstance(sec, dict):
+            continue
+        for r in (pts.get(sec.get("type")) or {}).get("required") or []:
+            if r.startswith("anyof:"):
+                if all(empty(get(sec, a.split(":")[0])) for a in r[6:].split("|")):
+                    miss.append(f"sections[{i}] {sec.get('type')} 缺 {r[6:]} 之一")
+            elif empty(get(sec, r.split(":")[0])):
+                miss.append(f"sections[{i}] {sec.get('type')} 缺 {r.split(':')[0]}")
+    chk("页型必填字段齐全（model-schema pageTypes.required）", not miss, "; ".join(miss[:4]))
+
+
 def _check_page_model(txt, chk, mode):
     """页面高度模型（每页高度稳定）：所有 .band 至少一屏高，长结构页显式 --flow 退出。"""
     has_model = ('--band-min' in txt) or ('calc(100svh - var(--bar-h))' in txt) or \
@@ -2001,6 +2030,7 @@ def main():
     _check_pptx_export(txt, chk)
     model = _check_model_consistency(txt, chk, mode, style)
     _check_content_coverage(txt, chk, model)
+    _check_required_fields(chk, model)
     _check_type_features(txt, chk, model)
     _check_exhibits(txt, chk, mode)
     _check_research_extras(txt, chk, mode)

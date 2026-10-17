@@ -384,6 +384,9 @@ def r_table(i, sec):
     tcls = ' tbl--hl' if hl is not None else ''
     body = (f'    <div class="tbl-wrap{tcls} rv"><table><thead><tr>' + th +
             '</tr></thead><tbody>' + ''.join(trs) + '</tbody></table></div>\n')
+    pts = [x for x in (sec.get('readout') or sec.get('points') or []) if x][:3]
+    if pts:   # M12：表下解读卡，与 PPTX readoutRow 同构
+        body += _readout_row([], pts)
     extra = ' data-variant="highlight"' if hl is not None else ''
     return wrap(i, 'table', body, sec, extra)
 
@@ -689,9 +692,9 @@ def r_quote(i, sec):
     body = (
         '    <div class="shead shead--center rv">\n'
         f'      <p class="t-h2 quote__t" style="max-width:960px;margin-inline:auto">{cite(sec.get("quote") or "")}</p>\n'
-        f'      <p class="t-sm" style="color:var(--accent-text)">—— {esc(sec.get("author") or "")}'
-        + (f' · {esc(sec.get("context"))}' if sec.get('context') else '')
-        + '</p>\n    </div>\n' + ev)
+        + ((f'      <p class="t-sm" style="color:var(--accent-text)">—— {esc(sec.get("author") or "")}'
+            + (f' · {esc(sec.get("context"))}' if sec.get('context') else '') + '</p>\n') if sec.get('author') else '')
+        + '    </div>\n' + ev)
     return wrap(i, 'quote', body, sec, ' band--accent band--fit')
 
 

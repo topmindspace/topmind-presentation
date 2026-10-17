@@ -2814,7 +2814,7 @@ CONTENT.sections.forEach((sec) => {
     s.addText(sec.quote, { x: qX, y: qY2, w: qW, h: qH, align: qm.length ? 'center' : 'left',
       fontFace: STYLE.fontDisplay, fontSize: qSize, bold: true, color: STYLE.ink, valign: 'middle' });
     const authY = qm.length ? qY2 + qH + 0.02 : Q.authorY;
-    s.addText('—— ' + sec.author, { x: qm.length ? qX : qreg.x, y: authY, w: qm.length ? qW : qreg.w, h: 0.45, align: qm.length ? 'center' : 'right',
+    if (sec.author) s.addText('—— ' + sec.author, { x: qm.length ? qX : qreg.x, y: authY, w: qm.length ? qW : qreg.w, h: 0.45, align: qm.length ? 'center' : 'right',
       fontFace: STYLE.font, fontSize: sz(13), bold: true, color: STYLE.accent });
     if (sec.context) s.addText(sec.context, { x: qm.length ? qX : qreg.x, y: qm.length ? authY + 0.45 : Q.contextY, w: qm.length ? qW : qreg.w, h: 0.4, align: qm.length ? 'center' : 'right',
       fontFace: STYLE.font, fontSize: sz(11), color: STYLE.faint });
@@ -3120,8 +3120,14 @@ CONTENT.sections.forEach((sec) => {
     /* 美化路由：表格可用高度放到主体区底部（短表行高放大，见 addTable roomy） */
     /* 演示模式整页短表同样放大（M5 评审：5 行表只占上半页） */
     const tRoomy = MODE_NAME === 'presentation' && (sec.table.rows || []).length <= 6;
-    const tAvail = (CONTENT.contentLocked || tRoomy) ? Math.max(treg.h, bodyBottom - treg.y - 0.2) : treg.h;
+    let tAvail = (CONTENT.contentLocked || tRoomy) ? Math.max(treg.h, bodyBottom - treg.y - 0.2) : treg.h;
+    /* M12 试跑：表格页的 points 与 HTML 同构，表下一行解读卡（≤3 条）；此前 PPTX 静默丢弃 */
+    const tPts = (sec.readout || sec.points || []).filter(Boolean).slice(0, 3)
+      .map(p => Array.isArray(p) ? [String(p[0] || ''), String(p[1] || '')] : [String(p), '']);
+    const tRowH = tPts.length ? 1.05 : 0;
+    if (tRowH) tAvail = Math.min(tAvail, bodyBottom - treg.y - tRowH - 0.3);
     addTable(s, sec.table, treg.x, treg.y, treg.w, tAvail, { highlightCol: isFinite(hlc) ? hlc : null, roomy: tRoomy });
+    if (tRowH) readoutRow(s, [], tPts, treg.x, bodyBottom - tRowH, treg.w, tRowH);
   } else if (type === 'timeline') {
     const T = PT.timeline;
     const treg = REGIONS.regionOf('timeline', 'primary') ||

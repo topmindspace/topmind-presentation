@@ -4,7 +4,7 @@ description: "把已有材料做成正式商务演示与多页可视化报告：
 license: MIT
 compatibility: "Python 3 stdlib for HTML generation; Node >=18 + pptxgenjs for PPTX; optional playwright for browser regression / theme captures."
 metadata:
-  version: "0.2.8"
+  version: "0.2.9"
   author: TopMindSpace
   updated: "2026-10-17"
   action_category: write
@@ -79,11 +79,11 @@ metadata:
 **L2 索引**（命中条件与逐任务只读清单详见 playbook §十）：
 
 - 模式契约与锁定版式 → `references/modes.md` · 完整路径七步 → `references/outline-design.md`
-- A/Fast L1.5 → `default-surface.md` + `presentation-craft.md` · 骨架 `layout-grammar.md` · 插画规范 → `illustration-layout.md`
-- 组件/版式**代码** → `components.md` · 页型表 `page-type-matrix.md` · 图表门面 `charts.md` + 决策树 `chart-decision-tree.md` · 信息图 → `infographics.md`
-- 配色/主题/字阶 → `styles.md` + `design-system.md` · 写作 → `content-rules.md` · 图标语义 → `icons.md`（48 原创图标包 `assets/icons/`，`icon:<名>` 或 `data-icon`）
-- 扩展点 → `references/extending.md` · 风格包 → `references/style-pack.md`· 版式库 → `references/layout-library.md`（48 版式 · `check_rhythm.py`）· 信息密度 → `references/density.md`（论点 + 证据 + 解读；解读写原因 / 影响 / 下一步、不复述数字、只用已有事实；复合版式；`check_density.py`）· 变体 → `layout-variants.md`
-- 美化已有 PPTX → `references/beautify.md` · PPTX 精导 → `references/pptx-export.md` · 深度高保真 → `references/high-fidelity.md` · 修复顺序 → `references/failure-modes.md` · 技能维护 → `references/tech-design.md`
+- A/Fast L1.5 → `default-surface.md` + `presentation-craft.md` · 骨架 `layout-grammar.md` · 插画 → `illustration-layout.md`
+- 组件/版式**代码** → `components.md` · 页型表 `page-type-matrix.md` · 图表 `charts.md` + 决策树 `chart-decision-tree.md` · 信息图 → `infographics.md`
+- 配色/主题/字阶 → `styles.md` + `design-system.md` · 写作 → `content-rules.md` · 图标语义 → `icons.md`（48 原创图标 `assets/icons/`，`icon:<名>` / `data-icon`）
+- 扩展点 → `extending.md` · 风格包 → `style-pack.md` · 版式库 → `layout-library.md`（48 版式 · `check_rhythm.py`）· 信息密度 → `density.md`（论点+证据+解读；解读写原因/影响/下一步，不复述数字、只用已有事实；复合版式；`check_density.py`）· 变体 → `layout-variants.md` · 复杂信息图 `infographics-guide.md`
+- 美化已有 PPTX → `references/beautify.md` · PPTX 精导 → `references/pptx-export.md` · 深度高保真 → `references/high-fidelity.md` · 修复顺序 → `failure-modes.md` · 技能维护 → `tech-design.md`
 
 
 ## 铁律（12 条 · 交付硬门禁）
@@ -94,7 +94,7 @@ metadata:
 2. **模式先定后写**——从对应模式模板起步；`data-mode` = `REPORT_MODEL.mode`；页面无模式切换；PPTX 字号走三模式独立比例尺。
 3. **亮暗双主题一致**——CSS 变量整块换肤 + header 切换 + 文件级记忆；`REPORT_MODEL.theme` 与页面一致，PPTX 同主题导出；强调带只用 accent 家族；**末页禁 `band--deep`**。
 4. **每页一屏 + 高度稳定**——`section.band` ≥ 一屏；主内容不得溢出画布或压进结论条/注释带。放不下按「重构承载 → 拆页/分章 → 换布局形态 → 有限缩字号」；**禁**静默截断或为疏朗删结论条/证据。**大纲 = 3–7 章（每章 1+ 页），禁逐页标题罗列**。结论条 = MD3 tonal surface（无「So what」标签、**无左侧 accent 轨**）。模型文本 → 渲染文本覆盖率 ≥95%；PPTX 长标题/列表/表格按 `containers.adaptiveText` 单源规则自动收紧。
-5. **PPT 式翻页 + 骨架固定**——`section.band` 即一页；方向键翻页、页码可点；Agenda 第二页（arch 内容页 ≤4 可省）；页头只留 eyebrow+标题+可选导语，页脚全文一个。
+5. **PPT 式翻页 + 骨架固定**——`section.band` 即一页；方向键翻页、页码可点；Agenda 第二页（arch 内容页 ≤4 可省）；页头默认只留标题+导语，页脚只留页码（`showEyebrow`/`showFootnotes`/`pageNumber` 可开）；正文行距 1.5×（不够 1.3×）。
 6. **标题与字号**——主标题粗体；research=结论句（≥12 字）；**presentation=主张/行动句**（禁话题标签）；字号随模式，`clamp()`；图表不缩水。
 7. **组合版式 + 细节保全**——默认一页 = 主件+从件+注释层；先判定决策必需信息再定形态，**禁砍口径列/时间列/维度**；密度 L/M/H 禁连续 3 页同档；同一版式不连用超 2 页。
 8. **列表优先 + 去 AI 味 + 图标克制**——大段文字转列表（research 双/三栏正文除外）；`aiFlavor` 词表零命中；图标每屏 3–8 个；按内容选图标（`icon_lib.js` 关键词匹配，选不出用默认 7 个），**不为装饰堆图标**。

@@ -31,7 +31,7 @@
 5. **数据可追溯**：每类页型的 `chart.dataTable` 策略默认 `notes`（数据表以「表头 | 行」文本写入**演讲者备注**，可复制回 Excel）；显式 `inline` 时在图形下方附**原生表格**（自动压缩图形高度，不越界）；**不得为 `off`**。
 6. **上限硬约束**（超出即拆页——节点/系列过多是结构容量问题，缩字号无效）：桑基节点 ≤12 / 流带 ≤24；树图叶节点 ≤16；箱线组数 ≤8；网络节点 ≤18 / 边 ≤30；马赛克列 ≤6 / 每列段 ≤4；流带系列 ≤6。限内标签偏挤可按 `containers.fontShrink` 有限下探（不低于模式 floor）。
 7. **配色克制**：马赛克/流带的段色只用 `accent / faint / body / line` 四阶（spectrum 风格可用 5 色数据板）；桑基节点用 `accent`、流带用 `soft`；**不引入第二色相**。
-8. **文本退到图注级**：页头仍只保留 eyebrow + 主标题 + 可选导语（铁律 14）；节点/段标签字号走 `micro`/`caption` 语义层级（`layout-constants.json` `typography` 的 T11/T12）。
+8. **文本退到图注级**：页头仍只保留主标题 + 可选导语（eyebrow 默认关）（铁律 14）；节点/段标签字号走 `micro`/`caption` 语义层级（`layout-constants.json` `typography` 的 T11/T12）。
 9. **一页一图**：本页型族**每页只放一张信息图**；注解用 `soWhat` / `footnote` / `flags` 槽位，不在图内塞正文段落。
 10. **页型专属，不作 `chart.type`**：这 6 类的载荷是结构化数组（`flows` / `items` / `groups` / `nodes+edges` / `cols+cells` / `series`），只能由 `sections[].type` 承载；`model-schema.json` 的 `chartTypes` 白名单（30 类）**不含**它们——避免 `chart` 对象字段歧义。`sync_runtime.py` 双向校验 `registry.types == chartTypes ∪ 这 6 类`，任何一侧缺失即 WARN（防止「登记了但模型表达不了」或反之）。
 

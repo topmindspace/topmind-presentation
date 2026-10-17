@@ -673,6 +673,7 @@
       "dotplot",
       "bulletchart",
       "waffle",
+      "pictogram",
       "boxplot",
       "pareto",
       "radialbar",
@@ -772,6 +773,9 @@
       "waffle": {
         "vbHeightMin": 160
       },
+      "pictogram": {
+        "vbHeightMin": 160
+      },
       "boxplot": {
         "vbHeightMin": 180
       },
@@ -821,6 +825,7 @@
         "dotplot": 150,
         "bulletchart": 160,
         "waffle": 190,
+        "pictogram": 190,
         "pareto": 200,
         "radialbar": 240,
         "candlestick": 200
@@ -904,6 +909,7 @@
       "dotplot": "medium",
       "bulletchart": "medium",
       "waffle": "medium",
+      "pictogram": "medium",
       "radialbar": "medium",
       "rose": "medium",
       "gantt": "medium",
@@ -1243,6 +1249,17 @@
         "dataTable": "notes",
         "min": {
           "vbHeightMin": 140
+        },
+        "path": {
+          "forbidPresetShapes": true
+        }
+      },
+      "pictogram": {
+        "html": "svg-pictogram",
+        "pptx": "shape",
+        "dataTable": "notes",
+        "min": {
+          "vbHeightMin": 160
         },
         "path": {
           "forbidPresetShapes": true
@@ -1851,6 +1868,7 @@
       "dotplot",
       "bulletchart",
       "waffle",
+      "pictogram",
       "radialbar",
       "rose",
       "candlestick",

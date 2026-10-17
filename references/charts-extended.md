@@ -480,3 +480,23 @@
 
 ---
 
+---
+
+## 71. 象形图（图标阵列 · 每 N 个中有 k 个）`data-chart="pictogram"`
+
+**用途**：把「每 10 位新客里 7 位流失」这类**单一比例**画成 N 个同一图标，前 k 个主色、其余浅色——比环形图更有画面感，听众一眼能数。**只放两组**（命中 / 其余），N 默认 10、上限 20；比例不是整数倍时四舍五入到格（`round(v / 合计 × N)`）。
+
+```json
+{"type": "bar", "title": "每 10 位新客里，7 位首周没有再次下单",
+ "chart": {"type": "pictogram", "icon": "用户", "labels": ["首周未复购", "首周复购"], "values": [70, 30], "unit": "%", "count": 10}}
+```
+
+```html
+<svg class="chart" data-chart="pictogram" viewBox="0 0 900 340">
+  <svg x="0" y="0" width="70" height="70" viewBox="0 0 24 24" class="pic__on" fill="none" stroke="currentColor" stroke-width="1.8"><!-- 图标路径 --></svg>
+  <!-- … 共 N 个，k 个 pic__on，其余 pic__off；图例收在图高内 -->
+</svg>
+```
+
+**规则**：图标取 `assets/icons/` 自研图标（语义要对，人数用「用户」、门店用「门店」）；一行 ≤10 个或两行，取格子更大的一种（双端同一几何，见 `lib_chart_svg.pictogram_geom` / `build_pptx.js shapePictogram`）；PPTX 每格是 256px 单色 PNG（`pic:on|off`，不计入单页图标上限）；不要拿它画多组构成（改 waffle / stack）。
+

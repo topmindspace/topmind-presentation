@@ -131,20 +131,20 @@
   {
    "layout": "distribution",
    "title": "各域就绪度分布：金融客服中位最高、离散最小",
-   "fp": "89f72aa37438",
+   "fp": "9a00bf44e537",
    "shapes": 40
   },
   {
    "layout": "mekko",
    "title": "渠道结构演变：线上占比三年提升 21 个百分点",
-   "fp": "b0bd44b0612f",
+   "fp": "1df1ca20796a",
    "shapes": 26
   },
   {
    "layout": "stream",
    "title": "价值兑现结构演变：副驾协同持续做厚",
-   "fp": "d0a0a069fbee",
-   "shapes": 381
+   "fp": "d8fd0dad8f44",
+   "shapes": 18
   },
   {
    "layout": "layer-stack",
@@ -179,7 +179,7 @@
   {
    "layout": "area-tree",
    "title": "规模化企业行业构成：制造与金融合计过半",
-   "fp": "76c759720e81",
+   "fp": "c4d51a4af6bd",
    "shapes": 22
   },
   {
@@ -215,7 +215,7 @@
   {
    "layout": "flow-sankey",
    "title": "线索转化流向：初筛环节流失占比近六成",
-   "fp": "658c2c2d8b4a",
+   "fp": "689615ab60a5",
    "shapes": 31
   },
   {
@@ -293,7 +293,7 @@
   {
    "layout": "chart-band",
    "title": "行业构成 + 解读带：制造与金融合计过半",
-   "fp": "3ffe6d75b101",
+   "fp": "f2ab682554c1",
    "shapes": 30
   },
   {

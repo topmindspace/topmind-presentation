@@ -330,8 +330,8 @@ def test_engine_static() -> None:
     export = (ROOT.parent / "assets" / "pptx-export.js").read_text(encoding="utf-8")
     build = (ROOT.parent / "scripts" / "build_pptx.js").read_text(encoding="utf-8")
     ok(
-        "C infoStreamgraph reserves legend inside plot",
-        "Reserve legend INSIDE" in build and "plotBottom" in build,
+        "C infoStreamgraph keeps labels inside the plot (M13 svgFrame 同构 viewBox)",
+        re.search(r"function infoStreamgraph[\s\S]{0,800}svgFrame\(MX, P\.y0, CW, P\.y1 - P\.y0\)", build) is not None,
     )
     ok(
         "D caption uses capYImg from imageLayoutShapes",

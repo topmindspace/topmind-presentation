@@ -20,6 +20,8 @@
 from __future__ import annotations
 
 import math
+import re
+from pathlib import Path
 from html import escape as _esc
 
 W, H = 900, 340
@@ -570,6 +572,81 @@ def scatter(ch, skin=None, w=W, h=H, bubble=False):
     return _svg('bubble' if bubble else 'scatter', body, w, h)
 
 
+# ── M13 信息图：华夫图（真点阵，与 PPTX shapeWaffle 同几何）· 象形图（图标阵列）────────────
+def _legend_row(labels, values, unit, y, cls_of, step=190):
+    out = []
+    for i, lb in enumerate(labels):
+        x = i * step
+        out.append(f'<circle cx="{_f(x + 5)}" cy="{_f(y)}" r="5" class="{cls_of(i)}"/>')
+        out.append(_txt(x + 16, y + 5, lb, 'f-txt2', 13, 'start'))
+        v = values[i] if i < len(values) else ''
+        out.append(_txt(x + 16 + 13 * len(str(lb)) + 10, y + 5, f'{num(v)}{unit}', 'f-txt', 13, 'start', 700))
+    return out
+
+
+def waffle(ch, skin=None, w=W, h=H):
+    """10×10 点阵按占比填充，网格左对齐、图例收在图高内（PPTX shapeWaffle 同口径）。"""
+    labels, values = list(ch.get('labels') or []), _vals(ch)
+    total = sum(values) or 1
+    leg = 30
+    cell = min(w / 10, (h - leg) / 10)
+    alloc = [round(v / total * 100) for v in values]
+    body, k = [], 0
+    for i, a in enumerate(alloc):
+        for _ in range(a):
+            if k >= 100:
+                break
+            r, c = divmod(k, 10)
+            body.append(f'<rect x="{_f(c * cell)}" y="{_f(r * cell)}" width="{_f(cell * .82)}" height="{_f(cell * .82)}" '
+                        f'rx="2" class="f-c{i % 5 + 1}"/>')
+            k += 1
+    body += _legend_row(labels, values, ch.get('unit') or '', 10 * cell + 14, lambda i: f'f-c{i % 5 + 1}')
+    return _svg('waffle', body, w, h)
+
+
+_ICON_DIR = Path(__file__).resolve().parent.parent / 'assets' / 'icons'
+
+
+def _icon_inner(name):
+    try:
+        t = (_ICON_DIR / f'{name}.svg').read_text(encoding='utf-8')
+    except OSError:
+        t = (_ICON_DIR / '用户.svg').read_text(encoding='utf-8')
+    return re.sub(r'^[\s\S]*?<svg[^>]*>|</svg>\s*$', '', t)
+
+
+def pictogram_geom(n, w, h, leg):
+    """象形图几何（双端单源口径）：一行（≤10）或两行里取格子更大的一种；格子取宽高约束的较小者，左对齐。"""
+    best = None
+    for cols in sorted({min(n, 10), (n + 1) // 2}):
+        rows = (n + cols - 1) // cols
+        cell = min(w / cols, (h - leg) / rows)
+        if best is None or cell > best[2] + 1e-6:
+            best = (cols, rows, cell)
+    return best
+
+
+def pictogram(ch, skin=None, w=W, h=H):
+    """象形图（icon array）：N 个同一图标，前 k 个主色、其余浅色——「每 10 人中 7 人」类比例最直观。
+    字段：icon（图标名）· labels[2] · values[2] · count（图标个数，默认 10，上限 20）· unit。"""
+    labels, values = list(ch.get('labels') or []), _vals(ch)
+    n = max(4, min(20, int(ch.get('count') or 10)))
+    tot = sum(values[:2]) or 1
+    k = round((values[0] if values else 0) / tot * n)
+    leg = 30
+    cols, rows, cell = pictogram_geom(n, w, h, leg)
+    inner, sz = _icon_inner(ch.get('icon') or '用户'), cell * .78
+    body = []
+    for i in range(n):
+        r, c = divmod(i, cols)
+        cls = 'pic__on' if i < k else 'pic__off'
+        body.append(f'<svg x="{_f(c * cell)}" y="{_f(r * cell)}" width="{_f(sz)}" height="{_f(sz)}" viewBox="0 0 24 24" '
+                    f'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="{cls}">{inner}</svg>')
+    body += _legend_row(labels[:2], values[:2], ch.get('unit') or '', rows * cell + 14,
+                        lambda i: 'f-acc' if i == 0 else 'f-accs')
+    return _svg('pictogram', body, w, h)
+
+
 CHARTS = {
     'bar': bar, 'column': bar, 'hbar': hbar, 'line': line, 'stackline': line, 'dualline': line,
     'area': lambda c, s=None, w=W, h=H: line(c, s, w, h, area=True),
@@ -579,7 +656,7 @@ CHARTS = {
     'rose': rose, 'candlestick': candlestick, 'scatter': scatter,
     'bubble': lambda c, s=None, w=W, h=H: scatter(c, s, w, h, bubble=True),
     'lollipop': hbar, 'dotplot': hbar, 'bulletchart': hbar, 'dumbbell': hbar, 'slope': line,
-    'sparkline': line, 'pareto': bar, 'gauge': progress, 'waffle': donut, 'radar': rose,
+    'sparkline': line, 'pareto': bar, 'gauge': progress, 'waffle': waffle, 'pictogram': pictogram, 'radar': rose,
 }
 
 

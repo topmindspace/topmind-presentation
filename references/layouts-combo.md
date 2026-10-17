@@ -308,6 +308,7 @@
 | 无素材但要锁版式（配图占位） | `.media--ph` 占位（§11c-3） | — | — | `image.placeholder` |
 | 待核实/待补充项收口 | flagbar 清单条（§11b） | tbd-legend 页级图例 | — | `flags` 字段 |
 | 构成占比（强调“每 1%”） | waffle 华夫图（`charts.md` §65） | 环形图（§42） | A/B | `donut` |
+| 单一比例（「每 10 人中 7 人」） | pictogram 象形图（`charts-extended.md` §71） | 华夫图（§65） | A/B | `donut` |
 | 多组分布 / 离散度对比 | boxplot 箱线图页（`infographics.md` §73） | dotplot（`charts.md` §62） | B/C | `boxplot` |
 | 主因排序（二八分析） | pareto 帕累托（`charts.md` §67） | 瀑布（`charts.md` §24） | A/B | `exhibit`（bar 变体） |
 | 多指标达成率（同心环） | radialbar 径向条形（`charts.md` §68） | gauge（`charts.md` §18） | A/B | `bullet` |

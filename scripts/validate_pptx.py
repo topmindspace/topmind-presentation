@@ -1095,7 +1095,8 @@ def inspect_slide(
         name = (nv.get('name') if nv is not None else '') or ''
         return name.startswith('icon:')
     icon_pictures = [p for p in pictures if _is_icon_pic(p)]
-    content_pictures = [p for p in pictures if not _is_icon_pic(p)]
+    content_pictures = [p for p in pictures if not _is_icon_pic(p)
+                        and not ((p.find('.//p:cNvPr', NS).get('name') or '') if p.find('.//p:cNvPr', NS) is not None else '').startswith('pic:')]   # M13 象形图格子
     is_focus = any((_shape_object_name(el) or '').startswith('focus:') for el in all_elements)   # M13 简单页
 
     for element in all_elements:

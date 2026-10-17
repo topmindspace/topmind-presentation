@@ -1575,6 +1575,7 @@ function shapeChart(s, c, x, y, w, h, dcols) {
   if (t === 'sparkline') { shapeSpark(s, c, x, y, w, h, dcols); return; }
   if (t === 'slope') { shapeSlope(s, c, x, y, w, h, dcols); return; }
   if (t === 'waffle') { shapeWaffle(s, c, x, y, w, h, dcols); return; }
+  if (t === 'pictogram') { shapePictogram(s, c, x, y, w, h); return; }
   if (t === 'rose') { shapeRose(s, c, x, y, w, h, dcols); return; }
   if (t === 'candlestick') { shapeCandlestick(s, c, x, y, w, h, dcols); return; }
   /* 已登记形状通道类型必须命中专属渲染器——命中通用回落 = 实现缺口，硬失败 */
@@ -1830,6 +1831,34 @@ function shapeSlope(s, c, x, y, w, h, dcols) {
     shapeValue(s, c, Number(other[i]) || 0, rightX + 0.1, y2 - 0.14, 0.62, 0.28, false);
   });
 }
+/* M13 象形图（icon array）：与 lib_chart_svg.pictogram 同几何——一行 / 两行取格子更大者，格子取宽高较小者、左对齐；
+   命中部分主色、其余浅色；图标用 256px 单色 PNG（objectName pic:on|off，不计入单页图标上限）。 */
+function shapePictogram(s, c, x, y, w, h) {
+  const labels = c.labels || [], vals = (c.values || []).map(Number);
+  const n = Math.max(4, Math.min(20, parseInt(c.count, 10) || 10));
+  const tot = (vals[0] || 0) + (vals[1] || 0) || 1;
+  const k = Math.round((vals[0] || 0) / tot * n);
+  const leg = h * 30 / 340;
+  let cols = 0, rows = 0, cell = 0;
+  [...new Set([Math.min(n, 10), Math.ceil(n / 2)])].sort((a, b) => a - b).forEach((cc) => {
+    const rr = Math.ceil(n / cc), ce = Math.min(w / cc, (h - leg) / rr);
+    if (ce > cell + 1e-6) { cols = cc; rows = rr; cell = ce; }
+  });
+  const isz = cell * 0.78;
+  const on = iconPng(c.icon || '用户', STYLE.accent), off = iconPng(c.icon || '用户', STYLE.soft2 || STYLE.soft);
+  for (let i = 0; i < n; i++) {
+    const r = Math.floor(i / cols), cc = i % cols, uri = i < k ? on : off;
+    if (uri) s.addImage({ data: uri, x: x + cc * cell, y: y + r * cell, w: isz, h: isz, objectName: 'pic:' + (i < k ? 'on' : 'off') });
+  }
+  const ly = y + rows * cell + 0.02;
+  labels.slice(0, 2).forEach((lb, i) => {
+    const lx = x + i * w * 190 / 900;
+    s.addShape('ellipse', { x: lx, y: ly + 0.04, w: 0.1, h: 0.1, fill: { color: i === 0 ? STYLE.accent : (STYLE.soft2 || STYLE.soft) }, line: { type: 'none' } });
+    s.addText([{ text: String(lb) + ' ', options: { color: STYLE.body } },
+      { text: String(vals[i] != null ? vals[i] : '') + (c.unit || ''), options: { bold: true, color: STYLE.ink } }],
+      { x: lx + 0.14, y: ly, w: w * 190 / 900 - 0.16, h: 0.24, fontFace: STYLE.font, fontSize: sz(10.5), valign: 'middle', margin: 0 });
+  });
+}
 /* 华夫图（waffle）：10×N 点阵按占比填充；图例含在图高 h 内（几何铁律②，防与 inline 数据表叠印） */
 function shapeWaffle(s, c, x, y, w, h, dcols) {
   const M = shapeMetrics(c, w, h);
@@ -2005,18 +2034,19 @@ function infoSankey(s, sec, y0, y1) {
   const outSum = {}, inSum = {};
   flows.forEach(f => { outSum[f[0]] = (outSum[f[0]] || 0) + Number(f[2]); inSum[f[1]] = (inSum[f[1]] || 0) + Number(f[2]); });
   const size = (n) => Math.max(inSum[n] || 0, outSum[n] || 0);
-  const plotH = P.y1 - P.y0;
+  const SF = svgFrame(MX, P.y0, CW, P.y1 - P.y0);   // M13：与 HTML viewBox 同构（x0=120 · x1=w-130 · y 20..h-20）
+  const plotH = SF.L(300);
   const gap = G.nodeGap;
   const cols = [];
   for (let l = 0; l <= maxLv; l++) cols.push(nodes.filter((n, i) => level[i] === l));
   const scale = Math.min.apply(null, cols.filter(c => c.length).map(c =>
     (plotH - gap * (c.length - 1)) / (c.reduce((a, n) => a + size(n), 0) || 1)));
   const labelW = Math.min(G.labelW, 1.5);
-  const xL = MX + labelW + 0.1, xR = MX + CW - labelW - 0.1 - G.nodeW;
+  const xL = SF.X(120), xR = SF.X(900 - 130);  void labelW;
   const geo = {};
   cols.forEach((c, l) => {
     const tot = c.reduce((a, n) => a + size(n) * scale, 0) + gap * (c.length - 1);
-    let cy = P.y0 + (plotH - tot) / 2;
+    let cy = SF.Y(20) + (plotH - tot) / 2;
     c.forEach(n => {
       const h = Math.max(0.04, size(n) * scale);
       geo[n] = { x: xL + (xR - xL) * (maxLv ? l / maxLv : 0), y: cy, h: h, lv: l, oo: 0, oi: 0 };
@@ -2072,7 +2102,8 @@ function infoTreemap(s, sec, y0, y1) {
     .filter(i => i.v > 0).sort((a, b) => b.v - a.v).slice(0, G.maxLeaves);
   if (!items.length) return;
   const out = [];
-  tmSplit(items, MX, P.y0, CW, P.y1 - P.y0, out);
+  const TF = svgFrame(MX, P.y0, CW, P.y1 - P.y0);   // M13：与 HTML squarify(0,0,900,340) 同构
+  tmSplit(items, TF.X(0), TF.Y(0), TF.L(900), TF.L(340), out);
   const maxV = items[0].v || 1;
   const total = items.reduce((a, i) => a + i.v, 0) || 1;
   /* M9：灰阶与 HTML 一致——三级都在品牌色系内（主色 / 中间调 / 浅调），不再出现灰色 STYLE.line 块；
@@ -2099,6 +2130,7 @@ function infoTreemap(s, sec, y0, y1) {
 /* 箱线图（M9 重写为横向，与 HTML lib_chart_svg.boxplot 同构）：每组一行，左侧组名、
  * 横轴取整到 10 的刻度网格；须线 + 端帽 + 品牌浅调箱体 + 主色中位线，右侧「中位 N」标注。
  * 全部是原生线/矩形/文本框，可编辑。 */
+/* M13：与 lib_chart_svg.boxplot 同构（svgFrame 等比映射 viewBox 900×340），组名 / 中位标签 / 刻度双端同位 */
 function infoBoxplot(s, sec, y0, y1) {
   const G = PT.boxplot;
   const P = infoPlot(sec, y0, y1);
@@ -2106,34 +2138,32 @@ function infoBoxplot(s, sec, y0, y1) {
   const groups = (sec.groups || []).filter(g => g && g.length >= 6).slice(0, G.maxGroups);
   if (!groups.length) return;
   const unit = sec.unit || '';
+  const F = svgFrame(MX, P.y0, CW, P.y1 - P.y0);
+  const W = 900, H = 340, x0 = 150, x1 = W - 120, gy0 = 20, gy1 = H - 40;
   const lo = Math.floor(Math.min.apply(null, groups.map(g => Number(g[1]))) / 10) * 10;
   const hi = Math.ceil(Math.max.apply(null, groups.map(g => Number(g[5]))) / 10) * 10;
   const span = (hi - lo) || 1;
-  const labW = Math.min(G.labelW, CW * 0.16), medW = 1.2;
-  const ax0 = MX + labW + 0.15, ax1 = MX + CW - medW - 0.1;
-  const top = P.y0 + 0.05, axisY = P.y1 - 0.32;
-  const X = v => ax0 + (Number(v) - lo) / span * (ax1 - ax0);
+  const X = v => x0 + (Number(v) - lo) / span * (x1 - x0);
   for (let k = 0; k <= 5; k++) {
-    const v = lo + span * k / 5, x = X(v);
-    s.addShape('line', { x, y: top, w: 0.005, h: axisY - top, line: { color: STYLE.line, width: 0.5 } });
-    s.addText(fmtNum(v), { x: x - 0.4, y: axisY + 0.04, w: 0.8, h: 0.24, align: 'center', margin: 0,
+    const v = lo + span * k / 5;
+    s.addShape('line', { x: F.X(X(v)), y: F.Y(gy0), w: 0.005, h: F.L(gy1 - gy0), line: { color: STYLE.line, width: 0.5 } });
+    s.addText(fmtNum(v), { x: F.X(X(v)) - 0.4, y: F.Y(gy1 + 22) - 0.15, w: 0.8, h: 0.2, align: 'center', margin: 0,
       fontFace: STYLE.font, fontSize: sz(9.5), color: STYLE.faint });
   }
-  const step = (axisY - top) / groups.length;
-  const bh = Math.min(0.42, step * 0.5);
-  const boxFill = mixHex(STYLE.soft, STYLE.accent, 0.12);
+  const step = (gy1 - gy0) / groups.length, bh = Math.min(40, step * 0.5);
+  const boxFill = mixHex(STYLE.soft, STYLE.accent, 0.3);
   groups.forEach((g, i) => {
     const mn = Number(g[1]), q1 = Number(g[2]), md = Number(g[3]), q3 = Number(g[4]), mx = Number(g[5]);
-    const cy = top + step * i + step / 2;
-    s.addShape('line', { x: X(mn), y: cy, w: Math.max(0.01, X(mx) - X(mn)), h: 0.005, line: { color: STYLE.faint, width: 1.25 } });
-    [mn, mx].forEach(v => s.addShape('line', { x: X(v), y: cy - bh / 3, w: 0.005, h: bh * 2 / 3, line: { color: STYLE.faint, width: 1.25 } }));
-    s.addShape('roundRect', { x: X(q1), y: cy - bh / 2, w: Math.max(0.05, X(q3) - X(q1)), h: bh, rectRadius: rr(0.06),
+    const cy = gy0 + i * step + step / 2;
+    s.addShape('line', { x: F.X(X(mn)), y: F.Y(cy), w: Math.max(0.01, F.L(X(mx) - X(mn))), h: 0.005, line: { color: STYLE.faint, width: 1.25 } });
+    [mn, mx].forEach(v => s.addShape('line', { x: F.X(X(v)), y: F.Y(cy - bh / 3), w: 0.005, h: F.L(bh * 2 / 3), line: { color: STYLE.faint, width: 1.25 } }));
+    s.addShape('roundRect', { x: F.X(X(q1)), y: F.Y(cy - bh / 2), w: Math.max(0.05, F.L(X(q3) - X(q1))), h: F.L(bh), rectRadius: F.L(6),
       fill: { color: boxFill }, line: { type: 'none' }, objectName: 'boxplot:box' });
-    s.addShape('line', { x: X(md), y: cy - bh / 2, w: 0.005, h: bh, line: { color: STYLE.accent, width: 2.5 } });
-    s.addText(String(g[0]), { x: MX, y: cy - 0.17, w: labW, h: 0.34, align: 'right', valign: 'middle', margin: 0,
-      fontFace: STYLE.font, fontSize: sz(11.5), bold: true, color: STYLE.ink });
-    s.addText('中位 ' + fmtNum(md) + unit, { x: ax1 + 0.12, y: cy - 0.16, w: medW, h: 0.32, valign: 'middle', margin: 0,
-      fontFace: STYLE.font, fontSize: sz(11), bold: true, color: STYLE.body });
+    s.addShape('line', { x: F.X(X(md)), y: F.Y(cy - bh / 2), w: 0.005, h: F.L(bh), line: { color: STYLE.accent, width: 2.5 } });
+    s.addText(String(g[0]), { x: MX, y: F.Y(cy) - 0.17, w: F.X(x0 - 16) - MX, h: 0.34, align: 'right', valign: 'middle', margin: 0,
+      fontFace: STYLE.font, fontSize: sz(Math.min(12, F.pt(14))), bold: true, color: STYLE.ink, fit: 'shrink' });
+    s.addText('中位 ' + fmtNum(md) + unit, { x: F.X(x1 + 16), y: F.Y(cy) - 0.16, w: F.L(W - x1 - 18), h: 0.32, valign: 'middle', margin: 0,
+      fontFace: STYLE.font, fontSize: sz(Math.min(11.5, F.pt(13))), bold: true, color: STYLE.body, fit: 'shrink' });
   });
 }
 /* 关系网络：确定性环形布局（同环按输入顺序）+ 直连边 */
@@ -2186,113 +2216,89 @@ function marimekkoSegs(arr, maxSegs) {
   }).filter(sg => sg.value > 0);
 }
 /* 马赛克图：列宽按列总量、列高按 100% 构成的双重编码 */
+/* M13 SVG 同构画框：与 HTML 端 viewBox 900×340 + preserveAspectRatio=meet 等比映射（水平居中），
+   复杂信息图按 lib_chart_svg 的坐标原样落位，双端标签位置一致（旧版各自排版，图内小标签偏移 0.15–0.6in）。 */
+function svgFrame(x, y, w, h, vw, vh) {
+  vw = vw || 900; vh = vh || 340;
+  const k = Math.min(w / vw, h / vh);
+  const ox = x + (w - vw * k) / 2, oy = y + (h - vh * k) / 2;
+  return { k: k, X: u => ox + u * k, Y: v => oy + v * k, L: u => u * k, pt: px => Math.max(8.5, Math.round(px * k * 72 * 2) / 2) };
+}
 function infoMarimekko(s, sec, y0, y1) {
-  const G = PT.marimekko;
   const P = infoPlot(sec, y0, y1);
   if (P.table) infoTable(s, P.rows, MX, P.table.y, CW, P.table.h);
-  const cols = (sec.cols || []).slice(0, G.maxCols);
+  const cols = (sec.cols || []).filter(c => Array.isArray(c) && c.length >= 2);
   if (!cols.length) return;
   const legend = (sec.legend || []).map(String);
   const cells = sec.cells || [];
-  const total = cols.reduce((a, c) => a + (Number(c[1]) || 0), 0) || 1;
-  /* 图例收在 P.y1 底带；列标签在图区下沿之上——二者留 0.12in 间隙，禁叠印（几何铁律②） */
-  const legendH = Math.max(0.28, G.legendH || 0.32);
-  const plotH = Math.max(0.5, (P.y1 - P.y0) - legendH - 0.40);
-  const labelY = P.y0 + plotH + 0.04;
-  const legendY = P.y1 - 0.22;
-  const availW = CW - G.colGap * Math.max(0, cols.length - 1);
-  /* M9：与 HTML f-acc / f-accs2 同色系——主色 + 品牌浅调梯度，不用灰 */
-  const palette = [STYLE.accent, mixHex(STYLE.soft, STYLE.accent, 0.12), mixHex(STYLE.soft, STYLE.accent, 0.45), STYLE.soft];
-  let cx0 = MX;
-  cols.forEach((c, i) => {
-    const cw = Math.max(0.2, (Number(c[1]) || 0) / total * availW);
-    const segs = marimekkoSegs(cells[i], G.maxSegs);
+  const F = svgFrame(MX, P.y0, CW, P.y1 - P.y0);
+  const W = 900, H = 340, x0 = 20, x1 = W - 150, gy0 = 16, gy1 = H - 40;
+  const tot = cols.reduce((a, c) => a + (Number(c[1]) || 0), 0) || 1;
+  const soft2 = mixHex(STYLE.soft, STYLE.accent, 0.3);   // 与 HTML f-accs2（accent-soft-2）同色系
+  const lab = sz(Math.min(12, F.pt(13)));
+  let x = x0;
+  cols.forEach((c, ci) => {
+    const cw = (Number(c[1]) || 0) / tot * (x1 - x0);
+    const segs = marimekkoSegs(cells[ci], 99);
     const sum = segs.reduce((a, sg) => a + sg.value, 0) || 1;
-    let cy0 = P.y0;
+    let y = gy0;
     segs.forEach((sg, k) => {
-      const v = sg.value;
-      const sh = Math.max(0.02, v / sum * plotH);
-      s.addShape('rect', { x: cx0, y: cy0, w: cw, h: sh,
-        fill: { color: palette[k % palette.length] }, line: { color: STYLE.bg, width: 0.75 } });
-      /* 有标签用标签（"<50ms"），裸数值沿用旧行为（值 + 单位） */
-      const segLabel = sg.label != null ? sg.label : (String(v) + (sec.unit || ''));
-      s.addText(segLabel, { x: cx0, y: cy0 + sh / 2 - 0.13, w: cw, h: 0.26, align: 'center',
-        fontFace: STYLE.font, fontSize: sz(11.5), bold: true, fit: 'shrink',
+      const hh = sg.value / sum * (gy1 - gy0);
+      s.addShape('roundRect', { x: F.X(x + 2), y: F.Y(y + 1), w: F.L(cw - 4), h: F.L(Math.max(1, hh - 2)), rectRadius: F.L(6),
+        fill: { color: k === 0 ? STYLE.accent : soft2 }, line: { type: 'none' } });
+      const segLabel = sg.label != null ? sg.label : (fmtNum(sg.value) + '%');
+      s.addText(segLabel, { x: F.X(x), y: F.Y(y + hh / 2) - 0.13, w: F.L(cw), h: 0.26, align: 'center', margin: 0,
+        fontFace: STYLE.font, fontSize: sz(Math.min(12, F.pt(14))), bold: true, fit: 'shrink',
         color: k === 0 ? STYLE.onAccent : STYLE.ink });
-      cy0 += sh;
+      y += hh;
     });
-    s.addText(String(c[0]), { x: cx0, y: labelY, w: cw, h: 0.28, align: 'center',
-      fontFace: STYLE.font, fontSize: sz(12), bold: true, color: STYLE.body, fit: 'shrink' });
-    cx0 += cw + G.colGap;
+    s.addText(String(c[0]) + ' · 规模 ' + fmtNum(c[1]), { x: F.X(x), y: F.Y(gy1 + 24) - 0.17, w: F.L(cw), h: 0.24, align: 'center', margin: 0,
+      fontFace: STYLE.font, fontSize: lab, color: STYLE.body, fit: 'shrink' });
+    x += cw;
   });
-  let lx = MX;
-  legend.forEach((lg, k) => {
-    s.addShape('rect', { x: lx, y: legendY + 0.06, w: 0.12, h: 0.12,
-      fill: { color: palette[k % palette.length] }, line: { type: 'none' } });
-    s.addText(lg, { x: lx + 0.16, y: legendY, w: 1.5, h: 0.24,
-      fontFace: STYLE.font, fontSize: sz(11.5), color: STYLE.body, valign: 'middle', fit: 'shrink' });
-    lx += 1.75;
+  legend.slice(0, 6).forEach((lg, k) => {
+    s.addShape('roundRect', { x: F.X(x1 + 24), y: F.Y(gy0 + 10 + k * 28), w: F.L(14), h: F.L(14), rectRadius: F.L(4),
+      fill: { color: k === 0 ? STYLE.accent : soft2 }, line: { type: 'none' } });
+    s.addText(lg, { x: F.X(x1 + 46), y: F.Y(gy0 + 22 + k * 28) - 0.17, w: F.L(W - x1 - 50), h: 0.24, margin: 0,
+      fontFace: STYLE.font, fontSize: lab, color: STYLE.body, valign: 'middle', fit: 'shrink' });
   });
 }
 /* 流带图：基线居中的堆叠平滑带（带边界上下分别采样，采样点 ≥24） */
+/* M13：与 lib_chart_svg.streamgraph 同构（svgFrame 等比映射）：中轴对称折线流带、系列名 + 末值贴右端、年份在下 */
 function infoStreamgraph(s, sec, y0, y1) {
   const G = PT.streamgraph;
   const P = infoPlot(sec, y0, y1);
   if (P.table) infoTable(s, P.rows, MX, P.table.y, CW, P.table.h);
-  const series = (sec.series || []).slice(0, G.maxSeries);
+  const series = (sec.series || []).filter(se => se && typeof se === 'object').slice(0, Math.min(6, G.maxSeries || 6));
   if (!series.length) return;
   const labels = sec.labels || [];
-  const nPts = labels.length || ((series[0].values || []).length);
-  if (nPts < 2) return;
-  const values = series.map(se => (se.values || []).map(v => Math.max(0, Number(v) || 0)));
-  const totals = [];
-  for (let i = 0; i < nPts; i++) {
-    let t = 0;
-    values.forEach(v => { t += (v[i] || 0); });
-    totals.push(t);
-  }
-  const maxTot = Math.max.apply(null, totals.concat([1]));
-  /* M7 修复：此前流带总厚度只用了 plotH/2（图只占上半区，下半空白），图例竖排又吃掉一大块；
-     现在流带铺满 plotH，年份轴在图下，图例单行横排。 */
-  const legH = 0.3, axisH = 0.26;
-  // Reserve legend INSIDE the plot region (legH + axisH) so nothing spills below y1
-  const plotBottom = P.y1 - legH - axisH;
-  const plotH = Math.max(0.6, plotBottom - P.y0);
-  const cyMid = P.y0 + plotH / 2;
-  const xAt = (i) => MX + (nPts > 1 ? i / (nPts - 1) : 0.5) * CW;
-  const yAt = (i) => cyMid - (totals[i] / maxTot) * plotH / 2;
-  /* M9：与 HTML f-c1…c5 同源（风格编码色板），不再用灰阶 */
+  const n = labels.length || ((series[0].values || []).length);
+  if (n < 2) return;
+  const F = svgFrame(MX, P.y0, CW, P.y1 - P.y0);
+  const W = 900, H = 340, x0 = 30, x1 = W - 170, gy0 = 16, gy1 = H - 40, mid = (gy0 + gy1) / 2;
+  const vals = series.map(se => Array.from({ length: n }, (_, i) => Math.max(0, Number((se.values || [])[i]) || 0)));
+  const tot = Array.from({ length: n }, (_, i) => vals.reduce((a, v) => a + v[i], 0));
+  const m = Math.max.apply(null, tot.concat([1]));
+  const xs = Array.from({ length: n }, (_, i) => x0 + (x1 - x0) * i / (n - 1));
+  let base = tot.map(t => mid - t / m * (gy1 - gy0) / 2);
   const palette = (dataColors(styleArg) || [STYLE.accent, mixHex(STYLE.soft, STYLE.accent, 0.45), mixHex(STYLE.soft, STYLE.accent, 0.12)]).slice(0, 5);
-  const n = Math.max(24, Math.round(CW / 0.1));
-  let base = [];
-  for (let i = 0; i < nPts; i++) base.push(yAt(i));
-  let lx = MX;
   series.forEach((se, si) => {
-    const upper = [];
-    for (let i = 0; i < nPts; i++) upper.push(base[i] + (values[si][i] || 0) / maxTot * plotH);
-    const pts = [];
-    for (let k = 0; k <= n; k++) {
-      const t = k / n * (nPts - 1);
-      const i0 = Math.min(nPts - 2, Math.floor(t)), f = t - i0;
-      const x = MX + (k / n) * CW;
-      const bt = base[i0] + (base[i0 + 1] - base[i0]) * sstep(f);
-      const ut = upper[i0] + (upper[i0 + 1] - upper[i0]) * sstep(f);
-      pts.push([x, ut, bt]);
-    }
-    ribbonRects(s, pts, palette[si % palette.length]);
-    const name = String(se.name || ('系列' + (si + 1)));
-    const lw = 0.3 + Math.min(2.4, estLines(name, 99, sz(10)) * 0 + name.length * 0.16);
-    s.addShape('rect', { x: lx, y: plotBottom + axisH + 0.09, w: 0.12, h: 0.12,
-      fill: { color: palette[si % palette.length] }, line: { type: 'none' } });
-    s.addText(name, { x: lx + 0.16, y: plotBottom + axisH + 0.05, w: lw, h: 0.2,
-      fontFace: STYLE.font, fontSize: sz(11.5), color: STYLE.body, valign: 'middle' });
-    lx += lw + 0.35;
-    base = upper;
+    const top = base.slice(), bot = top.map((t, i) => t + vals[si][i] / m * (gy1 - gy0));
+    const minY = Math.min.apply(null, top), maxY = Math.max.apply(null, bot);
+    const bx = F.X(xs[0]), by = F.Y(minY);
+    const pts = xs.map((x, i) => ({ x: F.L(x - xs[0]), y: F.L(top[i] - minY) }))
+      .concat(xs.slice().reverse().map((x, j) => { const i = n - 1 - j; return { x: F.L(x - xs[0]), y: F.L(bot[i] - minY) }; }));
+    pts.push({ close: true });
+    s.addShape('custGeom', { x: bx, y: by, w: Math.max(0.02, F.L(xs[n - 1] - xs[0])), h: Math.max(0.02, F.L(maxY - minY)),
+      fill: { color: palette[si % palette.length], transparency: 10 }, line: { type: 'none' }, points: pts });
+    s.addText(String(se.name || ('系列' + (si + 1))) + ' ' + fmtNum(vals[si][n - 1]),
+      { x: F.X(xs[n - 1] + 12), y: F.Y((top[n - 1] + bot[n - 1]) / 2) - 0.13, w: F.L(W - x1 - 14), h: 0.26, margin: 0, valign: 'middle',
+        fontFace: STYLE.font, fontSize: sz(Math.min(11.5, F.pt(13))), bold: true, color: STYLE.ink, fit: 'shrink' });
+    base = bot;
   });
   labels.forEach((lb, i) => {
-    const w0 = 0.8, x0 = Math.max(MX, Math.min(MX + CW - w0, xAt(i) - w0 / 2));
-    s.addText(String(lb), { x: x0, y: plotBottom + 0.03, w: w0, h: 0.2, align: i === 0 ? 'left' : (i === labels.length - 1 ? 'right' : 'center'),
-      fontFace: STYLE.font, fontSize: sz(11), color: STYLE.faint });
+    s.addText(String(lb), { x: F.X(xs[i]) - 0.4, y: F.Y(gy1 + 24) - 0.16, w: 0.8, h: 0.2, align: 'center', margin: 0,
+      fontFace: STYLE.font, fontSize: sz(Math.min(11, F.pt(13))), color: STYLE.faint });
   });
 }
 /* 表格：行高按可用高度自适应；行数×minRowH 超高时压到 hardFloor 并告警，禁止溢出注释带 */
@@ -2615,7 +2621,11 @@ function composeSide(s, sec, type, C, y0, y1) {
     });
     return;
   }
-  compChart(s, sec.chart, type, MX, y, mainW, H);
+  /* M13 保真遗留：Exhibit 来源行在 HTML 是图框内、紧贴图下（.exhibit__src），PPTX 原先沉到页底，比 HTML 低约 0.7in。
+     现与 HTML 同序：主图让出 0.34in，来源行落在主图正下方（左栏宽）。 */
+  const srcUnder = sec.exhibitNo && (sec.footnote || sec.note);
+  compChart(s, sec.chart, type, MX, y, mainW, srcUnder ? H - 0.34 : H);
+  if (srcUnder) ANNOT = Object.assign({}, ANNOT || {}, { foot: { x: MX, y: y + H - 0.3, w: mainW, h: 0.3 } });
   readoutPanel(s, C.pts.slice(0, 5), MX + mainW + 0.3, y, sideW, H);
 }
 

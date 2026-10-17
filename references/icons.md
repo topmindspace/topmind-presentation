@@ -4,9 +4,9 @@
 > **取码**：本节「高频取码」或 `python scripts/extract_snippet.py --task icons`。  
 > **完整 SVG 枚举**（60+）：[writing-skills 归档 `refs/icons-catalog.md`](https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/refs/icons-catalog.md)（生成默认**不**预读；仅当高频未覆盖语义时按名查阅）。
 
-全部 24×24、描边（stroke 1.8，圆角线帽），`currentColor` 随主题变色。共 **48** 个，单源 `assets/icons/`（`*.svg` HTML 内联 + `*.png` 256px 预渲染供 PPTX），`index.json` 为关键词→图标映射 + 默认表。校验：`python scripts/check_icons.py`。
+全部 24×24、描边（stroke 1.8，圆角线帽），`currentColor` 随主题变色。共 **72** 个（自研，不取第三方素材），单源 `assets/icons/`（`*.svg` HTML 内联 + `*.png` 256px 单色调色板 PNG 供 PPTX，换主色只改调色板），`index.json` 为关键词→图标映射 + 默认表。校验：`python scripts/check_icons.py`。
 
-> **PPTX 通道（真导出）**：图标名写入模型 `cards[].icon`（或 HTML `data-icon` / hydrate 标记 `<i data-icon="名"></i>`），`build_pptx.js` 经 `icon_lib.js` 取 PNG 嵌入（优先 `icon-assets.json` 的 accent 着色版 → 回落 `assets/icons/*.png` 256px 预渲染 → 最后才回落 accent 小方块路标），与 HTML 同名同语义。`objectName` 前缀 `icon:`，`validate_pptx` 单独计数（`icon_pictures`），**不进** `pictures=0` 内容图门禁。图标名取值 = `assets/icons/index.json` 的键（48 个）。
+> **PPTX 通道（真导出）**：图标名写入模型 `cards[].icon`（或 HTML `data-icon` / hydrate 标记 `<i data-icon="名"></i>`），`build_pptx.js` 经 `icon_lib.js` 取 PNG 嵌入（优先 `icon-assets.json` 的 accent 着色版 → 回落 `assets/icons/*.png` 256px 预渲染 → 最后才回落 accent 小方块路标），与 HTML 同名同语义。`objectName` 前缀 `icon:`，`validate_pptx` 单独计数（`icon_pictures`），**不进** `pictures=0` 内容图门禁。图标名取值 = `assets/icons/index.json` 的键（72 个）。
 
 ## 使用准则（先读再用）
 
@@ -15,7 +15,7 @@
 图标在正式商务演示文稿中是 **wayfinding（路标）**，不是插画墙。对齐常见咨询/产品 Deck 实践：
 
 1. **语义先行**：每个图标必须能回答「这是哪一类信息」；换掉标题后图标仍应成立，否则删。
-2. **同一家族**：全篇统一描边风（stroke ≈1.8、圆角线帽、`currentColor`）；禁混用填充风/emoji/三方彩色标。
+2. **同一家族**：全篇只选一种 `iconStyle`（`line` 线性 / `fill` 填充，见下节）；禁同篇混用、禁 emoji / 三方彩色标。
 3. **有限密度**：演示 3–8 / 研究 2–4 / 架构主图内 0；超过即噪音。
 4. **位置克制**：只走四正当位置（卡头 / 关键列表 / 指标角标 / 提示条）；**Agenda 大编号、表格单元格、图表内部、正文行内**一律不用。
 5. **一致性 > 个性**：同类信息复用同一语义图标（如「风险」全篇都用警告），不要每页换隐喻。
@@ -61,11 +61,24 @@
 
 光学中心对文字 x-height；图文距 `--sp-2`（8px）。同屏同尺寸。校验：`LAYOUT_ICON_SIZE`（∉ {16,18,20,24} → WARN）。
 
+### 线性 vs 填充（M13 · 模型顶层 `iconStyle`）
+
+| 风格 | 画法（双端一致） | 适合 |
+|---|---|---|
+| `line`（默认） | 浅色底块 + 主色描边图标 | 卡片多、信息密的页；研究 / 架构 |
+| `fill` | 主色实心底块 + 白色图标 | 简单页 / 仪表盘 KPI 条，需要更强的视觉锚点 |
+
+- **全篇单选**，不逐页切换：HTML `ICON_STYLE_MIXED`（全篇）与 PPTX `ICON_STYLE_MIXED`（单页）都是 FAIL。
+- PPTX 里图标 = 可编辑的底块形状（`icontile:line|fill`）+ 256px 高清 PNG（`icon:<名>`），不是整页截图。
+- **数量上限**：每页 ≤8（PPTX `ICON_OVERUSE`）；仪表盘 KPI 条 ≤4、简单页 1 个放大图标。
+- **尺寸**：列表 16–18px · 卡头 20–24px · KPI 条 28–32px · 简单页锚点 96–128px（只此一个，配大量留白）。
+- **装饰性误用**（审稿必删）：每条要点都配图标但语义重复；图标比文字还抢眼；同一页同时出现图标 + 插图 + 大号数字三个锚点；用图标填空白。
+
 ### 密度与一致性
 
 - 每屏 **3–8** 个；research 减半（2–4）；architecture 主图内 0，图例旁 ≤2
 - 长报告（≥6 页）至少一处 `.card__ico` 或 `.ul--ico`（否则 WARN）
-- 全篇统一描边风 stroke 1.8；不改 `stroke="currentColor"`；彩色只属于数据系列
+- 全篇统一一种风格（线性 / 填充二选一）；不改 `stroke="currentColor"`；彩色只属于数据系列
 
 ## 速查：按语义选图标
 
@@ -90,6 +103,12 @@
 | 标记 | 五角星、书签、信息/提示、对勾 |
 | 清单/条目 | 清单/条目 |
 | 待核实 | 信息 |
+| 交易/商品 | 订单、产品、购物车、门店 |
+| 协同/会务 | 会议、日历、协作、客服 |
+| 合同/合规 | 合同、合规、钥匙、加密 |
+| 产业/运营 | 工厂、物流、能源、服务器、代码 |
+| 市场/全球 | 地球、漏斗、搜索、奖杯 |
+| 民生/ESG | 健康、环保、学习 |
 
 选型顺序：**语义表 → index.json 关键词 → 高频取码**；命中不了用**默认表**（信息/检查/数据/图表/目标/团队/工具）轮换。
 

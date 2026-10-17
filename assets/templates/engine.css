@@ -1096,3 +1096,5 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
 /* M13 标题防孤字：两行标题平衡断行；数字 + 单位（.nw）不拆 */
 .shead__title,.cover__title,.t-display{text-wrap:balance}
 .nw{white-space:nowrap}
+/* M13 象形图：主色 = 命中部分，浅色 = 其余 */
+.pic__on{color:var(--accent)}.pic__off{color:var(--accent-soft-2)}

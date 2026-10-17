@@ -95,7 +95,8 @@
     "waffle",
     "radialbar",
     "rose",
-    "candlestick"
+    "candlestick",
+    "pictogram"
   ],
   "chartTypesHint": "chart.type 可取值 = 本表（30 类：16 原生 + 14 形状还原）。其余 6 类复杂信息图（sankey/treemap/boxplot/network/marimekko/streamgraph）是**专属页型**而非 chart.type——它们要按列/段/节点等结构化载荷表达，故走 sections[].type。不变量：charts.registry.types == chartTypes ∪ 上述 6 类页型（sync_runtime.py 校验）。",
   "chartDataTable": {

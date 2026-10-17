@@ -59,7 +59,7 @@
 - 能用原生图表就用原生（`MODEL_CHART_COUNT` 会核对）；形状通道的 `dataTable` 不得为 `off`。
 - 复合版式在 PPTX 里由同一求解器分区：主图、副图、解读带、关键数字各自成原生对象，双端位置差用 `check_fidelity.py` 量化（位置 p90 ≤0.12）。
 - M13 起复杂信息图（marimekko · boxplot · streamgraph · sankey · treemap）在 PPTX 端用 `svgFrame` 按 HTML 的 viewBox 900×340 等比落位，图内标签与 HTML 同位；Exhibit 来源行贴在主图正下方，与 HTML 图框内的来源行同序。剩余差距：表格页的「注：」行仍按版心底边落位（HTML 跟随表格高度），位置差 <0.2。
-- 正文行距双端统一为 1.5 倍、不够时 1.3 倍；页眉眉标与页脚小字默认不显示（`showEyebrow` / `showFootnotes` / `pageNumber` 可开关），省下的高度留给图表。
+- 正文行距双端统一为 1.5 倍、不够时 1.3 倍；页眉眉标与页脚小字默认不显示，省下的高度留给图表；需要时用顶层开关 `showEyebrow`、`showFootnotes`、`pageNumber` 打开。
 
 ## 4. 高密度复合页：仪表盘与杂志版（M13）
 

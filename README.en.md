@@ -9,7 +9,7 @@ English | [中文](./README.md)
 
 An agent skill for presentations. It turns your material into a **single-file, page-turning HTML deck** and, when needed, an **editable 16:9 PPTX**. Both come from one content model, so colours, layouts and numbers match. It can also re-lay-out an existing PPTX without changing a word.
 
-- Version: **v0.2.9**
+- Version: **v0.2.10**
 - Agents start at `SKILL.md`; this README is for people installing and maintaining the skill
 - The generated content and the skill's own docs are in Chinese
 

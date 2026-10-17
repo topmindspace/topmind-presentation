@@ -2683,12 +2683,16 @@ function composeSide(s, sec, type, C, y0, y1) {
   const minis = (sec.minis || []).filter(m => m && m.labels).slice(0, 2);
   const sideW = minis.length ? CW * 0.38 : Math.min(4.6, CW * 0.38);
   const mainW = CW - sideW - 0.3;
-  if (!C.pts.length && !minis.length) { compChart(s, sec.chart, type, MX, y, CW, H); return; }
+  /* 主图图注：HTML 在图框顶部写 cap（.fig__cap）；PPTX 同样在主图上方落一行（有 Exhibit 编号时 cap 已并入帧头，不重复） */
+  const mcap = sec.exhibitNo ? '' : (sec.cap || (sec.chart || {}).cap || '');
+  const capH = mcap ? 0.34 : 0;
+  if (!C.pts.length && !minis.length) { capText(s, mcap, MX, y, CW); compChart(s, sec.chart, type, MX, y + capH, CW, H - capH); return; }
   if (minis.length) {
     /* 主图 + 解读行在左，小图组占右列全高（小图越高越可读） */
     const rowH = C.pts.length ? Math.min(1.1, H * 0.3) : 0;
     const mh = H - rowH - (rowH ? 0.2 : 0);
-    compChart(s, sec.chart, type, MX, y, mainW, mh);
+    capText(s, mcap, MX, y, mainW);
+    compChart(s, sec.chart, type, MX, y + capH, mainW, mh - capH);
     if (rowH) readoutRow(s, [], C.pts.slice(0, 3), MX, y + mh + 0.2, mainW, rowH);
     const each = (H - 0.16 * (minis.length - 1)) / minis.length;
     minis.forEach((m, i) => {
@@ -2702,7 +2706,8 @@ function composeSide(s, sec, type, C, y0, y1) {
   /* M13 保真遗留：Exhibit 来源行在 HTML 是图框内、紧贴图下（.exhibit__src），PPTX 原先沉到页底，比 HTML 低约 0.7in。
      现与 HTML 同序：主图让出 0.34in，来源行落在主图正下方（左栏宽）。 */
   const srcUnder = sec.exhibitNo && (sec.footnote || sec.note);
-  compChart(s, sec.chart, type, MX, y, mainW, srcUnder ? H - 0.34 : H);
+  capText(s, mcap, MX, y, mainW);
+  compChart(s, sec.chart, type, MX, y + capH, mainW, (srcUnder ? H - 0.34 : H) - capH);
   if (srcUnder) ANNOT = Object.assign({}, ANNOT || {}, { foot: { x: MX, y: y + H - 0.3, w: mainW, h: 0.3 } });
   readoutPanel(s, C.pts.slice(0, 5), MX + mainW + 0.3, y, sideW, H);
 }

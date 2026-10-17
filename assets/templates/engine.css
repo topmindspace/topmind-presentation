@@ -292,9 +292,9 @@ display:flex;flex-direction:column;justify-content:center}
 /* M3 密度档（styleGrammar.density）：舒展 / 标准 / 紧凑 —— 间距档随风格切换 */
 html[data-density="airy"]{--gap:clamp(22px,2.3vw,38px)}
 html[data-density="dense"]{--gap:clamp(12px,1.2vw,20px)}
-.chap{display:grid;grid-template-columns:minmax(180px,30%) 1fr;gap:var(--sp-6);align-items:start}
+.chap{display:grid;grid-template-columns:minmax(160px,24%) 1fr;gap:var(--sp-6);align-items:start}
 .chap__no{font-family:var(--font-display);font-size:clamp(96px,14vw,200px);line-height:.9;font-weight:700;color:var(--accent);letter-spacing:-.04em}
-.chap__body .shead__title{margin:var(--sp-2) 0 var(--sp-4)}
+.chap__body .shead__title{margin:var(--sp-2) 0 var(--sp-4);font-size:clamp(2.25rem,3.6vw,3.5rem)}  /* 标题列 ≈ 版心 76%、每行约 19 字，与 PPTX chapter.numW 2.9in 同比例：长标题两行 */
 .chap__list{list-style:none;margin:var(--sp-5) 0 0;padding:0;counter-reset:none}
 .chap__list li{display:flex;gap:var(--sp-4);align-items:baseline;padding:var(--sp-3) 0;border-top:1px solid var(--border);color:var(--text);font-size:var(--fs-body)}
 .chap__i{font-weight:700;color:var(--accent);min-width:2em}

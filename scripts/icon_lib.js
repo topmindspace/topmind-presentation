@@ -1,5 +1,5 @@
 /**
- * topmind-presentation · 语义图标库（48 · 24×24 · stroke 1.8 圆角线帽 · currentColor）
+ * topmind-presentation · 语义图标库（72 · 24×24 · stroke 1.8 圆角线帽 · currentColor）
  * 单源：assets/icons/<name>.svg + assets/icons/index.json（关键词映射 + 默认表）。
  * 由 scripts/make_icon_pack.py 生成。HTML 内联 / build_pptx.js PNG 真导出共用。
  * 图标图 objectName 统一 `icon:` 前缀，validate_pptx 单独计数，不进 pictures 内容图门禁。
@@ -44,7 +44,7 @@ function defaultNames() {
 }
 
 /**
- * 按标题语义挑图标名：关键词命中 → 默认表轮换（不盲目轮换全量 48）。
+ * 按标题语义挑图标名：关键词命中 → 默认表轮换（不盲目轮换全量）。
  * 与 render_from_model.pick_icon_name 同策略（同读 index.json）。
  */
 function pickIconName(title, idx) {

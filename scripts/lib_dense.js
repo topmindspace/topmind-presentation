@@ -69,3 +69,35 @@ function overflow(sec) {
   return out;
 }
 module.exports = { DASH_MAX_CHARTS, DASH_MAX_KM, DASH_MAX_PTS, MAG_MAX_METRICS, MAG_MAX_PTS, niceCeil, dashCharts, dashLegend, kv3, pt3, focusKind, focusVariant, overflow };
+/* M13 中文标题防孤字：按估算字宽模拟换行；两行时一律在「标点后 / 词边界」平衡断行（末行不留孤字）。
+   数字与单位（18 个、3.2 天、+27%）、英文单词不拆开。返回带 \n 的标题；单行或已平衡时原样返回。 */
+function balanceTitle(text, widthIn, fontPt, asciiRatio) {
+  const t = String(text == null ? '' : text);
+  if (t.includes('\n') || !t) return t;
+  const ar = asciiRatio || 0.55, usable = Math.max(24, widthIn * 72 - 8);
+  const cw = ch => (/[\x00-\xff]/.test(ch) ? fontPt * ar : fontPt);
+  const total = [...t].reduce((a, c) => a + cw(c), 0);
+  // 估算字宽比真实排版略窄（字距 / 字体回退），留 8% 余量：贴边的「刚好一行」实际常被挤出孤字
+  if (total <= usable * 0.92) return t;
+  // 不可拆分段：数字 + 可选空格 + 单位、连续拉丁字母
+  const glue = new Array(t.length).fill(false);
+  const re = /[+\-]?\d[\d.,]*\s*(?:%|倍|个|家|万|亿|元|年|月|天|人|次|份|项|款|座|台|pt|×)?|[A-Za-z][A-Za-z0-9\-]*/g;
+  let m;
+  while ((m = re.exec(t))) for (let i = m.index + 1; i < m.index + m[0].length; i++) glue[i] = true;
+  const lines = Math.ceil(total / (usable * 0.92));
+  if (lines > 2) return t;            // 三行以上交给字号阶梯，不硬断
+  // 两行标题一律平衡断行：估算字宽与真实排版有误差，按估算「刚好不孤字」的标题实际仍可能把「18 个」拆开
+  // 在 [35%, 65%] 宽度区间找断点：优先标点后，其次非粘连处，越接近一半越好
+  let acc = 0, best = -1, bestScore = 1e9;
+  for (let i = 1; i < t.length; i++) {
+    acc += cw(t[i - 1]);
+    const r = acc / total;
+    if (r < 0.35 || r > 0.65 || glue[i] || acc > usable || total - acc > usable) continue;
+    const punct = /[，、：；。,:;！？—）)]/.test(t[i - 1]);
+    const score = Math.abs(r - 0.5) - (punct ? 0.2 : 0);
+    if (score < bestScore) { bestScore = score; best = i; }
+  }
+  if (best < 0) return t;
+  return t.slice(0, best).replace(/\s+$/, '') + '\n' + t.slice(best).replace(/^\s+/, '');
+}
+module.exports.balanceTitle = balanceTitle;

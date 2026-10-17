@@ -1118,6 +1118,10 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
 .focus__fig svg{width:100%;height:auto}
 .focus--number .focus__cap{margin-top:var(--sp-4);color:var(--text-1);font-weight:600}
 @media (max-width:900px){.dash--2,.dash--3,.dash--4,.mag,.focus--left,.focus--split{grid-template-columns:1fr}}
+
+/* M13 标题防孤字：两行标题平衡断行；数字 + 单位（.nw）不拆 */
+.shead__title,.cover__title,.t-display{text-wrap:balance}
+.nw{white-space:nowrap}
 /* __TOPPPT_ENGINE_END__ */
 
 /* ── 架构模式专属层（图为王 · 本模板即 architecture 形态：版心 1600 / band 紧凑 / 图占版面 ≥85%） ── */

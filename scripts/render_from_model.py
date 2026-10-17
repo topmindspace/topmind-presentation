@@ -89,6 +89,22 @@ def esc(s) -> str:
             .replace('"', '&quot;'))
 
 
+
+_TITLE_GLUE = re.compile(r'[+\-]?\d[\d.,]*\s*(?:%|倍|个|家|万|亿|元|年|月|天|人|次|份|项|款|座|台|pt|×)?|[A-Za-z][A-Za-z0-9\-]*\s+[A-Za-z0-9\-]+')
+
+
+def esc_title(t):
+    """M13 标题防孤字（HTML 端）：数字 + 单位等粘连段包 .nw 不拆行；配合 CSS text-wrap:balance 平衡两行。"""
+    out, last = [], 0
+    s = str(t or '')
+    for m in _TITLE_GLUE.finditer(s):
+        if ' ' not in m.group(0).strip() and not re.search(r'\d.*\D', m.group(0)):
+            continue
+        out.append(esc(s[last:m.start()])); out.append(f'<span class="nw">{esc(m.group(0))}</span>'); last = m.end()
+    out.append(esc(s[last:]))
+    return ''.join(out)
+
+
 def cite(text: str) -> str:
     """模型里 [n] → HTML 上标引用（模型保持纯文本）。"""
     return re.sub(r'\[(\d+)\]',
@@ -181,7 +197,7 @@ def shead(sec: dict) -> str:
     eb_html = f'      <div class="t-eyebrow">{esc(eb)}</div>\n' if eb else ''
     return (f'    <div class="shead rv">\n'
             f'{eb_html}'
-            f'      <h2 class="t-h1 shead__title">{esc(sec.get("title") or "")}</h2>'
+            f'      <h2 class="t-h1 shead__title">{esc_title(sec.get("title") or "")}</h2>'
             f'{lead_html}\n    </div>')
 
 
@@ -1051,7 +1067,7 @@ def r_chapter(i, sec):
             f'    <div class="chap__no" aria-hidden="true">{esc(num)}</div>\n'
             '    <div class="chap__body">\n'
             f'      <div class="t-eyebrow">{esc(eb)}</div>\n'
-            f'      <h2 class="t-display shead__title">{esc(sec.get("title") or "")}</h2>\n'
+            f'      <h2 class="t-display shead__title">{esc_title(sec.get("title") or "")}</h2>\n'
             + (f'      <p class="t-lead">{cite(sec.get("lead"))}</p>\n' if sec.get('lead') else '')
             + (f'      <ol class="chap__list">{items}</ol>\n' if items else '')
             + '    </div>\n  </div>\n'
@@ -1189,7 +1205,7 @@ def render_body(model: dict) -> str:
   <div class="wrap cover">
     <div class="t-eyebrow cover__meta">{esc(model.get("meta") or "")}</div>
     <div class="cover__main rv">
-      <h1 class="t-display cover__title">{esc(model.get("title") or "")}</h1>
+      <h1 class="t-display cover__title">{esc_title(model.get("title") or "")}</h1>
       <p class="t-lead cover__sub">{esc(model.get("subtitle") or "")}</p>
     </div>
   </div>
@@ -1304,7 +1320,7 @@ def render_body(model: dict) -> str:
     parts.append(f'''<section class="band band--accent" id="closing">
   <div class="wrap">
     <div class="shead rv">{ceb}
-      <h2 class="t-h1 shead__title">{esc(closing.get("title") or "收尾")}</h2></div>
+      <h2 class="t-h1 shead__title">{esc_title(closing.get("title") or "收尾")}</h2></div>
 {body}  </div>
 </section>''')
     # 参考资料：只列模型给的真实来源；无真实来源整节省略（禁止占位条目）

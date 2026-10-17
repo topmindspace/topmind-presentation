@@ -1,6 +1,6 @@
 {
-  "version": "0.2.0",
-  "count": 48,
+  "version": "0.3.0",
+  "count": 72,
   "defaults": [
     "信息",
     "检查",
@@ -347,7 +347,7 @@
       "keywords": [
         "组织",
         "层级",
-        "组织架构",
+        "架构",
         "org"
       ],
       "default": false
@@ -550,6 +550,328 @@
         "方向",
         "导航",
         "compass"
+      ],
+      "default": false
+    },
+    "订单": {
+      "file": "订单.svg",
+      "png": "订单.png",
+      "label": "订单/票据",
+      "keywords": [
+        "订单",
+        "票据",
+        "发票",
+        "账单",
+        "order"
+      ],
+      "default": false
+    },
+    "产品": {
+      "file": "产品.svg",
+      "png": "产品.png",
+      "label": "产品/包装",
+      "keywords": [
+        "产品",
+        "商品",
+        "包装",
+        "SKU",
+        "product"
+      ],
+      "default": false
+    },
+    "会议": {
+      "file": "会议.svg",
+      "png": "会议.png",
+      "label": "会议/汇报",
+      "keywords": [
+        "会议",
+        "汇报",
+        "演示",
+        "路演",
+        "meeting"
+      ],
+      "default": false
+    },
+    "日历": {
+      "file": "日历.svg",
+      "png": "日历.png",
+      "label": "日历/日程",
+      "keywords": [
+        "日历",
+        "日程",
+        "排期",
+        "周期",
+        "calendar"
+      ],
+      "default": false
+    },
+    "合同": {
+      "file": "合同.svg",
+      "png": "合同.png",
+      "label": "合同/签约",
+      "keywords": [
+        "合同",
+        "签约",
+        "协议",
+        "签署",
+        "contract"
+      ],
+      "default": false
+    },
+    "奖杯": {
+      "file": "奖杯.svg",
+      "png": "奖杯.png",
+      "label": "奖杯/荣誉",
+      "keywords": [
+        "奖杯",
+        "荣誉",
+        "冠军",
+        "第一",
+        "领先",
+        "award"
+      ],
+      "default": false
+    },
+    "地球": {
+      "file": "地球.svg",
+      "png": "地球.png",
+      "label": "全球/国际",
+      "keywords": [
+        "地球",
+        "全球",
+        "国际",
+        "海外",
+        "出海",
+        "global"
+      ],
+      "default": false
+    },
+    "工厂": {
+      "file": "工厂.svg",
+      "png": "工厂.png",
+      "label": "工厂/制造",
+      "keywords": [
+        "工厂",
+        "制造",
+        "生产",
+        "产能",
+        "factory"
+      ],
+      "default": false
+    },
+    "物流": {
+      "file": "物流.svg",
+      "png": "物流.png",
+      "label": "物流/配送",
+      "keywords": [
+        "物流",
+        "配送",
+        "运输",
+        "履约",
+        "delivery"
+      ],
+      "default": false
+    },
+    "购物车": {
+      "file": "购物车.svg",
+      "png": "购物车.png",
+      "label": "购物/零售",
+      "keywords": [
+        "购物车",
+        "购物",
+        "零售",
+        "电商",
+        "下单",
+        "cart"
+      ],
+      "default": false
+    },
+    "客服": {
+      "file": "客服.svg",
+      "png": "客服.png",
+      "label": "客服/服务",
+      "keywords": [
+        "客服",
+        "服务",
+        "热线",
+        "支持",
+        "support"
+      ],
+      "default": false
+    },
+    "学习": {
+      "file": "学习.svg",
+      "png": "学习.png",
+      "label": "学习/培训",
+      "keywords": [
+        "学习",
+        "培训",
+        "教育",
+        "课程",
+        "人才",
+        "learning"
+      ],
+      "default": false
+    },
+    "健康": {
+      "file": "健康.svg",
+      "png": "健康.png",
+      "label": "健康/医疗",
+      "keywords": [
+        "健康",
+        "医疗",
+        "医院",
+        "护理",
+        "养老",
+        "health"
+      ],
+      "default": false
+    },
+    "环保": {
+      "file": "环保.svg",
+      "png": "环保.png",
+      "label": "环保/可持续",
+      "keywords": [
+        "环保",
+        "绿色",
+        "可持续",
+        "低碳",
+        "ESG",
+        "green"
+      ],
+      "default": false
+    },
+    "搜索": {
+      "file": "搜索.svg",
+      "png": "搜索.png",
+      "label": "搜索/调研",
+      "keywords": [
+        "搜索",
+        "调研",
+        "查找",
+        "检索",
+        "search"
+      ],
+      "default": false
+    },
+    "加密": {
+      "file": "加密.svg",
+      "png": "加密.png",
+      "label": "加密/隐私",
+      "keywords": [
+        "加密",
+        "隐私",
+        "锁",
+        "保密",
+        "lock"
+      ],
+      "default": false
+    },
+    "服务器": {
+      "file": "服务器.svg",
+      "png": "服务器.png",
+      "label": "服务器/算力",
+      "keywords": [
+        "服务器",
+        "算力",
+        "机房",
+        "部署",
+        "server"
+      ],
+      "default": false
+    },
+    "代码": {
+      "file": "代码.svg",
+      "png": "代码.png",
+      "label": "代码/研发",
+      "keywords": [
+        "代码",
+        "研发",
+        "开发",
+        "工程",
+        "API",
+        "code"
+      ],
+      "default": false
+    },
+    "协作": {
+      "file": "协作.svg",
+      "png": "协作.png",
+      "label": "协作/生态",
+      "keywords": [
+        "协作",
+        "生态",
+        "伙伴",
+        "联动",
+        "协同",
+        "partner"
+      ],
+      "default": false
+    },
+    "漏斗": {
+      "file": "漏斗.svg",
+      "png": "漏斗.png",
+      "label": "漏斗/转化",
+      "keywords": [
+        "漏斗",
+        "转化",
+        "筛选",
+        "留存",
+        "funnel"
+      ],
+      "default": false
+    },
+    "合规": {
+      "file": "合规.svg",
+      "png": "合规.png",
+      "label": "合规/公平",
+      "keywords": [
+        "合规",
+        "监管",
+        "法务",
+        "公平",
+        "审计",
+        "compliance"
+      ],
+      "default": false
+    },
+    "钥匙": {
+      "file": "钥匙.svg",
+      "png": "钥匙.png",
+      "label": "钥匙/关键",
+      "keywords": [
+        "钥匙",
+        "关键",
+        "授权",
+        "准入",
+        "key"
+      ],
+      "default": false
+    },
+    "门店": {
+      "file": "门店.svg",
+      "png": "门店.png",
+      "label": "门店/网点",
+      "keywords": [
+        "门店",
+        "网点",
+        "店铺",
+        "线下",
+        "社区",
+        "store"
+      ],
+      "default": false
+    },
+    "能源": {
+      "file": "能源.svg",
+      "png": "能源.png",
+      "label": "能源/电力",
+      "keywords": [
+        "能源",
+        "电力",
+        "电池",
+        "续航",
+        "energy"
       ],
       "default": false
     }

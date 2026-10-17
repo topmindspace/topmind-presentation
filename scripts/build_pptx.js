@@ -758,6 +758,8 @@ function headRule(s, x, y, w) {
   const thick = SP.rule === 'bar-thick';
   s.addShape('rect', { x, y, w: thick ? 1.2 : 0.9, h: thick ? 0.07 : 0.045, fill: { color: STYLE.accent }, line: { type: 'none' }, objectName: 'head:rule' });
 }
+/* M13：标题防孤字（lib_dense.balanceTitle 单源）：两行标题在标点 / 词边界平衡断行，数字 + 单位不拆 */
+function BT(t, w, pt) { return DENSE.balanceTitle(t, w, pt, TM_ASCII); }
 function head(s, eyebrow, title, lead) {
   const H = REGIONS.regionOf('head', 'head') || {
     x: MX, y: PT.common.headEyebrowY, w: CW, h: 0.4,
@@ -770,8 +772,8 @@ function head(s, eyebrow, title, lead) {
   /* 主标题自适应（adaptiveText.title 单源）：先按字符数分档定上限，再按高度验算降一档，避免压到分隔线 */
   const titleH = H.ruleY - H.titleY - 0.06;
   const tMax = titleMaxFor(title);
-  const tSize = sz(estTextH(title, CW, sz(tMax), 1.25) > titleH ? Math.min(tMax, AT_TITLE.step1 || 24) : tMax);
-  s.addText(title, { x: H.x, y: H.titleY, w: H.w, h: Math.max(0.6, titleH),
+  const tSize = sz(estTextH(BT(title, H.w, sz(tMax)), CW, sz(tMax), 1.25) > titleH ? Math.min(tMax, AT_TITLE.step1 || 24) : tMax);
+  s.addText(BT(title, H.w, tSize), { x: H.x, y: H.titleY, w: H.w, h: Math.max(0.6, titleH),
     fontFace: STYLE.fontDisplay, fontSize: tSize, bold: SP.titleBold !== false, color: STYLE.ink, fit: 'shrink' });
   headRule(s, H.x, H.ruleY, H.w);
   if (lead) s.addText(lead, { x: H.x, y: H.leadY || PT.common.leadY, w: H.w, h: 0.5, fontFace: STYLE.font,
@@ -2388,7 +2390,7 @@ function addTable(s, tbl, x, y, w, availH, opts) {
     fontSize: sz(11), color: darkCover ? STYLE.accent : STYLE.soft });
   const _ct = roleSz('coverHero', 44);  /* M9：封面主标题与 HTML 主视觉同比例（短标题用 coverHero 档，长标题回落 44 / 36） */
   const tSize = estTextH(CONTENT.title, CW - 1, _ct, 1.2) <= C.titleH ? _ct : (estTextH(CONTENT.title, CW - 1, sz(44), 1.25) > C.titleH ? sz(36) : sz(44));
-  s.addText(CONTENT.title, { x: MX, y: C.titleY, w: CW - 1, h: C.titleH, fontFace: STYLE.fontDisplay,
+  s.addText(BT(CONTENT.title, CW - 1, tSize), { x: MX, y: C.titleY, w: CW - 1, h: C.titleH, fontFace: STYLE.fontDisplay,
     fontSize: tSize, bold: SP.titleBold !== false, color: cvTitle });
   s.addText(CONTENT.subtitle || '', { x: MX, y: C.subtitleY, w: CW - 1, h: C.subtitleH,
     fontFace: STYLE.font, fontSize: sz(18), color: cvSub });
@@ -2920,7 +2922,7 @@ CONTENT.sections.forEach((sec) => {
     const ebText = String(sec.eyebrow || '').replace(/^\s*\d{1,2}\s*[·・\-—]\s*/, '') || ('第 ' + num + ' 章');
     s.addText(ebText, { x: tx, y: CH.titleY - 0.42, w: tw, h: 0.4, fontFace: STYLE.font, fontSize: sz(11), bold: true,
       color: STYLE.accent, charSpacing: 2 });
-    s.addText(sec.title || '', { x: tx, y: CH.titleY, w: tw, h: 1.25, fontFace: STYLE.fontDisplay, fontSize: roleSz('chapterTitle', 32),
+    s.addText(BT(sec.title || '', tw, roleSz('chapterTitle', 32)), { x: tx, y: CH.titleY, w: tw, h: 1.25, fontFace: STYLE.fontDisplay, fontSize: roleSz('chapterTitle', 32),
       bold: SP.titleBold !== false, color: STYLE.ink, valign: 'top', fit: 'shrink' });
     let cy = 3.0;
     if (sec.lead) {
@@ -2947,7 +2949,7 @@ CONTENT.sections.forEach((sec) => {
     s.addShape('rect', { x: 0, y: 0, w: PW, h: PH, fill: { color: STYLE.soft }, line: { type: 'none' } });
     if (CHROME_FLAGS.showEyebrow && sec.eyebrow) s.addText(sec.eyebrow, { x: MX, y: PT.common.headEyebrowY, w: CW, h: 0.4,
       fontFace: STYLE.font, fontSize: sz(11), bold: true, color: STYLE.accent, charSpacing: 2 });
-    s.addText(sec.title, { x: MX, y: PT.common.headTitleY, w: CW, h: 1.0,
+    s.addText(BT(sec.title, CW, sz(30)), { x: MX, y: PT.common.headTitleY, w: CW, h: 1.0,
       fontFace: STYLE.fontDisplay, fontSize: sz(30), bold: true, color: STYLE.ink });
     s.addShape('rect', { x: MX, y: PT.common.headRuleY, w: 0.9, h: 0.045, fill: { color: STYLE.accent }, line: { type: 'none' } });
     /* M0：去掉装饰大引号；金句页必须带证据（metrics：2–4 个支撑数字），否则 strict 门禁拦截。
@@ -3945,7 +3947,7 @@ CONTENT.sections.forEach((sec) => {
   const cEb = !CHROME_FLAGS.showEyebrow ? '' : (CONTENT.closing.eyebrow != null ? CONTENT.closing.eyebrow : '下一步');
   if (cEb) s.addText(cEb, { x: MX, y: C.eyebrowY + 0.16, w: CW, h: 0.4, fontFace: STYLE.font,
     fontSize: sz(11), bold: true, color: STYLE.accent, charSpacing: 2 });
-  s.addText(CONTENT.closing.title, { x: MX, y: C.titleY, w: CW - 1, h: C.titleH, fontFace: STYLE.fontDisplay,
+  s.addText(BT(CONTENT.closing.title, CW - 1, sz(30)), { x: MX, y: C.titleY, w: CW - 1, h: C.titleH, fontFace: STYLE.fontDisplay,
     fontSize: sz(30), bold: true, color: STYLE.ink });
   /* 要点可为字符串（美化路由原样搬运）：统一成 [主句, 说明] */
   const pts = (CONTENT.closing.points || []).map(p => Array.isArray(p) ? p : [String(p), '']);

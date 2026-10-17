@@ -1240,6 +1240,36 @@ def inspect_slide(
     if len(tile_styles) > 1:
         warnings.append(issue("ICON_STYLE_MIXED", "同页出现线性与填充两种图标风格：全篇统一 iconStyle。", slide=slide_number))
 
+    # M13 TITLE_ORPHAN：标题（≥24pt）按框宽模拟换行，末行 ≤2 字或「数字 | 单位」被拆开即判孤字
+    _A = '{http://schemas.openxmlformats.org/drawingml/2006/main}'
+    for shape in shapes:
+        fs = font_sizes_pt(shape)
+        bx = shape_bounds(shape)
+        if not fs or bx is None or max(fs) < 24:
+            continue
+        pt = max(fs); usable = bx[2] / 914400 * 72 - 14
+        for para in shape.iter(_A + 'p'):
+            t = ''.join(x.text or '' for x in para.iter(_A + 't')).strip()
+            psz = [int(r.get('sz')) / 100 for r in para.iter(_A + 'rPr') if r.get('sz')]
+            if psz and max(psz) < 24:
+                continue          # 只查本段字号 ≥24pt 的标题段（同框里的小字说明不算）
+            if len(t) < 6 or re.fullmatch(r'[\d.,%+\-×x ]+', t):
+                continue
+            lines, w, cur = [], 0.0, ''
+            for ch in t:
+                cw = pt * (1.0 if ord(ch) > 0x2E80 else _containers_cfg()["emAsciiRatio"])
+                if w + cw > usable and cur:
+                    lines.append(cur); cur, w = ch, cw
+                else:
+                    cur += ch; w += cw
+            lines.append(cur)
+            if len(lines) < 2:
+                continue
+            last = lines[-1].strip()
+            broken = bool(re.search(r'\d\s*$', lines[-2]) and re.match(r'[个家万亿元年月天人次份项款座台%倍]', last))
+            if len(last) <= 2 or broken:
+                warnings.append(issue("TITLE_ORPHAN", f"标题末行孤字「{last}」：在标点 / 词边界平衡断行（数字 + 单位不拆）。", slide=slide_number))
+                break
     # R6：版心填充率（宽/高分别算；封面/大纲/收尾等结构页豁免）
     _struct_text = combined_text[:200] if combined_text else ""
     _is_struct = bool(re.search(r"(报告大纲|AGENDA|下一步|参考资料|封面)", _struct_text)) or slide_number <= 2
@@ -1541,7 +1571,7 @@ def validate_model_roundtrip(
         if slide_no > len(slide_texts):
             break
         title = str(sec.get("title") or "").strip()
-        if title and title not in slide_texts[slide_no - 1]:
+        if title and re.sub(r'\s+', '', title) not in re.sub(r'\s+', '', slide_texts[slide_no - 1]):   # M13 标题可能被平衡断行
             warnings.append(
                 issue("MODEL_ROUNDTRIP_TITLE_MISSING",
                       f"第 {i + 1} 章标题「{title[:36]}」未落在第 {slide_no} 页。", slide=slide_no)

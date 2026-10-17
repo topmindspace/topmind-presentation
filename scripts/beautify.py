@@ -527,6 +527,7 @@ def html_page_texts(path, with_svg=True):
         if not with_svg:
             # 图表 SVG 内是坐标刻度 / 数据标签 / 提示框（由数据计算，(d) 另行核对），不参与「新增文本」检查
             p = re.sub(r'<svg[\s\S]*?</svg>', ' ', p)
+        p = re.sub(r'<span class="nw">([^<]*)</span>', r'\1', p)   # M13 标题防孤字的行内粘连段不是独立文本
         t = re.sub(r'<[^>]+>', '\n', p)
         t = t.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#39;', "'")
         out.append([x for x in (s.strip() for s in t.split('\n')) if x])

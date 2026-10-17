@@ -309,6 +309,28 @@ def _check_required_fields(chk, model):
     chk("页型必填字段齐全（model-schema pageTypes.required）", not miss, "; ".join(miss[:4]))
 
 
+def _check_m13(txt, chk):
+    """M13：简单页稀疏门禁（HTML 侧）+ 图标风格统一。
+    FOCUS_SPARSE：focus 页必须有放大的锚点；正文 6–220 字（多了就不是简单页，改用要点 / 卡片；少于 6 字只剩标题）。
+    ICON_STYLE_MIXED：全篇线性 / 填充图标不得混用（模型级 iconStyle 单选）。"""
+    bad = []
+    for i, b in enumerate(_bands(txt), 1):
+        if 'band--focus' not in b[:260]:
+            continue
+        body = re.sub(r'<svg[\s\S]*?</svg>|<script[\s\S]*?</script>|<style[\s\S]*?</style>', ' ', b)
+        body = re.sub(r'<h2[^>]*shead__title[\s\S]*?</h2>', ' ', body, count=1)
+        n = len(re.sub(r'\s+', '', _plain(body)))
+        anchor = re.search(r'class="[^"]*\b(focus__num|focus__stmt|focus__ico|focus__fig|focus__para|focus__col)\b', b)
+        if not anchor or n < 6 or n > 220:
+            bad.append(f"第{i}页 正文{n}字{'（缺锚点）' if not anchor else ''}")
+    chk("FOCUS_SPARSE 简单页留白合理（有放大锚点 · 正文 6–220 字）", not bad, "; ".join(bad[:4]))
+    body_only = re.sub(r'<script[\s\S]*?</script>|<style[\s\S]*?</style>', ' ', ''.join(_bands(txt)))
+    has_fill = bool(re.search(r'\b(ico--fill|card__ico--fill|focus__ico--fill)\b', body_only))
+    has_line = bool(re.search(r'\b(ico--line|focus__ico--line)\b', body_only)) or bool(re.search(r'class="card__ico"', body_only))
+    chk("ICON_STYLE_MIXED 图标风格全篇统一（线性 / 填充不混用）", not (has_fill and has_line),
+        "同时出现线性与填充图标：在模型顶层统一 iconStyle")
+
+
 def _check_page_model(txt, chk, mode):
     """页面高度模型（每页高度稳定）：所有 .band 至少一屏高，长结构页显式 --flow 退出。"""
     has_model = ('--band-min' in txt) or ('calc(100svh - var(--bar-h))' in txt) or \
@@ -2031,6 +2053,7 @@ def main():
     model = _check_model_consistency(txt, chk, mode, style)
     _check_content_coverage(txt, chk, model)
     _check_required_fields(chk, model)
+    _check_m13(txt, chk)
     _check_type_features(txt, chk, model)
     _check_exhibits(txt, chk, mode)
     _check_research_extras(txt, chk, mode)

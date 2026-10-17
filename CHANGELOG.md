@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## [0.2.11] - 2026-10-17
+
+### docs/ 清理：落地页只在站点
+- 删除仓库内的旧落地页与截图：`docs/index.html`、`docs/showcase.html`、`docs/style-gallery.html`、`docs/assets/`、`docs/site-assets/`。本仓库没有 GitHub Pages，这些文件没有被任何脚本、测试、CI 或发布流程使用。`docs/` 只留 `PUBLISHING.md` 与 `MIGRATION-0.2.8.md`。
+- 落地页与演示统一指向 https://topmindspace.github.io/presentation/ （源码在 topmindspace.github.io 仓库）；风格总览仍是包内的 `assets/style-gallery.html`。两份 README 的入口与目录说明、`MIGRATION-0.2.8.md` 的对照表已同步。
+- `scripts/capture_theme_overview.js` 新增 `--out=<目录>`，可把主题总览截图直接写进站点仓库；`PUBLISHING.md` 新增「落地页（站点）」一节，写明站点截图的刷新步骤与站点规则。
+- `check_repo.py` 新规则：`docs/` 只允许 `PUBLISHING.md` 与 `MIGRATION-*.md`；README 中英文与 `docs/*.md` 里的相对链接必须指向存在的文件。
+
+### 版式与门禁
+- HTML 章节号与 PPTX 同比例：`clamp(72px,10vw,144px)`（PPTX 96pt ÷ 13.33in 页宽 ≈ 10%），研究模式按 80pt 用 8.3vw，之前 HTML 约大 40%。
+- HTML 章节页标题栏加宽（号码列 `minmax(160px,24%)`，`pageTypes.chapter.numW` 3.6 → 2.9），长标题不再被挤成三行。
+- PPTX 多图表综合页（侧图 / 迷你图 / 通栏）补上主图图注，与 HTML 一致；已有 `exhibitNo` 时不重复。
+- `audit_skill.py` 重复片段检查改为逐字滑窗、按文件分别取窗口，修复跨文件边界误报和重复只报一次的问题。
+- README 的「美化前后对比」链接指回站点 `#beautify` 锚点。
+
 ## [0.2.10] - 2026-10-17
 
 ### M13 多图表综合页、简单页、美化复杂稿与高密度示例

@@ -152,7 +152,8 @@ def grouped(ch, skin=None, w=W, h=H):
     unit = ch.get('unit') or ''
     allv = [float(v) for s in series for v in (s.get('values') or []) if v is not None]
     vmax = float(ch.get('max') or 0) or _nice_max(max(allv + [t['value'] for t in _targets(ch)] + [0]))
-    x0, x1, y0, y1 = 64, w - 24, 52, h - 46
+    leg = ch.get('legend') is not False   # M13：仪表盘共用图例时各图不再各画一份
+    x0, x1, y0, y1 = 64, w - 24, (52 if leg else 26), h - 46
     body = _grid(x0, x1, y0, y1, vmax, skin)
     n, k = max(1, len(labels)), max(1, len(series))
     step = (x1 - x0) / n
@@ -162,8 +163,9 @@ def grouped(ch, skin=None, w=W, h=H):
     for si, s in enumerate(series):
         cls = f'f-c{si % 5 + 1}'
         lx = x0 + si * 120
-        body.append(f'<rect x="{_f(lx)}" y="12" width="12" height="12" rx="3" class="{cls}"/>')
-        body.append(_txt(lx + 18, 22, s.get('name') or '', 'f-txt2', 12.5, 'start'))
+        if leg:
+            body.append(f'<rect x="{_f(lx)}" y="12" width="12" height="12" rx="3" class="{cls}"/>')
+            body.append(_txt(lx + 18, 22, s.get('name') or '', 'f-txt2', 12.5, 'start'))
         for i, v in enumerate(s.get('values') or []):
             if v is None or i >= n:
                 continue
@@ -313,7 +315,8 @@ def stack(ch, skin=None, w=W, h=H):
         return bar(ch, skin, w, h)
     tot = [sum(float((s.get('values') or [0] * len(labels))[i]) for s in series) for i in range(len(labels))]
     vmax = float(ch.get('max') or 0) or _nice_max(max(tot + [0]))
-    x0, x1, y0, y1 = 64, w - 150, 30, h - 46
+    leg = ch.get('legend') is not False
+    x0, x1, y0, y1 = 64, w - (150 if leg else 24), 30, h - 46
     body = _grid(x0, x1, y0, y1, vmax, skin)
     n = max(1, len(labels))
     step = (x1 - x0) / n
@@ -330,7 +333,8 @@ def stack(ch, skin=None, w=W, h=H):
                 body.append(_txt(x + bw / 2, acc - hh / 2 + 5, num(v), 't-on-inv', 12, weight=600))
             acc -= hh
         body.append(_txt(x + bw / 2, y1 + 24, lb, 'f-txt2', 13))
-    body += _legend(series, x1 + 24, y0 + 10)
+    if leg:
+        body += _legend(series, x1 + 24, y0 + 10)
     return _svg('stack', body, w, h)
 
 

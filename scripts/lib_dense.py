@@ -57,6 +57,11 @@ def dash_charts(sec: dict) -> list:
                     c['max'] = m
     for k, c in enumerate(cs):
         cap = str(c.get('cap') or '')
+        # 长单位（>2 字，如「亿人次」「元/km」）挪进图注，数据标签只留数字——窄格里「2.9 亿人次」会折成两行
+        u = str(c.get('unit') or '')
+        if len(u) > 2:
+            cap = f'{cap}（{u}）' if cap else u
+            c['unit'] = ''
         c['cap'] = f'{ORDINALS[k]} {cap}'.strip() if sec.get('numbered', True) else cap
     return cs
 

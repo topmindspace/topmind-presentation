@@ -1130,7 +1130,8 @@ background:var(--surface-2);border-radius:6px;padding:2px 7px;color:var(--text)}
 @media (max-width:900px){.dash--2,.dash--3,.dash--4,.mag,.focus--left,.focus--split{grid-template-columns:1fr}}
 
 /* M13 标题防孤字：两行标题平衡断行；数字 + 单位（.nw）不拆 */
-.shead__title,.cover__title,.t-display{text-wrap:balance}
+/* 中文按分句断行（keep-all：只在标点 / 空格处换行，与 PPTX balanceTitle 同口径）；单句超宽时 anywhere 兜底 */
+.shead__title,.cover__title,.t-display{text-wrap:balance;word-break:keep-all;overflow-wrap:anywhere}
 .nw{white-space:nowrap}
 /* M13 象形图：主色 = 命中部分，浅色 = 其余 */
 .pic__on{color:var(--accent)}.pic__off{color:var(--accent-soft-2)}

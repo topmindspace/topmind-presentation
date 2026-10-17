@@ -1634,7 +1634,7 @@ def validate_model_roundtrip(
                           slide=slide_no)
                 )
     model_title = str(model.get("title") or "").strip()
-    if model_title and slide_texts and model_title not in slide_texts[0]:
+    if model_title and slide_texts and re.sub(r'\s+', '', model_title) not in re.sub(r'\s+', '', slide_texts[0]):  # balanceTitle 会插换行
         warnings.append(issue("MODEL_ROUNDTRIP_COVER_TITLE", "模型封面标题未出现在第 1 页。"))
     # 原生数据图表硬门禁（按类型断言）：charts.registry 中 pptx=native 的图表必须落成
     # chart part（可编辑数据）；pptx=shape 的图表走高保真形状还原 + 数据表，不要求 chart part。

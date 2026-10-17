@@ -1263,15 +1263,17 @@ function chartBaseOpts(c, colors, multi, kind) {
   const _dec = chartDecimals(c), _ds = _dec ? '.' + '0'.repeat(_dec) : '';
   const opts = {
     /* 分组柱点数不多（≤12）时也标数值——值轴隐藏，不标数就读不出数（与 HTML grouped() 一致） */
-    showValue: !isLine && (!multi || (c.series || []).reduce((n, se) => n + (se.values || []).length, 0) <= 12),
-    dataLabelPosition: 'outEnd',
+    /* M13：单序列折线 ≤8 点也标数值（值轴隐藏，HTML line() 默认全标；面积图 PowerPoint 不支持标签定位，仍不标） */
+    showValue: isLine ? (kind === 'line' && !multi && (c.values || []).length <= 8 && String(c.dataLabels || 'all').toLowerCase() !== 'none')
+      : (!multi || (c.series || []).reduce((n, se) => n + (se.values || []).length, 0) <= 12),
+    dataLabelPosition: isLine ? 't' : 'outEnd',
     dataLabelColor: STYLE.body, dataLabelFontSize: sz(11.5), dataLabelFontFace: STYLE.font,
     dataLabelFormatCode: c.unit ? '0' + _ds + '"' + c.unit + '"' : (_dec ? '0' + _ds : 'General'),
     catAxisLabelColor: STYLE.faint, catAxisLabelFontSize: sz(10.5), catAxisLabelFontFace: STYLE.font,
     valAxisHidden: true, valAxisLineShow: false, catAxisLineShow: false,
     catGridLine: { style: 'none' }, valGridLine: { style: 'none' },
     valAxisMinVal: 0,
-    showLegend: !!multi, legendPos: 'b', legendColor: STYLE.body,
+    showLegend: !!multi && c.legend !== false, legendPos: 'b', legendColor: STYLE.body,
     legendFontSize: sz(10.5), legendFontFace: STYLE.font,
     showTitle: false,
   };
@@ -1380,7 +1382,9 @@ function nativeChart(s, c, x, y, w, h, dcols) {
   if (kind === 'bar') {
     opts.barDir = (t === 'hbar') ? 'bar' : 'col';
     opts.barGapWidthPct = (t === 'hbar') ? 45 : 55;
-    if (t === 'stack') { opts.barGrouping = 'stacked'; opts.showValue = false; }
+    /* M13：堆叠柱段内标数（与 HTML stack() 段高 >22px 才标同口径：总段数 ≤24 时标，段内居中、反白） */
+    if (t === 'stack') { const nSeg = (c.series || []).reduce((n, se) => n + (se.values || []).length, 0);
+      opts.barGrouping = 'stacked'; opts.showValue = nSeg > 0 && nSeg <= 24; opts.dataLabelPosition = 'ctr'; opts.dataLabelColor = STYLE.onAccent || 'FFFFFF'; }
     if (t === 'stackline') { opts.barGrouping = 'percentStacked'; opts.showValue = false; }
   }
   if (kind === 'line' || kind === 'area') {
@@ -2648,7 +2652,7 @@ function readoutRow(s, km, pts, x, y, w, h) {
 function compChart(s, c, ptype, x, y, w, h) {
   const cc = Object.assign({}, c || {});
   if (ptype === 'donut' && !cc.type) cc.type = 'donut';
-  if (!(cc.labels && cc.values)) return;
+  if (!(cc.labels && (cc.values || (cc.series && cc.series.length)))) return;   // M13：多系列（series）图表此前被当成空图跳过
   chartBlock(s, cc, x, y, w, h, cc.colors || (cc.type === 'donut' ? donutColors(styleArg) : dataColors(styleArg)));
 }
 function capText(s, t, x, y, w) {
@@ -3183,7 +3187,8 @@ CONTENT.sections.forEach((sec) => {
     const cells = sec.cells || [];
     const nR = Math.max(1, rowsH.length), nC = Math.max(1, colsH.length);
     const availH = hreg.h;
-    const rowH = fitRowH(availH - H.headH, nR, H.cellH, 0.24);
+    /* M13：行高扣掉表头间距、行间隙与色阶图例（7 行以上时图例此前压到下方关键数字带） */
+    const rowH = fitRowH(availH - H.headH - 0.08 - nR * H.cellGap - (_C ? 0 : 0.4), nR, H.cellH, 0.24);
     const gridW = hreg.w - H.labelW;
     const cw = (gridW - (nC - 1) * H.cellGap) / nC;
     const flat = cells.flat().map(Number).filter(v => !isNaN(v));

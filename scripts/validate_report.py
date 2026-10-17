@@ -315,6 +315,8 @@ def _check_required_fields(chk, model):
             if r.startswith("anyof:"):
                 if all(empty(get(sec, a.split(":")[0])) for a in r[6:].split("|")):
                     miss.append(f"sections[{i}] {sec.get('type')} 缺 {r[6:]} 之一")
+            elif r.split(":")[0].endswith(".values") and not empty(get(sec, r.split(":")[0][:-7] + ".series")):
+                continue  # 多系列图表（stack / 分组柱 / 多折线）用 series 承载数值
             elif empty(get(sec, r.split(":")[0])):
                 miss.append(f"sections[{i}] {sec.get('type')} 缺 {r.split(':')[0]}")
     chk("页型必填字段齐全（model-schema pageTypes.required）", not miss, "; ".join(miss[:4]))

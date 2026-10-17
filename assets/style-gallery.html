@@ -56,8 +56,6 @@
   .pv__pager{font-size:9.5px;color:var(--ptxt2);border:1px solid var(--pbd);border-radius:999px;
     padding:2px 7px;font-weight:600}
 
-  .pv__eyebrow{font-size:10px;font-weight:700;letter-spacing:var(--peye,.11em);text-transform:uppercase;
-    color:var(--pa);margin-bottom:6px}
   .pv__h{font-size:calc(22px * var(--pscale,1));line-height:1.18;letter-spacing:var(--pletter,-.02em);
     font-weight:var(--pw,700);margin-bottom:calc(14px * var(--pgap,1));font-family:var(--pfont-display)}
 
@@ -149,7 +147,7 @@
 <div class="head">
   <h1>风格 × 模式矩阵 · topmind-presentation</h1>
   <p>三种报告模式 × 12 套风格 × 亮/暗双主题，正交组合任意选用。<strong>模式</strong>（演示汇报 / 研究报告 / 信息架构图）是内容呈现形态与信息密度——生成时确定，切模式即换一套独立模板；<strong>风格</strong>是纯视觉皮肤——header 下拉可实时切换；<strong>主题</strong>（浅色 / 深色）在问询时一并确认——<strong>HTML 与 PPTX 导出同主题</strong>。切换上方模式 Tab，查看每种风格在该模式下的迷你版式特征；点击卡片标记，把 <code>data-mode + data-style + data-theme</code> 交给生成流程。</p>
-  <p style="margin-top:10px">三模式完整样例见 <code>assets/examples/</code>（presentation×2、research×3、architecture×2，AI 智能体发展研究主题）；三份模式模板见 <code>assets/templates/</code>。本页每张卡片已同时展示浅色（主预览）与深色（底部辅助条）两个变体，可一并挑选主题。</p>
+  <p style="margin-top:10px">三模式完整样例见 <code>assets/examples/</code>（演示汇报 3 份——含 22 页高密度示例「城市公交电动化复盘」、研究报告 1 份、信息架构图 1 份）；三份模式模板见 <code>assets/templates/</code>。本页每张卡片已同时展示浅色（主预览）与深色（底部辅助条）两个变体，可一并挑选主题。</p>
 </div>
 
 <div class="caps">
@@ -164,7 +162,7 @@
 <div class="foot">
   结构与风格分离：三份模式模板见 <code>assets/templates/</code>，12 套 token 见 <code>references/styles.md</code>（PPTX 侧与 <code>scripts/layout-constants.json</code> 同源）。
   模式规则见 <code>references/modes.md</code>：演示汇报（3 秒一主张，台上宣讲）/ 研究报告（咨询密排：行动标题 + Exhibit 编号 + so-what + 双/三栏论证 + 密表 + 矩阵）/ 信息架构图（图为王，1–3 张全幅主图）。
-  每张卡底部辅助条：石墨深灰为「深色优先」——主预览即 dark 变体、辅助条展示浅色辅助变体；其余 8 套主预览为 light、辅助条为 dark。每套风格的 5 色数据色板（c1–c5，单源 <code>STYLE_DATA_COLORS</code>）在主预览中随模式展示（彩色只属于数据系列）。
+  每张卡底部辅助条：石墨深灰为「深色优先」——主预览即 dark 变体、辅助条展示浅色辅助变体；其余 11 套主预览为 light、辅助条为 dark。每套风格的 5 色数据色板（c1–c5，单源 <code>STYLE_DATA_COLORS</code>）在主预览中随模式展示（彩色只属于数据系列）。
   新增风格：styles.md 加两个覆盖块 → 本页 <code>STYLE_META</code> 加一项（卡片列表与配色由单源派生，不必手改）→ 完。
 </div>
 
@@ -492,7 +490,7 @@ function pvBody(s,mode){
     '<div class="pv__barsub"><div class="pv__dot" style="background:var(--pa)"></div>'+
     '<div class="pv__dot" style="background:var(--ps3)"></div>'+
     '<div class="pv__pager">3 / 12</div></div></div>';
-  var eyebrow='<div class="pv__eyebrow">'+(mode==='research'?'03 · 域间差异':(mode==='architecture'?'01 · 总体架构':'01 · 范式跃迁'))+'</div>';
+  /* M13：缩略图不放眉标小字（与正文默认 showEyebrow:false 一致） */
   var hs=Math.round(MODE_HSIZE[mode]*(s.pscale!=null?s.pscale:1));
   var h='<div class="pv__h" style="font-size:'+hs+'px">'+t+'</div>';
   var pal=s.colors;
@@ -501,7 +499,7 @@ function pvBody(s,mode){
     /* 单系列柱图用单一强调色（彩色只属于多系列数据，色板见下方 c1–c5 条） */
     var bars='<div class="pv__bars"><i style="height:38%"></i><i style="height:55%"></i>'+
         '<i class="a" style="height:78%"></i><i class="a" style="height:100%"></i></div>';
-    return bar+eyebrow+h+
+    return bar+h+
       '<div class="pv__metric"><div><b>61%</b><span>企业试点率</span></div>'+
       '<div><b style="color:var(--ptxt)">18%</b><span>规模化占比</span></div></div>'+
       bars+
@@ -509,7 +507,7 @@ function pvBody(s,mode){
       palRow(s);
   }
   if(mode==='research'){
-    return bar+eyebrow+h+
+    return bar+h+
       '<div class="pv__exh"><div class="pv__exhHd"><span class="pv__exhNo">EXHIBIT 1</span>'+
       '<span class="pv__exhT">各业务域试点率对比</span></div>'+
       hbarRow('客服',72,100,pal?pal[0]:null)+hbarRow('财务',57,100,pal?pal[1]:null)+
@@ -524,7 +522,7 @@ function pvBody(s,mode){
       palRow(s);
   }
   /* architecture */
-  return bar+eyebrow+h+
+  return bar+h+
     '<div class="pv__arch">'+
     '<div class="pv__layer pv__layer--f"><div class="pv__lname">应用层</div>'+
     '<div class="pv__nodes"><div class="pv__node pv__node--a"><div class="pv__nt">智能客服</div><div class="pv__nd">7×24 应答</div></div>'+
@@ -551,7 +549,7 @@ function dkStrip(s,mode){
   var num=s.darkMain?'深色优先'
     :(mode==='research'?'10.5pt':(mode==='architecture'?'图为王':'17px'));
   return '<div class="dk"><span class="dk__tag">'+tag+'</span>'+
-    '<span class="dk__h">'+MODE_TITLES[mode].substring(0,10)+'…</span>'+bars+
+    '<span class="dk__h">'+MODE_TITLES[mode].split(/[，：]/)[0]+'</span>'+bars+   /* 取首个分句，不再硬截断加省略号 */
     '<span class="dk__num">'+num+'</span></div>';
 }
 

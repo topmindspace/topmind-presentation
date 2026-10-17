@@ -25,9 +25,10 @@ An agent skill for presentations. It turns your material into a **single-file, p
 | Deliverables | Single-file HTML (no external links, arrow-key paging, light/dark and style switcher) + editable PPTX (native charts you can double-click to edit) |
 | Three modes | Presentation · Research report (dense, sourced) · Architecture (layers / swimlanes / flows / topology) |
 | 12 styles | business-blue (default), apple-mono, mckinsey, brand-red, warm-sand, deep-teal, graphite-dark, indigo-violet, spectrum, ink-academic, coral-launch, sky-airy |
-| Layouts & charts | 48 layouts in 8 families; 36 chart types, 20 exported as native PowerPoint charts |
+| Layouts & charts | 51 layouts in 8 families; 37 chart types, 20 exported as native PowerPoint charts |
+| Dense & simple pages | Dashboards (2–4 charts sharing palette, scale and legend) and magazine pages (large image + pull quote + numbers + points); 12 simple-page variants (one number / one statement / one icon / one chart), with gates for both overcrowded and empty pages |
 | Illustrations | Text-and-image layouts (full, image-left/text-right, bleed, grid, compare, logo wall); layer diagrams, swimlanes, flows and topologies export as editable native shapes |
-| Beautify an existing deck | The original is read-only; every word, number, image and speaker note is checked before the new deck is delivered |
+| Beautify an existing deck | The original is read-only; every word, number, image and speaker note is checked before the new deck is delivered; slides with several charts become dashboards or paired charts, table + chart becomes half-table ([before / after](https://topmindspace.github.io/presentation/#beautify)) |
 | Quality gates | HTML and PPTX must each pass strict with 0 errors and 0 warnings; page-by-page HTML↔PPTX fidelity check; rendered pages are checked for fill, balance and pixel regressions |
 | Page layout | Body text uses 1.5× line spacing by default (1.3× when space is short); no eyebrow or footer note by default, only a quiet page number, so the space goes to content (`showEyebrow` / `showFootnotes` / `pageNumber` switches) |
 | Complex infographics | How to write composite layouts, paired charts, small multiples and image layouts, and where PPTX fidelity ends: [`references/infographics-guide.md`](./references/infographics-guide.md) (Chinese) |
@@ -111,8 +112,8 @@ SKILL.md            agent entry: route table, gates, rules (≤300 lines)
 recipes/            one recipe per route; only the chosen one is read
 references/         in-depth specs, read only when needed
 assets/templates/   HTML templates for the three modes (engine, styles, runtime inlined)
-assets/examples/    model.json for three golden samples (npm ships models only; HTML renders in one command)
-assets/icons/       48 original line icons
+assets/examples/    model.json for three golden samples + a 22-page high-density sample (city e-bus operations review) (npm ships models only; HTML renders in one command)
+assets/icons/       72 original icons (SVG + 256px single-colour PNG; usage in references/icons.md)
 scripts/            render, export, validate, beautify, doctor, regression
 tests/              beautify samples, layout goldens, pixel baselines
 evals/  docs/       eval set and landing page (not packaged)

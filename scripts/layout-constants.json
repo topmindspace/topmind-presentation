@@ -555,7 +555,10 @@
     }
   },
   "pageTypeGeometry": {
-    "$comment": "schema 页型 → 本文件 pageTypes 几何组 的映射（sync_runtime.py 用它校验「页型四件套」不缺几何）。新增页型必须同时出现在 model-schema.json 的 pageTypes 与这里。",
+    "$comment": "schema 页型 → 本文件 pageTypes 几何组 的映射（sync_runtime.py 用它校验「页型四件套」不缺几何）。新增页型必须同时出现在 model-schema.json 的 pageTypes 与这里。M13：dashboard / magazine / focus 用通用正文区（common），版内分栏由 lib_dense 计算。",
+    "dashboard": "common",
+    "magazine": "common",
+    "focus": "common",
     "points": "points",
     "metrics": "metrics",
     "kpi": "kpi",

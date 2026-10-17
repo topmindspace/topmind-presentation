@@ -47,8 +47,14 @@
   {
    "layout": "argument-3",
    "title": "范式跃迁：智能体的本质是目标驱动的自主执行",
-   "fp": "c8cc346b8d44",
+   "fp": "23b959c26880",
    "shapes": 18
+  },
+  {
+   "layout": "chart-dash",
+   "title": "四项核心指标同时向好：车多了、电省了、人回来了",
+   "fp": "1e374bce187e",
+   "shapes": 38
   },
   {
    "layout": "quote-evidence",
@@ -57,15 +63,27 @@
    "shapes": 16
   },
   {
+   "layout": "magazine",
+   "title": "地铁接驳线把通勤客流接了回来",
+   "fp": "4613494632ed",
+   "shapes": 24
+  },
+  {
    "layout": "contrast",
    "title": "从试点到规模化：两条路径的分野",
-   "fp": "72ec081dbf9a",
+   "fp": "cfe3debd025b",
    "shapes": 22
+  },
+  {
+   "layout": "focus",
+   "title": "智能排队上线后，场站排队时间少了三分之二",
+   "fp": "b25dfd81ea0c",
+   "shapes": 8
   },
   {
    "layout": "problem-solution",
    "title": "散装出稿止步，strict 0/0 才算交付",
-   "fp": "76f6c553a796",
+   "fp": "9e2189f6d53d",
    "shapes": 23
   },
   {
@@ -227,7 +245,7 @@
   {
    "layout": "text-media",
    "title": "平台化先行是穿越分水岭的共同路径",
-   "fp": "45c0713033c5",
+   "fp": "5713e99d1bb9",
    "shapes": 14
   },
   {
@@ -239,7 +257,7 @@
   {
    "layout": "media-half",
    "title": "左图右文：控制台界面",
-   "fp": "d9b66adea690",
+   "fp": "5c2ffdf08a69",
    "shapes": 13
   },
   {

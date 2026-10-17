@@ -25,7 +25,12 @@ function dashCharts(sec) {
       if (m) grp.forEach(c => { c.max = m; });
     });
   }
-  cs.forEach((c, k) => { const cap = String(c.cap || ''); c.cap = sec.numbered !== false ? (ORD[k] + ' ' + cap).trim() : cap; });
+  cs.forEach((c, k) => {
+    let cap = String(c.cap || '');
+    const u = String(c.unit || '');   // 长单位（>2 字）挪进图注，数据标签只留数字（与 lib_dense.py 同口径）
+    if ([...u].length > 2) { cap = cap ? cap + '（' + u + '）' : u; c.unit = ''; }
+    c.cap = sec.numbered !== false ? (ORD[k] + ' ' + cap).trim() : cap;
+  });
   return cs;
 }
 function dashLegend(cs) {

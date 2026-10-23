@@ -75,21 +75,46 @@ b.addEventListener('click',function(){a(r.getAttribute('data-theme')==='dark'?'l
   var seld=document.getElementById('styleSel');
   if(seld){
     var btn=document.getElementById('styleBtn'),list=document.getElementById('styleList');
+    function setOpen(on){
+      seld.classList.toggle('open',!!on);
+      if(btn)btn.setAttribute('aria-expanded',on?'true':'false');
+    }
+    if(btn){
+      btn.setAttribute('aria-haspopup','menu');
+      btn.setAttribute('aria-expanded','false');
+      btn.setAttribute('aria-controls','stylePop');
+    }
+    var lab=seld.querySelector('.seld__lab');
+    if(lab)lab.textContent='风格 · '+STYLES.length+' 套';
     STYLES.forEach(function(s){
       var b=document.createElement('button');b.type='button';b.className='sitem';
-      b.setAttribute('data-style',s[0]);b.title=s[1];
+      b.setAttribute('data-style',s[0]);b.setAttribute('role','menuitem');
+      b.title=s[1];b.setAttribute('aria-label',s[1]);
       b.innerHTML='<span class="swd" style="background:'+s[2]+'"></span>'+s[1];
       if(s[0]===r.getAttribute('data-style'))b.classList.add('on');
       b.addEventListener('click',function(){
         r.setAttribute('data-style',s[0]);r.setAttribute('data-density',DENSITY[s[0]]||'normal');
         list.querySelectorAll('.sitem').forEach(function(x){x.classList.remove('on')});
         b.classList.add('on');syncModel();
-        seld.classList.remove('open')});   /* MD3 menu 惯例：选中即收起 */
+        setOpen(false);btn&&btn.focus()});   /* MD3 menu 惯例：选中即收起 */
       list.appendChild(b)});
     btn.addEventListener('click',function(e){e.stopPropagation();
-      seld.classList.toggle('open')});
+      var next=!seld.classList.contains('open');setOpen(next);
+      if(next){var on=list.querySelector('.sitem.on')||list.querySelector('.sitem');
+        if(on)on.focus()}});
     document.addEventListener('click',function(e){
-      if(!seld.contains(e.target))seld.classList.remove('open')});
+      if(!seld.contains(e.target))setOpen(false)});
+    document.addEventListener('keydown',function(e){
+      if(!seld.classList.contains('open'))return;
+      var items=[].slice.call(list.querySelectorAll('.sitem'));
+      if(!items.length)return;
+      var i=items.indexOf(document.activeElement);
+      if(e.key==='Escape'){e.preventDefault();setOpen(false);btn&&btn.focus();return}
+      if(e.key==='ArrowDown'){e.preventDefault();items[(i+1)%items.length].focus()}
+      else if(e.key==='ArrowUp'){e.preventDefault();items[(i<=0?items.length:i)-1].focus()}
+      else if(e.key==='Home'){e.preventDefault();items[0].focus()}
+      else if(e.key==='End'){e.preventDefault();items[items.length-1].focus()}
+    });
   }
   /* 帮助模态（PPT 生成指引：双通道说明 + 可复制提示词） */
   var hmodal=document.getElementById('helpModal');
@@ -391,7 +416,9 @@ if(e.isIntersecting){e.target.classList.add('in');o.unobserve(e.target)}})},
       close();
       if(helpModal)helpModal.classList.remove('open');
       var seld=document.getElementById('styleSel');
-      if(seld)seld.classList.remove('open');
+      if(seld){seld.classList.remove('open');
+        var sb=document.getElementById('styleBtn');
+        if(sb)sb.setAttribute('aria-expanded','false')}
       return;
     }
     if(e.altKey||e.ctrlKey||e.metaKey)return;

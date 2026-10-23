@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [0.2.12] - 2026-10-23
+
+### Header 风格下拉遮挡与交互态
+- 修复顶栏风格下拉被裁切：`.bar__in` 由 `overflow:hidden` 改为 `visible`（品牌与导航文字省略仍由 `.brand` / `.nav` 各自裁切）；`.toolsbar` / `.seld` 保证弹出层可溢出；下拉列表可容纳 12 套风格。
+- Header 全部图标按钮补齐 `:hover` / `:focus-visible` / `:active`，风格按钮打开态高亮；导航链接补 `:focus-visible`。
+- 风格菜单：`aria-expanded` / `aria-haspopup`、方向键与 Home/End、Esc 关闭并回焦；标签文案按 `STYLES.length` 同步，避免示例残留「9 套」。
+- 单源：`engine.css` + `ui.js` → `sync_runtime` 注入三模板与示例内联副本。
+
+### 质量
+- `ci_skill_gates.sh --with-pptx` 全绿；五套示例保真位置 p90 ≤ 0.109（研究模式 0.093）。
+
 ## [0.2.11] - 2026-10-17
 
 ### docs/ 清理：落地页只在站点

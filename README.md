@@ -9,7 +9,7 @@
 
 一个给智能体用的演示文稿技能：把材料做成**可翻页的单文件 HTML**，需要时再导出**可编辑的 16:9 PPTX**。两份交付出自同一份内容模型，配色、版式和数字一致。也能把已有的 PPTX 原文不动地重新排版。
 
-- 版本：**v0.2.12**
+- 版本：**v0.2.13**
 - 落地页与演示：https://topmindspace.github.io/presentation/（样张、风格总览、美化前后对比）
 - 智能体从 `SKILL.md` 进入；本 README 写给安装和维护的人
 
@@ -117,7 +117,7 @@ assets/icons/       72 个原创图标（SVG + 256px 单色 PNG，用法见 refe
 scripts/            渲染、导出、校验、美化、doctor、回归
 tests/              美化样例、版式 golden、像素基线
 evals/              评测集（不进包）
-docs/               发布规范 PUBLISHING.md 与 0.2.8 迁移说明（不进包；落地页在 topmindspace.github.io 仓库）
+docs/               发布规范 PUBLISHING.md（不进包；落地页在 topmindspace.github.io 仓库）
 ```
 
 ## 维护
@@ -130,7 +130,7 @@ python3 scripts/sync_runtime.py              # 改了 layout-constants.json / mo
 npm run capture-themes                       # 重拍本页的风格总览图（需 playwright）
 ```
 
-从旧版升级到 0.2.8 的变化见 [`docs/MIGRATION-0.2.8.md`](./docs/MIGRATION-0.2.8.md)，逐版记录见 [`CHANGELOG.md`](./CHANGELOG.md)。
+逐版变化见 [`CHANGELOG.md`](./CHANGELOG.md)。
 
 ## 许可证
 

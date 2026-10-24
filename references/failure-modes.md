@@ -1,6 +1,6 @@
 # 失败模式库（交付前自检）
 
-> **何时读本文**：生成完成、跑完校验脚本后，若想确认"没有踩坑"，按本文**二十类**模式逐条对照；或当校验器报出某类问题时，查本文的**修复顺序铁律**（先改什么、不要改什么）。
+> **何时读本文**：生成完成、跑完校验脚本后，若想确认没有遗漏，按本文**二十类**模式逐条对照；或当校验器报出某类问题时，查本文的**修复顺序铁律**（先改什么、不要改什么）。
 > 本文与校验器一一对应：每类模式给出**识别信号 → 校验器错误码 → 修复动作**。
 > F1–F14 为结构/导出/内容硬缺陷；F15–F16 为内容节奏与导出诚实性；F17 为 v9 截图级缺陷；F18 为截断/溢出/半空卡；F19 为几何叠印/同槽双条（PPTX 导出硬伤）；F20 为 Agenda 容量/图表退化/图标缺失。
 
@@ -68,7 +68,7 @@
 - **错误码**：`IMAGE_LAYOUT_INVALID` / `IMAGE_FIT_INVALID` / `IMAGE_ITEMS_TOO_MANY` / `IMAGE_SRC_MISSING` / `IMAGE_SRC_EXTERNAL` / `PICTURES_NOT_DECLARED`；`validate_report` 的「模型图片版式 ↔ 正文版式类/比例锁定类对应」。
 - **根因**：手写 `<img>` 却没挂 `.media--r*` 比例锁定类；`layout` 写了 `grid` 但正文还是单图；相对路径按 CWD 而非报告目录写；图片体积超限仍强行内联。
 - **修复**：版式与比例一律取自 `imageSpec`（HTML 用 `ratioCssClass`、PPTX 用 `ratioDefault`）；多图用 `image.items` + `.media-grid/.media-compare/.media-wall`；相对路径以**模型/报告所在目录**为锚；体积超限改用相对路径（`prepare_images.py --mode path`）。
-- **无素材时的正解**：不是"省略图"也不是"塞无关图"，而是 `image.placeholder` + `.media--ph`（版式/比例/图注位置一次锁死，交付前替换 `src`）。
+- **无素材时的正解**：用 `image.placeholder` + `.media--ph`，不省略图，也不塞无关图（版式/比例/图注位置一次锁死，交付前替换 `src`）。
 
 ### F10 空占位 `empty_placeholder`
 

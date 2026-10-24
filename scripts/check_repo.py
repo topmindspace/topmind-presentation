@@ -32,7 +32,7 @@ except Exception:
 ROOT = Path(__file__).resolve().parent.parent
 PACK_LIMIT = 10 * 1024 * 1024
 PACK_FORBIDDEN = ('docs/', 'assets/showcase/', 'evals/', 'dist/', 'node_modules/', '__pycache__/')
-DOCS_ALLOWED = re.compile(r'^(PUBLISHING|MIGRATION-[\w.\-]+)\.md$')
+DOCS_ALLOWED = re.compile(r'^PUBLISHING\.md$')
 LINK_RE = re.compile(r'\]\(([^)\s]+)\)')
 
 
@@ -79,7 +79,7 @@ def check_docs() -> list[str]:
     if docs.is_dir():
         for p in sorted(docs.rglob('*')):
             if p.is_file() and not (p.parent == docs and DOCS_ALLOWED.match(p.name)):
-                errs.append(f'docs/ 只放 PUBLISHING.md 与 MIGRATION-*.md（落地页在 topmindspace.github.io 仓库）：'
+                errs.append(f'docs/ 只放 PUBLISHING.md（落地页在 topmindspace.github.io 仓库）：'
                             f'{p.relative_to(ROOT).as_posix()}')
     for f in [ROOT / 'README.md', ROOT / 'README.en.md', *sorted(docs.glob('*.md'))]:
         if not f.exists():

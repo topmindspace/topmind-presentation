@@ -9,7 +9,7 @@ English | [中文](./README.md)
 
 An agent skill for presentations. It turns your material into a **single-file, page-turning HTML deck** and, when needed, an **editable 16:9 PPTX**. Both come from one content model, so colours, layouts and numbers match. It can also re-lay-out an existing PPTX without changing a word.
 
-- Version: **v0.2.12**
+- Version: **v0.2.13**
 - Landing page and demos: https://topmindspace.github.io/presentation/ (samples, style overview, beautify before/after)
 - Agents start at `SKILL.md`; this README is for people installing and maintaining the skill
 - The generated content and the skill's own docs are in Chinese
@@ -118,7 +118,7 @@ assets/icons/       72 original icons (SVG + 256px single-colour PNG; usage in r
 scripts/            render, export, validate, beautify, doctor, regression
 tests/              beautify samples, layout goldens, pixel baselines
 evals/              eval set (not packaged)
-docs/               PUBLISHING.md and the 0.2.8 migration notes (not packaged; the landing page lives in the topmindspace.github.io repo)
+docs/               PUBLISHING.md (not packaged; the landing page lives in the topmindspace.github.io repo)
 ```
 
 ## Maintenance
@@ -131,7 +131,7 @@ python3 scripts/sync_runtime.py              # required after editing layout-con
 npm run capture-themes                       # re-capture the style overview above (needs playwright)
 ```
 
-Upgrading to 0.2.8: [`docs/MIGRATION-0.2.8.md`](./docs/MIGRATION-0.2.8.md). Release notes: [`CHANGELOG.md`](./CHANGELOG.md).
+Release notes: [`CHANGELOG.md`](./CHANGELOG.md).
 
 ## License
 

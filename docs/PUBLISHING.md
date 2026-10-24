@@ -48,7 +48,7 @@ Secret **`NPM_TOKEN`**（granular，scope `@topmindspace` 写权限）配置在 
 ## 落地页（站点）
 
 - 线上地址：<https://topmindspace.github.io/presentation/>。页面源码、截图与中英文文案都在 **topmindspace/topmindspace.github.io** 仓库（`presentation/index.html`、`assets/img/presentation/`、`i18n/zh.json` / `i18n/en.json`），由该仓库的 GitHub Pages 发布。
-- 本仓库**没有**开 GitHub Pages，`docs/` 只放本文件和 `MIGRATION-0.2.8.md`，不要再往这里放落地页、showcase 或截图。
+- 本仓库**没有**开 GitHub Pages，`docs/` 只放本文件，不要再往这里放落地页、showcase 或截图。
 - 风格画廊仍是本仓库的 `assets/style-gallery.html`（随包分发）；README 与 Gate 0 用 `assets/theme-overview.png`。
 - 刷新站点截图（站点仓库与本仓库并排克隆时）：
   ```bash

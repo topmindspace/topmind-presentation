@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## [0.2.13] - 2026-10-24
+
+### 优化
+
+- 图标数量统一为 72 个（SKILL.md、`references/icons.md`、`references/tech-design.md`、`package.json` 描述）；`package.json` 描述改成用户能看懂的说法。
+- 删除 `docs/MIGRATION-0.2.8.md`，升级要点并入 0.2.8 条目；`docs/` 只放 `PUBLISHING.md`。
+- `references/` 里几处说明改得更直白：模式说明、失败模式数量（二十类）、官方校验器的用法与 CI 一致。
+- `docs/PUBLISHING.md` 的安装说明改为 `npx @topmindspace/topmind-presentation install`。
+- CHANGELOG 用词统一为「优化」，只涉及发布流程与 CI 的条目压成一行。
+
 ## [0.2.12] - 2026-10-23
 
 ### Header 风格下拉遮挡与交互态
@@ -70,6 +80,8 @@
 - 文档、四个示例、试跑样例、主题总览、风格画廊、showcase 与 README 截图全部按新行为重新生成；新增 `tests/m12/test_m12.py` 并接入 CI。
 
 ## [0.2.8] - 2026-10-17
+
+升级提示：已有 model.json 字段和命令行入口都兼容，风格 id 不变；渲染不再补占位字，模型没写的内容不会出现在页面上。
 
 ### M11 复审、安装命令与全新主题试跑
 - 新增 `npx @topmindspace/topmind-presentation install [--to 目录] [--force] [--link]`（`scripts/lib_install.js`）：默认直接升级（旧版覆盖、不备份）；已装版本更新时拒绝降级，`--force` 才降；同名目录是之前装的同一技能时自动替换，无关同名目录需 `--force`；符号链接只删链接不删源；拒绝装进源目录。`tests/install/test_install.js` 14 项覆盖，接入 CI。规则借鉴 topmind-writing-skills，不依赖它。
@@ -149,7 +161,7 @@
 
 ### 文档与素材
 - README 中英两版重写；只保留一张 12 套风格总览图（重新拍摄）。风格画廊文案改为 12 套，补齐三套新风格的中文名、描述与适用场景，单系列柱图改用单一强调色。
-- 新增升级说明（现为 `docs/MIGRATION-0.2.8.md`）。
+- 新增升级说明（0.2.13 起不再单独保留，要点见 0.2.8 条目）。
 - 清理：`assets/showcase/`、`docs/showcase/`、`scripts/capture_showcase_pages.js`、两张按模式的总览图及其引用。
 
 ### 优化（整体复核中发现）
@@ -280,7 +292,7 @@
 - `docs/showcase/topmind-showcase/`、`assets/showcase/`、`docs/site-assets/` 下的 Showcase 截图按新版重拍。
 - `scripts/capture_showcase_pages.js` 适配独立仓库目录（仓库根即技能根），支持 `PW_CHANNEL=chrome` 使用本机 Chrome、`ONLY=<prefix>` 只重拍指定样张，并等待图表动效结束后再截图。
 - README 目录结构说明与实际的 `docs/` 内容对齐；移除未被引用的行业调研过程文档（`docs/industry-pptx-research.md`）。
-- 技能本体（`SKILL.md` 正文与 references）不变。
+- 其余为发布流程与 CI 调整，技能本体（`SKILL.md` 正文与 references）不变。
 
 ## [0.2.6] - 2026-10-10
 
@@ -290,10 +302,6 @@
 
 - 调研文档 `docs/industry-pptx-research.md` 改为中性的研究方法说明，示例与参考资料为通用内容。
 - README 中英文的外链与 canonical 指向正确的站点路径。
-- `scripts/ci_privacy_scan.py` 增加自定义盘符路径检查项，扫描覆盖面更完整。
-- GitHub Actions 改用 Node 24 运行时的版本：`actions/checkout` v4 → v7、`actions/setup-node` v4 → v7、`actions/setup-python` v5 → v7、`softprops/action-gh-release` v2 → v3；CI 与 Release 的 `node-version` 20 → 24。
-- `runs-on` 由 `ubuntu-latest` 固定为 `ubuntu-24.04`：GitHub 在 2026-10-19 至 11-19 期间把 `ubuntu-latest` 逐步切到 Ubuntu 26.04，先停在当前已验证的镜像，切 26.04 另行验证后再改。
-- `.gitignore` 补充 Release 附件、npm pack 输出等再生成产物。
 - 技能本体（`SKILL.md` 正文与 references）不变。
 
 ## [0.2.5] - 2026-10-08

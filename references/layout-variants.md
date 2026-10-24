@@ -1,4 +1,4 @@
-# 版式变体注册表（0.2.0 新增）
+# 版式变体注册表
 
 > **何时读**：标准页型（cards / timeline / twocol）不够用、但内容仍属其语义家族时。
 > 变体**不新增 DSL 页型**：`section.variant` 声明，HTML 与 PPTX 双通道按 base 页型渲染 + 变体类名/分支。

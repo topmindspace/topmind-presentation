@@ -1,6 +1,6 @@
 {
   "name": "@topmindspace/topmind-presentation",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "topmind-presentation：把材料做成可翻页的单文件 HTML 和可编辑的 16:9 PPTX，两份交付同源一致；三种模式、12 套风格、72 个原创图标；也能把已有 PPTX 原文不动地重新排版。",
   "files": [
     "SKILL.md",

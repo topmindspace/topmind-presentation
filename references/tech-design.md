@@ -3,7 +3,7 @@
 > 本文是**总体技术方案**（架构 / 双单源 / 双通道 / 门禁 / 深度模式 / 工作流 / 演进）。
 > 生成报告前不必读本文；**改动架构、导出机制、常量或校验体系前必读**。
 
-## 一、一句话架构
+## 一、架构概览
 
 **一套内容模型，两种交付形态，双单源，双通道，按需深度模式。**
 
@@ -32,7 +32,7 @@
 | `scripts/model-schema.json` | 29 种页型的字段与必填约束 / **图表类型白名单 `chartTypes`（30 类：20 原生 + 10 形状）** / **数据表策略 `chartDataTable`** / 通用可选字段 `commonSectionFields` | `extract_model.py`（本地校验）、`pptx-export.js`（浏览器端 `validateModel`） |
 | `layout-constants.json` → `layoutSlots` | **页型布局 IR（29 页型全量）**：语义槽位（head/primary/secondary/annotation + required）——双通道按同一槽位语义落位 | `sync_runtime.py`（完整性校验）；`lib_layout_regions.js`（槽位→英寸矩形）；`extract_snippet.py --page-type` |
 | `scripts/icon_lib.js` | **语义图标库单源**（20 名 → 24×24 stroke SVG；与 `icons.md` 高频取码 / `render_from_model.ICONS` 同键） | `build_icon_assets.js`（栅格化）、`build_pptx.js`（真导出 PNG）、`icon_raster.js` |
-| `scripts/icon-assets.json` | **图标 PNG 资产缓存**（`build_icon_assets.js` 生成 · sharp 栅格化 · 20 图标 × 各风格 accent 色；gitignore，可再生成） | `build_pptx.js`（同步读取；缺失时 execFileSync 自动补齐） |
+| `scripts/icon-assets.json` | **图标 PNG 资产缓存**（`build_icon_assets.js` 生成 · sharp 栅格化 · 72 个图标 × 各风格 accent 色；gitignore，可再生成） | `build_pptx.js`（同步读取；缺失时 execFileSync 自动补齐） |
 | 交付一键 | `quality_gate.py` | `validate_report --strict` + 可选 `validate_pptx` + `evals --score` + **rubric 启发式五维**（content/layout/chart/infographic/tone） |
 
 **纪律**：改常量只改 JSON，改 schema 只改 schema JSON，然后跑 `python scripts/sync_runtime.py`（注入 + 完整性校验 + 哈希摘要）。**禁止手改** `pptx-export.js` / 三模板 / `style-gallery.html` 的标记块。
@@ -128,7 +128,7 @@
 | `references/icons.md` | 内联 SVG 图标库与使用准则 |
 | `references/pptx-export.md` | PPTX 导出通道、模型字段、双单源、29 页型、图表双通道 |
 | `references/high-fidelity.md` | 按需深度模式规范（触发、容差、manifest、渲染对照） |
-| `references/failure-modes.md` | 十四类失败模式 + 修复顺序铁律 + 错误解释纠正表 |
+| `references/failure-modes.md` | 二十类失败模式 + 修复顺序铁律 + 错误解释纠正表 |
 | [writing-skills 归档 `refs/industry-benchmark.md`](https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/refs/industry-benchmark.md) | 业界对标与采纳/不采纳决策依据 |
 | `scripts/*` | 校验器、**骨架生成器 `scaffold_report.py`**、注入器、回归、**三项审计（styles / docs / skill）**、打包（全部标准库；PPTX 精导需 Node + pptxgenjs） |
 | `evals/*` | Eval 框架：`prompts.csv`（14 条，含负对照）+ `rubric.schema.json`（风格目标评分契约）+ `run_evals.py`（结果/过程/风格/效率四类目标） |
@@ -138,5 +138,5 @@
 ## 附：第三方校验与实验 frontmatter
 
 - **主门禁**：`audit_skill.py` / `package_skill.py --check`（体积、披露、Gate0、触发覆盖）。
-- **可选**：`npx --yes skills-ref@0.1.5 validate .`（Agent Skills 开放标准；本技能已通过）。**不**作为 CI 硬依赖。
+- **官方校验器**：`agentskills validate .`（`pip install skills-ref`，Agent Skills 开放标准）。CI 与 Release 都会跑；本机没装时 `ci_skill_gates.sh` 跳过并提示。
 - **不启用**：Claude-only `when_to_use`（会破坏严格 allowlist）；跨端 `allowed-tools`（宿主语法分叉）——需要时由宿主侧实验，不进本仓库 frontmatter。

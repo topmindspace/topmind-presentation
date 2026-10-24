@@ -109,7 +109,7 @@ python3 scripts/beautify.py old.pptx --out beautified --style business-blue --co
 ## Layout
 
 ```
-SKILL.md            agent entry: route table, gates, rules (≤300 lines)
+SKILL.md            agent entry: route table, gates, rules
 recipes/            one recipe per route; only the chosen one is read
 references/         in-depth specs, read only when needed
 assets/templates/   HTML templates for the three modes (engine, styles, runtime inlined)

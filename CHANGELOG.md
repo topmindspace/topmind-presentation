@@ -3,7 +3,7 @@
 ## [0.2.12] - 2026-10-23
 
 ### Header 风格下拉遮挡与交互态
-- 修复顶栏风格下拉被裁切：`.bar__in` 由 `overflow:hidden` 改为 `visible`（品牌与导航文字省略仍由 `.brand` / `.nav` 各自裁切）；`.toolsbar` / `.seld` 保证弹出层可溢出；下拉列表可容纳 12 套风格。
+- 顶栏风格下拉不再被裁切：`.bar__in` 由 `overflow:hidden` 改为 `visible`（品牌与导航文字省略仍由 `.brand` / `.nav` 各自裁切）；`.toolsbar` / `.seld` 保证弹出层可溢出；下拉列表可容纳 12 套风格。
 - Header 全部图标按钮补齐 `:hover` / `:focus-visible` / `:active`，风格按钮打开态高亮；导航链接补 `:focus-visible`。
 - 风格菜单：`aria-expanded` / `aria-haspopup`、方向键与 Home/End、Esc 关闭并回焦；标签文案按 `STYLES.length` 同步，避免示例残留「9 套」。
 - 单源：`engine.css` + `ui.js` → `sync_runtime` 注入三模板与示例内联副本。
@@ -23,7 +23,7 @@
 - HTML 章节号与 PPTX 同比例：`clamp(72px,10vw,144px)`（PPTX 96pt ÷ 13.33in 页宽 ≈ 10%），研究模式按 80pt 用 8.3vw，之前 HTML 约大 40%。
 - HTML 章节页标题栏加宽（号码列 `minmax(160px,24%)`，`pageTypes.chapter.numW` 3.6 → 2.9），长标题不再被挤成三行。
 - PPTX 多图表综合页（侧图 / 迷你图 / 通栏）补上主图图注，与 HTML 一致；已有 `exhibitNo` 时不重复。
-- `audit_skill.py` 重复片段检查改为逐字滑窗、按文件分别取窗口，修复跨文件边界误报和重复只报一次的问题。
+- `audit_skill.py` 重复片段检查改为逐字滑窗、按文件分别取窗口，跨文件边界不再误报，重复也不再只报一次。
 - README 的「美化前后对比」链接指回站点 `#beautify` 锚点。
 
 ## [0.2.10] - 2026-10-17
@@ -42,7 +42,7 @@
   - 保留原稿页序时，节奏和相邻同型图只记 INFO，相邻同一版式仍然硬拦。
   - 原图按 contain 放进浅色底卡。
   - 新增 `tests/beautify/samples/complex-ops.pptx`，站点和 showcase 新增美化前后对比。
-- PPTX 修复：
+- PPTX 优化：
   - 仪表盘 / 复合版式中的多系列图表被当成空图跳过。
   - 单系列折线（≤8 点）补数值标签；堆叠柱的段内标签居中，用反白字。
   - 环形图在单位不是 % 时显示「1 种」，改为百分比。
@@ -65,7 +65,7 @@
 - 页面做减法：默认去掉页头眉标和页脚小字，只留一个 9pt 浅色页码；省下的高度交给求解器排正文。新增模型开关 `showEyebrow`、`showFootnotes`、`pageNumber`；美化路线默认全显示。隐藏的页脚小字写进演讲者备注，带 `[n]` 引用的来源行与 Exhibit 来源行照常显示。保真门禁、往返核对、美化核对与像素 / 版式基线同步更新。
 - PPTX 时间线：2–5 个阶段时改为阶段卡 + 轴线，与 HTML 一致；章节扉页结论两端都显示；研究模式保真位置 p90 从 0.118 降到约 0.10，留出余量。
 - 版式：要点 + 指标页改为左列表右指标卡；短段落双栏改为卡片网格；金句页居中且避免单字换行；showcase 两处触到字号下限的文案改写。
-- 第二次全新主题试跑（社区养老服务站 · 演示模式，15 页，收进 `tests/trial/yanglao.model.json` 并接入 CI）。发现并修复：表格页的 `points` 两端都没渲染（现在表下一行解读卡，HTML 与 PPTX 同构）；金句页缺 `author` 时 PPTX 显示「—— undefined」；页型必填字段（`model-schema` 的 `pageTypes.required`）此前没有门禁，validate_report 新增「页型必填字段齐全」检查。
+- 第二次全新主题试跑（社区养老服务站 · 演示模式，15 页，收进 `tests/trial/yanglao.model.json` 并接入 CI）。发现并优化：表格页的 `points` 两端都没渲染（现在表下一行解读卡，HTML 与 PPTX 同构）；金句页缺 `author` 时 PPTX 显示「—— undefined」；页型必填字段（`model-schema` 的 `pageTypes.required`）此前没有门禁，validate_report 新增「页型必填字段齐全」检查。
 - 新增 `references/infographics-guide.md`（复杂信息图指南）：模型字段与示例、选型与组合规则、PPTX 原生图表与形状的边界。
 - 文档、四个示例、试跑样例、主题总览、风格画廊、showcase 与 README 截图全部按新行为重新生成；新增 `tests/m12/test_m12.py` 并接入 CI。
 
@@ -73,7 +73,7 @@
 
 ### M11 复审、安装命令与全新主题试跑
 - 新增 `npx @topmindspace/topmind-presentation install [--to 目录] [--force] [--link]`（`scripts/lib_install.js`）：默认直接升级（旧版覆盖、不备份）；已装版本更新时拒绝降级，`--force` 才降；同名目录是之前装的同一技能时自动替换，无关同名目录需 `--force`；符号链接只删链接不删源；拒绝装进源目录。`tests/install/test_install.js` 14 项覆盖，接入 CI。规则借鉴 topmind-writing-skills，不依赖它。
-- 全新主题端到端试跑（街角咖啡华东扩张评估 · 研究模式 · warm-sand，17 页：复合版式、折线、瀑布、矩阵、分层示意图、图文混排、对比、时间线），样例收进 `tests/trial/` 并接入 CI。试跑发现并修复：
+- 全新主题端到端试跑（街角咖啡华东扩张评估 · 研究模式 · warm-sand，17 页：复合版式、折线、瀑布、矩阵、分层示意图、图文混排、对比、时间线），样例收进 `tests/trial/` 并接入 CI。试跑发现并优化：
   - `make_deck --out 目录`（空格写法）崩溃；仅 WARN 导致 strict 失败时不显示 WARN 行；PPTX 质检只显示错误码不显示说明。
   - 研究模式自动 Exhibit 编号与手写编号撞车；现在一个都没写才自动编号，HTML 与 PPTX 同规则（此前 PPTX 不自动编号）。
   - 复合版式的关键数字条 / 解读栏 / 解读带未计入「组合版式」承载件，复合页被当成单件页。
@@ -94,15 +94,15 @@
 - 新增 `tests/m10/test_m10.py`（风格全覆盖、衬线回退链、表格同源、统一阈值、矩阵高亮、zh-CN 标注），接入 CI。
 
 ### M9 全方位优化
-- 新增 HTML ↔ PPTX 逐页保真门禁 `check_fidelity.py` + `fidelity_html.js`：按段落配对，量化字级层级（相对整稿中位比值）、颜色 ΔE、换行、位置、字体声明；修复提示中文可执行；接入 CI（四份示例全部 PASS）。
+- 新增 HTML ↔ PPTX 逐页保真门禁 `check_fidelity.py` + `fidelity_html.js`：按段落配对，量化字级层级（相对整稿中位比值）、颜色 ΔE、换行、位置、字体声明；改进提示用中文写成可执行的步骤；接入 CI（四份示例全部 PASS）。
 - 两端对齐：封面 / 章节标题 / 指标大数 / 卡内大数 / 时间线阶段名改走新增角色字号（coverHero · chapterTitle · kpiHero · kpiCard · stepTitle）；眉题降一级；结论条改 tonal；表头改 tonal；Exhibit 行改「品牌色编号 + 墨色图题」；卡片网格行优先。
 - PPTX 灰阶统一到品牌色系：热力图第 3 级、子弹图未达标条、树图、马赛克图、流带图（改用风格编码色板）、K 线阴线不再用灰。
 - 复杂信息图：关系网络改「枢纽居中 + 椭圆环 + 胶囊节点」与 HTML 同算法；箱线图改横向；树图标签带占比；信息图标签字号上调。
-- HTML：独立指标页改主视觉卡（不再顶部一条、下半页空）；收尾页改卡片；研究 / 架构模板的模式层改为 `html[data-mode]` 作用域，修复标题字号被风格层覆盖。
+- HTML：独立指标页改主视觉卡（不再顶部一条、下半页空）；收尾页改卡片；研究 / 架构模板的模式层改为 `html[data-mode]` 作用域，标题字号不再被风格层覆盖。
 - 风格性格：PPTX 卡片圆角按风格 `styleIdentity.radius` 等比缩放（mckinsey 方正、apple-mono / sky-airy 圆润）。
 - 一条命令流水线 `make_deck.py`（`npx topmind-presentation build`）：渲染 → HTML strict → 密度 → PPTX strict → PPTX 质检 →（可选）保真，失败只摘失败行并给「怎么修」。
 - 复述检测改为双信号（数字可推导率 + 汉字二元组新信息率），连词伪解读不再放行；新增 16 条人工标注小样本评测（检出 8/8、误报 0/8，旧法 3/8）。示例中被新法识别的复述要点按已有事实改写。
-- Agenda 条目下限与 schema 同源（≥3），修复与 `agendaMin` 矛盾的写死 ≥4。
+- Agenda 条目下限与 schema 同源（≥3），去掉与 `agendaMin` 矛盾的写死 ≥4。
 - SKILL.md 精简（流程改为「写 model → make_deck」），图片规则写入 illustration-layout.md。
 
 ### M8 遗留问题清理
@@ -120,14 +120,14 @@
 - 模型层：图表页支持 points / keyMetrics / chart2 / minis / compose；缺关键数字时由单序列数据自动派生，缺解读给出提示。
 - 新增最低信息密度门禁 check_density.py（演示 / 研究 / 架构三档）及自测，接入 CI。
 - 新增 references/density.md（分档、复合版式、插图与图标规则），清理过时的极简规则。
-- 重做四份示例低密度页；修复 streamgraph 只占半高、环形图标签重复、热力图图例压住底栏。
+- 重做四份示例低密度页；streamgraph 撑满高度，环形图标签不再重复，热力图图例不再压住底栏。
 
 ### M6（未发版）
 - HTML 封面改为整块主色色块（与 PPTX 一致）；暗色主题用主色与背景 30% 混合，避免刺眼；12 套风格亮/暗均已核对。
 - 新渲染的 HTML 自动填充页眉、页脚、导航与 `<title>`，不再残留模板占位文字。
 - `scaffold --plan` 标题初稿只输出标题与页型，正文位置统一为「【待填】」空位，不再含示例正文或编造数字（初稿 strict 校验会报 UNDERFILL，属预期）。
 - 短内容卡片页、时间线页、步骤页按字数自动放大字号并铺满（HTML：`cards--roomy`、`tl--h` 横排卡片、`steps--roomy`；PPTX：放大字号、统一垂直居中、时间线整列色卡）。
-- 修复：`band--top` / `band--fit` 等附加类名此前被写成无效属性，现并入 class。
+- 优化：`band--top` / `band--fit` 等附加类名此前被写成无效属性，现并入 class。
  — M5 收尾（main，未发版）
 
 ### M4 遗留
@@ -152,7 +152,7 @@
 - 新增升级说明（现为 `docs/MIGRATION-0.2.8.md`）。
 - 清理：`assets/showcase/`、`docs/showcase/`、`scripts/capture_showcase_pages.js`、两张按模式的总览图及其引用。
 
-### 修复（整体复核中发现）
+### 优化（整体复核中发现）
 - HTML 大数指标页在模型没有要点时会补出「支撑。一句话。」占位；支撑指标在窄列里横排导致数字折行。改为不补字、支撑指标竖排、大数放进色调面板。
 - 环图单位为 % 且合计 100 时中心显示「100%」、图例重复占比列（HTML 与 PPTX 两端）。
 
@@ -172,7 +172,7 @@
 - `references/styles.md` 补 §12–14：学术墨蓝 / 活力珊瑚 / 晴空课件的亮暗色值、编码色板与 `engine.css` 覆盖块。
 - `SKILL.md` 精简（13.2KB → 12.3KB），加美化路由一行。
 
-#### 修复
+#### 优化
 - HTML 卡片栅格 `g-N--equal` 丢了列定义，等高卡片退化成单列；bento 卡片变体被同名的 4 列拼贴工具类覆盖，导致末行留洞。
 - PPTX 分组柱（≤12 个点）补数值标签，避免值轴隐藏后读不出数；HTML 多系列柱改为分组柱（`grouped()`）。
 - 无注释的图表页图形框下沿留 0.25in，不再贴进注释带；版式 golden 随之更新。
@@ -195,7 +195,7 @@
 
 #### 图表
 - 新增 `scripts/lib_chart_svg.py`：HTML 端数据驱动 SVG（核心 15 类 + 6 类信息图），标注层 `annotations`（目标线 / 高亮 / 旁注）与 `dataLabels`；配色规则统一（单系列主色、高亮项主色其余浅主色、多系列 c1–c5、负值 f-neg、K 线不用红绿）。
-- PPTX：高亮逐点着色、柱图目标线为原生组合图虚线系列、图表皮肤随风格；修复横向条形图「彩虹柱」。
+- PPTX：高亮逐点着色、柱图目标线为原生组合图虚线系列、图表皮肤随风格；横向条形图不再出现「彩虹柱」。
 - 桑基图 PPTX 重写：全局比例尺、三次贝塞尔流带（custGeom）、流失节点灰化、标签后绘不被遮挡。
 
 #### 示例
@@ -203,7 +203,7 @@
 - 架构：第 2 页改为 4 层 × 4 节点 + 横切护栏 + 图例；新增指标、选型高亮表、依赖拓扑、章节扉页、里程碑，共 12 页。
 - 演示 / showcase：补参考资料、目标线与高亮、bento 安装卡、问题 → 方案页。
 
-#### 修复与清理
+#### 优化与清理
 - 架构图层高求解参数顺序错误（第 4 层越出版心）、排序面板底板压注释带、引言署名与背景叠印、章节号字号进入比例尺（`chapterNum`）。
 - 删除 `scripts/hydrate_charts.py`（被 lib_chart_svg 取代）、未引用的 `.btn--soft` / `.btn--onDark` / `.ul--flow`、「A/B 通道」旧注释；`docs/showcase.html` 与 `docs/style-gallery.html` 同步。
 - 负例自足：N11 注入内联 `.tbd`；IMAGE_CAPTION 检查不再依赖模型含图片页。
@@ -213,7 +213,7 @@
 #### 同源
 - 新增 `scripts/lib_solver.py`（与 lib_solver.js 逐值对齐同一 golden，120 例），`render_from_model.py` 渲染前同样拆页，HTML 与 PPTX 页序一致。
 - 浏览器运行时 `assets/pptx-export.js` 删除整套 OOXML 几何引擎（与服务端不一致、仅用于预览），只保留 schema 校验、内联求解器（`__TOPPPT_SOLVER__` 注入）与 `pagePlan()`；每份 HTML 约减 90KB。
-- 预览模态改为按 pagePlan 克隆真实 HTML 版块作缩略图，标注页型与续页；修复缩略图网格行被压扁。
+- 预览模态改为按 pagePlan 克隆真实 HTML 版块作缩略图，标注页型与续页；缩略图网格行不再被压扁。
 - `cross_verify.py` 改为默认运行的同源核对：页数 = 求解页计划、PPTX/HTML 标题顺序、图表数据与标签、溢出；当即发现 business-blue 引用页顺序漂移并修正。
 
 #### 原生图表
@@ -242,7 +242,7 @@
 #### 门禁与测试
 - 视觉填充门禁对四份示例（演示 / 研究 / 架构 / 产品展示）全部转为硬门禁；架构样张冒烟转为硬门禁。
 - 新增 `tests/solver/test_solver.js` + 金样 `golden.json`：10 页型族 × 3 模式 × 4 档共 120 例，断言确定性与拆页不变量；CI 增加「同模型两次构建幻灯片 XML 逐字节一致」检查。
-- `regression.py` 全链路回归恢复全绿（修复 showcase 大纲 9 条未双栏、对比页被误要求图标、split 探针越界）。
+- `regression.py` 全链路回归恢复全绿（showcase 大纲 9 条改为双栏，对比页不再被误要求图标，split 探针不再越界）。
 
 ### M0 止血（PR #6）
 

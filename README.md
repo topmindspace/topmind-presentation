@@ -108,7 +108,7 @@ python3 scripts/beautify.py 旧稿.pptx --out 美化结果 --style business-blue
 ## 目录
 
 ```
-SKILL.md            智能体入口：路线表、门禁、铁律（≤300 行）
+SKILL.md            智能体入口：路线表、门禁、铁律
 recipes/            五条路线的食谱，选定路线后只读一份
 references/         深度规范，命中条件才读
 assets/templates/   三种模式的 HTML 模板（引擎、样式、运行时内联）

@@ -7,7 +7,7 @@
 | 通道 | 方式 | 特点 |
 |------|------|------|
 | **GitHub** | clone / 下载 Release zip | 跟 HEAD 或钉版本 |
-| **npm** | 包 `@topmindspace/topmind-presentation` | 与 GitHub tag 同版本发布；内容按 `package.json` 的 `files` 白名单（只含运行所需文件）；装进 `node_modules` 后需 `npx skills experimental_sync` 或手动复制进技能目录，宿主才能发现 |
+| **npm** | 包 `@topmindspace/topmind-presentation` | 与 GitHub tag 同版本发布；内容按 `package.json` 的 `files` 白名单（只含运行所需文件）；推荐 `npx @topmindspace/topmind-presentation install` 直接装进技能目录；只 `npm i` 时包在 `node_modules` 里，要再复制进技能目录宿主才能发现 |
 
 - 包：<https://www.npmjs.com/package/@topmindspace/topmind-presentation>
 - 仓库：<https://github.com/topmindspace/topmind-presentation>

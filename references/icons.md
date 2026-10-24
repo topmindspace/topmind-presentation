@@ -114,7 +114,7 @@
 
 ## 高频取码（压缩 SVG · 20，与 assets/icons/ 同源）
 
-> 完整 48 见 `assets/icons/index.json`（关键词→图标映射 + 默认表）；归档旧目录 [writing-skills 归档 `refs/icons-catalog.md`](https://github.com/topmindspace/topmind-writing-skills/blob/9a37952bf584c8c8924dc4f450820ac618788a8c/docs/archive/refs/icons-catalog.md) 仅备查。
+完整 72 个见 `assets/icons/index.json`（关键词→图标映射 + 默认表）。
 
 **数据库**
 ```html
